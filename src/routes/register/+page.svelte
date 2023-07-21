@@ -12,7 +12,7 @@
 
 <div class="grid md:grid-cols-2">
 	<Card>
-		<form class="flex flex-col space-y-6" action="?/register" method="POST">
+		<form class="flex flex-col space-y-6" action="?/register" method="POST" use:enhance>
 			<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white">
 				Create an account
 			</h3>
