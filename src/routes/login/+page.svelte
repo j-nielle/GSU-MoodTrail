@@ -7,6 +7,8 @@
 
 {#if form?.error === 'Email not confirmed'}
 	<Alert color="red">Oops! You entered unverified email. Please try again later.</Alert>
+{:else if form?.error === 'Invalid credentials.'}
+<Alert color="red">Oops! You entered invalid credentials. Please try again later.</Alert>
 {/if}
 
 <div class="grid md:grid-cols-2">
