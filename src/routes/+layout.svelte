@@ -52,11 +52,13 @@
 <Navbar class="mt-5">
 	{#if session}
 		<NavBrand href="/dashboard">
-			<img src="../logo-no-background.svg" class="h-6 mr-3 sm:h-9" alt="Placeholder" />
+			<p class="text-2xl">MoodTrail BETA</p>
+			<!-- <img src="../logo-no-background.svg" class="h-6 mr-3 sm:h-9" alt="Placeholder" /> -->
 		</NavBrand>
 	{:else}
 		<NavBrand href="/">
-			<img src="../../logo-no-background.svg" class="h-6 mr-3 sm:h-9" alt="Placeholder" />
+			<p class="text-2xl">MoodTrail BETA</p>
+			<!-- <img src="../../logo-no-background.svg" class="h-6 mr-3 sm:h-9" alt="Placeholder" /> -->
 		</NavBrand>
 	{/if}
 	<div class="flex space-x-3 md:order-2">
@@ -73,7 +75,6 @@
 				<Avatar
 					class="cursor-pointer outline outline-red-600"
 					id="avatar-menu"
-					src="../../logo-no-background.svg"
 					alt="User Profile Pic"
 				/>
 			</label>
