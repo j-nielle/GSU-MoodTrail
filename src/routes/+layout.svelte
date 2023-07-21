@@ -60,8 +60,8 @@
 		</NavBrand>
 	{/if}
 	<div class="flex space-x-3 md:order-2">
-	{#if session}
-		<!-- <Avatar
+		{#if session}
+			<!-- <Avatar
 			class="cursor-pointer"
 			id="avatar-menu"
 			src={data?.user?.avatar
@@ -69,20 +69,22 @@
 				: `https://avatars.dicebear.com/api/initials/${data.name}.svg`}
 			alt="User Profile Pic"
 		/> -->
-		<Avatar
-			class="cursor-pointer"
-			id="avatar-menu"
-			src='../../logo-no-background.svg'
-			alt="User Profile Pic"
-		/>
-	{:else}
-		<Button href="/register" size="sm" color="light">Create an account</Button>
-		<Button href="/login" size="sm" color="dark">Login</Button>
-	{/if}
+			<label for="avatar-menu">
+				<Avatar
+					class="cursor-pointer outline outline-red-600"
+					id="avatar-menu"
+					src="../../logo-no-background.svg"
+					alt="User Profile Pic"
+				/>
+			</label>
+		{:else}
+			<Button href="/register" size="sm" color="light">Create an account</Button>
+			<Button href="/login" size="sm" color="dark">Login</Button>
+		{/if}
 	</div>
 	<Dropdown placement="bottom" triggeredBy="#avatar-menu">
 		<DropdownHeader>
-			<span class="block text-sm"> {session.user.name} </span>
+			<span class="block text-sm"> {session.user.user_metadata.name} </span>
 			<span class="block text-sm font-medium truncate"> {session.user.email} </span>
 		</DropdownHeader>
 		<DropdownItem class="cursor-pointer" href="/dashboard/settings/profile">Settings</DropdownItem>
@@ -97,4 +99,4 @@
 	</Dropdown>
 </Navbar>
 
-<slot></slot>
+<slot />
