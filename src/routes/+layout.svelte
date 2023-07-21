@@ -85,8 +85,8 @@
 	</div>
 	<Dropdown placement="bottom" triggeredBy="#avatar-menu">
 		<DropdownHeader>
-			<span class="block text-sm"> {session.user.user_metadata.name} </span>
-			<span class="block text-sm font-medium truncate"> {session.user.email} </span>
+			<span class="block text-sm"> {session?.user?.user_metadata?.name} </span>
+			<span class="block text-sm font-medium truncate"> {session?.user?.email} </span>
 		</DropdownHeader>
 		<DropdownItem class="cursor-pointer" href="/dashboard/settings/profile">Settings</DropdownItem>
 		<DropdownDivider />
