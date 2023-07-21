@@ -1,4 +1,6 @@
 <script>
+	import { Skeleton } from 'flowbite-svelte'
+
 	export let data
 
     // commented out client side data fetching w/ RLS
@@ -21,8 +23,9 @@
 	<title>Dashboard</title>
 </svelte:head>
 
-<div>
+<div class="p-10">
 	<h1>Dashboard</h1>
+	<Skeleton />
 </div>
 
 <!-- {#if session}
