@@ -1,6 +1,5 @@
-import { redirect } from '@sveltejs/kit'
+import { redirect } from '@sveltejs/kit';
 
-/** @type {import('./$types').PageLoad} */
 export async function load({parent}) {
   const { supabase, session } = await parent()
   if (!session) {
