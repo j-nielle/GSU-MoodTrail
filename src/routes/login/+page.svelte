@@ -5,6 +5,10 @@
 	export let form;
 </script>
 
+<svelte:head>
+	<title>Login</title>
+</svelte:head>
+
 {#if form?.error === 'Email not confirmed'}
 	<Alert color="red">Oops! You entered unverified email. Please try again later.</Alert>
 {:else if form?.error === 'Invalid credentials.'}

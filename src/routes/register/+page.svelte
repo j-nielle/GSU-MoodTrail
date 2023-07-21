@@ -4,6 +4,10 @@
 	export let form;
 </script>
 
+<svelte:head>
+	<title>Create an account</title>
+</svelte:head>
+
 {#if form?.success === true}
 	<Alert color="green">Registration has been successful! Please check your inbox.</Alert>
 {:else if form?.success === false}
