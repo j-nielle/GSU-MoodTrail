@@ -8,7 +8,7 @@ export async function load({ locals: { supabase, getSession } }) {
     }
 
     const { data } = await supabase.from("Student").select();
-    console.log(data)
+    //console.log(data)
     // return {
     //   students: data ?? [],
     // };
