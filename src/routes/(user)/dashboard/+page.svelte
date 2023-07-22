@@ -1,22 +1,7 @@
 <script>
-	import { Skeleton } from 'flowbite-svelte'
+	import { Skeleton } from 'flowbite-svelte';
+	import { onMount, onDestroy } from 'svelte';
 
-	export let data
-
-    // commented out client side data fetching w/ RLS
-	// $: ({ supabase, session } = data);
-
-	// let loadedData = [];
-	// async function loadData() {
-	// 	const { data } = await supabase.from('test').select('*').limit(20);
-	// 	loadedData = data;
-	// }
-
-	// $: if (session) {
-	// 	loadData();
-	// }
-
-    // $: ({ user, tableData } = data);
 </script>
 
 <svelte:head>
@@ -25,7 +10,24 @@
 
 <div class="p-10">
 	<h1>Dashboard</h1>
-	<Skeleton />
+	<table>
+    <thead>
+      <tr>
+        <th>Phone</th>
+        <th>Request Type</th>
+        <th>Timestamp</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- {#each loadedData?? as row}
+        <tr>
+          <td>{row.phone}</td>
+          <td>{row.requesttype}</td>
+          <td>{row.timestamp}</td>
+        </tr>
+      {/each} -->
+    </tbody>
+  </table>
 </div>
 
 <!-- {#if session}
