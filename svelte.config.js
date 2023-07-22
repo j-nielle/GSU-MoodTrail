@@ -10,7 +10,13 @@ const config = {
 		adapter: adapter()
 	},
 
-	preprocess: [vitePreprocess({})]
+	preprocess: [vitePreprocess({})],
+	vitePlugin: {
+		inspector: {
+			holdMode: true,
+			showToggleButton: 'always',
+		}
+	}
 };
 
 export default config;
