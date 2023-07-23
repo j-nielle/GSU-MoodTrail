@@ -23,8 +23,6 @@
 			data: { subscription }
 			// @ts-ignore
 		} = supabase.auth.onAuthStateChange((event, _session) => {
-			if (event == 'PASSWORD_RECOVERY') console.log('PASSWORD_RECOVERY', session)
-			if (event == 'TOKEN_REFRESHED') console.log('TOKEN_REFRESHED', session)
 			if (_session?.expires_at !== session?.expires_at) {
 				/**
 				 * The usage of invalidate tells sveltekit that the root `+layout.ts load` function
