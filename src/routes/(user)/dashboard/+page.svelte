@@ -1,24 +1,40 @@
 <script>
+	import { Alert } from 'flowbite-svelte';
 	import { onMount, onDestroy } from 'svelte';
-	import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-	import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-
+	import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 	import { createClient } from '@supabase/supabase-js';
 
-	const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+	const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+		auth: { persistSession: false }
+	});
 
-	const channel = supabase
-		.channel('schema-db-changes')
-		.on(
-			'postgres_changes',
-			{
-				event: 'INSERT',
-				schema: 'public',
-				table: 'RequestEntries'
-			},
-			(payload) => console.log(payload)
-		)
-		.subscribe((status) => console.log(status));
+	//const channel = supabase.channel('schema-db-changes');
+
+	export let data;
+
+	console.log(data.newData);
+	// let requestsData;
+
+	// $: requestsData = Array.from(data.requests.values());
+
+	// channel
+	// 	.on(
+	// 		'postgres_changes',
+	// 		{
+	// 			event: 'INSERT',
+	// 			schema: 'public',
+	// 			table: 'RequestEntries'
+	// 		},
+	// 		(payload) => {
+	// 			console.log('new request detected');
+	// 			requestsData = [...payload.new, ...requestsData];
+	// 		}
+	// 	)
+	// 	.subscribe((status) => console.log(status));
+
+	// onDestroy(() => {
+	// 	channel.unsubscribe();
+	// });
 </script>
 
 <svelte:head>
@@ -26,6 +42,11 @@
 </svelte:head>
 
 <div class="p-10">
+	{#if data.newData}
+		<Alert color="green" dismissable>
+			<p>New request received!</p>
+		</Alert>
+	{/if}
 	<h1>Dashboard</h1>
 	<table>
 		<thead>
@@ -33,25 +54,26 @@
 				<th>Phone</th>
 				<th>Request Type</th>
 				<th>Timestamp</th>
+				<th>Status</th>
 			</tr>
 		</thead>
 		<tbody>
-			<!-- {#each loadedData?? as row}
-        <tr>
-          <td>{row.phone}</td>
-          <td>{row.requesttype}</td>
-          <td>{row.timestamp}</td>
-        </tr>
-      {/each} -->
+			<!-- {#if !requestsData.length}
+				<tr>
+					<td>No requests found</td>
+					<td>No requests found</td>
+					<td>No requests found</td>
+					<td>No requests found</td>
+				</tr>
+			{/if}
+			{#each requestsData as req}
+				<tr>
+					<td>{req.contact_num}</td>
+					<td>{req.request_type}</td>
+					<td>{req.created_at}</td>
+					<td>{req.iscompleted}</td>
+				</tr>
+			{/each} -->
 		</tbody>
 	</table>
 </div>
-
-<!-- {#if session}
-<p>client-side data fetching with RLS</p>
-<pre>{JSON.stringify(loadedData, null, 2)}</pre>
-{/if} -->
-
-<!-- <div>Protected content for {user.email}</div>
-<pre>{JSON.stringify(tableData, null, 2)}</pre>
-<pre>{JSON.stringify(user, null, 2)}</pre> -->
