@@ -1,12 +1,12 @@
-import { RealtimeClient } from '@supabase/realtime-js'
-import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public'
+import { RealtimeClient } from '@supabase/realtime-js';
+import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 
 export const realtimeClient = new RealtimeClient('ws://localhost:4000/socket', {
-  params: {
-    apikey: PUBLIC_SUPABASE_ANON_KEY,
-    eventsPerSecond: 10,
-  },
-})
+	params: {
+		apikey: PUBLIC_SUPABASE_ANON_KEY,
+		eventsPerSecond: 10
+	}
+});
 
 // const channel = realtimeClient.channel('db-changes')
 

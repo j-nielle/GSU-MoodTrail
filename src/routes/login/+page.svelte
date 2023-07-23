@@ -12,7 +12,7 @@
 {#if form?.error === 'Email not confirmed'}
 	<Alert color="red">Oops! You entered unverified email. Please try again later.</Alert>
 {:else if form?.error === 'Invalid credentials.'}
-<Alert color="red">Oops! You entered invalid credentials. Please try again later.</Alert>
+	<Alert color="red">Oops! You entered invalid credentials. Please try again later.</Alert>
 {/if}
 
 <div class="grid md:grid-cols-2">
@@ -21,7 +21,14 @@
 			<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white">Welcome back!</h3>
 			<Label class="space-y-2">
 				<span>Email</span>
-				<Input type="email" id="email" name="email" placeholder="name@company.com" value={form?.email ?? ''} required>
+				<Input
+					type="email"
+					id="email"
+					name="email"
+					placeholder="name@company.com"
+					value={form?.email ?? ''}
+					required
+				>
 					<svg
 						slot="left"
 						aria-hidden="true"
@@ -37,7 +44,14 @@
 			</Label>
 			<Label class="space-y-2">
 				<span>Password</span>
-				<Input type="password" id="password" name="password" placeholder="•••••" required autocomplete="">
+				<Input
+					type="password"
+					id="password"
+					name="password"
+					placeholder="•••••"
+					required
+					autocomplete=""
+				>
 					<svg
 						slot="left"
 						aria-hidden="true"
@@ -57,7 +71,8 @@
 				<!-- <Checkbox on:click={handleRememberMe}>Remember me</Checkbox> -->
 				<a
 					href="/register"
-					class="text-sm hover:font-semibold text-primary-700 hover:underline dark:text-primary-500">Not registered?</a
+					class="text-sm hover:font-semibold text-primary-700 hover:underline dark:text-primary-500"
+					>Not registered?</a
 				>
 				<a
 					href="/reset-password"

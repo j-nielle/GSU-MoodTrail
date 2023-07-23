@@ -1,10 +1,10 @@
 <script lang="ts">
-  export let data
+	export let data;
 
-  let { user, tableData } = data
-  $: ({ user, tableData } = data)
+	let { user, tableData } = data;
+	$: ({ user, tableData } = data);
 
-	console.log(data)
+	console.log(data);
 </script>
 
 <svelte:head>

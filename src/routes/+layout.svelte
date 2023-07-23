@@ -23,6 +23,8 @@
 			data: { subscription }
 			// @ts-ignore
 		} = supabase.auth.onAuthStateChange((event, _session) => {
+			if (event == 'PASSWORD_RECOVERY') console.log('PASSWORD_RECOVERY', session)
+			if (event == 'TOKEN_REFRESHED') console.log('TOKEN_REFRESHED', session)
 			if (_session?.expires_at !== session?.expires_at) {
 				/**
 				 * The usage of invalidate tells sveltekit that the root `+layout.ts load` function
@@ -30,6 +32,7 @@
 				 */
 				invalidate('supabase:auth');
 			}
+			console.log(event, session)
 		});
 
 		return () => subscription.unsubscribe();
@@ -82,11 +85,7 @@
 				</div>
 			</div>
 			<label for="avatar-menu">
-				<Avatar
-					class="cursor-pointer"
-					id="avatar-menu"
-					alt="User Profile Pic"
-				/>
+				<Avatar class="cursor-pointer" id="avatar-menu" alt="User Profile Pic" />
 			</label>
 		{:else}
 			<Button href="/register" size="sm" color="light">Create an account</Button>

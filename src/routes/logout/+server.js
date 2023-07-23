@@ -1,4 +1,4 @@
-import { redirect } from '@sveltejs/kit'
+import { redirect } from '@sveltejs/kit';
 
 /**
  * This is the server-side logout route handler
@@ -6,6 +6,6 @@ import { redirect } from '@sveltejs/kit'
  * @type {import('./$types').RequestHandler}
  */
 export async function POST({ locals: { supabase } }) {
-    await supabase.auth.signOut()
-    throw redirect(303, '/')
+	await supabase.auth.signOut();
+	throw redirect(303, '/');
 }

@@ -57,7 +57,6 @@
 					id="email"
 					name="email"
 					placeholder="name@company.com"
-					value={form?.email ?? ''}
 					required
 				>
 					<svg
