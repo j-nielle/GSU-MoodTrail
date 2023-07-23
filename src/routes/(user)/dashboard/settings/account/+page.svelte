@@ -2,21 +2,43 @@
 	import { Alert, Card, Button, Label, Input, Checkbox } from 'flowbite-svelte';
 	import { enhance } from '$app/forms';
 
-	export let form
+	export let form;
 </script>
 
 <svelte:head>
 	<title>Account Settings</title>
 </svelte:head>
 
+{#if form?.success}
+	<div class="p-8">
+		<Alert color="green">
+			<span class="font-medium">Password changed succesfully!</span>
+		</Alert>
+	</div>
+{:else if form?.error}
+	<div class="p-8">
+		<Alert color="red">
+			<span class="font-medium">Oops! Something went wrong...</span> Please try again later.
+		</Alert>
+	</div>
+{/if}
 
 <div class="grid md:grid-cols-2">
 	<Card>
 		<form class="flex flex-col space-y-6" action="?/resetPassword" method="POST" use:enhance>
-			<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white">Enter new password</h3>
+			<h3 class="text-xl text-center font-medium text-gray-900 dark:text-white">
+				Enter new password
+			</h3>
 			<Label class="space-y-2">
-				<span>Password</span>
-				<Input type="password" id="password" name="password" placeholder="•••••" required autocomplete="">
+				<span>New Password</span>
+				<Input
+					type="password"
+					id="password"
+					name="password"
+					placeholder="•••••"
+					required
+					autocomplete
+				>
 					<svg
 						slot="left"
 						aria-hidden="true"
@@ -32,7 +54,7 @@
 					</svg>
 				</Input>
 			</Label>
-			<Button type="submit" class="w-full">LOGIN</Button>
+			<Button type="submit" class="w-full">SUBMIT NEW PASSWORD</Button>
 		</form>
 	</Card>
 </div>

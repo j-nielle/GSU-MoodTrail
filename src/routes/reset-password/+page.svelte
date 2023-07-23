@@ -5,22 +5,22 @@
 </script>
 
 <svelte:head>
-    <title>Password Reset Request</title>
+	<title>Password Reset Request</title>
 </svelte:head>
 
-<!-- {#if form?.error}
+{#if form?.success}
+	<div class="p-8">
+		<Alert color="green">
+			<span class="font-medium">Request sent succesfully! Please check your inbox.</span>
+		</Alert>
+	</div>
+{:else if form?.error}
 	<div class="p-8">
 		<Alert color="red">
 			<span class="font-medium">Oops! Something went wrong...</span> Please try again later.
 		</Alert>
 	</div>
-{:else if form?.success}
-	<div class="p-8">
-		<Alert color="green">
-			<span class="font-medium">Request sent succesfully!</span> Please check your inbox.
-		</Alert>
-	</div>
-{/if} -->
+{/if}
 
 <div class="grid md:grid-cols-2">
 	<Card>
