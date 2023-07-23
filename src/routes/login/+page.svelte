@@ -53,7 +53,7 @@
 					</svg>
 				</Input>
 			</Label>
-			<div class="flex items-start">
+			<div class="flex justify-between">
 				<!-- <Checkbox on:click={handleRememberMe}>Remember me</Checkbox> -->
 				<a
 					href="/register"
@@ -64,7 +64,6 @@
 					class="ml-auto hover:font-semibold text-sm text-primary-700 hover:underline dark:text-primary-500"
 					>Forgot password?</a
 				>
-				
 			</div>
 			<Button type="submit" class="w-full">LOGIN</Button>
 		</form>
