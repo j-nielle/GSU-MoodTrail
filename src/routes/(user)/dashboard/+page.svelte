@@ -1,7 +1,23 @@
 <script>
-	import { Skeleton } from 'flowbite-svelte';
 	import { onMount, onDestroy } from 'svelte';
+  import { PUBLIC_SUPABASE_URL } from '$env/static/public'
+  import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public'
 
+  import { createClient } from '@supabase/supabase-js'
+
+  const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY)
+
+  const channel = supabase.channel('schema-db-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'RequestEntries'
+      },
+      (payload) => console.log(payload)
+    )
+    .subscribe(status=>console.log(status))
 </script>
 
 <svelte:head>
@@ -11,23 +27,23 @@
 <div class="p-10">
 	<h1>Dashboard</h1>
 	<table>
-    <thead>
-      <tr>
-        <th>Phone</th>
-        <th>Request Type</th>
-        <th>Timestamp</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- {#each loadedData?? as row}
+		<thead>
+			<tr>
+				<th>Phone</th>
+				<th>Request Type</th>
+				<th>Timestamp</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- {#each loadedData?? as row}
         <tr>
           <td>{row.phone}</td>
           <td>{row.requesttype}</td>
           <td>{row.timestamp}</td>
         </tr>
       {/each} -->
-    </tbody>
-  </table>
+		</tbody>
+	</table>
 </div>
 
 <!-- {#if session}
