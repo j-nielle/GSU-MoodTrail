@@ -95,7 +95,7 @@
 	</div>
 	<Dropdown
 		triggeredBy="#bell"
-		class="w-full max-w-sm rounded divide-y divide-gray-100 shadow dark:bg-gray-800 dark:divide-gray-700"
+		class="w-full outline outline-red-500 max-w-sm rounded divide-y divide-gray-100 shadow dark:bg-gray-800 dark:divide-gray-700"
 	>
 		<div slot="header" class="text-center py-2 font-bold">Notifications</div>
 		<DropdownItem class="flex space-x-4">
