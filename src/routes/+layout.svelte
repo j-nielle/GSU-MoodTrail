@@ -25,7 +25,7 @@
 		} = supabase.auth.onAuthStateChange((event, _session) => {
 			if (_session?.expires_at !== session?.expires_at) {
 				/**
-				 * The usage of invalidate tells sveltekit that the root `+layout.ts load` function
+				 * The usage of invalidate tells sveltekit that the root `+layout.js load` function
 				 * should be executed whenever the session updates to keep the page store in sync.
 				 */
 				invalidate('supabase:auth');
@@ -90,6 +90,8 @@
 			<Button href="/login" size="sm" color="dark">Login</Button>
 		{/if}
 	</div>
+	
+	<!--  subscribe to the notification store
 	<Dropdown
 		triggeredBy="#bell"
 		class="w-full outline outline-red-500 max-w-sm rounded divide-y divide-gray-100 shadow dark:bg-gray-800 dark:divide-gray-700"
@@ -147,7 +149,8 @@
 				View all
 			</div>
 		</a>
-	</Dropdown>
+	</Dropdown> -->
+
 	<Dropdown placement="bottom" triggeredBy="#avatar-menu">
 		<DropdownHeader>
 			<span class="block text-sm"> {session?.user?.user_metadata?.name} </span>
