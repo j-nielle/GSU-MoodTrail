@@ -1,6 +1,3 @@
-export const prerender = false;
-export const ssr = true;
-
 import { redirect } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageServerLoad} */
