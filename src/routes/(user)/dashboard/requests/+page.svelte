@@ -105,12 +105,13 @@
 	{/if}
 
 	<TableSearch
+		divClass="relative overflow-x-auto"
 		placeholder="Search by request or status (true/false)"
 		hoverable={true}
 		bind:inputValue={searchTerm}
 	/>
-	<Table>
-		<TableHead>
+	<Table divClass="relative overflow-x-hidden shadow-xl sm:rounded-lg h-3/5">
+		<TableHead class="sticky top-0">
 			<TableHeadCell>#</TableHeadCell>
 			<TableHeadCell>Phone</TableHeadCell>
 			<TableHeadCell>Request Type</TableHeadCell>
@@ -125,7 +126,7 @@
 					<TableBodyCell>{req.request_type}</TableBodyCell>
 					<TableBodyCell>{new Date(req.created_at).toLocaleString()}</TableBodyCell>
 					<TableBodyCell>
-						<Checkbox bind:checked={req.iscompleted} on:change={() => toggleRequestStatus(req)} />
+						<Checkbox class="cursor-pointer" bind:checked={req.iscompleted} on:change={() => toggleRequestStatus(req)} />
 					</TableBodyCell>
 				</TableBodyRow>
 			{/each}
