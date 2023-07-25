@@ -20,9 +20,12 @@
 
 	$: ({ supabase } = data);
 	$: requestsData = data.requests;
-	$: filteredItems = requestsData.filter(
-		(req) => req.request_type.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1
-	);
+	$: filteredItems = requestsData.filter((req) => {
+		const typeMatch = req.request_type.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
+		const statusMatch =
+			req.iscompleted.toString().toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
+		return typeMatch || statusMatch;
+	});
 
 	onMount(() => {
 		const channel = supabase
@@ -58,8 +61,10 @@
 			const { data, error } = await supabase
 				.from('RequestEntries')
 				.update({ iscompleted: isCompleted })
-				.eq('id', req.id).select().single();
-			console.log("data:",data)
+				.eq('id', req.id)
+				.select()
+				.single();
+			console.log('data:', data);
 			if (error) {
 				console.log(error);
 			}
@@ -100,32 +105,30 @@
 	{/if}
 
 	<TableSearch
-		divClass="relative overflow-y-auto mb-4"
-		placeholder="Search by request type"
+		placeholder="Search by request or status (true/false)"
 		hoverable={true}
 		bind:inputValue={searchTerm}
-	>
-		<Table>
-			<TableHead>
-				<TableHeadCell>#</TableHeadCell>
-				<TableHeadCell>Phone</TableHeadCell>
-				<TableHeadCell>Request Type</TableHeadCell>
-				<TableHeadCell>Timestamp</TableHeadCell>
-				<TableHeadCell>Status</TableHeadCell>
-			</TableHead>
-			<TableBody tableBodyClass="divide-y">
-				{#each filteredItems as req}
-					<TableBodyRow>
-						<TableBodyCell>{req.id}</TableBodyCell>
-						<TableBodyCell>{req.contact_num}</TableBodyCell>
-						<TableBodyCell>{req.request_type}</TableBodyCell>
-						<TableBodyCell>{new Date(req.created_at).toLocaleString()}</TableBodyCell>
-						<TableBodyCell>
-							<Checkbox bind:checked={req.iscompleted} on:change={() => toggleRequestStatus(req)} />
-						</TableBodyCell>
-					</TableBodyRow>
-				{/each}
-			</TableBody>
-		</Table>
-	</TableSearch>
+	/>
+	<Table>
+		<TableHead>
+			<TableHeadCell>#</TableHeadCell>
+			<TableHeadCell>Phone</TableHeadCell>
+			<TableHeadCell>Request Type</TableHeadCell>
+			<TableHeadCell>Timestamp</TableHeadCell>
+			<TableHeadCell>Status</TableHeadCell>
+		</TableHead>
+		<TableBody tableBodyClass="divide-y">
+			{#each filteredItems as req}
+				<TableBodyRow>
+					<TableBodyCell>{req.id}</TableBodyCell>
+					<TableBodyCell>{req.contact_num}</TableBodyCell>
+					<TableBodyCell>{req.request_type}</TableBodyCell>
+					<TableBodyCell>{new Date(req.created_at).toLocaleString()}</TableBodyCell>
+					<TableBodyCell>
+						<Checkbox bind:checked={req.iscompleted} on:change={() => toggleRequestStatus(req)} />
+					</TableBodyCell>
+				</TableBodyRow>
+			{/each}
+		</TableBody>
+	</Table>
 </div>
