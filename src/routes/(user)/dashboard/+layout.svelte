@@ -11,20 +11,12 @@
 		<Sidebar class="w-fit">
 			<SidebarWrapper class="bg-white drop-shadow-lg">
 				<SidebarGroup>
-					<SidebarItem
-						label="Dashboard"
-						href="/dashboard"
-						active={activeUrl === '/dashboard'}
-					>
+					<SidebarItem label="Dashboard" href="/dashboard" active={activeUrl === '/dashboard'}>
 						<svelte:fragment slot="icon">
 							<ChartMixedSolid />
 						</svelte:fragment>
 					</SidebarItem>
-					<SidebarItem
-						label="Requests"
-						href="/dashboard/requests"
-						active={activeUrl === '/dashboard/requests'}
-					>
+					<SidebarItem label="Requests" href="/dashboard/requests" active={activeUrl === '/dashboard/requests'}>
 						<svelte:fragment slot="icon">
 							<PhoneSolid />
 						</svelte:fragment>
