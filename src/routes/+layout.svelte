@@ -30,7 +30,7 @@
 				 */
 				invalidate('supabase:auth');
 			}
-			console.log(event, session)
+			//console.log(event, session)
 		});
 
 		return () => subscription.unsubscribe();
