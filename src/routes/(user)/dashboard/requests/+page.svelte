@@ -21,15 +21,16 @@
 
 	$: ({ supabase } = data);
 	$: requestsData = data.requests;
-	$: filteredItems = requestsData.filter((req) => {
-		const typeMatch = req.request_type.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
-		const statusMatch =
-			req.iscompleted.toString().toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
-		return typeMatch || statusMatch;
-	});
+	
+	$: filteredItems = searchTerm === '' ? requestsData
+  	: requestsData.filter((req) => {
+      const typeMatch = req.request_type.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
+      const statusMatch = req.iscompleted.toString().toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
+      return typeMatch || statusMatch;
+  });
 
 	onMount(() => {
-		const channel = supabase
+		const channelA = supabase
 			.channel('schema-db-changes')
 			.on(
 				'postgres_changes',
@@ -52,7 +53,7 @@
 			.subscribe((status) => console.log(status));
 
 		return () => {
-			channel.unsubscribe();
+			channelA.unsubscribe();
 		};
 	});
 
