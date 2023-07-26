@@ -7,10 +7,12 @@ export async function load({ locals: { supabase, getSession } }) {
 		throw redirect(303, '/login');
 	}
 
-	// const { data } = await supabase.from("RequestEntries").select().order("created_at", { ascending: false });
-	// const requests = data?.map((request) => request) || [];
+	const { data: studentMood } = await supabase.from("StudentMoodEntries").select().order("created_at", { ascending: true });
+	const { data: requests } = await supabase.from("RequestEntries").select().order("created_at", { ascending: false });
 
-	// return {
-	// 	requests: requests
-	// };
+	return {
+		studentMood: studentMood || [],
+		requests: requests || [],
+		session: session
+	};
 }
