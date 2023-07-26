@@ -1,9 +1,7 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
-	import { BellRingSolid } from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
 	import {
 		Checkbox,
-		Toast,
 		Table,
 		TableBody,
 		TableBodyCell,
@@ -17,7 +15,6 @@
 
 	let searchTerm = '';
 	let requestsData = [];
-	let newRequest = false;
 
 	$: ({ supabase } = data);
 	$: requestsData = data.requests;
@@ -30,7 +27,7 @@
   });
 
 	onMount(() => {
-		const channelA = supabase
+		const requestsChannel = supabase
 			.channel('schema-db-changes')
 			.on(
 				'postgres_changes',
@@ -40,20 +37,13 @@
 					table: 'RequestEntries'
 				},
 				(payload) => {
-					if (payload.new) {
-						newRequest = true;
-						setTimeout(() => {
-							newRequest = false;
-						}, 8000);
-					}
-					console.log(payload.new);
 					requestsData = [payload.new, ...requestsData];
 				}
 			)
-			.subscribe((status) => console.log(status));
+			.subscribe((status) => console.log("inside /requests/+page.svelte:",status));
 
 		return () => {
-			channelA.unsubscribe();
+			requestsChannel.unsubscribe();
 		};
 	});
 
@@ -83,20 +73,7 @@
 	<title>Requests</title>
 </svelte:head>
 
-<div class="p-10">
-	{#if newRequest}
-		<Toast
-			position="top-right"
-			simple
-			contentClass="flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center"
-		>
-			<BellRingSolid class="text-blue-700" />
-			<div class="pl-4">
-				<span class="font-bold text-blue-700">(NEW)</span> Help request received!
-			</div>
-		</Toast>
-	{/if}
-	
+<div class="p-10">	
 	<!-- placeholder date filter component -->
 	<input type="date" id="notifs-datepicker" class="mb-3">
 	
