@@ -14,7 +14,10 @@
 			},
 			xAxis: {
 				type: 'category',
-				data: xData
+				data: xData,
+				axisLine: {
+					onZero: false
+				}
 			},
 			yAxis: {
 				type: 'value'
