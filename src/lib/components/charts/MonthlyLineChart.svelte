@@ -5,14 +5,14 @@
 	export let xData;
 	export let yData;
 
-	let lineChart;
+	let monthlyLineChart;
 
-	$: console.log('LineChart.svelte:', xData, yData);
+	$: console.log('MonthlyLineChart.svelte:', xData, yData);
 
 	onMount(() => {
-		lineChart = echarts.init(document.getElementById('lineChart'));
+		monthlyLineChart = echarts.init(document.getElementById('monthlyLineChart'));
 
-		lineChart.setOption({
+		monthlyLineChart.setOption({
 			title: {
 				text: 'Line Chart'
 			},
@@ -40,13 +40,13 @@
 		});
 
 		return () => {
-			lineChart.dispose();
+			monthlyLineChart.dispose();
 		};
 	});
 
 	afterUpdate(() => {
 		console.log('afterUpdate()');
-		lineChart.setOption({
+		monthlyLineChart.setOption({
 			xAxis: {
 				data: xData
 			},
@@ -59,4 +59,4 @@
 	});
 </script>
 
-<div id="lineChart" style="width:750px;height:300px;" />
+<div id="monthlyLineChart" style="width:750px;height:300px;" />

@@ -1,7 +1,7 @@
 <script>
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
-	import LineChart from '$lib/components/charts/LineChart.svelte';
+	import MonthlyLineChart from '$lib/components/charts/MonthlyLineChart.svelte';
 
 	export let data;
 
@@ -75,5 +75,5 @@
 </svelte:head>
 
 <div class="p-10">
-	<LineChart bind:xData={monthly} bind:yData={monthlyAverages} />
+	<MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} />
 </div>
