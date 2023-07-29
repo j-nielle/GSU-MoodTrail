@@ -1,12 +1,16 @@
 <script>
 	import * as echarts from 'echarts';
-	import { onMount } from 'svelte';
+	import { onMount, afterUpdate } from 'svelte';
 
 	export let xData;
 	export let yData;
 
+	let lineChart
+
+	$: console.log('LineChart.svelte:', xData, yData);
+	
 	onMount(() => {
-		const lineChart = echarts.init(document.getElementById('lineMoodScore'));
+		lineChart = echarts.init(document.getElementById('lineMoodScore'));
 
 		lineChart.setOption({
 			title: {
@@ -31,7 +35,7 @@
 			tooltip: {
 				show: 'true',
 				trigger: 'axis',
-				valueFormatter: (value) => 'Average Mood: ' + value.toFixed(3)
+				valueFormatter: (value) => 'Average Mood: ' + value
 			}
 		});
 
@@ -39,6 +43,20 @@
 			lineChart.dispose();
 		};
 	});
+
+	afterUpdate(() => {
+		console.log('afterUpdate()')
+    lineChart.setOption({
+      xAxis: {
+        data: xData
+      },
+      series: [
+        {
+          data: yData
+      	}
+      ]
+    });
+  });
 </script>
 
 <div id="lineMoodScore" style="width:750px;height:300px;" />

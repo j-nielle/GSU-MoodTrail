@@ -5,27 +5,14 @@
 
 	export let data;
 
-	let studentMoodData = [];
-	let monthlyAverages = [];
-	let m_scores = [],
-		m_labels = [],
-		m_reasons = [],
-		courses = [],
-		year_lvls = [],
-		timestamps = [];
-	let monthly = [];
+	let studentMoodData;
+	let monthlyAverages;
+	let m_scores;
+	let timestamps;
+	let monthly;
 
-	$: ({ supabase } = data);
-	$: studentMoodData = data.studentMood;
-
-	$: {
-		m_scores = studentMoodData.map((entry) => entry.mood_score);
-		m_labels = studentMoodData.map((entry) => entry.mood_label);
-		m_reasons = studentMoodData.map((entry) => entry.mood_reason);
-		courses = studentMoodData.map((entry) => entry.course);
-		year_lvls = studentMoodData.map((entry) => entry.year_level);
-		timestamps = studentMoodData.map((entry) => entry.created_at);
-	}
+	const currentDate = dayjs();
+  const monthlyAveragesObj = {};
 
 	onMount(() => {
 		const dashboardChannel = supabase
@@ -48,28 +35,38 @@
 		};
 	});
 
-	const currentDate = dayjs();
-	$: {
-		monthly = Array.from(
-			new Set(
-				timestamps
-					.filter((timestamp) => {
-						const date = dayjs(timestamp);
-						return date.year() === currentDate.year() && date.month() === currentDate.month();
-					})
-					.map((timestamp) => dayjs(timestamp).format('MM-DD-YYYY'))
-					.filter((dateString) => dateString !== undefined) // filter out undefined values
-			)
-		).sort();
+	$: ({ supabase } = data);
+	$: studentMoodData = data.studentMood;
 
-		monthlyAverages = monthly.map((date) => {
-			const scoresOnDate = studentMoodData
-				.filter((entry) => dayjs(entry.created_at).format('MM-DD-YYYY') === date)
-				.map((entry) => entry.mood_score);
-			const averageScore =
-				scoresOnDate.reduce((total, score) => total + score, 0) / scoresOnDate.length;
-			return averageScore;
-		});
+	$: {
+		m_scores = studentMoodData.map((entry) => entry.mood_score);
+		timestamps = studentMoodData.map((entry) => entry.created_at);
+	}
+
+	$: {   
+    studentMoodData.forEach((entry) => {
+        const date = dayjs(entry.created_at);
+        if (date.year() === currentDate.year() && date.month() === currentDate.month()) {
+            const formattedDate = date.format('MM-DD-YYYY');
+            if (entry.mood_score !== undefined && entry.mood_score !== null) {
+                if (!monthlyAveragesObj[formattedDate]) {
+                    monthlyAveragesObj[formattedDate] = {
+                        totalScore: entry.mood_score,
+                        count: 1,
+                    };
+                } else {
+                    monthlyAveragesObj[formattedDate].totalScore += entry.mood_score;
+                    monthlyAveragesObj[formattedDate].count++;
+                }
+            }
+        }
+    });
+
+    monthly = Object.keys(monthlyAveragesObj).sort();
+    monthlyAverages = monthly.map((date) => {
+        const { totalScore, count } = monthlyAveragesObj[date];
+        return totalScore / count;
+    });
 	}
 </script>
 
