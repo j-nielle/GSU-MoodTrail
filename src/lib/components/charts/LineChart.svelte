@@ -5,12 +5,12 @@
 	export let xData;
 	export let yData;
 
-	let lineChart
+	let lineChart;
 
 	$: console.log('LineChart.svelte:', xData, yData);
-	
+
 	onMount(() => {
-		lineChart = echarts.init(document.getElementById('lineMoodScore'));
+		lineChart = echarts.init(document.getElementById('lineChart'));
 
 		lineChart.setOption({
 			title: {
@@ -45,18 +45,18 @@
 	});
 
 	afterUpdate(() => {
-		console.log('afterUpdate()')
-    lineChart.setOption({
-      xAxis: {
-        data: xData
-      },
-      series: [
-        {
-          data: yData
-      	}
-      ]
-    });
-  });
+		console.log('afterUpdate()');
+		lineChart.setOption({
+			xAxis: {
+				data: xData
+			},
+			series: [
+				{
+					data: yData
+				}
+			]
+		});
+	});
 </script>
 
-<div id="lineMoodScore" style="width:750px;height:300px;" />
+<div id="lineChart" style="width:750px;height:300px;" />
