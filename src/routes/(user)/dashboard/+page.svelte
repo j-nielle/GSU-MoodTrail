@@ -12,7 +12,7 @@
 	let monthly;
 
 	const currentDate = dayjs();
-  const monthlyAveragesObj = {};
+	const monthlyAveragesObj = {};
 
 	onMount(() => {
 		const dashboardChannel = supabase
@@ -43,30 +43,33 @@
 		timestamps = studentMoodData.map((entry) => entry.created_at);
 	}
 
-	$: {   
-    studentMoodData.forEach((entry) => {
-        const date = dayjs(entry.created_at);
-        if (date.year() === currentDate.year() && date.month() === currentDate.month()) {
-            const formattedDate = date.format('MM-DD-YYYY');
-            if (entry.mood_score !== undefined && entry.mood_score !== null) {
-                if (!monthlyAveragesObj[formattedDate]) {
-                    monthlyAveragesObj[formattedDate] = {
-                        totalScore: entry.mood_score,
-                        count: 1,
-                    };
-                } else {
-                    monthlyAveragesObj[formattedDate].totalScore += entry.mood_score;
-                    monthlyAveragesObj[formattedDate].count++;
-                }
-            }
-        }
-    });
+	$: {
+		studentMoodData.forEach((entry) => {
+			const date = dayjs(entry.created_at);
+			// if the entry was created this year and this month
+			// make month an input so that users can choose which month
+			// to view in the line chart
+			if (date.year() === currentDate.year() && date.month() === currentDate.month()) {
+				const formattedDate = date.format('MM-DD-YYYY');
+				if (entry.mood_score !== undefined && entry.mood_score !== null) {
+					if (!monthlyAveragesObj[formattedDate]) {
+						monthlyAveragesObj[formattedDate] = {
+							totalScore: entry.mood_score,
+							count: 1
+						};
+					} else {
+						monthlyAveragesObj[formattedDate].totalScore += entry.mood_score;
+						monthlyAveragesObj[formattedDate].count++;
+					}
+				}
+			}
+		});
 
-    monthly = Object.keys(monthlyAveragesObj).sort();
-    monthlyAverages = monthly.map((date) => {
-        const { totalScore, count } = monthlyAveragesObj[date];
-        return totalScore / count;
-    });
+		monthly = Object.keys(monthlyAveragesObj).sort();
+		monthlyAverages = monthly.map((date) => {
+			const { totalScore, count } = monthlyAveragesObj[date];
+			return totalScore / count;
+		});
 	}
 </script>
 

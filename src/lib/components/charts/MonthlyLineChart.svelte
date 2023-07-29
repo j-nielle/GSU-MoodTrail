@@ -1,4 +1,5 @@
 <script>
+	import dayjs from 'dayjs';
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
 
@@ -6,8 +7,6 @@
 	export let yData;
 
 	let monthlyLineChart;
-
-	$: console.log('MonthlyLineChart.svelte:', xData, yData);
 
 	onMount(() => {
 		monthlyLineChart = echarts.init(document.getElementById('monthlyLineChart'));
