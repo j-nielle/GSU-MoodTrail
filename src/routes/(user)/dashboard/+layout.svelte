@@ -11,14 +11,11 @@
 	onMount(() => {
 		const toastChannel = supabase
 			.channel('toast-requests')
-			.on(
-				'postgres_changes',
-				{
+			.on('postgres_changes', {
 					event: 'INSERT',
 					schema: 'public',
 					table: 'RequestEntries'
-				},
-				(payload) => {
+				},(payload) => {
 					if (payload.new) {
 						newRequest.set(true);
 						setTimeout(() => {
@@ -57,11 +54,7 @@
 		</Sidebar>
 		<div class="flex flex-1 font-sans rounded-md border-2 border-slate-500/10 shadow-lg shadow-slate-400 bg-white">
 			{#if $newRequest}
-				<Toast
-					position="top-right"
-					simple
-					contentClass="flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center"
-				>
+				<Toast position="top-right" simple contentClass="flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center">
 					<BellRingSolid class="text-blue-700" />
 					<div class="pl-4">
 						<span class="font-bold text-blue-700">(NEW)</span> Help request received!
