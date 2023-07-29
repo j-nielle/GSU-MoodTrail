@@ -18,24 +18,15 @@ export const actions = {
 
 			if (error.message === 'Email not confirmed') {
 				return fail(400, {
-					error: 'Email not confirmed',
-					values: {
-						email
-					}
+					error: 'Email not confirmed'
 				});
 			} else if (error instanceof AuthApiError && error.status === 400) {
 				return fail(400, {
-					error: 'Invalid credentials.',
-					values: {
-						email
-					}
+					error: 'Invalid credentials.'
 				});
 			}
 			return fail(500, {
-				error: 'Server error. Try again later.',
-				values: {
-					email
-				}
+				error: 'Server error. Try again later.'
 			});
 		}
 
