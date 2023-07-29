@@ -55,25 +55,24 @@
 					border>{session?.user?.user_metadata?.name}
 				</Avatar>
 			</label>
+			<Dropdown placement="bottom" triggeredBy="#avatar-menu">
+				<DropdownHeader>
+					<span class="block text-sm"> {session?.user?.user_metadata?.name} </span>
+					<span class="block text-sm font-medium truncate"> {session?.user?.email} </span>
+				</DropdownHeader>
+				<DropdownItem class="cursor-pointer" href="/dashboard/settings/profile">Settings</DropdownItem>
+				<DropdownDivider />
+				<form method="POST" action="/logout">
+					<DropdownItem	type="submit" class="py-2 text-sm font-medium cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600">
+						Logout
+					</DropdownItem>
+				</form>
+			</Dropdown>
 		{:else}
 			<Button href="/register" size="sm" color="light">Create an account</Button>
 			<Button href="/login" size="sm" color="dark">Login</Button>
 		{/if}
 	</div>
-
-	<Dropdown placement="bottom" triggeredBy="#avatar-menu">
-		<DropdownHeader>
-			<span class="block text-sm"> {session?.user?.user_metadata?.name} </span>
-			<span class="block text-sm font-medium truncate"> {session?.user?.email} </span>
-		</DropdownHeader>
-		<DropdownItem class="cursor-pointer" href="/dashboard/settings/profile">Settings</DropdownItem>
-		<DropdownDivider />
-		<form method="POST" action="/logout">
-			<DropdownItem	type="submit" class="py-2 text-sm font-medium cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600">
-				Logout
-			</DropdownItem>
-		</form>
-	</Dropdown>
 </Navbar>
 
 <slot />
