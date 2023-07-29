@@ -35,18 +35,18 @@
     </Label>
     <Label class="space-y-2">
       <span>Password</span>
-      <Input type="password" id="password" name="password" placeholder="•••••••" required autocomplete="">
-      <svelte:fragment slot="left">
-        <ShieldSolid size="xs" class="ml-1" />
-      </svelte:fragment>
+      <Input type="password" id="password" name="password" placeholder="•••••••" required autocomplete>
+        <svelte:fragment slot="left">
+          <ShieldSolid size="xs" class="ml-1" />
+        </svelte:fragment>
       </Input>
     </Label>
     <Label class="space-y-2">
       <span>Confirm Password</span>
-      <Input type="password" name="passwordConfirm" placeholder="•••••" required autocomplete="">
+      <Input type="password" name="passwordConfirm" placeholder="•••••••" required autocomplete>
         <svelte:fragment slot="left">
         <ShieldSolid size="xs" class="ml-1" />
-      </svelte:fragment>
+        </svelte:fragment>
       </Input>
     </Label>
     <Button type="submit" class="w-full">REGISTER</Button>
