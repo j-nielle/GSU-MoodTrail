@@ -73,7 +73,7 @@
 	<title>Requests</title>
 </svelte:head>
 
-<div class="p-10">	
+<div class="p-10 outline outline-red-600 outline-1">	
 	<!-- placeholder date filter component -->
 	<input type="date" id="notifs-datepicker" class="mb-3">
 	

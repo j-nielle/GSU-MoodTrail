@@ -77,8 +77,5 @@
 				</SidebarGroup>
 			</SidebarWrapper>
 		</Sidebar>
-		<div class="flex flex-1 font-sans rounded-md border-2 border-slate-500/10 shadow-lg shadow-slate-400 ring-1 bg-white">
-			<slot><!-- optional fallback --></slot>
-		</div>
 	</div>
 </div>
