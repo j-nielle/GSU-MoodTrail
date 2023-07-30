@@ -34,7 +34,7 @@
 	$: activeUrl = $page.url.pathname;
 </script>
 
-<div class="p-10 mt-3 bg-slate-200/20">
+<div class="p-10 mt-3 bg-slate-200/20 outline outline-red-500">
 	<div class="flex items-stretch space-x-3">
 		<Sidebar class="w-fit">
 			<SidebarWrapper class="bg-white drop-shadow-lg">
