@@ -1,6 +1,7 @@
 <script>
 	// @ts-nocheck
 
+	import { minBy } from 'lodash';
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
 
@@ -8,8 +9,19 @@
 	export let yData;
 
 	let weeklyLineChart;
+	let mood;
+
+	function getNearestMoodLabel(score) {
+		const moodLabels = ['Sad', 'Annoyed', 'Nervous', 'Bored', 'Neutral', 'Calm', 'Relaxed', 'Happy', 'Excited'];
+		const moodScores = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
+
+		const nearestIndex = minBy(moodScores, (moodScore) => Math.abs(moodScore - score));
+		return moodLabels[moodScores.indexOf(nearestIndex)];
+	}
 
 	onMount(() => {
+		mood = yData.map(score => getNearestMoodLabel(score));
+
 		weeklyLineChart = echarts.init(document.getElementById('weeklyLineChart'));
 
 		weeklyLineChart.setOption({
@@ -33,10 +45,15 @@
 				}
 			],
 			tooltip: {
-				show: true,
+				show: 'true',
 				trigger: 'axis',
-				formatter: 'Average Mood Score: {c}'
-			}, 
+				formatter: (params) => {
+          const index = params[0].dataIndex;
+          const moodScore = yData[index].toFixed(4);
+          const moodLabel = mood[index];
+          return `Nearest Mood: ${moodLabel} (<span class="font-bold">${moodScore}</span>)`;
+        }
+			},  
 			toolbox: {
 				show: true,
 				feature: {
@@ -78,5 +95,5 @@
 	});
 </script>
 
-<div id="weeklyLineChart" class="m-2" style="width:800px;height:270px;"/>
+<div id="weeklyLineChart" class="m-2" style="width:970px;height:270px;"/>
 

@@ -27,7 +27,7 @@
 	let monthly;
 	let yearly;
 
-	let todayEntries;
+	let todaysEntries;
 	let timestamps;
 	let moodScores;
 
@@ -67,23 +67,23 @@
 		groupedByMonth = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM'));
 		groupedByYear = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY'));
 
-		dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+		dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score')) ?? ['-'];
+		weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score')) ?? ['-'];
+		monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score')) ?? ['-'];
+		yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score')) ?? ['-'];
 
-		daily = _.sortBy(_.keys(groupedByDay));
+		daily = _.sortBy(_.keys(groupedByDay)) ?? ['-'];
 		weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
 			const weekNumber = parseInt(week.replace('Week ', ''));
 			return weekNumber;
-		});
+		}) ?? ['-'];
 
-		monthly = _.sortBy(_.keys(groupedByMonth));
-		yearly = _.sortBy(_.keys(groupedByYear));
+		monthly = _.sortBy(_.keys(groupedByMonth)) ?? ['-'];
+		yearly = _.sortBy(_.keys(groupedByYear)) ?? ['-'];
 
-		todayEntries = studentMoodData.filter(entry => dayjs(entry.created_at).format('YYYY-MM-DD') === today);
-		timestamps = todayEntries.map(entry => dayjs(entry.created_at).format('HH:mm:ss'));
-		moodScores = todayEntries.map(entry => entry.mood_score);
+		todaysEntries = studentMoodData.filter(entry => dayjs(entry.created_at).format('YYYY-MM-DD') === today);
+		timestamps = todaysEntries.map(entry => dayjs(entry.created_at).format('HH:mm:ss')) ?? ['-'];
+		moodScores = todaysEntries.map(entry => entry.mood_score) ?? ['-'];
 	}
 
 	let selectedChart = 'today';
