@@ -60,7 +60,6 @@
 		groupedByMonth = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM'));
 		groupedByYear = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY'));
 
-		console.log(groupedByWeek)
 		dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
 		weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
 		monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
@@ -72,7 +71,6 @@
 			return weekNumber;
 		});
 
-		console.log(weekly)
 		monthly = _.sortBy(_.keys(groupedByMonth));
 		yearly = _.sortBy(_.keys(groupedByYear));
 	}
