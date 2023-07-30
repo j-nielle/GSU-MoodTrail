@@ -6,7 +6,7 @@
 
 <Card class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex max-w-2xl flex-col p-4 sm:p-12" size="lg" padding='xl'>
   <form class="flex flex-col space-y-6" action="?/login" method="POST" use:enhance>
-    <h3 class="text-xl text-center font-semibold text-gray-900 dark:text-white">Welcome back!</h3>
+    <h3 class="text-xl text-center font-bold text-gray-900 dark:text-white">Welcome back!</h3>
     <Label class="space-y-2">
       <span>Email</span>
       <Input type="email" id="email" name="email" class="font-normal" placeholder="name@company.com" required>
