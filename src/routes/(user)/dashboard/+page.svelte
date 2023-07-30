@@ -49,24 +49,30 @@
 	$: studentMoodData = data.studentMood;
 
 	$: {
-		const getWeekNumber = (date) => {
-			const firstDayOfYear = dayjs(date).startOf('year').day(0);
-			const weekDiff = date.diff(firstDayOfYear, 'week');
-			return weekDiff + 1;
+		const getWeekNumberString = (date) => {
+			const firstDayOfYear = dayjs(date).startOf('year').day(1);
+			const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
+			return `Week ${weekDiff}`;
 		};
 
 		groupedByDay = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD'));
-		groupedByWeek = _.groupBy(studentMoodData, (entry) => getWeekNumber(dayjs(entry.created_at)));
+		groupedByWeek = _.groupBy(studentMoodData, (entry) => getWeekNumberString(dayjs(entry.created_at)));
 		groupedByMonth = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM'));
 		groupedByYear = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY'));
 
+		console.log(groupedByWeek)
 		dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
 		weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
 		monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
 		yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
 
 		daily = _.sortBy(_.keys(groupedByDay));
-		weekly = _.sortBy(_.keys(groupedByWeek));
+		weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
+			const weekNumber = parseInt(week.replace('Week ', ''));
+			return weekNumber;
+		});
+
+		console.log(weekly)
 		monthly = _.sortBy(_.keys(groupedByMonth));
 		yearly = _.sortBy(_.keys(groupedByYear));
 	}
