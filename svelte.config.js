@@ -12,10 +12,10 @@ const config = {
 
 	preprocess: [vitePreprocess({})],
 	vitePlugin: {
-		inspector: {
-			holdMode: true,
-			showToggleButton: 'always'
-		}
+		// inspector: {
+		// 	holdMode: true,
+		// 	showToggleButton: 'always'
+		// }
 	}
 };
 
