@@ -12,7 +12,7 @@
 
 		monthlyLineChart.setOption({
 			title: {
-				text: 'Line Chart'
+				text: 'Monthly Mood Averages'
 			},
 			xAxis: {
 				type: 'category',
@@ -57,4 +57,5 @@
 	});
 </script>
 
-<div id="monthlyLineChart" class="outline outline-blue-700 outline-1"  style="width:750px;height:300px;" />
+<div id="monthlyLineChart" class="m-2" style="width:800px;height:270px;"/>
+
