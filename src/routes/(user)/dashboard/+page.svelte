@@ -18,8 +18,6 @@
 	let monthlyAverages;
 	let yearlyAverages;
 
-	let timestamps;
-	let m_scores;
 	let daily;
 	let weekly;
 	let monthly;
@@ -66,6 +64,11 @@
 		weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
 		monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
 		yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+
+		daily = _.sortBy(_.keys(groupedByDay));
+		weekly = _.sortBy(_.keys(groupedByWeek));
+		monthly = _.sortBy(_.keys(groupedByMonth));
+		yearly = _.sortBy(_.keys(groupedByYear));
 	}
 
 	let selectedChart = 'daily';
