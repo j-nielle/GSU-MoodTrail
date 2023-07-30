@@ -11,54 +11,54 @@
 	import YearlyLineChart from '$lib/components/charts/YearlyLineChart.svelte';
 
 	export let data;
+	let studentMoodData = [];
 
-	let studentMoodData;
+	let groupedByDay;
+	let groupedByWeek;
+	let groupedByMonth;
+	let groupedByYear;
 	let dailyAverages;
 	let weeklyAverages;
 	let monthlyAverages;
 	let yearlyAverages;
-
 	let daily;
 	let weekly;
 	let monthly;
 	let yearly;
 
-	onMount(() => {		
+	onMount(() => {
 		const dashboardChannel = supabase
 			.channel('dashboard')
-			.on(
-				'postgres_changes',
-				{
-					event: '*',
+			.on('postgres_changes',	{
+					event: 'INSERT',
 					schema: 'public',
 					table: 'StudentMoodEntries'
-				},
-				(payload) => {
-					studentMoodData = [payload.new, ...studentMoodData];
+				},(payload) => {
+					if(payload.new)	{
+						studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
+					}
 				}
-			)
-			.subscribe((status) => console.log('/dashboard/+page.svelte:', status));
+			).subscribe((status) => console.log('/dashboard/+page.svelte:', status));
 
 		return () => {
 			dashboardChannel.unsubscribe();
 		};
 	});
 
-	function getWeekNumber(date) {
-		const firstDayOfYear = dayjs(date).startOf('year').day(0);
-		const weekDiff = date.diff(firstDayOfYear, 'week');
-		return weekDiff + 1;
-	}
-
 	$: ({ supabase } = data);
 	$: studentMoodData = data.studentMood;
-	
 
 	$: {
-		const groupedByDay =  _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD'));
-		const groupedByWeek = _.groupBy(studentMoodData, (entry) => getWeekNumber(dayjs(entry.created_at)));
-		const groupedByMonth = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM'));
-		const groupedByYear = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY'));
+		const getWeekNumber = (date) => {
+			const firstDayOfYear = dayjs(date).startOf('year').day(0);
+			const weekDiff = date.diff(firstDayOfYear, 'week');
+			return weekDiff + 1;
+		};
+
+		groupedByDay = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD'));
+		groupedByWeek = _.groupBy(studentMoodData, (entry) => getWeekNumber(dayjs(entry.created_at)));
+		groupedByMonth = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM'));
+		groupedByYear = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY'));
 
 		dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
 		weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
@@ -106,7 +106,7 @@
 				</ButtonGroup>
 			</div>
 			{#if selectedChart === 'daily'}
-			<DailyLineChart bind:xData={daily} bind:yData={dailyAverages} />
+				<DailyLineChart bind:xData={daily} bind:yData={dailyAverages} />
 			{:else if selectedChart === 'weekly'}
 				<WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} />
 			{:else if selectedChart === 'monthly'}
