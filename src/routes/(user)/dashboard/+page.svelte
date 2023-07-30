@@ -57,9 +57,6 @@
 	
 
 	$: {
-		timestamps = studentMoodData.map((entry) => dayjs(entry.created_at));
-		m_scores = studentMoodData.map((entry) => entry.mood_score);
-
 		const groupedByDay =  _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD'));
 		const groupedByWeek = _.groupBy(studentMoodData, (entry) => getWeekNumber(dayjs(entry.created_at)));
 		const groupedByMonth = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM'));
