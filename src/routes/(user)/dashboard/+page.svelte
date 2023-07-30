@@ -1,4 +1,6 @@
 <script>
+	// @ts-nocheck
+	import _ from 'lodash';
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
 	import { Card, Button, ButtonGroup, Label } from 'flowbite-svelte';
@@ -23,7 +25,7 @@
 	let monthly;
 	let yearly;
 
-	onMount(() => {
+	onMount(() => {		
 		const dashboardChannel = supabase
 			.channel('dashboard')
 			.on(
@@ -52,69 +54,24 @@
 
 	$: ({ supabase } = data);
 	$: studentMoodData = data.studentMood;
+	
 
 	$: {
 		timestamps = studentMoodData.map((entry) => dayjs(entry.created_at));
 		m_scores = studentMoodData.map((entry) => entry.mood_score);
 
-		const groupedByDay = {};
-		const groupedByWeek = {};
-		const groupedByMonth = {};
-		const groupedByYear = {};
+		const groupedByDay =  _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD'));
+		const groupedByWeek = _.groupBy(studentMoodData, (entry) => getWeekNumber(dayjs(entry.created_at)));
+		const groupedByMonth = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM'));
+		const groupedByYear = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY'));
 
-		// forEach expects 2 arguments but we only need index here
-		studentMoodData.forEach((_, index) => {
-			const date = timestamps[index];
-			const formattedDate = date.format('YYYY-MM-DD');
-
-			if (!groupedByDay[formattedDate]) {
-				groupedByDay[formattedDate] = [];
-			}
-			groupedByDay[formattedDate].push(m_scores[index]);
-
-			const weekNumber = getWeekNumber(date);
-			if (!groupedByWeek[weekNumber]) {
-				groupedByWeek[weekNumber] = [];
-			}
-			groupedByWeek[weekNumber].push(m_scores[index]);
-
-			const formattedMonth = date.format('YYYY-MM');
-			if (!groupedByMonth[formattedMonth]) {
-				groupedByMonth[formattedMonth] = [];
-			}
-			groupedByMonth[formattedMonth].push(m_scores[index]);
-
-			const formattedYear = date.format('YYYY');
-			if (!groupedByYear[formattedYear]) {
-				groupedByYear[formattedYear] = [];
-			}
-			groupedByYear[formattedYear].push(m_scores[index]);
-		});
-
-		daily = Object.keys(groupedByDay).sort();
-		weekly = Object.keys(groupedByWeek).sort();
-		monthly = Object.keys(groupedByMonth).sort();
-		yearly = Object.keys(groupedByYear).sort();
-
-		dailyAverages = daily.map(
-			(date) =>
-				groupedByDay[date].reduce((sum, score) => sum + score, 0) / groupedByDay[date].length
-		);
-		weeklyAverages = weekly.map(
-			(week) =>
-				groupedByWeek[week].reduce((sum, score) => sum + score, 0) / groupedByWeek[week].length
-		);
-		monthlyAverages = monthly.map(
-			(month) =>
-				groupedByMonth[month].reduce((sum, score) => sum + score, 0) / groupedByMonth[month].length
-		);
-		yearlyAverages = yearly.map(
-			(year) =>
-				groupedByYear[year].reduce((sum, score) => sum + score, 0) / groupedByYear[year].length
-		);
+		dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+		weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+		monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+		yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
 	}
 
-	let selectedChart = 'daily'; // set to 'daily' by default
+	let selectedChart = 'daily';
 
 	function toggleChart(chart) {
 		selectedChart = chart;
