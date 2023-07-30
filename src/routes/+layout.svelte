@@ -7,6 +7,7 @@
 		Navbar,
 		NavBrand,
 		Button,
+		DarkMode,
 		Dropdown,
 		DropdownDivider,
 		DropdownHeader,
@@ -21,9 +22,6 @@
 		const {
 			data: { subscription }
 		} = supabase.auth.onAuthStateChange((event, _session) => {
-			// if (_session?.expires_at !== session?.expires_at) {
-			// 	invalidate('supabase:auth');
-			// } else 
 			if (event === 'TOKEN_REFRESHED') {
 				invalidate('supabase:auth');
 			}
@@ -33,14 +31,14 @@
 	});
 </script>
 
-<Navbar class="mt-5">
+<Navbar class="p-8">
 	{#if session}
 		<NavBrand href="/dashboard" class="space-x-4">
-			<p class="text-2xl">MoodTrail BETA</p>
+			<img src="/src/lib/img/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit">
 		</NavBrand>
 	{:else}
 		<NavBrand href="/">
-			<p class="text-2xl">MoodTrail BETA</p>
+			<img src="/src/lib/img/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit">
 		</NavBrand>
 	{/if}
 
@@ -69,10 +67,11 @@
 				</form>
 			</Dropdown>
 		{:else}
-			<Button href="/register" size="sm" color="light">Create an account</Button>
-			<Button href="/login" size="sm" color="dark">Login</Button>
+			<Button href="/register" size="sm" color="light">Register</Button>
+			<Button href="/login" size="sm" color="blue">Login</Button>
 		{/if}
 	</div>
 </Navbar>
 
-<slot />
+<slot>
+</slot>

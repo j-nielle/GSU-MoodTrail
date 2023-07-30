@@ -14,7 +14,7 @@ const config = {
 	vitePlugin: {
 		inspector: {
 			holdMode: true,
-			showToggleButton: 'active'
+			showToggleButton: 'always'
 		}
 	}
 };

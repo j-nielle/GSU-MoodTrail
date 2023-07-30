@@ -14,6 +14,6 @@
 	<Alert color="red">Oops! Something went wrong. Please try again later.</Alert>
 {/if}
 
-<div class="grid md:grid-cols-2">
+<div class="flex justify-center">
 	<Register />
 </div>

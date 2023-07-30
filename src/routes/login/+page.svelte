@@ -16,6 +16,6 @@
 	<Alert color="red">Oops! You entered invalid credentials. Please try again later.</Alert>
 {/if}
 
-<div class="grid md:grid-cols-2">
+<div class="flex justify-center">
 	<Login />
 </div>
