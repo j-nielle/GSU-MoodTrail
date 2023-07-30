@@ -1,4 +1,6 @@
 <script>
+	// @ts-nocheck
+
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
 
