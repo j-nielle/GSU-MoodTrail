@@ -35,8 +35,27 @@
 			tooltip: {
 				show: 'true',
 				trigger: 'axis',
-				valueFormatter: (value) => 'Average Mood: ' + value
-			}
+				formatter: 'Average Mood Score: {c}'
+			}, 
+			toolbox: {
+				show: true,
+				feature: {
+					dataZoom: {
+						show: true,
+						yAxisIndex: "none"
+					},
+					dataView: {
+						show: true,
+						readOnly: false
+					},
+					restore: {
+						show: true
+					},
+					saveAsImage: {
+						show: true
+					}
+				}
+			},
 		});
 
 		return () => {
