@@ -1,7 +1,7 @@
 <script>
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
-	import { Card, Button, Label } from 'flowbite-svelte';
+	import { Card, Button, ButtonGroup, Label } from 'flowbite-svelte';
 	import { FaceLaughOutline } from 'flowbite-svelte-icons';
 	import DailyLineChart from '$lib/components/charts/DailyLineChart.svelte';
 	import WeeklyLineChart from '$lib/components/charts/WeeklyLineChart.svelte';
@@ -15,18 +15,13 @@
 	let weeklyAverages;
 	let monthlyAverages;
 	let yearlyAverages;
-	let m_scores;
+
 	let timestamps;
+	let m_scores;
 	let daily;
 	let weekly;
 	let monthly;
 	let yearly;
-
-	const currentDate = dayjs();
-	const dailyAveragesObj = {};
-	const weeklyAveragesObj = {};
-	const monthlyAveragesObj = {};
-	const yearlyAveragesObj = {};
 
 	onMount(() => {
 		const dashboardChannel = supabase
@@ -49,104 +44,81 @@
 		};
 	});
 
+	function getWeekNumber(date) {
+		const firstDayOfYear = dayjs(date).startOf('year').day(0);
+		const weekDiff = date.diff(firstDayOfYear, 'week');
+		return weekDiff + 1;
+	}
+
 	$: ({ supabase } = data);
 	$: studentMoodData = data.studentMood;
 
 	$: {
+		timestamps = studentMoodData.map((entry) => dayjs(entry.created_at));
 		m_scores = studentMoodData.map((entry) => entry.mood_score);
-		timestamps = studentMoodData.map((entry) => entry.created_at);
-	}
 
-	$: {
-		studentMoodData.forEach((entry) => {
-			const date = dayjs(entry.created_at);
-			const formattedDate = date.format('MM-DD-YYYY');
-			// if the entry was created this year and this month
-			// make month an input so that users can choose which month
-			// to view in the line chart
-			if (entry.mood_score !== undefined && entry.mood_score !== null) {
-				if (date.isSame(currentDate, 'day')) {
-					if (!dailyAveragesObj[formattedDate]) {
-						dailyAveragesObj[formattedDate] = {
-							totalScore: entry.mood_score,
-							count: 1
-						};
-					} else {
-						dailyAveragesObj[formattedDate].totalScore += entry.mood_score;
-						dailyAveragesObj[formattedDate].count++;
-					}
-				}
+		const groupedByDay = {};
+		const groupedByWeek = {};
+		const groupedByMonth = {};
+		const groupedByYear = {};
 
-				if (date.isSame(currentDate, 'week')) {
-					const weekStart = date.startOf('week').format('MM-DD-YYYY');
-					if (!weeklyAveragesObj[weekStart]) {
-						weeklyAveragesObj[weekStart] = {
-							totalScore: entry.mood_score,
-							count: 1
-						};
-					} else {
-						weeklyAveragesObj[weekStart].totalScore += entry.mood_score;
-						weeklyAveragesObj[weekStart].count++;
-					}
-				}
+		// forEach expects 2 arguments but we only need index here
+		studentMoodData.forEach((_, index) => {
+			const date = timestamps[index];
+			const formattedDate = date.format('YYYY-MM-DD');
 
-				if (date.isSame(currentDate, 'month')) {
-					if (!monthlyAveragesObj[formattedDate]) {
-						monthlyAveragesObj[formattedDate] = {
-							totalScore: entry.mood_score,
-							count: 1
-						};
-					} else {
-						monthlyAveragesObj[formattedDate].totalScore += entry.mood_score;
-						monthlyAveragesObj[formattedDate].count++;
-					}
-				}
-
-				if (date.isSame(currentDate, 'year')) {
-					const yearStart = date.startOf('year').format('MM-DD-YYYY');
-					if (!yearlyAveragesObj[yearStart]) {
-						yearlyAveragesObj[yearStart] = {
-							totalScore: entry.mood_score,
-							count: 1
-						};
-					} else {
-						yearlyAveragesObj[yearStart].totalScore += entry.mood_score;
-						yearlyAveragesObj[yearStart].count++;
-					}
-				}
+			if (!groupedByDay[formattedDate]) {
+				groupedByDay[formattedDate] = [];
 			}
+			groupedByDay[formattedDate].push(m_scores[index]);
+
+			const weekNumber = getWeekNumber(date);
+			if (!groupedByWeek[weekNumber]) {
+				groupedByWeek[weekNumber] = [];
+			}
+			groupedByWeek[weekNumber].push(m_scores[index]);
+
+			const formattedMonth = date.format('YYYY-MM');
+			if (!groupedByMonth[formattedMonth]) {
+				groupedByMonth[formattedMonth] = [];
+			}
+			groupedByMonth[formattedMonth].push(m_scores[index]);
+
+			const formattedYear = date.format('YYYY');
+			if (!groupedByYear[formattedYear]) {
+				groupedByYear[formattedYear] = [];
+			}
+			groupedByYear[formattedYear].push(m_scores[index]);
 		});
 
-		daily = Object.keys(dailyAveragesObj).sort();
-		dailyAverages = daily.map((date) => {
-			const { totalScore, count } = dailyAveragesObj[date];
-			return totalScore / count;
-		});
+		daily = Object.keys(groupedByDay).sort();
+		weekly = Object.keys(groupedByWeek).sort();
+		monthly = Object.keys(groupedByMonth).sort();
+		yearly = Object.keys(groupedByYear).sort();
 
-		weekly = Object.keys(weeklyAveragesObj).sort();
-		weeklyAverages = weekly.map((date) => {
-			const { totalScore, count } = weeklyAveragesObj[date];
-			return totalScore / count;
-		});
-
-		monthly = Object.keys(monthlyAveragesObj).sort();
-		monthlyAverages = monthly.map((date) => {
-			const { totalScore, count } = monthlyAveragesObj[date];
-			return totalScore / count;
-		});
-
-		yearly = Object.keys(yearlyAveragesObj).sort();
-		yearlyAverages = yearly.map((date) => {
-			const { totalScore, count } = yearlyAveragesObj[date];
-			return totalScore / count;
-		});
+		dailyAverages = daily.map(
+			(date) =>
+				groupedByDay[date].reduce((sum, score) => sum + score, 0) / groupedByDay[date].length
+		);
+		weeklyAverages = weekly.map(
+			(week) =>
+				groupedByWeek[week].reduce((sum, score) => sum + score, 0) / groupedByWeek[week].length
+		);
+		monthlyAverages = monthly.map(
+			(month) =>
+				groupedByMonth[month].reduce((sum, score) => sum + score, 0) / groupedByMonth[month].length
+		);
+		yearlyAverages = yearly.map(
+			(year) =>
+				groupedByYear[year].reduce((sum, score) => sum + score, 0) / groupedByYear[year].length
+		);
 	}
 
-	let selectedChart = 'daily';
+	let selectedChart = 'daily'; // set to 'daily' by default
 
-  function toggleChart(chart) {
-    selectedChart = chart;
-  }
+	function toggleChart(chart) {
+		selectedChart = chart;
+	}
 </script>
 
 <svelte:head>
@@ -169,24 +141,20 @@
 	<div class="outline outline-lime-500 outline-1 flex">
 		<div class="flex flex-col m-3">
 			<div class="bg-blue-100 justify-start items-center content-center mb-2 space-x-1">
-				<Button class="outline outline-black outline-1" on:click={() => toggleChart('daily')}>Daily</Button>
-				<Button class="outline outline-black outline-1" on:click={() => toggleChart('weekly')}>Weekly</Button>
-				<Button class="outline outline-black outline-1" on:click={() => toggleChart('monthly')}>Monthly</Button>
-				<Button class="outline outline-black outline-1" on:click={() => toggleChart('yearly')}>Yearly</Button>
+				<ButtonGroup>
+					<Button pill color="purple" on:click={() => toggleChart('daily')}>Daily</Button>
+					<Button pill color="purple" on:click={() => toggleChart('weekly')}>Weekly</Button>
+					<Button pill color="purple" on:click={() => toggleChart('monthly')}>Monthly</Button>
+					<Button pill color="purple" on:click={() => toggleChart('yearly')}>Yearly</Button>
+				</ButtonGroup>
 			</div>
 			{#if selectedChart === 'daily'}
-				<DailyLineChart bind:xData={daily} bind:yData={dailyAverages} />
-			{/if}
-
-			{#if selectedChart === 'weekly'}
+			<DailyLineChart bind:xData={daily} bind:yData={dailyAverages} />
+			{:else if selectedChart === 'weekly'}
 				<WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} />
-			{/if}
-
-			{#if selectedChart === 'monthly'}
+			{:else if selectedChart === 'monthly'}
 				<MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} />
-			{/if}
-
-			{#if selectedChart === 'yearly'}
+			{:else if selectedChart === 'yearly'}
 				<YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} />
 			{/if}
 		</div>
