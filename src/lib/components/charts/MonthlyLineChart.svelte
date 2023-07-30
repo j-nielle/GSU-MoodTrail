@@ -1,5 +1,4 @@
 <script>
-	import dayjs from 'dayjs';
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
 
@@ -58,4 +57,4 @@
 	});
 </script>
 
-<div id="monthlyLineChart" style="width:750px;height:300px;" />
+<div id="monthlyLineChart" class="outline outline-blue-700 outline-1"  style="width:750px;height:300px;" />
