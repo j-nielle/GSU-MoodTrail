@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { Card, Button, ButtonGroup, Label } from 'flowbite-svelte';
 	import { FaceLaughOutline } from 'flowbite-svelte-icons';
+	import TodayLineChart from '$lib/components/charts/TodayLineChart.svelte';
 	import DailyLineChart from '$lib/components/charts/DailyLineChart.svelte';
 	import WeeklyLineChart from '$lib/components/charts/WeeklyLineChart.svelte';
 	import MonthlyLineChart from '$lib/components/charts/MonthlyLineChart.svelte';
@@ -25,6 +26,10 @@
 	let weekly;
 	let monthly;
 	let yearly;
+
+	let todayEntries;
+	let timestamps;
+	let moodScores;
 
 	onMount(() => {
 		const dashboardChannel = supabase
@@ -49,6 +54,8 @@
 	$: studentMoodData = data.studentMood;
 
 	$: {
+		let today = dayjs().format('YYYY-MM-DD');
+
 		const getWeekNumberString = (date) => {
 			const firstDayOfYear = dayjs(date).startOf('year').day(1);
 			const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
@@ -73,9 +80,13 @@
 
 		monthly = _.sortBy(_.keys(groupedByMonth));
 		yearly = _.sortBy(_.keys(groupedByYear));
+
+		todayEntries = studentMoodData.filter(entry => dayjs(entry.created_at).format('YYYY-MM-DD') === today);
+		timestamps = todayEntries.map(entry => dayjs(entry.created_at).format('HH:mm:ss'));
+		moodScores = todayEntries.map(entry => entry.mood_score);
 	}
 
-	let selectedChart = 'daily';
+	let selectedChart = 'today';
 
 	function toggleChart(chart) {
 		selectedChart = chart;
@@ -101,15 +112,18 @@
 	</div>
 	<div class="outline outline-lime-500 outline-1 flex">
 		<div class="flex flex-col m-3">
-			<div class="bg-blue-100 justify-start items-center content-center mb-2 space-x-1">
+			<div class="justify-start items-center content-center mb-2 space-x-1">
 				<ButtonGroup>
+					<Button pill color="purple" on:click={() => toggleChart('today')}>Today</Button>
 					<Button pill color="purple" on:click={() => toggleChart('daily')}>Daily</Button>
 					<Button pill color="purple" on:click={() => toggleChart('weekly')}>Weekly</Button>
 					<Button pill color="purple" on:click={() => toggleChart('monthly')}>Monthly</Button>
 					<Button pill color="purple" on:click={() => toggleChart('yearly')}>Yearly</Button>
 				</ButtonGroup>
 			</div>
-			{#if selectedChart === 'daily'}
+			{#if selectedChart === 'today'}
+				<TodayLineChart bind:xData={timestamps} bind:yData={moodScores} />
+			{:else if selectedChart === 'daily'}
 				<DailyLineChart bind:xData={daily} bind:yData={dailyAverages} />
 			{:else if selectedChart === 'weekly'}
 				<WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} />
