@@ -40,6 +40,11 @@
 					table: 'StudentMoodEntries'
 				},(payload) => {
 					if(payload.new)	{
+						// had to clone instead of keeping a shallow copy of the array since
+						// new changes will affect both the original and the shallow copy
+						// which is not the ideal scenario, so every time there's a new 
+						// record added in this table, i am cloning the array and adding
+						// the new record to the cloned array
 						studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
 					}
 				}
