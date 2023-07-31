@@ -1,4 +1,6 @@
 <script>
+	// @ts-nocheck
+	import _ from 'lodash';
 	import { onMount } from 'svelte';
 	import {
 		Checkbox,
@@ -19,28 +21,25 @@
 	$: ({ supabase } = data);
 	$: requestsData = data.requests;
 	
-	$: filteredItems = searchTerm === '' ? requestsData
-  	: requestsData.filter((req) => {
-      const typeMatch = req.request_type.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
-      const statusMatch = req.iscompleted.toString().toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
-      return typeMatch || statusMatch;
-  });
+	$: filteredItems = searchTerm === '' ? requestsData	: _.filter(requestsData, (req) => {
+			const typeMatch = _.includes(req.request_type.toLowerCase(), searchTerm.toLowerCase());
+			const statusMatch = _.includes(req.iscompleted.toString().toLowerCase(), searchTerm.toLowerCase());
+			return typeMatch || statusMatch;
+		});
 
 	onMount(() => {
 		const requestsChannel = supabase
 			.channel('schema-db-changes')
-			.on(
-				'postgres_changes',
-				{
+			.on('postgres_changes',	{
 					event: 'INSERT',
 					schema: 'public',
 					table: 'RequestEntries'
-				},
-				(payload) => {
-					requestsData = [payload.new, ...requestsData];
+				},(payload) => {
+					if(payload.new){
+						requestsData = [payload.new, ...requestsData];
+					}
 				}
-			)
-			.subscribe((status) => console.log("inside /requests/+page.svelte:",status));
+			).subscribe((status) => console.log("inside /requests/+page.svelte:",status));
 
 		return () => {
 			requestsChannel.unsubscribe();
@@ -49,6 +48,7 @@
 
 	const toggleRequestStatus = async (req) => {
 		let isCompleted = req.iscompleted;
+
 		try {
 			const { data, error } = await supabase
 				.from('RequestEntries')
@@ -56,16 +56,10 @@
 				.eq('id', req.id)
 				.select()
 				.single();
-			console.log('data:', data);
-			if (error) {
-				console.log(error);
-			}
-			//isCompleted = data?.iscompleted;
 		} catch (error) {
 			console.log(error);
 		}
 	};
-
 	$: console.log(requestsData);
 </script>
 
