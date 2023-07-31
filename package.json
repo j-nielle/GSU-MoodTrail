@@ -15,6 +15,7 @@
 		"@supabase/auth-helpers-sveltekit": "^0.10.1",
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/kit": "^1.20.4",
+		"@types/lodash": "^4.14.195",
 		"autoprefixer": "^10.4.14",
 		"eslint": "^8.28.0",
 		"eslint-config-prettier": "^8.5.0",
