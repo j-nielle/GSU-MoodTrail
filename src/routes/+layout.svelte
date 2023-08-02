@@ -31,7 +31,7 @@
 	});
 </script>
 
-<Navbar class="p-8">
+<Navbar class="p-6">
 	{#if session}
 		<NavBrand href="/dashboard" class="space-x-4">
 			<img src="/src/lib/img/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit">
