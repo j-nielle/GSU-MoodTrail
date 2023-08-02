@@ -1,6 +1,6 @@
 <script>
 	// @ts-nocheck
-	import _, { stubTrue } from 'lodash';
+	import _ from 'lodash';
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
 	import {
@@ -23,29 +23,12 @@
 
 	$: ({ supabase } = data);
 	$: requestsData = data.requests;
+	$: page = data.page;
+	$: limit = data.limit;
 
 	let searchTerm = '';
 	let dateFilter = '';
 	let filteredItems;
-
-	$: {
-		filteredItems = requestsData.filter((req) => {
-			const phoneMatch = req.contact_num.includes(searchTerm);
-			const reqMatch = req.request_type.toLowerCase().includes(searchTerm.toLowerCase());
-			const statusMatch = req.iscompleted.toString().toLowerCase().includes(searchTerm.toLowerCase());
-			// this statement checks if the date filter is not empty, if it is not empty, it will format the date to YYYY-MM-DD
-			// if dateFilter is empty then it will return true which means it will not filter the data
-			const dateMatch = dateFilter !== '' ? dayjs(req.created_at).format('YYYY-MM-DD') === dayjs(dateFilter).format('YYYY-MM-DD') : true;
-
-			return (searchTerm !== '' && dateFilter !== '') // if both search term and date filter are not empty
-				? (phoneMatch || reqMatch || statusMatch) && dateMatch // then it will filter the data according to the search term and date filter
-				: searchTerm !== '' // else if search term is not empty
-					? phoneMatch || reqMatch || statusMatch // then it will filter the data according to the search term
-					: dateFilter !== '' // else if date filter is not empty
-						? dateMatch // then it will filter the data according to the date filter
-						: true; // else it will return true which means it will not filter the data
-			});
-		}
 
 	onMount(() => {
 		const requestsChannel = supabase.channel('schema-db-changes').on('postgres_changes',{
@@ -75,6 +58,25 @@
 		} catch (error) {
 			console.log(error);
 		}
+	}
+
+	$: {
+		filteredItems = requestsData.filter((req) => {
+			const phoneMatch = req.contact_num.includes(searchTerm);
+			const reqMatch = req.request_type.toLowerCase().includes(searchTerm.toLowerCase());
+			const statusMatch = req.iscompleted.toString().toLowerCase().includes(searchTerm.toLowerCase());
+			// this statement checks if the date filter is not empty, if it is not empty, it will format the date to YYYY-MM-DD
+			// if dateFilter is empty then it will return true which means it will not filter the data
+			const dateMatch = dateFilter !== '' ? dayjs(req.created_at).format('YYYY-MM-DD') === dayjs(dateFilter).format('YYYY-MM-DD') : true;
+
+			return (searchTerm !== '' && dateFilter !== '') // if both search term and date filter are not empty
+				? (phoneMatch || reqMatch || statusMatch) && dateMatch // then it will filter the data according to the search term and date filter
+				: searchTerm !== '' // else if search term is not empty
+					? phoneMatch || reqMatch || statusMatch // then it will filter the data according to the search term
+					: dateFilter !== '' // else if date filter is not empty
+						? dateMatch // then it will filter the data according to the date filter
+						: true; // else it will return true which means it will not filter the data
+		});
 	}
 </script>
 
@@ -140,4 +142,14 @@
 			{/if}
 		</TableBody>
 	</Table>
+	<div class="flex flex-col items-center justify-center gap-2 mt-3">
+		<div class="text-sm text-gray-700 dark:text-gray-400">
+			Page <span class="font-semibold text-gray-900 dark:text-white">{page}</span>
+		</div>
+	
+		<Pagination table>
+			<span class="text-white" slot="prev"><a href="?page={page - 1}&limit={limit}">Prev</a></span>
+			<span class="text-white" slot="next"><a href="?page={page + 1}&limit={limit}">Next</a></span>
+		</Pagination>
+	</div>
 </div>
