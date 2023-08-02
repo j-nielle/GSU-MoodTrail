@@ -34,9 +34,9 @@
 	$: activeUrl = $page.url.pathname;
 </script>
 
-<div class="p-4 bg-slate-200/20 outline outline-yellow-500  outline-1">
+<div class="flex justify-center p-4 bg-slate-200/20">
 	<div class="flex">
-		<Sidebar class="w-auto mr-7">
+		<Sidebar class="w-auto mr-5">
 			<SidebarWrapper class="bg-white drop-shadow-lg w-fit">
 				<SidebarGroup class="space-y-4">
 					<SidebarItem class="flex-col" href="/dashboard" active={activeUrl === '/dashboard'}>
@@ -52,7 +52,7 @@
 				</SidebarGroup>
 			</SidebarWrapper>
 		</Sidebar>
-		<div class="font-sans outline outline-1 rounded-md border-2 border-slate-500/10 shadow-lg shadow-slate-400 bg-white items-center">
+		<div class="font-sans rounded-md border-2 border-slate-500/10 shadow-lg shadow-slate-400 bg-white items-center">
 			{#if $newRequest}
 				<Toast position="top-right" simple contentClass="flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center">
 					<BellRingSolid class="text-blue-700" />
