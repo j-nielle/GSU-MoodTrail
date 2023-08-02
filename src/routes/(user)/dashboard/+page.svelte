@@ -112,22 +112,27 @@
 	</div>
 	<div class="outline outline-lime-500 outline-1 flex">
 		<div class="flex flex-col m-3">
-			<div class="justify-start items-center content-center mb-2 space-x-1">
+			<div class="flex space-x-1 justify-between m-2">
+				<ButtonGroup class="gap-x-px">
+					<Button pill color="blue" on:click={() => toggleChart('today')}>Today</Button>
+					<Button pill color="blue" on:click={() => toggleChart('daily')}>Daily</Button>
+					<Button pill color="blue" on:click={() => toggleChart('weekly')}>Weekly</Button>
+					<Button pill color="blue" on:click={() => toggleChart('monthly')}>Monthly</Button>
+					<Button pill color="blue" on:click={() => toggleChart('yearly')}>Yearly</Button>
+				</ButtonGroup>
 				<ButtonGroup>
-					<Button pill color="purple" on:click={() => toggleChart('today')}>Today</Button>
-					<Button pill color="purple" on:click={() => toggleChart('daily')}>Daily</Button>
-					<Button pill color="purple" on:click={() => toggleChart('weekly')}>Weekly</Button>
-					<Button pill color="purple" on:click={() => toggleChart('monthly')}>Monthly</Button>
-					<Button pill color="purple" on:click={() => toggleChart('yearly')}>Yearly</Button>
+					<Button pill color="dark">Students</Button>
+					<Button pill>Anonymous</Button>
 				</ButtonGroup>
 			</div>
+
 			{#if selectedChart === 'today'}
 				<TodayLineChart bind:xData={timestamps} bind:yData={moodScores} />
 			{:else if selectedChart === 'daily'}
 				<DailyLineChart bind:xData={daily} bind:yData={dailyAverages} />
 			{:else if selectedChart === 'weekly'}
 				<WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} />
-			{:else if selectedChart === 'monthly'}
+			{:else if selectedChart === 'monthly'}	
 				<MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} />
 			{:else if selectedChart === 'yearly'}
 				<YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} />
