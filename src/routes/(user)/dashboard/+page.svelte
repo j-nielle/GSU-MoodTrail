@@ -31,42 +31,23 @@
 	let timestamps;
 	let moodScores;
 
-	onMount(() => {
-		const dashboardChannel = supabase
-			.channel('dashboard')
-			.on('postgres_changes',	{
-					event: 'INSERT',
-					schema: 'public',
-					table: 'StudentMoodEntries'
-				},(payload) => {
-					if(payload.new)	{
-						// had to clone instead of keeping a shallow copy of the array since
-						// new changes will affect both the original and the shallow copy
-						// which is not the ideal scenario, so every time there's a new 
-						// record added in this table, i am cloning the array and adding
-						// the new record to the cloned array
-						studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
-					}
-				}
-			).subscribe((status) => console.log('/dashboard/+page.svelte:', status));
+	let today = dayjs().format('YYYY-MM-DD');
+	let selectedChart = 'today';
 
-		return () => {
-			dashboardChannel.unsubscribe();
-		};
-	});
+	function toggleChart(chart) {
+		selectedChart = chart;
+	}
 
-	$: ({ supabase } = data);
-	$: studentMoodData = data.studentMood;
+	const getWeekNumberString = (date) => {
+		const firstDayOfYear = dayjs(date).startOf('year').day(1);
+		const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
+		return `Week ${weekDiff}`;
+	};
 
-	$: {
-		let today = dayjs().format('YYYY-MM-DD');
+	$: ({supabase} = data)
+	$: studentMoodData = data.studentMood
 
-		const getWeekNumberString = (date) => {
-			const firstDayOfYear = dayjs(date).startOf('year').day(1);
-			const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
-			return `Week ${weekDiff}`;
-		};
-
+	$: {  
 		groupedByDay = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD'));
 		groupedByWeek = _.groupBy(studentMoodData, (entry) => getWeekNumberString(dayjs(entry.created_at)));
 		groupedByMonth = _.groupBy(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM'));
@@ -91,11 +72,25 @@
 		moodScores = todaysEntries.map(entry => entry.mood_score);
 	}
 
-	let selectedChart = 'today';
+	onMount(() => {
+		const dashboardChannel = supabase
+			.channel('dashboard')
+			.on('postgres_changes',	{
+					event: 'INSERT',
+					schema: 'public',
+					table: 'StudentMoodEntries'
+				},(payload) => {
+					if(payload.new){
+						studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
+					}
+				}
+			).subscribe((status) => console.log('/dashboard/+page.svelte:', status));
 
-	function toggleChart(chart) {
-		selectedChart = chart;
-	}
+		return () => {
+			dashboardChannel.unsubscribe();
+		};
+	});
+	$: console.log("timestamps and moodScores lengths:",timestamps.length,moodScores.length)
 </script>
 
 <svelte:head>
