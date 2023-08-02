@@ -82,23 +82,23 @@
 	<title>Requests</title>
 </svelte:head>
 
-<div class="ml-4-6 ml-4 mt-0.5 mb-4 mr-4">
-	<div class="flex justify-between">
-		<div class="flex items-center">
-			<TableSearch divClass="relative overflow-x-auto p-0" class="p-0"
-				placeholder="Search by request, phone, or status*" hoverable={true} bind:inputValue={searchTerm}/>
-			<button class="text-slate-700" class:hidden={!searchTerm != ''} on:click={() => { searchTerm = ''; }}>
-				<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-backspace-fill" viewBox="0 0 16 16">
-					<path d="M15.683 3a2 2 0 0 0-2-2h-7.08a2 2 0 0 0-1.519.698L.241 7.35a1 1 0 0 0 0 1.302l4.843 5.65A2 2 0 0 0 6.603 15h7.08a2 2 0 0 0 2-2V3zM5.829 5.854a.5.5 0 1 1 .707-.708l2.147 2.147 2.146-2.147a.5.5 0 1 1 .707.708L9.39 8l2.146 2.146a.5.5 0 0 1-.707.708L8.683 8.707l-2.147 2.147a.5.5 0 0 1-.707-.708L7.976 8 5.829 5.854z" />
-				</svg>
-			</button>
-		</div>
-		<div class="mt-1">
-			<Input type="date" class="w-auto h-auto m-4" bind:value={dateFilter} />
-		</div>
+<div class="flex justify-between">
+	<div class="flex items-center">
+		<TableSearch divClass="relative overflow-x-auto ml-4 mt-3" class="p-0"
+			placeholder="Search by request, phone, or status*" hoverable={true} bind:inputValue={searchTerm}/>
+		<button class="text-slate-700" class:hidden={!searchTerm != ''} on:click={() => { searchTerm = ''; }}>
+			<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-backspace-fill" viewBox="0 0 16 16">
+				<path d="M15.683 3a2 2 0 0 0-2-2h-7.08a2 2 0 0 0-1.519.698L.241 7.35a1 1 0 0 0 0 1.302l4.843 5.65A2 2 0 0 0 6.603 15h7.08a2 2 0 0 0 2-2V3zM5.829 5.854a.5.5 0 1 1 .707-.708l2.147 2.147 2.146-2.147a.5.5 0 1 1 .707.708L9.39 8l2.146 2.146a.5.5 0 0 1-.707.708L8.683 8.707l-2.147 2.147a.5.5 0 0 1-.707-.708L7.976 8 5.829 5.854z" />
+			</svg>
+		</button>
 	</div>
-	<Table divClass="">
-		<caption class="text-lg font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-4">
+	<div class="mt-1">
+		<Input type="date" class="w-auto h-auto m-4 mr-8 mt-8" bind:value={dateFilter} />
+	</div>
+</div>
+<div class="ml-4-6 ml-4 mb-7 mr-11">
+	<Table divClass="w-full text-left text-sm text-gray-500 dark:text-gray-400 ml-4">
+		<caption class="text-lg font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
 			Help Requests from the Kiosk
 			<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
 				By default, it shows requests for the current date and is sorted according to the latest
