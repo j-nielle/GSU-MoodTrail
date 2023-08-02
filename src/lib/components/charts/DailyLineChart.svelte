@@ -28,9 +28,9 @@
 		return moodLabels[moodScores.indexOf(nearestIndex)];
 	}
 
-	onMount(() => {
-		mood = yData.map((score) => getNearestMoodLabel(score)); // get the nearest mood label for each score
+	$: mood = yData.map((score) => getNearestMoodLabel(score));
 
+	onMount(() => { 
 		dailyLineChart = echarts.init(document.getElementById('dailyLineChart'));
 
 		if (!xData || !yData) {
@@ -72,7 +72,7 @@
 					const index = params[0].dataIndex;
 					const moodScore = yData[index].toFixed(4);
 					const moodLabel = mood[index];
-					return `Nearest Mood: ${moodLabel} (<span class="font-bold">${moodScore}<, span>)`;
+					return `Nearest Mood: ${moodLabel} (<span class="font-bold">${moodScore}</ span>)`;
 				}
 			},
 			toolbox: {
@@ -116,4 +116,4 @@
 	});
 </script>
 
-<div id="dailyLineChart" class="m-2" style="width:970px; height:290px;" />
+<div id="dailyLineChart" class="m-2" style="width:890px; height:290px;" />

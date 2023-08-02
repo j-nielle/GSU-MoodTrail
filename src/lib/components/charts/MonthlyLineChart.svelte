@@ -28,9 +28,9 @@
 		return moodLabels[moodScores.indexOf(nearestIndex)];
 	}
 
-	onMount(() => {
-		mood = yData.map((score) => getNearestMoodLabel(score)); // get the nearest mood label for each score
+	$: mood = yData.map((score) => getNearestMoodLabel(score));
 
+	onMount(() => {
 		monthlyLineChart = echarts.init(document.getElementById('monthlyLineChart'));
 
 		if (!xData || !yData) {
@@ -116,4 +116,4 @@
 	});
 </script>
 
-<div id="monthlyLineChart" class="m-2" style="width:970px; height:290px;" />
+<div id="monthlyLineChart" class="m-2" style="width:890px; height:290px;" />

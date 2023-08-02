@@ -29,9 +29,9 @@
 		return moodLabels[moodScores.indexOf(nearestIndex)];
 	}
 
-	onMount(() => {
-		mood = yData.map((score) => getNearestMoodLabel(score));
+	$: mood = yData.map((score) => getNearestMoodLabel(score));
 
+	onMount(() => {
 		yearlyLineChart = echarts.init(document.getElementById('yearlyLineChart'));
 		
 		if (!xData || !yData) {
@@ -117,4 +117,4 @@
 	});
 </script>
 
-<div id="yearlyLineChart" class="m-2" style="width:970px; height:290px;" />
+<div id="yearlyLineChart" class="m-2" style="width:890px; height:290px;" />

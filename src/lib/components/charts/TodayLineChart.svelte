@@ -31,9 +31,9 @@
 		return moodLabels[moodScores.indexOf(nearestIndex)];
 	}
 
-	onMount(() => {
-		mood = yData.map((score) => getNearestMoodLabel(score)); // get the nearest mood label for each score
+	$: mood = yData.map((score) => getNearestMoodLabel(score));
 
+	onMount(() => {
 		todayLineChart = echarts.init(document.getElementById('todayLineChart'));
 
 		if (!xData || !yData) {
@@ -105,7 +105,7 @@
 	});
 
 	afterUpdate(() => {
-		console.log('afterUpdate()');
+		console.log('afterUpdate() lengths:',yData.length, xData.length);  
 		todayLineChart.setOption({
 			xAxis: {
 				data: xData
@@ -115,8 +115,9 @@
 					data: yData
 				}
 			]
-		});
+		}); 
 	});
+	console.log('lengths:',yData.length, xData.length); 
 </script>
 
-<div id="todayLineChart" class="m-2" style="width:970px; height:290px;" />
+<div id="todayLineChart" class="m-2" style="width:890px; height:290px;" />

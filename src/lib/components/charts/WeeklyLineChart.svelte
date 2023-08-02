@@ -28,9 +28,9 @@
 		return moodLabels[moodScores.indexOf(nearestIndex)];
 	}
 
-	onMount(() => {
-		mood = yData.map((score) => getNearestMoodLabel(score));
+	$: mood = yData.map((score) => getNearestMoodLabel(score));
 
+	onMount(() => {
 		weeklyLineChart = echarts.init(document.getElementById('weeklyLineChart'));
 
 		if (!xData || !yData) {
@@ -116,4 +116,4 @@
 	});
 </script>
 
-<div id="weeklyLineChart" class="m-2" style="width:970px; height:290px;" />
+<div id="weeklyLineChart" class="m-2" style="width:890px; height:290px;" />
