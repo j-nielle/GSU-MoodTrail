@@ -73,7 +73,7 @@
 				trigger: 'axis',
 				formatter: (params) => {
 					const index = params[0].dataIndex;
-					const moodScore = yData[index].toFixed(4);
+					const moodScore = yData[index].toFixed(2);
 					const moodLabel = mood[index];
 					return `Mood: ${moodLabel} (<span class="font-bold">${moodScore}</span>)`;
 				}
