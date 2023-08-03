@@ -12,9 +12,13 @@
 	import YearlyLineChart from '$lib/components/charts/YearlyLineChart.svelte';
 
 	export let data;
-
+	
 	let studentMoodData = [];
-	let totalMoods;
+
+	$: ({ supabase } = data);
+	$: studentMoodData = data.studentMood;
+
+	let moodCount;
 	let todayMostFreq;
 	let dailyMostFreq;
 	let weeklyMostFreq;
@@ -34,10 +38,10 @@
 	let todaysMoodScores;
 
 	let today = dayjs().format('YYYY-MM-DD');
-	let selectedChart = 'today';
+	let selectedLineChart = 'today';
 
 	function toggleChart(chart) {
-		selectedChart = chart;
+		selectedLineChart = chart;
 	}
 
 	const getWeekNumberString = (date) => {
@@ -45,51 +49,6 @@
 		const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
 		return `Week ${weekDiff}`;
 	};
-
-	$: ({ supabase } = data);
-	$: studentMoodData = data.studentMood;
-
-	$: {
-		const groupedByDay = _.groupBy(studentMoodData, (entry) =>
-			dayjs(entry.created_at).format('YYYY-MM-DD')
-		);
-		const groupedByWeek = _.groupBy(studentMoodData, (entry) =>
-			getWeekNumberString(dayjs(entry.created_at))
-		);
-		const groupedByMonth = _.groupBy(studentMoodData, (entry) =>
-			dayjs(entry.created_at).format('YYYY-MM')
-		);
-		const groupedByYear = _.groupBy(studentMoodData, (entry) =>
-			dayjs(entry.created_at).format('YYYY')
-		);
-
-		const todaysEntries = studentMoodData.filter(
-			(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
-		);
-		
-		timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss'));
-		todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score);
-
-		dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-
-		daily = _.sortBy(_.keys(groupedByDay));
-		weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
-			const weekNumber = parseInt(week.replace('Week ', ''));
-			return weekNumber;
-		});
-
-		monthly = _.sortBy(_.keys(groupedByMonth));
-		yearly = _.sortBy(_.keys(groupedByYear));
-
-		todayMostFreq = _.head(_(todaysMoodScores).countBy().entries().maxBy(_.last));
-		dailyMostFreq = _.head(_(groupedByDay).flatMap().countBy('mood_score').entries().maxBy(_.last));
-		weeklyMostFreq = _.head(_(groupedByWeek).flatMap().countBy('mood_score').entries().maxBy(_.last));
-		monthlyMostFreq = _.head(_(groupedByMonth).flatMap().countBy('mood_score').entries().maxBy(_.last));
-		yearlyMostFreq = _.head(_(groupedByYear).flatMap().countBy('mood_score').entries().maxBy(_.last));
-	}
 
 	onMount(() => {
 		const dashboardChannel = supabase
@@ -111,6 +70,67 @@
 			dashboardChannel.unsubscribe();
 		};
 	});
+
+	$: {
+		moodCount = _.countBy(studentMoodData, 'mood_label'); // for barchart/histogram
+		const groupedByMood = _.groupBy(studentMoodData, 'mood_label');
+		const countReasons = _.mapValues(groupedByMood, (moodGroup) =>
+			_.countBy(moodGroup, 'reason_label')
+		); // for stacked area chart (count of reasons for each mood)
+	}
+
+	$: if(selectedLineChart === 'today'){
+		const todaysEntries = studentMoodData.filter(
+			(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
+		);
+
+		timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss'));
+		todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score);
+		todayMostFreq = _.head(_(todaysMoodScores).countBy().entries().maxBy(_.last));
+	}
+
+	$: if(selectedLineChart === 'daily'){
+		const groupedByDay = _.groupBy(studentMoodData, (entry) =>
+			dayjs(entry.created_at).format('YYYY-MM-DD')
+		);
+
+		dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+		daily = _.sortBy(_.keys(groupedByDay));
+		dailyMostFreq = _.head(_(groupedByDay).flatMap().countBy('mood_score').entries().maxBy(_.last));
+	}
+
+	$: if(selectedLineChart === 'weekly'){
+		const groupedByWeek = _.groupBy(studentMoodData, (entry) =>
+			getWeekNumberString(dayjs(entry.created_at))
+		);
+
+		weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+		weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
+			const weekNumber = parseInt(week.replace('Week ', ''));
+			return weekNumber;
+		});
+		weeklyMostFreq = _.head(_(groupedByWeek).flatMap().countBy('mood_score').entries().maxBy(_.last));
+	}
+	
+	$: if(selectedLineChart === 'monthly'){
+		const groupedByMonth = _.groupBy(studentMoodData, (entry) =>
+			dayjs(entry.created_at).format('YYYY-MM')
+		);
+
+		monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+		monthly = _.sortBy(_.keys(groupedByMonth));
+		monthlyMostFreq = _.head(_(groupedByMonth).flatMap().countBy('mood_score').entries().maxBy(_.last));
+	}
+
+	$: if(selectedLineChart === 'yearly'){
+		const groupedByYear = _.groupBy(studentMoodData, (entry) =>
+			dayjs(entry.created_at).format('YYYY')
+		);
+
+		yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+		yearly = _.sortBy(_.keys(groupedByYear));
+		yearlyMostFreq = _.head(_(groupedByYear).flatMap().countBy('mood_score').entries().maxBy(_.last));
+	}
 </script>
 
 <svelte:head>
@@ -120,23 +140,23 @@
 <div class="flex">
 	<div class="flex p-3 flex-col justify-start space-y-3">
 		<div class="">
-			{#if selectedChart === 'today'}
+			{#if selectedLineChart === 'today'}
 				<Card class="w-48 h-10 outline outline-black outline-1 justify-center items">
 					Most Frequent: {todayMostFreq}
 				</Card>
-			{:else if selectedChart === 'daily'}
+			{:else if selectedLineChart === 'daily'}
 				<Card class="w-48 h-10 outline outline-black outline-1 justify-center items">
 					Most Frequent: {dailyMostFreq}
 				</Card>
-			{:else if selectedChart === 'weekly'}
+			{:else if selectedLineChart === 'weekly'}
 				<Card class="w-48 h-10 outline outline-black outline-1 justify-center items">
 					Most Frequent: {weeklyMostFreq}
 				</Card>
-			{:else if selectedChart === 'monthly'}
+			{:else if selectedLineChart === 'monthly'}
 				<Card class="w-48 h-10 outline outline-black outline-1 justify-center items">
 					Most Frequent: {monthlyMostFreq}
 				</Card>
-			{:else if selectedChart === 'yearly'}
+			{:else if selectedLineChart === 'yearly'}
 				<Card class="w-48 h-10 outline outline-black outline-1 justify-center items">
 					Most Frequent: {yearlyMostFreq}
 				</Card>
@@ -164,15 +184,15 @@
 				</ButtonGroup>
 			</div>
 
-			{#if selectedChart === 'today'}
+			{#if selectedLineChart === 'today'}
 				<TodayLineChart bind:xData={timestamps} bind:yData={todaysMoodScores} />
-			{:else if selectedChart === 'daily'}
+			{:else if selectedLineChart === 'daily'}
 				<DailyLineChart bind:xData={daily} bind:yData={dailyAverages} />
-			{:else if selectedChart === 'weekly'}
+			{:else if selectedLineChart === 'weekly'}
 				<WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} />
-			{:else if selectedChart === 'monthly'}
+			{:else if selectedLineChart === 'monthly'}
 				<MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} />
-			{:else if selectedChart === 'yearly'}
+			{:else if selectedLineChart === 'yearly'}
 				<YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} />
 			{/if}
 		</div>
