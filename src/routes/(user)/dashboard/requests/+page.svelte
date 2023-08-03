@@ -4,7 +4,6 @@
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
 	import {
-		Pagination,
 		PaginationItem,
 		Checkbox,
 		Input,
@@ -21,10 +20,8 @@
 
 	let requestsData = [];
 
-	$: ({ supabase } = data);
+	$: ({ supabase, page, limit, maxPage } = data);
 	$: requestsData = data.requests;
-	$: page = data.page;
-	$: limit = data.limit;
 
 	let searchTerm = '';
 	let dateFilter = '';
@@ -144,12 +141,14 @@
 	</Table>
 	<div class="flex flex-col items-center justify-center gap-2 mt-3">
 		<div class="text-sm text-gray-700 dark:text-gray-400">
-			Page <span class="font-semibold text-gray-900 dark:text-white">{page}</span>
+			Page <span class="font-semibold text-gray-900 dark:text-white">{page} <span class="font-normal">of</span> {maxPage}</span>
 		</div>
 	
-		<Pagination table>
-			<span class="text-white" slot="prev"><a href="?page={page - 1}&limit={limit}">Prev</a></span>
-			<span class="text-white" slot="next"><a href="?page={page + 1}&limit={limit}">Next</a></span>
-		</Pagination>
+		<div class="flex justify-between">
+			<!-- ensures that the page number is never less than 1 -->
+			<PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" href="?page={Math.max(1, page - 1)}&limit={limit}">Prev</PaginationItem>
+			<!-- ensures that the page number does not exceed the maximum page number -->
+			<PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" href="?page={Math.min(maxPage, page + 1)}&limit={limit}">Next</PaginationItem>
+	</div>
 	</div>
 </div>
