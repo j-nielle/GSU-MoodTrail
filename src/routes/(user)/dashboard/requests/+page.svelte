@@ -103,9 +103,7 @@
 				By default, it shows requests for the current date and is sorted according to the latest
 				request.
 			</p>
-			<p class="mt-1 text-xs font-light text-gray-500 dark:text-gray-400">
-				(*status: false/true, pertains to the completion of the request)
-			</p>
+			<p class="mt-1 text-xs font-light text-gray-500 dark:text-gray-400">(*status: false/true, pertains to the completion of the request)</p>
 		</caption>
 		<TableHead class="border border-zinc-300 text-center">
 			<TableHeadCell>Phone Number</TableHeadCell>
@@ -143,7 +141,6 @@
 		<div class="text-sm text-gray-700 dark:text-gray-400">
 			Page <span class="font-semibold text-gray-900 dark:text-white">{page} <span class="font-normal">of</span> {maxPage}</span>
 		</div>
-	
 		<div class="flex justify-between">
 			<!-- ensures that the page number is never less than 1 -->
 			<PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" href="?page={Math.max(1, page - 1)}&limit={limit}">Prev</PaginationItem>
