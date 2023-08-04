@@ -39,6 +39,8 @@
 	let timestamps;
 	let todaysMoodScores;
 
+	let recentStudent;
+
 	let today = dayjs().format('YYYY-MM-DD');
 	let selectedLineChart = 'today';
 
@@ -74,6 +76,9 @@
 	});
 
 	$: {
+		console.log(studentMoodData)
+		recentStudent = _.last(studentMoodData)['name'];
+
 		const moodCount = _.countBy(studentMoodData, 'mood_label');
 		xDataMC = _.keys(moodCount);
 		yDataMC = _.values(moodCount);
@@ -83,7 +88,7 @@
 		const groupedByMood = _.groupBy(studentMoodData, 'mood_label');
 		const countReasons = _.mapValues(groupedByMood, (moodGroup) =>
 			_.countBy(moodGroup, 'reason_label')
-		); // for stacked area chart (count of reasons for each mood)
+		); // for ?? chart (count of reasons for each mood)
 	}
 
 	$: if(selectedLineChart === 'today'){
@@ -93,7 +98,8 @@
 
 		timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss'));
 		todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score);
-		todayMostFreq = _.head(_(todaysMoodScores).countBy().entries().maxBy(_.last));
+		const todaysMoodLabels = _.map(todaysEntries, (entry) => entry.mood_label);
+		todayMostFreq = _.head(_(todaysMoodLabels).countBy().entries().maxBy(_.last));
 	}
 
 	$: if(selectedLineChart === 'daily'){
@@ -103,7 +109,7 @@
 
 		dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
 		daily = _.sortBy(_.keys(groupedByDay));
-		dailyMostFreq = _.head(_(groupedByDay).flatMap().countBy('mood_score').entries().maxBy(_.last));
+		dailyMostFreq = _.head(_(groupedByDay).flatMap().countBy('mood_label').entries().maxBy(_.last));
 	}
 
 	$: if(selectedLineChart === 'weekly'){
@@ -116,7 +122,7 @@
 			const weekNumber = parseInt(week.replace('Week ', ''));
 			return weekNumber;
 		});
-		weeklyMostFreq = _.head(_(groupedByWeek).flatMap().countBy('mood_score').entries().maxBy(_.last));
+		weeklyMostFreq = _.head(_(groupedByWeek).flatMap().countBy('mood_label').entries().maxBy(_.last));
 	}
 	
 	$: if(selectedLineChart === 'monthly'){
@@ -126,7 +132,7 @@
 
 		monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
 		monthly = _.sortBy(_.keys(groupedByMonth));
-		monthlyMostFreq = _.head(_(groupedByMonth).flatMap().countBy('mood_score').entries().maxBy(_.last));
+		monthlyMostFreq = _.head(_(groupedByMonth).flatMap().countBy('mood_label').entries().maxBy(_.last));
 	}
 
 	$: if(selectedLineChart === 'yearly'){
@@ -136,7 +142,7 @@
 
 		yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
 		yearly = _.sortBy(_.keys(groupedByYear));
-		yearlyMostFreq = _.head(_(groupedByYear).flatMap().countBy('mood_score').entries().maxBy(_.last));
+		yearlyMostFreq = _.head(_(groupedByYear).flatMap().countBy('mood_label').entries().maxBy(_.last));
 	}
 </script>
 
@@ -145,48 +151,18 @@
 </svelte:head>
 
 <div class="flex">
-	<!-- <div class="flex p-3 flex-col justify-start space-y-3">
-		<div class="">
-			{#if selectedLineChart === 'today'}
-				<Card class="w-48 h-10 outline outline-black outline-1 justify-center items">
-					Most Frequent: {todayMostFreq}
-				</Card>
-			{:else if selectedLineChart === 'daily'}
-				<Card class="w-48 h-10 outline outline-black outline-1 justify-center items">
-					Most Frequent: {dailyMostFreq}
-				</Card>
-			{:else if selectedLineChart === 'weekly'}
-				<Card class="w-48 h-10 outline outline-black outline-1 justify-center items">
-					Most Frequent: {weeklyMostFreq}
-				</Card>
-			{:else if selectedLineChart === 'monthly'}
-				<Card class="w-48 h-10 outline outline-black outline-1 justify-center items">
-					Most Frequent: {monthlyMostFreq}
-				</Card>
-			{:else if selectedLineChart === 'yearly'}
-				<Card class="w-48 h-10 outline outline-black outline-1 justify-center items">
-					Most Frequent: {yearlyMostFreq}
-				</Card>
-			{/if}
-		</div>
-		<div class="">
-			<Card class="w-48 h-10 outline outline-black outline-1 justify-center items-stretch">
-				<Label>Testing</Label>
-			</Card>
-		</div>
-	</div> -->
-	<div class="p-3 flex justify-center flex-col items-center outline outline-1">
+	<div class="p-3 flex justify-center flex-col items-center">
 		<MoodBarChart bind:xData={xDataMC} bind:yData={yDataMC} />
 	</div>
-	<div class="outline outline-lime-500 outline-1 flex">
+	<div class="flex">
 		<div class="flex flex-col m-3">
 			<div class="flex space-x-1 justify-between m-2">
-				<ButtonGroup class="gap-x-px">
-					<Button pill color="blue" on:click={() => toggleChart('today')}>Today</Button>
-					<Button pill color="blue" on:click={() => toggleChart('daily')}>Daily</Button>
-					<Button pill color="blue" on:click={() => toggleChart('weekly')}>Weekly</Button>
-					<Button pill color="blue" on:click={() => toggleChart('monthly')}>Monthly</Button>
-					<Button pill color="blue" on:click={() => toggleChart('yearly')}>Yearly</Button>
+				<ButtonGroup>
+					<Button color="light" on:click={() => toggleChart('today')}>Today</Button>
+					<Button color="light" on:click={() => toggleChart('daily')}>Daily</Button>
+					<Button color="light" on:click={() => toggleChart('weekly')}>Weekly</Button>
+					<Button color="light" on:click={() => toggleChart('monthly')}>Monthly</Button>
+					<Button color="light" on:click={() => toggleChart('yearly')}>Yearly</Button>
 				</ButtonGroup>
 				<ButtonGroup>
 					<Button pill color="dark">Students</Button>
@@ -209,7 +185,33 @@
 	</div>
 </div>
 <div class="flex p-3 justify-start space-x-3">
+	<Card class="max-h-8 justify-center">
+		<!-- (SOON): once recentStudent gets clicked, user will be led to the individual student section/page -->
+		<Label>Recent Student: <span class="font-bold cursor-pointer">{recentStudent}</span></Label>
+	</Card>
+	{#if selectedLineChart === 'today'}
+		<Card class="max-h-8 justify-center">
+			<Label class="text-slate-900">Most Frequent Mood: <span class="font-bold text-slate-800">{todayMostFreq}</span></Label>
+		</Card>
+	{:else if selectedLineChart === 'daily'}
+		<Card class="max-h-8 justify-center">
+			<Label class="text-slate-900">Most Frequent Mood: <span class="font-bold text-slate-800">{dailyMostFreq}</span></Label>
+		</Card>
+	{:else if selectedLineChart === 'weekly'}
+		<Card class="max-h-8 justify-center">
+			<Label class="text-slate-900">Most Frequent Mood: <span class="font-bold text-slate-800">{weeklyMostFreq}</span></Label>
+		</Card>
+	{:else if selectedLineChart === 'monthly'}
+		<Card class="max-h-8 justify-center">
+			<Label class="text-slate-900">Most Frequent Mood: <span class="font-bold text-slate-800">{monthlyMostFreq}</span></Label>
+		</Card>
+	{:else if selectedLineChart === 'yearly'}
+		<Card class="max-h-8 justify-center">
+			<Label class="text-slate-900">Most Frequent Mood: <span class="font-bold text-slate-800">{yearlyMostFreq}</span></Label>
+		</Card>
+	{/if}
 	<Card class="outline outline-1" />
-	<Card class="outline outline-1" />
-	<Card class="outline outline-1" />
+</div>
+<div class="outline outline-1">
+	<Card />
 </div>
