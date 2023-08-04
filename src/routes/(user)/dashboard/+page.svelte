@@ -10,6 +10,7 @@
 	import WeeklyLineChart from '$lib/components/charts/WeeklyLineChart.svelte';
 	import MonthlyLineChart from '$lib/components/charts/MonthlyLineChart.svelte';
 	import YearlyLineChart from '$lib/components/charts/YearlyLineChart.svelte';
+	import MoodBarChart from '$lib/components/charts/MoodBarChart.svelte';
 
 	export let data;
 	
@@ -18,7 +19,8 @@
 	$: ({ supabase } = data);
 	$: studentMoodData = data.studentMood;
 
-	let moodCount;
+	let xDataMC, yDataMC;
+	let uniqueMoodLabels;
 	let todayMostFreq;
 	let dailyMostFreq;
 	let weeklyMostFreq;
@@ -72,7 +74,12 @@
 	});
 
 	$: {
-		moodCount = _.countBy(studentMoodData, 'mood_label'); // for barchart/histogram
+		const moodCount = _.countBy(studentMoodData, 'mood_label');
+		xDataMC = _.keys(moodCount);
+		yDataMC = _.values(moodCount);
+
+		uniqueMoodLabels = _.uniqBy(studentMoodData, 'mood_label').map((data) => data.mood_label);
+
 		const groupedByMood = _.groupBy(studentMoodData, 'mood_label');
 		const countReasons = _.mapValues(groupedByMood, (moodGroup) =>
 			_.countBy(moodGroup, 'reason_label')
@@ -138,7 +145,7 @@
 </svelte:head>
 
 <div class="flex">
-	<div class="flex p-3 flex-col justify-start space-y-3">
+	<!-- <div class="flex p-3 flex-col justify-start space-y-3">
 		<div class="">
 			{#if selectedLineChart === 'today'}
 				<Card class="w-48 h-10 outline outline-black outline-1 justify-center items">
@@ -167,6 +174,9 @@
 				<Label>Testing</Label>
 			</Card>
 		</div>
+	</div> -->
+	<div class="p-3 flex justify-center flex-col items-center outline outline-1">
+		<MoodBarChart bind:xData={xDataMC} bind:yData={yDataMC} />
 	</div>
 	<div class="outline outline-lime-500 outline-1 flex">
 		<div class="flex flex-col m-3">
@@ -197,4 +207,9 @@
 			{/if}
 		</div>
 	</div>
+</div>
+<div class="flex p-3 justify-start space-x-3">
+	<Card class="outline outline-1" />
+	<Card class="outline outline-1" />
+	<Card class="outline outline-1" />
 </div>
