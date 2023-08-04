@@ -36,7 +36,7 @@
 
 <div class="flex justify-center p-4 bg-slate-200/20">
 	<div class="flex">
-		<Sidebar class="w-auto mr-5">
+		<Sidebar class="w-auto mr-3">
 			<SidebarWrapper class="bg-white drop-shadow-lg w-fit">
 				<SidebarGroup class="space-y-4">
 					<SidebarItem class="flex-col" href="/dashboard" active={activeUrl === '/dashboard'}>
