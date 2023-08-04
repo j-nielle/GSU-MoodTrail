@@ -54,10 +54,7 @@
 			},
 			xAxis: {
 				type: 'category',
-				data: xData,
-				axisLine: {
-					onZero: false
-				}
+				data: xData
 			},
 			yAxis: {
 				type: 'value'
@@ -120,4 +117,4 @@
 	console.log('lengths:',yData.length, xData.length); 
 </script>
 
-<div id="todayLineChart" class="m-2" style="width:890px; height:290px;" />
+<div id="todayLineChart" class="m-2" style="width:800px; height:297px;" />

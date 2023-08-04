@@ -116,4 +116,4 @@
 	});
 </script>
 
-<div id="monthlyLineChart" class="m-2" style="width:890px; height:290px;" />
+<div id="monthlyLineChart" class="m-2" style="width:800px; height:297px;" />
