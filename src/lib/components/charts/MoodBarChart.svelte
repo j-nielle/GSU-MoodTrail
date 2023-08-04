@@ -31,7 +31,7 @@
 
 		moodBarChart.setOption({
 			title: {
-				text: 'Total Mood Counts'
+				text: 'Overall Mood Counts'
 			},
 			xAxis: {
 				type: 'category',
@@ -52,7 +52,6 @@
         itemStyle: {
           realtimeSort: true,
           color: function(params) {
-            console.log(params)
             return categoryColors[params.name] || '#5470c6';
           }
         }
