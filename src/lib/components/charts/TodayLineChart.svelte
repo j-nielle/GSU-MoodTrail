@@ -101,8 +101,7 @@
 		};
 	});
 
-	afterUpdate(() => {
-		console.log('afterUpdate() lengths:',yData.length, xData.length);  
+	afterUpdate(() => {  
 		todayLineChart.setOption({
 			xAxis: {
 				data: xData
@@ -114,7 +113,6 @@
 			]
 		}); 
 	});
-	console.log('lengths:',yData.length, xData.length); 
 </script>
 
 <div id="todayLineChart" class="m-2" style="width:800px; height:297px;" />
