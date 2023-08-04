@@ -11,6 +11,7 @@
 	import MonthlyLineChart from '$lib/components/charts/MonthlyLineChart.svelte';
 	import YearlyLineChart from '$lib/components/charts/YearlyLineChart.svelte';
 	import MoodBarChart from '$lib/components/charts/MoodBarChart.svelte';
+	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 
 	export let data;
 	
@@ -40,6 +41,8 @@
 	let todaysMoodScores;
 
 	let recentStudent;
+
+	let heatmapData;
 
 	let today = dayjs().format('YYYY-MM-DD');
 	let selectedLineChart = 'today';
@@ -76,8 +79,17 @@
 	});
 
 	$: {
-		console.log(studentMoodData)
 		recentStudent = _.last(studentMoodData)['name'];
+
+		const groupedData = _.groupBy(studentMoodData, (data) => {
+			const date = new Date(data.created_at);
+			return [date.getDay(), date.getHours()];
+		});
+
+		heatmapData = _.flatMap(groupedData, (data, key) => {
+			const [day, hour] = key.split(',');
+			return [[parseInt(hour), parseInt(day), data.length || '-']];
+		});
 
 		const moodCount = _.countBy(studentMoodData, 'mood_label');
 		xDataMC = _.keys(moodCount);
@@ -212,6 +224,9 @@
 	{/if}
 	<Card class="outline outline-1" />
 </div>
-<div class="outline outline-1">
-	<Card />
+<div class="flex justify-evenly my-3">
+	<HeatmapChart {heatmapData} />
+	<Card class="max-h-8 justify-center">
+		<Label class="text-slate-900">Another chart here</Label>
+	</Card>
 </div>
