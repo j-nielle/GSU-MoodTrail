@@ -224,7 +224,7 @@
 	{/if}
 	<Card class="outline outline-1" />
 </div>
-<div class="flex justify-evenly my-3">
+<div class="flex justify-evenly">
 	<HeatmapChart {heatmapData} />
 	<Card class="max-h-8 justify-center">
 		<Label class="text-slate-900">Another chart here</Label>

@@ -26,6 +26,9 @@
       tooltip: {
         position: 'top'
       },
+			title: {
+				text: 'Heatmap Chart'
+			},
       xAxis: {
         type: 'category',
         data: hours,
