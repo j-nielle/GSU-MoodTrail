@@ -8,7 +8,7 @@ export async function load({ url, locals: { supabase, getSession } }) {
   }
 
   const page = parseInt(url.searchParams.get('page') || '1');
-  const limit = parseInt(url.searchParams.get('limit') || '10');
+  const limit = parseInt(url.searchParams.get('limit') || '5');
   const offset = (page - 1) * limit;
 
 	const { count } = await supabase
