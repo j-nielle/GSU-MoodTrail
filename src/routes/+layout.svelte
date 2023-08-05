@@ -2,6 +2,7 @@
 	import '../app.postcss';
 	import { invalidate } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import {
 		Avatar,
 		Navbar,
@@ -9,7 +10,6 @@
 		NavLi,
 		NavUl,
 		Button,
-		DarkMode,
 		Dropdown,
 		DropdownDivider,
 		DropdownHeader,
@@ -24,9 +24,7 @@
 	$: ({ supabase, session } = data);
 
 	onMount(() => {
-		const {
-			data: { subscription }
-		} = supabase.auth.onAuthStateChange((event, session) => {
+		const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
 			// @ts-ignore
 			if (session != null) user = session.user;
 			if (event == 'SIGNED_OUT') {
@@ -36,10 +34,12 @@
 
 		return () => subscription.unsubscribe();
 	});
+
+	$: activeUrl = $page.url.pathname;
 </script>
 
 <Navbar class="p-6 drop-shadow-lg z-50 relative">
-	{#if user}
+	{#if session}
 		<NavBrand href="/dashboard" class="space-x-4">
 			<img src="/src/lib/img/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit" />
 		</NavBrand>
@@ -49,17 +49,15 @@
 		</NavBrand>
 	{/if}
 
-	{#if user}
+	{#if session}
 		<NavUl>
-			<NavLi>Requests</NavLi>
-			<NavLi>Individual Charts</NavLi>
+			<NavLi href="/dashboard" active={activeUrl === '/dashboard'} activeClass="font-semibold text-blue-700">Dashboard</NavLi>
+			<NavLi href="/dashboard/requests" active={activeUrl === '/dashboard/requests'} activeClass="font-semibold text-blue-700">Requests</NavLi>
+			<NavLi href="/dashboard/student-chart" active={activeUrl === '/dashboard/student-chart'} activeClass="font-semibold text-blue-700">Student Chart</NavLi>
 		</NavUl>
-	{/if}
-
-	{#if user}
 		<label for="avatar-menu">
 			<Avatar
-				class="cursor-pointer"
+				class="cursor-pointer fixed"
 				data-name={user?.user_metadata?.name ?? 'User'}
 				id="avatar-menu"
 				alt="User Profile Pic"
@@ -67,24 +65,25 @@
 				>{user?.user_metadata?.name ?? 'User'}
 			</Avatar>
 		</label>
+		<Dropdown {placement} 
+			triggeredBy="#avatar-menu" 
+			containerClass="drop-shadow-lg w-fit mt-8">		
+			<DropdownHeader>
+				<span class="block text-sm"> {user?.user_metadata?.name ?? 'User'} </span>
+				<span class="block text-sm font-medium truncate"> {user?.email} </span>
+			</DropdownHeader>
+			<DropdownItem class="cursor-pointer" href="/dashboard/settings/profile">Settings</DropdownItem>
+			<DropdownDivider />
+			<form method="POST" action="/logout">
+				<DropdownItem type="submit" class="py-2 text-sm font-medium cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600">Logout</DropdownItem>
+			</form>
+		</Dropdown>
 	{:else}
-		<Button href="/register" size="sm" color="light">Register</Button>
-		<Button href="/login" size="sm" color="blue">Login</Button>
+		<div class="flex space-x-4">
+			<Button href="/signup" class="bg-purple-600 hover:bg-purple-600 hover:drop-shadow-md">Register Account</Button>
+			<Button href="/login" class="bg-teal-500 hover:drop-shadow-md hover:bg-teal-500">Login</Button>
+		</div>
 	{/if}
-	
-	<Dropdown {placement} 
-		triggeredBy="#avatar-menu" 
-		containerClass="drop-shadow-lg w-fit mt-8">		
-		<DropdownHeader>
-			<span class="block text-sm"> {user?.user_metadata?.name ?? 'User'} </span>
-			<span class="block text-sm font-medium truncate"> {user?.email} </span>
-		</DropdownHeader>
-		<DropdownItem class="cursor-pointer" href="/dashboard/settings/profile">Settings</DropdownItem>
-		<DropdownDivider />
-		<form method="POST" action="/logout">
-			<DropdownItem type="submit" class="py-2 text-sm font-medium cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600">Logout</DropdownItem>
-		</form>
-	</Dropdown>
 </Navbar>
 
 <main>

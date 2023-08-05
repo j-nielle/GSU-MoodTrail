@@ -1,19 +1,8 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
-	import { page } from '$app/stores';
 	import { newRequest } from '$lib/newRequest';
-	import { 
-		Sidebar, 
-		SidebarGroup, 
-		SidebarItem, 
-		SidebarWrapper, 
-		Toast, 
-		Button, 
-		Dropdown, 
-		DropdownItem, 
-		ToolbarButton, 
-		MenuButton } from 'flowbite-svelte';
-	import { ChartOutline, AdressBookOutline, BellRingSolid } from 'flowbite-svelte-icons';
+	import { Toast } from 'flowbite-svelte';
+	import { BellRingSolid } from 'flowbite-svelte-icons';
 	
 	export let data
 	$: ({ supabase } = data);
@@ -39,44 +28,16 @@
 			toastChannel.unsubscribe();
 		}
 	});
-
-	$: activeUrl = $page.url.pathname;
 </script>
 
-<!-- <MenuButton class="dots-menu dark:text-white" />
-<Dropdown triggeredBy=".dots-menu">
-	<DropdownItem>Dashboard</DropdownItem>
-	<DropdownItem>Settings</DropdownItem>
-	<DropdownItem>Earnings</DropdownItem>
-</Dropdown> -->
-<div class="flex justify-center p-4 relative">
-	<div class="flex">
-		<Sidebar class="w-auto mr-3">
-			<SidebarWrapper class="bg-white drop-shadow-lg w-fit">
-				<SidebarGroup class="space-y-4">
-					<SidebarItem class="flex-col" href="/dashboard" active={activeUrl === '/dashboard'}>
-						<svelte:fragment slot="icon" >
-							<ChartOutline class="outline-none text-blue-700" />
-						</svelte:fragment>
-					</SidebarItem>
-					<SidebarItem class="flex-col" href="/dashboard/requests" active={activeUrl === '/dashboard/requests'}>
-						<svelte:fragment slot="icon">
-							<AdressBookOutline class="outline-none text-blue-700" />
-						</svelte:fragment>
-					</SidebarItem>
-				</SidebarGroup>
-			</SidebarWrapper>
-		</Sidebar>
-		<div class="rounded-md items-center outline outline-blue-500 outline-1">
-			{#if $newRequest}
-				<Toast position="top-right" simple contentClass="flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center">
-					<BellRingSolid class="text-blue-700" />
-					<div class="pl-4">
-						<span class="font-bold text-blue-700">(NEW)</span> Help request received!
-					</div>
-				</Toast>
-			{/if}
-			<slot />
-		</div>
-	</div>
+<div class="items-center">
+	{#if $newRequest}
+		<Toast position="top-right" simple contentClass="flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center">
+			<BellRingSolid class="text-blue-700" />
+			<div class="pl-4">
+				<span class="font-bold text-blue-700">(NEW)</span> Help request received!
+			</div>
+		</Toast>
+	{/if}
+	<slot />
 </div>

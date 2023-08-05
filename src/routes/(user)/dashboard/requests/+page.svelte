@@ -81,71 +81,73 @@
 	<title>Requests</title>
 </svelte:head>
 
-<div class="flex justify-between">
-	<div class="flex items-center">
-		<TableSearch divClass="relative overflow-x-auto ml-4 mt-3" class="p-0"
-			placeholder="Search by request, phone, or status*" hoverable={true} bind:inputValue={searchTerm}/>
-		<button class="text-slate-700 mt-3" class:hidden={!searchTerm != ''} on:click={() => { searchTerm = ''; }}>
-			<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-backspace-fill" viewBox="0 0 16 16">
-				<path d="M15.683 3a2 2 0 0 0-2-2h-7.08a2 2 0 0 0-1.519.698L.241 7.35a1 1 0 0 0 0 1.302l4.843 5.65A2 2 0 0 0 6.603 15h7.08a2 2 0 0 0 2-2V3zM5.829 5.854a.5.5 0 1 1 .707-.708l2.147 2.147 2.146-2.147a.5.5 0 1 1 .707.708L9.39 8l2.146 2.146a.5.5 0 0 1-.707.708L8.683 8.707l-2.147 2.147a.5.5 0 0 1-.707-.708L7.976 8 5.829 5.854z" />
-			</svg>
-		</button>
-	</div>
-	<div class="mt-1">
-		<Input type="date" class="w-auto h-auto m-4 mr-8 mt-8" bind:value={dateFilter} />
-	</div>
-</div>
-<div class="ml-4-6 ml-4 mb-7 mr-11">
-	<Table divClass="w-full text-left text-sm text-gray-500 dark:text-gray-400 ml-4">
-		<caption class="text-lg font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
-			Help Requests from the Kiosk
-			<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-				By default, it shows requests for the current date and is sorted according to the latest
-				request.
-			</p>
-			<p class="mt-1 text-xs font-light text-gray-500 dark:text-gray-400">(*status: false/true, pertains to the completion of the request)</p>
-		</caption>
-		<TableHead class="border border-zinc-300 text-center">
-			<TableHeadCell>Phone Number</TableHeadCell>
-			<TableHeadCell>Request Type</TableHeadCell>
-			<TableHeadCell>Timestamp</TableHeadCell>
-			<TableHeadCell>Status</TableHeadCell>
-		</TableHead>
-		<TableBody tableBodyClass="divide-y border border-zinc-300 max-h-40 overflow-y-auto">
-			{#if filteredItems === undefined || filteredItems.length === 0}
-				<TableBodyRow>
-					<TableBodyCell>No data</TableBodyCell>
-					<TableBodyCell>No data</TableBodyCell>
-					<TableBodyCell>No data</TableBodyCell>
-					<TableBodyCell>No data</TableBodyCell>
-				</TableBodyRow>
-			{:else}
-				{#each filteredItems as req}
-					<TableBodyRow>
-						<TableBodyCell>{req.contact_num}</TableBodyCell>
-						<TableBodyCell>{req.request_type}</TableBodyCell>
-						<TableBodyCell>{new Date(req.created_at).toLocaleString()}</TableBodyCell>
-						<TableBodyCell class="flex justify-center">
-							<Checkbox
-								class="cursor-pointer mr-0"
-								bind:checked={req.iscompleted}
-								on:change={() => toggleRequestStatus(req)}
-							/>
-						</TableBodyCell>
-					</TableBodyRow>
-				{/each}
-			{/if}
-		</TableBody>
-	</Table>
-	<div class="flex flex-col items-center justify-center gap-2 mt-4">
-		<div class="text-sm text-gray-700 dark:text-gray-400">
-			Page <span class="font-semibold text-gray-900 dark:text-white">{page} <span class="font-normal">of</span> {maxPage}</span>
+<div class="bg-white p-4">
+	<div class="flex justify-between">
+		<div class="flex items-center">
+			<TableSearch divClass="relative overflow-x-auto ml-4"
+				placeholder="Search by request, phone, or status*" hoverable={true} bind:inputValue={searchTerm}/>
+			<button class="text-slate-700 mt-1" class:hidden={!searchTerm != ''} on:click={() => { searchTerm = ''; }}>
+				<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-backspace-fill" viewBox="0 0 16 16">
+					<path d="M15.683 3a2 2 0 0 0-2-2h-7.08a2 2 0 0 0-1.519.698L.241 7.35a1 1 0 0 0 0 1.302l4.843 5.65A2 2 0 0 0 6.603 15h7.08a2 2 0 0 0 2-2V3zM5.829 5.854a.5.5 0 1 1 .707-.708l2.147 2.147 2.146-2.147a.5.5 0 1 1 .707.708L9.39 8l2.146 2.146a.5.5 0 0 1-.707.708L8.683 8.707l-2.147 2.147a.5.5 0 0 1-.707-.708L7.976 8 5.829 5.854z" />
+				</svg>
+			</button>
 		</div>
-		<div class="flex justify-between">
-			<!-- ensures that the page number is never less than 1 -->
-			<PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" href="?page={Math.max(1, page - 1)}&limit={limit}">Prev</PaginationItem>
-			<!-- ensures that the page number does not exceed the maximum page number -->
-			<PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" href="?page={Math.min(maxPage, page + 1)}&limit={limit}">Next</PaginationItem>
+		<div class="">
+			<Input type="date" class="w-auto h-auto m-4 mr-8 mt-5" bind:value={dateFilter} />
+		</div>
 	</div>
+	<div class="ml-4-6 ml-4 mb-7 mr-11">
+		<Table divClass="w-full text-left text-sm text-gray-500 dark:text-gray-400 ml-4">
+			<caption class="text-lg font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
+				Help Requests from the Kiosk
+				<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
+					By default, it shows requests for the current date and is sorted according to the latest
+					request.
+				</p>
+				<p class="mt-1 text-xs font-light text-gray-500 dark:text-gray-400">(*status: false/true, pertains to the completion of the request)</p>
+			</caption>
+			<TableHead class="border border-zinc-300">
+				<TableHeadCell>Phone Number</TableHeadCell>
+				<TableHeadCell>Request Type</TableHeadCell>
+				<TableHeadCell>Timestamp</TableHeadCell>
+				<TableHeadCell class="text-center">Status</TableHeadCell>
+			</TableHead>
+			<TableBody tableBodyClass="divide-y border border-zinc-300 max-h-40 overflow-y-auto">
+				{#if filteredItems === undefined || filteredItems.length === 0}
+					<TableBodyRow>
+						<TableBodyCell>No data</TableBodyCell>
+						<TableBodyCell>No data</TableBodyCell>
+						<TableBodyCell>No data</TableBodyCell>
+						<TableBodyCell>No data</TableBodyCell>
+					</TableBodyRow>
+				{:else}
+					{#each filteredItems as req}
+						<TableBodyRow>
+							<TableBodyCell>{req.contact_num}</TableBodyCell>
+							<TableBodyCell>{req.request_type}</TableBodyCell>
+							<TableBodyCell>{new Date(req.created_at).toLocaleString()}</TableBodyCell>
+							<TableBodyCell class="flex justify-center">
+								<Checkbox
+									class="cursor-pointer mr-0"
+									bind:checked={req.iscompleted}
+									on:change={() => toggleRequestStatus(req)}
+								/>
+							</TableBodyCell>
+						</TableBodyRow>
+					{/each}
+				{/if}
+			</TableBody>
+		</Table>
+		<div class="flex flex-col items-center justify-center gap-2 mt-4">
+			<div class="text-sm text-center text-gray-700 dark:text-gray-400">
+				Page <span class="font-semibold text-gray-900 dark:text-white">{page} <span class="font-normal">of</span> {maxPage}</span>
+			</div>
+			<div class="flex justify-between space-x-2">
+				<!-- ensures that the page number is never less than 1 -->
+				<PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" href="?page={Math.max(1, page - 1)}&limit={limit}">Prev</PaginationItem>
+				<!-- ensures that the page number does not exceed the maximum page number -->
+				<PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" href="?page={Math.min(maxPage, page + 1)}&limit={limit}">Next</PaginationItem>
+		</div>
+		</div>
 	</div>
 </div>

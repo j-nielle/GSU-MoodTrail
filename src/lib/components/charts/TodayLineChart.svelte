@@ -115,4 +115,4 @@
 	});
 </script>
 
-<div id="todayLineChart" class="m-2" style="width:750px; height:297px;" />
+<div id="todayLineChart" class="m-2" style="width:830px; height:297px;" />

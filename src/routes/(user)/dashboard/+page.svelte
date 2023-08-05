@@ -176,8 +176,8 @@
 	<title>Dashboard</title>
 </svelte:head>
 
-<div class="bg-zinc-50 p-2 outline outline-red-600 outline-1 rounded-md drop-shadow-xl">
-	<div class="flex p-3 justify-end space-x-3 mt-0.5 outline outline-1">
+<div class="bg-zinc-50 p-4 outline outline-1 flex flex-col space-y-3">
+	<div class="flex justify-end space-x-3 mt-0.5 outline outline-teal-500 outline-1">
 		<Card class="max-h-8 justify-center drop-shadow-md flex-row items-center space-x-2">
 			<!-- (SOON): once recentStudent gets clicked, user will be led to the individual student section/page -->
 			<ProfileCardOutline class="text-slate-900" />
@@ -230,47 +230,51 @@
 			</Card>
 		{/if}
 	</div>
-	<div class="flex">
-		<div class="m-3 p-3 flex justify-center flex-col items-center outline outline-blue-500 outline-1 bg-white rounded-sm drop-shadow-xl">
-			<MoodBarChart bind:xData={xDataMC} bind:yData={yDataMC} />
-		</div>
-		<div class="flex outline outline-purple-500 outline-1 m-3 bg-white rounded-sm drop-shadow-xl">
-			<div class="flex flex-col m-3">
-				<div class="flex space-x-1 justify-between m-2">
-					<ButtonGroup>
-						<Button color="light" on:click={() => toggleChart('today')}>Today</Button>
-						<Button color="light" on:click={() => toggleChart('daily')}>Daily</Button>
-						<Button color="light" on:click={() => toggleChart('weekly')}>Weekly</Button>
-						<Button color="light" on:click={() => toggleChart('monthly')}>Monthly</Button>
-						<Button color="light" on:click={() => toggleChart('yearly')}>Yearly</Button>
-					</ButtonGroup>
-					<ButtonGroup>
-						<Button pill color="dark">Students</Button>
-						<Button pill>Anonymous</Button>
-					</ButtonGroup>
+	<div class="flex flex-col space-y-3">
+		<!-- Bar Chart and Line Chart -->
+		<div class="flex justify-between outline outline-pink-500 outline-1">
+			<div class="flex p-3 outline outline-blue-500 outline-1 bg-white rounded-sm drop-shadow-xl">
+				<MoodBarChart bind:xData={xDataMC} bind:yData={yDataMC} />
+			</div>
+			<div class="flex outline outline-purple-500 outline-1 bg-white rounded-sm drop-shadow-xl">
+				<div class="flex flex-col p-3">
+					<div class="flex space-x-1 justify-between">
+						<ButtonGroup>
+							<Button color="light" on:click={() => toggleChart('today')}>Today</Button>
+							<Button color="light" on:click={() => toggleChart('daily')}>Daily</Button>
+							<Button color="light" on:click={() => toggleChart('weekly')}>Weekly</Button>
+							<Button color="light" on:click={() => toggleChart('monthly')}>Monthly</Button>
+							<Button color="light" on:click={() => toggleChart('yearly')}>Yearly</Button>
+						</ButtonGroup>
+						<ButtonGroup>
+							<Button pill color="dark">Students</Button>
+							<Button pill>Anonymous</Button>
+						</ButtonGroup>
+					</div>
+		
+					{#if selectedLineChart === 'today'}
+						<TodayLineChart bind:xData={timestamps} bind:yData={todaysMoodScores} />
+					{:else if selectedLineChart === 'daily'}
+						<DailyLineChart bind:xData={daily} bind:yData={dailyAverages} />
+					{:else if selectedLineChart === 'weekly'}
+						<WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} />
+					{:else if selectedLineChart === 'monthly'}
+						<MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} />
+					{:else if selectedLineChart === 'yearly'}
+						<YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} />
+					{/if}
 				</div>
-	
-				{#if selectedLineChart === 'today'}
-					<TodayLineChart bind:xData={timestamps} bind:yData={todaysMoodScores} />
-				{:else if selectedLineChart === 'daily'}
-					<DailyLineChart bind:xData={daily} bind:yData={dailyAverages} />
-				{:else if selectedLineChart === 'weekly'}
-					<WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} />
-				{:else if selectedLineChart === 'monthly'}
-					<MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} />
-				{:else if selectedLineChart === 'yearly'}
-					<YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} />
-				{/if}
 			</div>
 		</div>
-	</div>
-	
-	<div class="flex justify-start space-x-3 m-3">
-		<div class="bg-white rounded-sm drop-shadow-xl p-4 outline outline-yellow-500 outline-1 justify-items-center">
-			<HeatmapChart {heatmapData} />
+		
+		<!-- Heatmap Chart -->
+		<div class="flex justify-start space-x-3 outline outline-fuchsia-500 outline-1">
+			<div class="bg-white rounded-sm drop-shadow-xl p-4 outline outline-yellow-500 outline-1">
+				<HeatmapChart {heatmapData} />
+			</div>
+			<Card class="max-h-8 justify-center outline outline-pink-600 outline-1 bg-slate-800 flex-row items-center space-x-2">
+				<Label class="text-white">Another chart here</Label>
+			</Card>
 		</div>
-		<Card class="max-h-8 justify-center outline outline-pink-600 outline-1 bg-slate-800 flex-row items-center space-x-2">
-			<Label class="text-white">Another chart here</Label>
-		</Card>
 	</div>
 </div>

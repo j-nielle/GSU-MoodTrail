@@ -95,4 +95,4 @@
 	});
 </script>
 
-<div id="moodBarChart" style="width:350px; height:350px;" />
+<div id="moodBarChart" style="width:410px; height:350px;" />
