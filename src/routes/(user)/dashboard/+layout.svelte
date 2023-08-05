@@ -2,8 +2,18 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 	import { newRequest } from '$lib/newRequest';
-	import { Sidebar, SidebarGroup, SidebarItem, SidebarWrapper, Toast } from 'flowbite-svelte';
-	import { ChartPieOutline, PhoneOutline, BellRingSolid } from 'flowbite-svelte-icons';
+	import { 
+		Sidebar, 
+		SidebarGroup, 
+		SidebarItem, 
+		SidebarWrapper, 
+		Toast, 
+		Button, 
+		Dropdown, 
+		DropdownItem, 
+		ToolbarButton, 
+		MenuButton } from 'flowbite-svelte';
+	import { ChartOutline, AdressBookOutline, BellRingSolid } from 'flowbite-svelte-icons';
 	
 	export let data
 	$: ({ supabase } = data);
@@ -20,11 +30,10 @@
 						newRequest.set(true);
 						setTimeout(() => {
 							newRequest.set(false);
-						}, 8000);
+						}, 5000);
 					}
 				}
-			)
-			.subscribe((status) => console.log("inside /dashboard/+layout.svelte:",status));
+			).subscribe((status) => console.log("inside /dashboard/+layout.svelte:",status));
 	
 		return () => {
 			toastChannel.unsubscribe();
@@ -34,25 +43,31 @@
 	$: activeUrl = $page.url.pathname;
 </script>
 
-<div class="flex justify-center p-4 ">
+<!-- <MenuButton class="dots-menu dark:text-white" />
+<Dropdown triggeredBy=".dots-menu">
+	<DropdownItem>Dashboard</DropdownItem>
+	<DropdownItem>Settings</DropdownItem>
+	<DropdownItem>Earnings</DropdownItem>
+</Dropdown> -->
+<div class="flex justify-center p-4 relative">
 	<div class="flex">
 		<Sidebar class="w-auto mr-3">
 			<SidebarWrapper class="bg-white drop-shadow-lg w-fit">
 				<SidebarGroup class="space-y-4">
 					<SidebarItem class="flex-col" href="/dashboard" active={activeUrl === '/dashboard'}>
 						<svelte:fragment slot="icon" >
-							<ChartPieOutline class="outline-none text-blue-700" />
+							<ChartOutline class="outline-none text-blue-700" />
 						</svelte:fragment>
 					</SidebarItem>
 					<SidebarItem class="flex-col" href="/dashboard/requests" active={activeUrl === '/dashboard/requests'}>
 						<svelte:fragment slot="icon">
-							<PhoneOutline class="outline-none text-blue-700" />
+							<AdressBookOutline class="outline-none text-blue-700" />
 						</svelte:fragment>
 					</SidebarItem>
 				</SidebarGroup>
 			</SidebarWrapper>
 		</Sidebar>
-		<div class="rounded-md shadow-lg items-center">
+		<div class="rounded-md items-center outline outline-blue-500 outline-1">
 			{#if $newRequest}
 				<Toast position="top-right" simple contentClass="flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center">
 					<BellRingSolid class="text-blue-700" />
@@ -61,7 +76,7 @@
 					</div>
 				</Toast>
 			{/if}
-			<slot><!-- optionaasdl fallback --></slot>
+			<slot />
 		</div>
 	</div>
 </div>

@@ -13,7 +13,6 @@
 	let heatmapChart;
 
 	onMount(() => {
-		console.log(heatmapData)
 		heatmapChart = echarts.init(document.getElementById('heatmapChart'));
 
     if (!heatmapData) {
@@ -87,7 +86,6 @@
 	});
 
 	afterUpdate(() => {
-	  console.log('heatmapData:', heatmapData);
 		heatmapChart.setOption({
 			xAxis: {
 				data: hours

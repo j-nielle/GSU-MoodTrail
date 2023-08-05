@@ -103,7 +103,6 @@
 	});
 
 	afterUpdate(() => {
-		console.log('afterUpdate()');
 		yearlyLineChart.setOption({
 			xAxis: {
 				data: xData

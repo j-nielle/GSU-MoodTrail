@@ -84,7 +84,6 @@
 	});
 
 	afterUpdate(() => {
-		console.log('afterUpdate()');
 		moodBarChart.setOption({
 			xAxis: {
 				data: xData

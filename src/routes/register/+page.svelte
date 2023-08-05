@@ -14,6 +14,6 @@
 	<Alert color="red">Oops! Something went wrong. Please try again later.</Alert>
 {/if}
 
-<div class="flex justify-center">
+<div class="flex justify-center mt-5">
 	<Register />
 </div>

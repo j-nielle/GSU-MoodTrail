@@ -102,7 +102,6 @@
 	});
 
 	afterUpdate(() => {
-		console.log('afterUpdate()');
 		dailyLineChart.setOption({
 			xAxis: {
 				data: xData

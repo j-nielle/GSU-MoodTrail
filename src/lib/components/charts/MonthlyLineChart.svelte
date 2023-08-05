@@ -102,7 +102,6 @@
 	});
 
 	afterUpdate(() => {
-		console.log('afterUpdate()');
 		monthlyLineChart.setOption({
 			xAxis: {
 				data: xData

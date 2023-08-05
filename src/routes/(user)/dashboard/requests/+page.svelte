@@ -137,7 +137,7 @@
 			{/if}
 		</TableBody>
 	</Table>
-	<div class="flex flex-col items-center justify-center gap-2 mt-3">
+	<div class="flex flex-col items-center justify-center gap-2 mt-4">
 		<div class="text-sm text-gray-700 dark:text-gray-400">
 			Page <span class="font-semibold text-gray-900 dark:text-white">{page} <span class="font-normal">of</span> {maxPage}</span>
 		</div>

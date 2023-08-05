@@ -102,7 +102,6 @@
 	});
 
 	afterUpdate(() => {
-		console.log('afterUpdate()');
 		weeklyLineChart.setOption({
 			xAxis: {
 				data: xData
