@@ -33,7 +33,7 @@
 	onMount(() => {
 		monthlyLineChart = echarts.init(document.getElementById('monthlyLineChart'));
 
-		if (!xData || !yData) {
+		if (xData.length === 0 || yData.length === 0) {
 			monthlyLineChart.showLoading();
 		} else {
 			monthlyLineChart.hideLoading();
@@ -116,4 +116,4 @@
 	});
 </script>
 
-<div id="monthlyLineChart" class="m-2" style="width:800px; height:297px;" />
+<div id="monthlyLineChart" class="m-2" style="width:750px; height:297px;" />

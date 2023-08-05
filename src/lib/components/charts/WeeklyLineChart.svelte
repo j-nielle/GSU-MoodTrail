@@ -33,7 +33,7 @@
 	onMount(() => {
 		weeklyLineChart = echarts.init(document.getElementById('weeklyLineChart'));
 
-		if (!xData || !yData) {
+		if (xData.length === 0 || yData.length === 0) {
 			weeklyLineChart.showLoading();
 		} else {
 			weeklyLineChart.hideLoading();
@@ -116,4 +116,4 @@
 	});
 </script>
 
-<div id="weeklyLineChart" class="m-2" style="width:800px; height:297px;" />
+<div id="weeklyLineChart" class="m-2" style="width:750px; height:297px;" />

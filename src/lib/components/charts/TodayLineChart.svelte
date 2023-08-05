@@ -36,7 +36,7 @@
 	onMount(() => {
 		todayLineChart = echarts.init(document.getElementById('todayLineChart'));
 
-		if (!xData || !yData) {
+		if (xData.length === 0 || yData.length === 0) {
 			todayLineChart.showLoading();
 		} else {
 			todayLineChart.hideLoading();
@@ -115,4 +115,4 @@
 	});
 </script>
 
-<div id="todayLineChart" class="m-2" style="width:800px; height:297px;" />
+<div id="todayLineChart" class="m-2" style="width:750px; height:297px;" />

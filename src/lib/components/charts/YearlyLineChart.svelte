@@ -34,7 +34,7 @@
 	onMount(() => {
 		yearlyLineChart = echarts.init(document.getElementById('yearlyLineChart'));
 		
-		if (!xData || !yData) {
+		if (xData.length === 0 || yData.length === 0) {
 			yearlyLineChart.showLoading();
 		} else {
 			yearlyLineChart.hideLoading();
@@ -117,4 +117,4 @@
 	});
 </script>
 
-<div id="yearlyLineChart" class="m-2" style="width:800px; height:297px;" />
+<div id="yearlyLineChart" class="m-2" style="width:750px; height:297px;" />

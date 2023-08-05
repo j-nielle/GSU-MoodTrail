@@ -23,7 +23,7 @@
 	onMount(() => {
 		moodBarChart = echarts.init(document.getElementById('moodBarChart'));
 
-		if (!xData || !yData) {
+		if (xData.length === 0 || yData.length === 0) {
 			moodBarChart.showLoading();
 		} else {
 			moodBarChart.hideLoading();

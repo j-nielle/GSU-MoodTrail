@@ -34,7 +34,7 @@
 	$: activeUrl = $page.url.pathname;
 </script>
 
-<div class="flex justify-center p-4 bg-slate-200/20">
+<div class="flex justify-center p-4 ">
 	<div class="flex">
 		<Sidebar class="w-auto mr-3">
 			<SidebarWrapper class="bg-white drop-shadow-lg w-fit">
@@ -52,7 +52,7 @@
 				</SidebarGroup>
 			</SidebarWrapper>
 		</Sidebar>
-		<div class="font-sans rounded-md border-2 border-slate-500/10 shadow-lg shadow-slate-400 bg-white items-center">
+		<div class="rounded-md shadow-lg items-center">
 			{#if $newRequest}
 				<Toast position="top-right" simple contentClass="flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center">
 					<BellRingSolid class="text-blue-700" />

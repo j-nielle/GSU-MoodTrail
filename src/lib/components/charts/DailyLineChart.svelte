@@ -33,7 +33,7 @@
 	onMount(() => { 
 		dailyLineChart = echarts.init(document.getElementById('dailyLineChart'));
 
-		if (!xData || !yData) {
+		if (xData.length === 0 || yData.length === 0) {
 			dailyLineChart.showLoading();
 		} else {
 			dailyLineChart.hideLoading();
@@ -116,4 +116,4 @@
 	});
 </script>
 
-<div id="dailyLineChart" class="m-2" style="width:800px; height:297px;" />
+<div id="dailyLineChart" class="m-2" style="width:750px; height:297px;" />
