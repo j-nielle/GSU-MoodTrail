@@ -16,9 +16,9 @@
 					table: 'RequestEntries'
 				},(payload) => {
 					if (payload.new) {
-						newRequest.set(true);
+						newRequest.update(() => true)
 						setTimeout(() => {
-							newRequest.set(false);
+							newRequest.update(() => false)
 						}, 5000);
 					}
 				}
@@ -28,6 +28,8 @@
 			toastChannel.unsubscribe();
 		}
 	});
+
+  newRequest.set(false);
 </script>
 
 <div class="items-center">
@@ -37,7 +39,7 @@
       <div>
         <span class="font-bold text-blue-700">(NEW)</span> Help request received!
       </div>
-      <CloseSolid class="cursor-pointer" on:click={() => newRequest.set(false)} />
+      <CloseSolid class="cursor-pointer" on:click={() => newRequest.update(() => false)} />
     </Alert>
 	{/if}
 	<slot />
