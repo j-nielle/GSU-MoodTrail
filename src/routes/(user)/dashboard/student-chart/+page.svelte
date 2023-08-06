@@ -56,8 +56,6 @@
     console.log(selectedStudentName,studentInfo)
   }
 
-  $: console.log(studentMoodData)
-
 	onMount(() => {
 		const dashboardChannel = supabase
 			.channel('dashboard')
@@ -84,23 +82,28 @@
 	<title>Student Chart</title>
 </svelte:head>
 
-<div class="h-screen bg-slate-900 p-4 flex flex-col space-y-3">
-	<Card class="space-y-3">
-    <Label>Select the course
-      <Select placeholder="..." class="mt-2" items={course} bind:value={selectedCourse} on:change={handleCourseSelection} />
+<div class="bg-slate-900 p-4 flex space-x-3">
+	<Card class="space-y-3 w-fit">
+    <Label class="font-bold w-56">Select a course:
+      <Select placeholder="..." class="mt-2 font-normal" items={course} bind:value={selectedCourse} on:change={handleCourseSelection} />
     </Label>
-    
-    {#if selectedCourse}
-      <Label>Select a year level
-        <Select class="mt-2" items={filteredYearLevels} bind:value={selectedYearLevel} on:change={handleYearLevelSelection} />
+    <Label class="font-bold w-56">Select a year level:
+      <Select placeholder="..." class="mt-2 font-normal" items={filteredYearLevels} bind:value={selectedYearLevel} on:change={handleYearLevelSelection} />
+    </Label>
+    <Label class="font-bold w-56">Select a name:
+      <Select placeholder="..." class="mt-2 font-normal" items={filteredStudentNames} bind:value={selectedStudentName} on:change={handleStudentNameSelection} />
+    </Label>
+    <!-- {#if selectedCourse}
+      <Label class="font-bold w-56">Select a year level:
+        <Select placeholder="..." class="mt-2 font-normal" items={filteredYearLevels} bind:value={selectedYearLevel} on:change={handleYearLevelSelection} />
       </Label>
     {/if}
 
     {#if selectedYearLevel}
-      <Label>Select a name
-        <Select class="mt-2" items={filteredStudentNames} bind:value={selectedStudentName} on:change={handleStudentNameSelection} />
+      <Label class="font-bold w-56">Select a name:
+        <Select placeholder="..." class="mt-2 font-normal" items={filteredStudentNames} bind:value={selectedStudentName} on:change={handleStudentNameSelection} />
       </Label>
-    {/if}
+    {/if} -->
   </Card>
 	<Card />
 </div>
