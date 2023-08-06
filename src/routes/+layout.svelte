@@ -19,7 +19,6 @@
 	export let data;
 
 	let user = {};
-	let placement = 'left';
 
 	$: ({ supabase, session } = data);
 
@@ -65,7 +64,7 @@
 				>{user?.user_metadata?.name ?? 'User'}
 			</Avatar>
 		</label>
-		<Dropdown {placement} 
+		<Dropdown placement=left
 			triggeredBy="#avatar-menu" 
 			containerClass="drop-shadow-lg w-fit mt-8">		
 			<DropdownHeader>

@@ -2,7 +2,7 @@
 	// @ts-nocheck
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { Card, Button, ButtonGroup, Label } from 'flowbite-svelte';
 	import { ProfileCardOutline, FaceLaughOutline, BrainOutline } from 'flowbite-svelte-icons';
 	import TodayLineChart from '$lib/components/charts/TodayLineChart.svelte';

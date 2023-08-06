@@ -18,10 +18,9 @@
 
 	export let data;
 
-	let requestsData = [];
+	let requestsData = data.requests;
 
 	$: ({ supabase, page, limit, maxPage } = data);
-	$: requestsData = data.requests;
 
 	let searchTerm = '';
 	let dateFilter = '';

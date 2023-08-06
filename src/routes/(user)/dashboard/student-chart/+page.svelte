@@ -93,17 +93,6 @@
     <Label class="font-bold w-56">Select a name:
       <Select placeholder="..." class="mt-2 font-normal" items={filteredStudentNames} bind:value={selectedStudentName} on:change={handleStudentNameSelection} />
     </Label>
-    <!-- {#if selectedCourse}
-      <Label class="font-bold w-56">Select a year level:
-        <Select placeholder="..." class="mt-2 font-normal" items={filteredYearLevels} bind:value={selectedYearLevel} on:change={handleYearLevelSelection} />
-      </Label>
-    {/if}
-
-    {#if selectedYearLevel}
-      <Label class="font-bold w-56">Select a name:
-        <Select placeholder="..." class="mt-2 font-normal" items={filteredStudentNames} bind:value={selectedStudentName} on:change={handleStudentNameSelection} />
-      </Label>
-    {/if} -->
   </Card>
 	<Card />
 </div>
