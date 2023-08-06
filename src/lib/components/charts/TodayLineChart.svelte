@@ -54,7 +54,10 @@
 			},
 			xAxis: {
 				type: 'category',
-				data: xData
+				data: xData,
+				axisLine: {
+					onZero: false
+				}
 			},
 			yAxis: {
 				type: 'value'
@@ -115,4 +118,4 @@
 	});
 </script>
 
-<div id="todayLineChart" class="m-2" style="width:830px; height:297px;" />
+<div id="todayLineChart" class="m-2" style="width:850px; height:297px;" />

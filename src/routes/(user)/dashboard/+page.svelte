@@ -23,24 +23,19 @@
 	$: anonMoodData = data.anonMood;
 
 	let xDataMC, yDataMC;
-	let uniqueMoodLabels;
+  let uniqueMoodLabels;
 	let todayMostFreqMood, todayMostFreqReason;
 	let dailyMostFreqMood, dailyMostFreqReason;
 	let weeklyMostFreqMood, weeklyMostFreqReason;
 	let monthlyMostFreqMood, monthlyMostFreqReason;
 	let yearlyMostFreqMood, yearlyMostFreqReason;
 
-	let dailyAverages;
-	let weeklyAverages;
-	let monthlyAverages;
-	let yearlyAverages;
-	let daily;
-	let weekly;
-	let monthly;
-	let yearly;
+	let daily, dailyAverages;
+	let weekly, weeklyAverages;
+	let monthly, monthlyAverages;
+	let yearly, yearlyAverages;
 
-	let timestamps;
-	let todaysMoodScores;
+	let timestamps, todaysMoodScores;
 
 	let recentStudent;
 
@@ -117,6 +112,7 @@
 		);
 
 		timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss'));
+    console.log(todaysEntries)
 		todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score);
 		const todaysMoodLabels = _.map(todaysEntries, (entry) => entry.mood_label);
 		const todaysReasonLabels = _.map(todaysEntries, (entry) => entry.reason_label);

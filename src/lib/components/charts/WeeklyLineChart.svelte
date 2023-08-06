@@ -70,9 +70,10 @@
 				trigger: 'axis',
 				formatter: (params) => {
 					const index = params[0].dataIndex;
+          const date = xData[index];
 					const moodScore = yData[index].toFixed(2);
 					const moodLabel = mood[index];
-					return `Nearest Mood: ${moodLabel} (<span class="font-bold">${moodScore}</span>)`;
+					return `${date}: <span class="font-bold">${moodLabel}</ span>`;
 				}
 			},
 			toolbox: {
@@ -115,4 +116,4 @@
 	});
 </script>
 
-<div id="weeklyLineChart" class="m-2" style="width:830px; height:297px;" />
+<div id="weeklyLineChart" class="m-2" style="width:850px; height:297px;" />
