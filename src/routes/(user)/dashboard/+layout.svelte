@@ -1,8 +1,8 @@
 <script>
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { newRequest } from '$lib/newRequest';
-	import { Toast } from 'flowbite-svelte';
-	import { BellRingSolid } from 'flowbite-svelte-icons';
+	import { Alert } from 'flowbite-svelte';
+	import { BellRingSolid, CloseSolid } from 'flowbite-svelte-icons';
 	
 	export let data
 	$: ({ supabase } = data);
@@ -32,12 +32,13 @@
 
 <div class="items-center">
 	{#if $newRequest}
-		<Toast position="top-right" simple contentClass="z-50 flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center">
-			<BellRingSolid class="text-blue-700" />
-			<div class="pl-4">
-				<span class="font-bold text-blue-700">(NEW)</span> Help request received!
-			</div>
-		</Toast>
+    <Alert color="blue" class="flex m-5 justify-between">
+      <BellRingSolid class="text-blue-700" />
+      <div>
+        <span class="font-bold text-blue-700">(NEW)</span> Help request received!
+      </div>
+      <CloseSolid class="cursor-pointer" on:click={() => newRequest.set(false)} />
+    </Alert>
 	{/if}
 	<slot />
 </div>
