@@ -32,7 +32,7 @@
 
 <div class="items-center">
 	{#if $newRequest}
-		<Toast position="top-right" simple contentClass="flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center">
+		<Toast position="top-right" simple contentClass="z-50 flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center">
 			<BellRingSolid class="text-blue-700" />
 			<div class="pl-4">
 				<span class="font-bold text-blue-700">(NEW)</span> Help request received!
