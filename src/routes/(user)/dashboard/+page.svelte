@@ -193,7 +193,7 @@
 	<title>Dashboard</title>
 </svelte:head>
 
-<div class="bg-zinc-50 p-4 outline outline-1 flex flex-col space-y-3">
+<div class="bg-zinc-50 p-4 flex flex-col space-y-3">
 	<div class="flex justify-end space-x-3 mt-0.5 outline outline-teal-500 outline-1">
 		<Card class="max-h-8 w-fit justify-center drop-shadow-md flex-row items-center space-x-2">
 			<!-- (SOON): once recentStudent gets clicked, user will be led to the individual student section/page -->
