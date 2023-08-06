@@ -6,10 +6,9 @@
 	import { Card, Button, ButtonGroup, Select, Label } from 'flowbite-svelte';
 
 	export let data;
-	let studentMoodData = [];
+	let studentMoodData = data.studentMood;
 
   $: ({ supabase } = data);
-	$: studentMoodData = data.studentMood;
 
   let course;
   let filteredYearLevels;
