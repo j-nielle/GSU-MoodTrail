@@ -4,6 +4,13 @@
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
 	import { Card, Search, Button, Select } from 'flowbite-svelte';
+  import TodayLineChart from '$lib/components/charts/TodayLineChart.svelte';
+	import DailyLineChart from '$lib/components/charts/DailyLineChart.svelte';
+	import WeeklyLineChart from '$lib/components/charts/WeeklyLineChart.svelte';
+	import MonthlyLineChart from '$lib/components/charts/MonthlyLineChart.svelte';
+	import YearlyLineChart from '$lib/components/charts/YearlyLineChart.svelte';
+	import MoodBarChart from '$lib/components/charts/MoodBarChart.svelte';
+	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
 
 	export let data;
 	let studentMoodData = data.studentMood;
@@ -93,7 +100,7 @@
 	<title>Student Chart</title>
 </svelte:head>
 
-<div class="bg-slate-900 p-4 flex flex-col space-y-3">
+<div class="p-4 flex flex-col space-y-3">
 	<Card class="space-x-4 flex flex-row max-w-full items-end">
 		<div class="flex gap-2">
 			<Search size="md" class="w-fit h-10" placeholder="Search for ID or name" bind:value={searchTerm}
@@ -132,7 +139,7 @@
 		</Button>
 	</Card>
 
-	<Card>
+	<Card class="text-slate-950">
 		{#if searchTerm != '' && filteredSearch.length > 0}
 			<h2 class="font-bold">Student Information</h2>
 			<p><strong>Student ID:</strong> {filteredSearch[0].student_id}</p>
