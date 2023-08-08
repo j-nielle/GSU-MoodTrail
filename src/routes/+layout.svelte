@@ -37,7 +37,7 @@
 	$: activeUrl = $page.url.pathname;
 </script>
 
-<Navbar class="p-4 drop-shadow-sm z-50 relative">
+<Navbar class="p-4 drop-shadow-sm relative z-50" navDivClass="mx-auto flex flex-wrap justify-between items-center container">
 	{#if session}
 		<NavBrand href="/dashboard" class="space-x-4">
 			<img src="/src/lib/img/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit" />
