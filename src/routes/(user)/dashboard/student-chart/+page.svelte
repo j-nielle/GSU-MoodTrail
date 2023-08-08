@@ -66,77 +66,61 @@
 			.value();
 	}
 
-	$: {
-		filteredSearch = _.filter(studentMoodData, (req) => {
-			const searchTermNumeric = /^\d{10}$/.test(searchTerm);
-			const idMatch = searchTermNumeric && _.includes(req.student_id.toString(), searchTerm);
-			const nameMatch = _.includes(req.name.toLowerCase(), searchTerm.toLowerCase());
-
-			return searchTerm != '' ? idMatch || nameMatch : false;
-		}).sort((a, b) => (dayjs(a.created_at).isBefore(dayjs(b.created_at)) ? -1 : 1));
-
-		// using lodash here for filtering logic kay for some reason
-		// its performance for the input search is faster kesa sa native js
-		const moodCounts = _.countBy(filteredSearch, 'mood_label');
-		const sortedMoods = _.keys(moodCounts).sort((a, b) => moodCounts[b] - moodCounts[a]);
-
-		const groupedByMood = _.groupBy(filteredSearch, 'mood_label');
-		const countByMoodAndReason = _.mapValues(groupedByMood, (arr) =>
-			_.countBy(arr, 'reason_label')
-		);
-
-		mostFrequentMood = sortedMoods[0];
-		leastFrequentMood = sortedMoods[sortedMoods.length - 1];
-		countReasonsForMood = countByMoodAndReason[sortedMoods[0]];
-
-		const todaysEntries = filteredSearch.filter(
+  $: if(selectedLineChart === 'today'){
+    const todaysEntries = filteredSearch.filter(
 			(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
 		);
 		const timestamps = todaysEntries.map((entry) => dayjs(entry.created_at).format('HH:mm:ss'));
 		const todayMoodScores = todaysEntries.map((entry) => entry.mood_score);
-	}
+  }
 
-	function handleStudentNameSelection(event) {
-		dropdownFilter = true;
-		selectedStudentName = event.target.value;
+  $: {
+    filteredSearch = _.filter(studentMoodData, (req) => {
+      const searchTermNumeric = /^\d{10}$/.test(searchTerm);
+      const searchTermAlpha = /^[a-zA-Z]{3,}$/.test(searchTerm);
+      const idMatch = searchTermNumeric && req.student_id.toString() === searchTerm;
+      const nameMatch = searchTermAlpha && _.includes(req.name.toLowerCase(), searchTerm.toLowerCase());
+      const courseMatch = !selectedCourse || req.course === selectedCourse;
+      const yearLevelMatch = !selectedYearLevel || req.year_level === selectedYearLevel;
+      const studentNameMatch = !selectedStudentName || req.name === selectedStudentName;
+    
+      return (searchTerm !== '' && (idMatch || nameMatch)) ||
+        (selectedStudentName) ? courseMatch && yearLevelMatch && studentNameMatch : false;
+    }).sort((a, b) => (dayjs(a.created_at).isBefore(dayjs(b.created_at)) ? -1 : 1));
 
-		studentInfo = studentMoodData.filter((student) => student.name === selectedStudentName);
-
-		// using native js here for the opposite reason
-		const moodReason = studentInfo.map((obj) => {
+		const moodReason = filteredSearch.map((obj) => {
 			return {
 				mood: obj.mood_label,
 				reason: obj.reason_label
 			};
 		});
 
-		let { moodCounts, sortedMoods } = studentInfo.reduce(
+    // basically counts the number of occurences of each mood_labels
+    // sa filteredSearch 
+		let { moodCounts } = filteredSearch.reduce(
 			(acc, { mood_label }) => {
 				acc.moodCounts[mood_label] = (acc.moodCounts[mood_label] || 0) + 1;
 				return acc;
 			},
-			{ moodCounts: {}, sortedMoods: [] }
+			{ moodCounts: {} }
 		);
 
-		sortedMoods = Object.keys(moodCounts).sort((a, b) => moodCounts[b] - moodCounts[a]);
+		const sortedMoods = Object.keys(moodCounts).sort((a, b) => moodCounts[b] - moodCounts[a]);
 
-		const countReasons = moodReason.reduce((acc, { mood, reason }) => {
-			acc[mood] = acc[mood] || {};
-			acc[mood][reason] = (acc[mood][reason] || 0) + 1;
-			return acc;
-		}, {});
+    // basically counts the number of occurences for each reason of the most frequent mood
+		const countReasons = moodReason.reduce(
+      (acc, { mood, reason }) => {
+        acc[mood] = acc[mood] || {};
+        acc[mood][reason] = (acc[mood][reason] || 0) + 1;
+        return acc;
+      }, {}
+    );
 
 		mostFrequentMood = sortedMoods[0];
 		leastFrequentMood = sortedMoods[sortedMoods.length - 1];
 
 		countReasonsForMood = countReasons[sortedMoods[0]];
-
-		const todaysEntries = studentInfo.filter(
-			(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
-		);
-		const timestamps = todaysEntries.map((entry) => dayjs(entry.created_at).format('HH:mm:ss'));
-		const todayMoodScores = todaysEntries.map((entry) => entry.mood_score);
-	}
+  }
 
 	function toggleChart(chart) {
 		selectedLineChart = chart;
@@ -182,16 +166,18 @@
 		<Select placeholder="Select a course" class="font-normal w-56 h-11 bg-white" items={course} bind:value={selectedCourse}
 			on:change={(e) => {
 				searchTerm = '';
+        selectedYearLevel = '';
+        selectedStudentName = '';
 				selectedCourse = e.target.value;
 			}}
 		/>
 		<Select placeholder="Select a year level" class="font-normal w-fit h-11 bg-white" items={yearLevel} bind:value={selectedYearLevel}
 			on:change={(e) => {
+        selectedStudentName = '';
 				selectedYearLevel = e.target.value;
 			}}
 		/>
 		<Select placeholder="Select a student" class="font-normal w-full h-11 bg-white" items={student} bind:value={selectedStudentName}
-			on:change={handleStudentNameSelection}
 		/>
 		<Button class="h-11" size="sm" color="red"
 			on:click={() => {
@@ -209,21 +195,14 @@
 		<div class="flex flex-row space-x-6 justify-between">
 			<div class="flex flex-col">
 				<h2 class="font-bold">Student Information</h2>
-				{#if searchTerm != '' && filteredSearch.length > 0}
+				{#if dropdownFilter || filteredSearch.length > 0}
 					<p><strong>Student ID:</strong> {filteredSearch[0].student_id}</p>
 					<p><strong>Name:</strong> {filteredSearch[0].name}</p>
-					<p><strong>Latest Mood:</strong>{filteredSearch[filteredSearch.length - 1].mood_label ?? 'loading...'}
+					<p><strong>Latest Mood:</strong> {filteredSearch[filteredSearch.length - 1].mood_label ?? 'loading...'}
 					</p>
 					<p><strong>Most Frequent Mood:</strong> {mostFrequentMood ?? 'loading...'}</p>
 					<p><strong>Least Frequent Mood:</strong> {leastFrequentMood ?? 'loading...'}</p>
-				{:else if dropdownFilter && studentInfo.length > 0}
-					<p><strong>Student ID:</strong> {studentInfo[0].student_id}</p>
-					<p><strong>Name:</strong> {studentInfo[0].name}</p>
-					<p><strong>Latest Mood:</strong>{studentInfo[studentInfo.length - 1].mood_label ?? 'loading...'}
-					</p>
-					<p><strong>Most Frequent Mood:</strong> {mostFrequentMood ?? 'loading...'}</p>
-					<p><strong>Least Frequent Mood:</strong> {leastFrequentMood ?? 'loading...'}</p>
-				{:else if searchTerm === '' || dropdownFilter === false}
+				{:else if filteredSearch.length === 0}
 					<h2>Student not found.</h2>
 				{/if}
 			</div>
