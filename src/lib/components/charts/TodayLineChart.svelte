@@ -6,11 +6,10 @@
 
 	export let xData;
 	export let yData;
+  export let elementID;
 
 	let todayLineChart;
 	let mood;
-
-  console.log(xData.length === 0 && yData.length === 0)
 
 	function getNearestMoodLabel(score) {
 		const moodLabels = [
@@ -36,7 +35,7 @@
 	$: mood = yData.map((score) => getNearestMoodLabel(score));
 
 	onMount(() => {
-		todayLineChart = echarts.init(document.getElementById('todayLineChart'));
+		todayLineChart = echarts.init(document.getElementById(elementID));
 
 		todayLineChart.setOption({
 			title: {
@@ -114,4 +113,4 @@
 	});
 </script>
 
-<div id="todayLineChart" class="m-2" style="width:850px; height:297px;" />
+<div id={elementID} class="m-2" style="width:850px; height:297px;" />

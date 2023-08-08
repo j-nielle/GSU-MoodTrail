@@ -6,6 +6,7 @@
 
 	export let xData;
 	export let yData;
+  export let elementID;
 
 	let dailyLineChart;
 	let mood;
@@ -31,7 +32,7 @@
 	$: mood = yData.map((score) => getNearestMoodLabel(score));
 
 	onMount(() => { 
-		dailyLineChart = echarts.init(document.getElementById('dailyLineChart'));
+		dailyLineChart = echarts.init(document.getElementById(elementID));
 
 		dailyLineChart.setOption({
 			title: {
@@ -111,4 +112,4 @@
 	});
 </script>
 
-<div id="dailyLineChart" class="m-2" style="width:850px; height:297px;" />
+<div id={elementID} class="m-2" style="width:850px; height:297px;" />

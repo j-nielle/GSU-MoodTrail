@@ -6,6 +6,7 @@
 
 	export let xData;
 	export let yData;
+  export let elementID;
 
 	let monthlyLineChart;
 	let mood;
@@ -31,7 +32,7 @@
 	$: mood = yData.map((score) => getNearestMoodLabel(score));
 
 	onMount(() => {
-		monthlyLineChart = echarts.init(document.getElementById('monthlyLineChart'));
+		monthlyLineChart = echarts.init(document.getElementById(elementID));
 
 		monthlyLineChart.setOption({
 			title: {
@@ -110,4 +111,4 @@
 	});
 </script>
 
-<div id="monthlyLineChart" class="m-2" style="width:850px; height:297px;" />
+<div id={elementID} class="m-2" style="width:850px; height:297px;" />

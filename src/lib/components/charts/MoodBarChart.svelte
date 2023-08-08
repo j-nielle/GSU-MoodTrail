@@ -5,6 +5,7 @@
 
 	export let xData;
 	export let yData;
+  export let elementID;
 
 	let moodBarChart;
 
@@ -21,7 +22,7 @@
   }
 
 	onMount(() => {
-		moodBarChart = echarts.init(document.getElementById('moodBarChart'));
+		moodBarChart = echarts.init(document.getElementById(elementID));
 
 		moodBarChart.setOption({
 			title: {
@@ -89,4 +90,4 @@
 	});
 </script>
 
-<div id="moodBarChart" style="width:390px; height:350px;" />
+<div id={elementID} style="width:390px; height:350px;" />

@@ -191,6 +191,8 @@
 			dashboardChannel.unsubscribe();
 		};
 	});
+
+  $: console.log(studentMoodData)
 </script>
 
 <svelte:head>
@@ -238,15 +240,16 @@
 
 	<div class="bg-white dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col">
 		<div class="flex flex-row space-x-6 justify-between">
-			<div class="flex flex-col">
-				<h2 class="font-bold">Student Information</h2>
+			<div class="flex flex-col p-5">
+				<h2 class="font-bold mb-2 text-xl">STUDENT INFORMATION</h2>
 				{#if dropdownFilter || filteredSearch?.length > 0}
-					<p><strong>Student ID:</strong> {filteredSearch[0].student_id}</p>
+					<p><strong>ID:</strong> {filteredSearch[0].student_id}</p>
 					<p><strong>Name:</strong> {filteredSearch[0].name}</p>
 					<p><strong>Latest Mood:</strong> {filteredSearch[filteredSearch.length - 1].mood_label ?? 'loading...'}
 					</p>
 					<p><strong>Most Frequent Mood:</strong> {mostFrequentMood ?? 'loading...'}</p>
 					<p><strong>Least Frequent Mood:</strong> {leastFrequentMood ?? 'loading...'}</p>
+          <p><strong>Latest Log Date:</strong> {dayjs(filteredSearch[filteredSearch.length - 1].created_at).format(`MMM D, YYYY - HH:mm a`)}</p>
 				{:else if filteredSearch.length === 0 || searchTerm.length < 2}
 					<h2>Student not found.</h2>
 				{/if}
@@ -263,15 +266,15 @@
           </ButtonGroup>
         </div>
         {#if selectedLineChart === 'today'}
-          <TodayLineChart bind:xData={timestamps} bind:yData={todaysMoodScores} />
+          <TodayLineChart bind:xData={timestamps} bind:yData={todaysMoodScores} elementID={'IndTLC'} />
         {:else if selectedLineChart === 'daily'}
-          <DailyLineChart bind:xData={daily} bind:yData={dailyAverages} />
+          <DailyLineChart bind:xData={daily} bind:yData={dailyAverages} elementID={'IndDLC'} />
         {:else if selectedLineChart === 'weekly'}
-          <WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} />
+          <WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} elementID={'IndWLC'} />
         {:else if selectedLineChart === 'monthly'}
-          <MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} />
+          <MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} elementID={'IndMLC'} />
         {:else if selectedLineChart === 'yearly'}
-          <YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} />
+          <YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} elementID={'IndYLC'} />
         {/if}
       </div>
 		</div>

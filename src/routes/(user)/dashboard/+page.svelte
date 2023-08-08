@@ -118,7 +118,7 @@
 	}
 
 	$: if (selectedLineChart === 'daily') {
-		console.log('daily');
+		
 		const groupedByDay = _.groupBy(studentMoodData, (entry) =>
 			dayjs(entry.created_at).format('YYYY-MM-DD')
 		);
@@ -134,7 +134,7 @@
 	}
 
 	$: if (selectedLineChart === 'weekly') {
-		console.log('weekly');
+		
 		const groupedByWeek = _.groupBy(studentMoodData, (entry) =>
 			getWeekNumberString(dayjs(entry.created_at))
 		);
@@ -153,7 +153,7 @@
 	}
 
 	$: if (selectedLineChart === 'monthly') {
-		console.log('monthly');
+		
 		const groupedByMonth = _.groupBy(studentMoodData, (entry) =>
 			dayjs(entry.created_at).format('YYYY-MM')
 		);
@@ -169,7 +169,7 @@
 	}
 
 	$: if (selectedLineChart === 'yearly') {
-		console.log('yearly');
+		
 		const groupedByYear = _.groupBy(studentMoodData, (entry) =>
 			dayjs(entry.created_at).format('YYYY')
 		);
@@ -275,7 +275,7 @@
 		<!-- Bar Chart and Line Chart -->
 		<div class="flex justify-between outline outline-pink-500 outline-1">
 			<div class="flex p-3 outline outline-blue-500 outline-1 bg-white rounded-sm drop-shadow-xl">
-				<MoodBarChart bind:xData={xDataMC} bind:yData={yDataMC} />
+				<MoodBarChart bind:xData={xDataMC} bind:yData={yDataMC} elementID={'dashboardMBC'} />
 			</div>
 			<div class="flex outline outline-purple-500 outline-1 bg-white rounded-sm drop-shadow-xl">
 				<div class="flex flex-col p-3">
@@ -294,15 +294,15 @@
 					</div>
 
 					{#if selectedLineChart === 'today'}
-						<TodayLineChart bind:xData={timestamps} bind:yData={todaysMoodScores} />
+						<TodayLineChart bind:xData={timestamps} bind:yData={todaysMoodScores} elementID={'dashboardTLC'} />
 					{:else if selectedLineChart === 'daily'}
-						<DailyLineChart bind:xData={daily} bind:yData={dailyAverages} />
+						<DailyLineChart bind:xData={daily} bind:yData={dailyAverages} elementID={'dashboardDLC'} />
 					{:else if selectedLineChart === 'weekly'}
-						<WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} />
+						<WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} elementID={'dashboardWLC'} />
 					{:else if selectedLineChart === 'monthly'}
-						<MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} />
+						<MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} elementID={'dashboardMLC'} />
 					{:else if selectedLineChart === 'yearly'}
-						<YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} />
+						<YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} elementID={'dashboardYLC'} />
 					{/if}
 				</div>
 			</div>
@@ -311,7 +311,7 @@
 		<!-- Heatmap Chart -->
 		<div class="flex justify-start space-x-3 outline outline-fuchsia-500 outline-1">
 			<div class="bg-white rounded-sm drop-shadow-xl p-4 outline outline-yellow-500 outline-1">
-				<HeatmapChart {heatmapData} />
+				<HeatmapChart {heatmapData} elementID={'dashboardHM'} />
 			</div>
 			<Card
 				class="max-h-8 justify-center outline outline-pink-600 outline-1 bg-slate-800 flex-row items-center space-x-2"

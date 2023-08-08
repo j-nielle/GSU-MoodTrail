@@ -7,6 +7,7 @@
 
 	export let xData;
 	export let yData;
+  export let elementID;
 
 	let yearlyLineChart;
 	let mood;
@@ -32,7 +33,7 @@
 	$: mood = yData.map((score) => getNearestMoodLabel(score));
 
 	onMount(() => {
-		yearlyLineChart = echarts.init(document.getElementById('yearlyLineChart'));
+		yearlyLineChart = echarts.init(document.getElementById(elementID));
 
 		yearlyLineChart.setOption({
 			title: {
@@ -111,4 +112,4 @@
 	});
 </script>
 
-<div id="yearlyLineChart" class="m-2" style="width:850px; height:297px;" />
+<div id={elementID} class="m-2" style="width:850px; height:297px;" />

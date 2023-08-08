@@ -5,6 +5,7 @@
 	import { onMount, afterUpdate } from 'svelte';
 
 	export let heatmapData;
+  export let elementID;
 
   // Define the days and hours for the axis labels
   var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -13,7 +14,7 @@
 	let heatmapChart;
 
 	onMount(() => {
-		heatmapChart = echarts.init(document.getElementById('heatmapChart'));
+		heatmapChart = echarts.init(document.getElementById(elementID));
 
 		heatmapChart.setOption({
       tooltip: {
@@ -94,4 +95,4 @@
 	});
 </script>
 
-<div id="heatmapChart" style="width:750px; height:350px;" />
+<div id={elementID} style="width:750px; height:350px;" />
