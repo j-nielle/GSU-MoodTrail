@@ -33,12 +33,6 @@
 	onMount(() => {
 		monthlyLineChart = echarts.init(document.getElementById('monthlyLineChart'));
 
-		if (xData.length === 0 || yData.length === 0) {
-			monthlyLineChart.showLoading();
-		} else {
-			monthlyLineChart.hideLoading();
-		}
-
 		monthlyLineChart.setOption({
 			title: {
 				text: 'Monthly Mood Averages',

@@ -33,12 +33,6 @@
 	onMount(() => {
 		weeklyLineChart = echarts.init(document.getElementById('weeklyLineChart'));
 
-		if (xData.length === 0 || yData.length === 0) {
-			weeklyLineChart.showLoading();
-		} else {
-			weeklyLineChart.hideLoading();
-		}
-
 		weeklyLineChart.setOption({
 			title: {
 				text: 'Weekly Mood Averages',

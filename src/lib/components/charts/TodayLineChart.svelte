@@ -10,6 +10,8 @@
 	let todayLineChart;
 	let mood;
 
+  console.log(xData.length === 0 && yData.length === 0)
+
 	function getNearestMoodLabel(score) {
 		const moodLabels = [
 			'Sad',
@@ -35,12 +37,6 @@
 
 	onMount(() => {
 		todayLineChart = echarts.init(document.getElementById('todayLineChart'));
-
-		if (xData.length === 0 || yData.length === 0) {
-			todayLineChart.showLoading();
-		} else {
-			todayLineChart.hideLoading();
-		}
 
 		todayLineChart.setOption({
 			title: {

@@ -15,12 +15,6 @@
 	onMount(() => {
 		heatmapChart = echarts.init(document.getElementById('heatmapChart'));
 
-    if (!heatmapData) {
-			heatmapChart.showLoading();
-		} else {
-			heatmapChart.hideLoading();
-		}
-
 		heatmapChart.setOption({
       tooltip: {
         position: 'top'

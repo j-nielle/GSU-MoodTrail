@@ -23,12 +23,6 @@
 	onMount(() => {
 		moodBarChart = echarts.init(document.getElementById('moodBarChart'));
 
-		if (xData.length === 0 || yData.length === 0) {
-			moodBarChart.showLoading();
-		} else {
-			moodBarChart.hideLoading();
-		}
-
 		moodBarChart.setOption({
 			title: {
 				text: 'Overall Mood Counts'

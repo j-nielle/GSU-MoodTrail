@@ -33,12 +33,6 @@
 
 	onMount(() => {
 		yearlyLineChart = echarts.init(document.getElementById('yearlyLineChart'));
-		
-		if (xData.length === 0 || yData.length === 0) {
-			yearlyLineChart.showLoading();
-		} else {
-			yearlyLineChart.hideLoading();
-		}
 
 		yearlyLineChart.setOption({
 			title: {

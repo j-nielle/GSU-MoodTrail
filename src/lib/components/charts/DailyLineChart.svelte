@@ -33,12 +33,6 @@
 	onMount(() => { 
 		dailyLineChart = echarts.init(document.getElementById('dailyLineChart'));
 
-		if (xData.length === 0 || yData.length === 0) {
-			dailyLineChart.showLoading();
-		} else {
-			dailyLineChart.hideLoading();
-		}
-
 		dailyLineChart.setOption({
 			title: {
 				text: 'Daily Mood Averages',
