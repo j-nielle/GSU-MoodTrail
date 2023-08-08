@@ -72,21 +72,24 @@
 		);
 		const timestamps = todaysEntries.map((entry) => dayjs(entry.created_at).format('HH:mm:ss'));
 		const todayMoodScores = todaysEntries.map((entry) => entry.mood_score);
+
+    console.log(todaysEntries)
   }
 
   $: {
     filteredSearch = _.filter(studentMoodData, (req) => {
       const searchTermNumeric = /^\d{10}$/.test(searchTerm);
-      const searchTermAlpha = /^[a-zA-Z]{3,}$/.test(searchTerm);
-      const idMatch = searchTermNumeric && req.student_id.toString() === searchTerm;
-      const nameMatch = searchTermAlpha && _.includes(req.name.toLowerCase(), searchTerm.toLowerCase());
+      const idMatch = searchTermNumeric && req.student_id.toString() === searchTerm;      
+      const nameMatch = req.name.toLowerCase().includes(searchTerm.toLowerCase());
+
       const courseMatch = !selectedCourse || req.course === selectedCourse;
       const yearLevelMatch = !selectedYearLevel || req.year_level === selectedYearLevel;
       const studentNameMatch = !selectedStudentName || req.name === selectedStudentName;
-    
+      
       return (searchTerm !== '' && (idMatch || nameMatch)) ||
-        (selectedStudentName) ? courseMatch && yearLevelMatch && studentNameMatch : false;
+        (selectedStudentName ? (courseMatch && yearLevelMatch && studentNameMatch) : false);
     }).sort((a, b) => (dayjs(a.created_at).isBefore(dayjs(b.created_at)) ? -1 : 1));
+
 
 		const moodReason = filteredSearch.map((obj) => {
 			return {
@@ -195,14 +198,14 @@
 		<div class="flex flex-row space-x-6 justify-between">
 			<div class="flex flex-col">
 				<h2 class="font-bold">Student Information</h2>
-				{#if dropdownFilter || filteredSearch.length > 0}
+				{#if dropdownFilter || (filteredSearch.length > 0 && searchTerm.length >= 2)}
 					<p><strong>Student ID:</strong> {filteredSearch[0].student_id}</p>
 					<p><strong>Name:</strong> {filteredSearch[0].name}</p>
 					<p><strong>Latest Mood:</strong> {filteredSearch[filteredSearch.length - 1].mood_label ?? 'loading...'}
 					</p>
 					<p><strong>Most Frequent Mood:</strong> {mostFrequentMood ?? 'loading...'}</p>
 					<p><strong>Least Frequent Mood:</strong> {leastFrequentMood ?? 'loading...'}</p>
-				{:else if filteredSearch.length === 0}
+				{:else if filteredSearch.length === 0 || searchTerm.length < 2}
 					<h2>Student not found.</h2>
 				{/if}
 			</div>
