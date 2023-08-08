@@ -66,16 +66,6 @@
 			.value();
 	}
 
-  $: if(selectedLineChart === 'today'){
-    const todaysEntries = filteredSearch.filter(
-			(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
-		);
-		const timestamps = todaysEntries.map((entry) => dayjs(entry.created_at).format('HH:mm:ss'));
-		const todayMoodScores = todaysEntries.map((entry) => entry.mood_score);
-
-    console.log(todaysEntries)
-  }
-
   $: {
     filteredSearch = _.filter(studentMoodData, (req) => {
       const searchTermNumeric = /^\d{10}$/.test(searchTerm);
@@ -89,7 +79,6 @@
       return (searchTerm !== '' && (idMatch || nameMatch)) ||
         (selectedStudentName ? (courseMatch && yearLevelMatch && studentNameMatch) : false);
     }).sort((a, b) => (dayjs(a.created_at).isBefore(dayjs(b.created_at)) ? -1 : 1));
-
 
 		const moodReason = filteredSearch.map((obj) => {
 			return {
@@ -125,9 +114,62 @@
 		countReasonsForMood = countReasons[sortedMoods[0]];
   }
 
+  $: if(selectedLineChart === 'today'){
+    const todaysEntries = filteredSearch.filter(
+			(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
+		);
+		timestamps = todaysEntries.map((entry) => dayjs(entry.created_at).format('HH:mm:ss'));
+		todaysMoodScores = todaysEntries.map((entry) => entry.mood_score);
+  }
+
+  $: if (selectedLineChart === 'daily') {
+		const groupedByDay = _.groupBy(filteredSearch, (entry) =>
+			dayjs(entry.created_at).format('YYYY-MM-DD')
+		);
+
+		dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+		daily = _.sortBy(_.keys(groupedByDay));
+	}
+
+	$: if (selectedLineChart === 'weekly') {
+		const groupedByWeek = _.groupBy(filteredSearch, (entry) =>
+			getWeekNumberString(dayjs(entry.created_at))
+		);
+
+		weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+		weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
+			const weekNumber = parseInt(week.replace('Week ', ''));
+			return weekNumber;
+		});
+	}
+
+	$: if (selectedLineChart === 'monthly') {
+		const groupedByMonth = _.groupBy(filteredSearch, (entry) =>
+			dayjs(entry.created_at).format('YYYY-MM')
+		);
+
+		monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+		monthly = _.sortBy(_.keys(groupedByMonth));
+	}
+
+	$: if (selectedLineChart === 'yearly') {
+		const groupedByYear = _.groupBy(filteredSearch, (entry) =>
+			dayjs(entry.created_at).format('YYYY')
+		);
+
+		yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+		yearly = _.sortBy(_.keys(groupedByYear));
+	}
+
 	function toggleChart(chart) {
 		selectedLineChart = chart;
 	}
+
+  const getWeekNumberString = (date) => {
+		const firstDayOfYear = dayjs(date).startOf('year').day(1);
+		const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
+		return `Week ${weekDiff}`;
+	};
 
 	onMount(() => {
 		const dashboardChannel = supabase
@@ -198,7 +240,7 @@
 		<div class="flex flex-row space-x-6 justify-between">
 			<div class="flex flex-col">
 				<h2 class="font-bold">Student Information</h2>
-				{#if dropdownFilter || (filteredSearch.length > 0 && searchTerm.length >= 2)}
+				{#if dropdownFilter || filteredSearch?.length > 0}
 					<p><strong>Student ID:</strong> {filteredSearch[0].student_id}</p>
 					<p><strong>Name:</strong> {filteredSearch[0].name}</p>
 					<p><strong>Latest Mood:</strong> {filteredSearch[filteredSearch.length - 1].mood_label ?? 'loading...'}
@@ -210,15 +252,28 @@
 				{/if}
 			</div>
 
-			<div class="flex justify-end h-fit">
-				<ButtonGroup>
-					<Button color="light" on:click={() => toggleChart('today')}>Today</Button>
-					<Button color="light" on:click={() => toggleChart('daily')}>Daily</Button>
-					<Button color="light" on:click={() => toggleChart('weekly')}>Weekly</Button>
-					<Button color="light" on:click={() => toggleChart('monthly')}>Monthly</Button>
-					<Button color="light" on:click={() => toggleChart('yearly')}>Yearly</Button>
-				</ButtonGroup>
-			</div>
+			<div class="flex flex-col">
+        <div class="flex justify-end h-fit">
+          <ButtonGroup>
+            <Button color="light" on:click={() => toggleChart('today')}>Today</Button>
+            <Button color="light" on:click={() => toggleChart('daily')}>Daily</Button>
+            <Button color="light" on:click={() => toggleChart('weekly')}>Weekly</Button>
+            <Button color="light" on:click={() => toggleChart('monthly')}>Monthly</Button>
+            <Button color="light" on:click={() => toggleChart('yearly')}>Yearly</Button>
+          </ButtonGroup>
+        </div>
+        {#if selectedLineChart === 'today'}
+          <TodayLineChart bind:xData={timestamps} bind:yData={todaysMoodScores} />
+        {:else if selectedLineChart === 'daily'}
+          <DailyLineChart bind:xData={daily} bind:yData={dailyAverages} />
+        {:else if selectedLineChart === 'weekly'}
+          <WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} />
+        {:else if selectedLineChart === 'monthly'}
+          <MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} />
+        {:else if selectedLineChart === 'yearly'}
+          <YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} />
+        {/if}
+      </div>
 		</div>
 	</div>
 </div>
