@@ -79,8 +79,8 @@
 		</Dropdown>
 	{:else}
 		<div class="flex space-x-4">
-			<Button href="/signup" class="bg-purple-600 hover:bg-purple-600 hover:drop-shadow-md">Register Account</Button>
-			<Button href="/login" class="bg-teal-500 hover:drop-shadow-md hover:bg-teal-500">Login</Button>
+			<Button href="/register" color="alternative" class="hover:text-gray-900 focus:text-gray-900">Register Account</Button>
+			<Button href="/login" color="purple" class="">Login</Button>
 		</div>
 	{/if}
 </Navbar>
