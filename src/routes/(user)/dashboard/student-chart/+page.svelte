@@ -3,8 +3,8 @@
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
-	import { Card, Search, Button, Select } from 'flowbite-svelte';
-  import TodayLineChart from '$lib/components/charts/TodayLineChart.svelte';
+	import { Card, Search, Button, ButtonGroup, Select } from 'flowbite-svelte';
+	import TodayLineChart from '$lib/components/charts/TodayLineChart.svelte';
 	import DailyLineChart from '$lib/components/charts/DailyLineChart.svelte';
 	import WeeklyLineChart from '$lib/components/charts/WeeklyLineChart.svelte';
 	import MonthlyLineChart from '$lib/components/charts/MonthlyLineChart.svelte';
@@ -30,8 +30,18 @@
 	let filteredSearch;
 
 	let dropdownFilter = false;
-	let mostFrequentMood 
-	let leastFrequentMood
+	let mostFrequentMood;
+	let leastFrequentMood;
+	let countReasonsForMood;
+
+	let selectedLineChart = 'today';
+	let today = dayjs().format('YYYY-MM-DD');
+
+	let timestamps, todaysMoodScores;
+	let daily, dailyAverages;
+	let weekly, weeklyAverages;
+	let monthly, monthlyAverages;
+	let yearly, yearlyAverages;
 
 	$: {
 		course = _.uniq(studentMoodData.map((data) => data.course)).map((course) => ({
@@ -42,18 +52,18 @@
 		yearLevel = _.chain(studentMoodData)
 			.filter({ course: selectedCourse })
 			.map('year_level')
-      .uniq()
-      .sort()
-      .map((yearLevel) => ({ value: yearLevel, name: yearLevel }))
-      .value();
+			.uniq()
+			.sort()
+			.map((yearLevel) => ({ value: yearLevel, name: yearLevel }))
+			.value();
 
-    student = _.chain(studentMoodData)
+		student = _.chain(studentMoodData)
 			.filter({ course: selectedCourse, year_level: selectedYearLevel })
 			.map('name')
-      .uniq()
-      .sort()
-      .map((name) => ({ value: name, name: name }))
-      .value();
+			.uniq()
+			.sort()
+			.map((name) => ({ value: name, name: name }))
+			.value();
 	}
 
 	$: {
@@ -65,30 +75,88 @@
 			return searchTerm != '' ? idMatch || nameMatch : false;
 		}).sort((a, b) => (dayjs(a.created_at).isBefore(dayjs(b.created_at)) ? -1 : 1));
 
+		// using lodash here for filtering logic kay for some reason
+		// its performance for the input search is faster kesa sa native js
 		const moodCounts = _.countBy(filteredSearch, 'mood_label');
 		const sortedMoods = _.keys(moodCounts).sort((a, b) => moodCounts[b] - moodCounts[a]);
+
+		const groupedByMood = _.groupBy(filteredSearch, 'mood_label');
+		const countByMoodAndReason = _.mapValues(groupedByMood, (arr) =>
+			_.countBy(arr, 'reason_label')
+		);
+
 		mostFrequentMood = sortedMoods[0];
 		leastFrequentMood = sortedMoods[sortedMoods.length - 1];
+		countReasonsForMood = countByMoodAndReason[sortedMoods[0]];
+
+		const todaysEntries = filteredSearch.filter(
+			(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
+		);
+		const timestamps = todaysEntries.map((entry) => dayjs(entry.created_at).format('HH:mm:ss'));
+		const todayMoodScores = todaysEntries.map((entry) => entry.mood_score);
 	}
 
 	function handleStudentNameSelection(event) {
 		dropdownFilter = true;
 		selectedStudentName = event.target.value;
 
-		studentInfo = _.filter(studentMoodData, { name: selectedStudentName });
+		studentInfo = studentMoodData.filter((student) => student.name === selectedStudentName);
+
+		// using native js here for the opposite reason
+		const moodReason = studentInfo.map((obj) => {
+			return {
+				mood: obj.mood_label,
+				reason: obj.reason_label
+			};
+		});
+
+		let { moodCounts, sortedMoods } = studentInfo.reduce(
+			(acc, { mood_label }) => {
+				acc.moodCounts[mood_label] = (acc.moodCounts[mood_label] || 0) + 1;
+				return acc;
+			},
+			{ moodCounts: {}, sortedMoods: [] }
+		);
+
+		sortedMoods = Object.keys(moodCounts).sort((a, b) => moodCounts[b] - moodCounts[a]);
+
+		const countReasons = moodReason.reduce((acc, { mood, reason }) => {
+			acc[mood] = acc[mood] || {};
+			acc[mood][reason] = (acc[mood][reason] || 0) + 1;
+			return acc;
+		}, {});
+
+		mostFrequentMood = sortedMoods[0];
+		leastFrequentMood = sortedMoods[sortedMoods.length - 1];
+
+		countReasonsForMood = countReasons[sortedMoods[0]];
+
+		const todaysEntries = studentInfo.filter(
+			(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
+		);
+		const timestamps = todaysEntries.map((entry) => dayjs(entry.created_at).format('HH:mm:ss'));
+		const todayMoodScores = todaysEntries.map((entry) => entry.mood_score);
+	}
+
+	function toggleChart(chart) {
+		selectedLineChart = chart;
 	}
 
 	onMount(() => {
 		const dashboardChannel = supabase
 			.channel('dashboard')
-			.on( 'postgres_changes', {
+			.on(
+				'postgres_changes',
+				{
 					event: 'INSERT',
 					schema: 'public',
 					table: 'StudentMoodEntries'
-				}, (payload) => {
+				},
+				(payload) => {
 					studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
 				}
-			).subscribe((status) => console.log('/dashboard/student-chart/+page.svelte:', status));
+			)
+			.subscribe((status) => console.log('/dashboard/student-chart/+page.svelte:', status));
 
 		return () => {
 			dashboardChannel.unsubscribe();
@@ -100,11 +168,10 @@
 	<title>Student Chart</title>
 </svelte:head>
 
-<div class="p-4 flex flex-col space-y-3">
-	<Card class="space-x-4 flex flex-row max-w-full items-end">
+<div class="bg-zinc-50 p-4 flex flex-col space-y-5 outline outline-red-500 outline-1">
+	<div class="space-x-4 flex flex-row max-w-full items-end">
 		<div class="flex gap-2">
-			<Search size="md" class="w-fit h-10" placeholder="Search for ID or name" bind:value={searchTerm}
-				on:input={() => {
+			<Search size="md" class="w-fit h-11 bg-white" placeholder="Search for ID or name" bind:value={searchTerm} on:input={() => {
 					selectedCourse = '';
 					selectedYearLevel = '';
 					selectedStudentName = '';
@@ -112,47 +179,64 @@
 			/>
 		</div>
 
-		<Select placeholder="Select a course" class="font-normal" items={course} bind:value={selectedCourse}
+		<Select placeholder="Select a course" class="font-normal w-56 h-11 bg-white" items={course} bind:value={selectedCourse}
 			on:change={(e) => {
 				searchTerm = '';
 				selectedCourse = e.target.value;
 			}}
 		/>
-		<Select placeholder="Select a year level" class="font-normal" items={yearLevel} bind:value={selectedYearLevel}
+		<Select placeholder="Select a year level" class="font-normal w-fit h-11 bg-white" items={yearLevel} bind:value={selectedYearLevel}
 			on:change={(e) => {
 				selectedYearLevel = e.target.value;
 			}}
 		/>
-		<Select placeholder="Select a student" class="font-normal" items={student} bind:value={selectedStudentName}
+		<Select placeholder="Select a student" class="font-normal w-full h-11 bg-white" items={student} bind:value={selectedStudentName}
 			on:change={handleStudentNameSelection}
 		/>
-		<Button class="h-10" size="sm" color="red"
+		<Button class="h-11" size="sm" color="red"
 			on:click={() => {
-        dropdownFilter = false;
+				dropdownFilter = false;
 				searchTerm = '';
 				selectedCourse = '';
 				selectedYearLevel = '';
 				selectedStudentName = '';
 			}}
-		>
-			Reset
+		>Reset
 		</Button>
-	</Card>
+	</div>
 
-	<Card class="text-slate-950">
-		{#if searchTerm != '' && filteredSearch.length > 0}
-			<h2 class="font-bold">Student Information</h2>
-			<p><strong>Student ID:</strong> {filteredSearch[0].student_id}</p>
-			<p><strong>Name:</strong> {filteredSearch[0].name}</p>
-			<p><strong>Latest Mood:</strong> {filteredSearch[filteredSearch.length - 1].mood_label}</p>
-		{:else if dropdownFilter && filteredSearch.length === 0}
-			<h2 class="font-bold">Student Information</h2>
-			<p><strong>Student ID:</strong> {studentInfo[0].student_id}</p>
-			<p><strong>Name:</strong> {studentInfo[0].name}</p>
-			<p><strong>Latest Mood:</strong> {studentInfo[studentInfo.length - 1].mood_label}</p>
-		{:else if searchTerm === '' || dropdownFilter === false}
-			<h2 class="font-bold">Student Information</h2>
-			<h2>Student not found.</h2>
-		{/if}
-	</Card>
+	<div class="bg-white dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col">
+		<div class="flex flex-row space-x-6 justify-between">
+			<div class="flex flex-col">
+				<h2 class="font-bold">Student Information</h2>
+				{#if searchTerm != '' && filteredSearch.length > 0}
+					<p><strong>Student ID:</strong> {filteredSearch[0].student_id}</p>
+					<p><strong>Name:</strong> {filteredSearch[0].name}</p>
+					<p><strong>Latest Mood:</strong>{filteredSearch[filteredSearch.length - 1].mood_label ?? 'loading...'}
+					</p>
+					<p><strong>Most Frequent Mood:</strong> {mostFrequentMood ?? 'loading...'}</p>
+					<p><strong>Least Frequent Mood:</strong> {leastFrequentMood ?? 'loading...'}</p>
+				{:else if dropdownFilter && studentInfo.length > 0}
+					<p><strong>Student ID:</strong> {studentInfo[0].student_id}</p>
+					<p><strong>Name:</strong> {studentInfo[0].name}</p>
+					<p><strong>Latest Mood:</strong>{studentInfo[studentInfo.length - 1].mood_label ?? 'loading...'}
+					</p>
+					<p><strong>Most Frequent Mood:</strong> {mostFrequentMood ?? 'loading...'}</p>
+					<p><strong>Least Frequent Mood:</strong> {leastFrequentMood ?? 'loading...'}</p>
+				{:else if searchTerm === '' || dropdownFilter === false}
+					<h2>Student not found.</h2>
+				{/if}
+			</div>
+
+			<div class="flex justify-end h-fit">
+				<ButtonGroup>
+					<Button color="light" on:click={() => toggleChart('today')}>Today</Button>
+					<Button color="light" on:click={() => toggleChart('daily')}>Daily</Button>
+					<Button color="light" on:click={() => toggleChart('weekly')}>Weekly</Button>
+					<Button color="light" on:click={() => toggleChart('monthly')}>Monthly</Button>
+					<Button color="light" on:click={() => toggleChart('yearly')}>Yearly</Button>
+				</ButtonGroup>
+			</div>
+		</div>
+	</div>
 </div>
