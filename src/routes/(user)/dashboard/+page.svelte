@@ -81,8 +81,6 @@
 		};
 	});
 
-  $: console.log(studentMoodData.length);
-
 	$: {
 		recentStudent = _.last(studentMoodData)['name'];
 
@@ -109,9 +107,7 @@
 	}
 
 	$: if (selectedLineChart === 'today') {
-		const todaysEntries = studentMoodData.filter(
-			(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
-		);
+		const todaysEntries = _.filter(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today);
 
 		timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss'));
 		todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score);
@@ -283,7 +279,7 @@
 			</div>
 			<div class="flex outline outline-purple-500 outline-1 bg-white rounded-sm drop-shadow-xl">
 				<div class="flex flex-col p-3">
-					<div class="flex space-x-1 justify-between">
+					<div class="flex space-x-4 flex-row h-fit justify-between">
 						<ButtonGroup>
 							<Button color="light" on:click={() => toggleChart('today')}>Today</Button>
 							<Button color="light" on:click={() => toggleChart('daily')}>Daily</Button>
