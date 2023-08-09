@@ -12,6 +12,7 @@
 	import YearlyLineChart from '$lib/components/charts/YearlyLineChart.svelte';
 	import MoodBarChart from '$lib/components/charts/MoodBarChart.svelte';
 	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
+	import { consistentLowMoods } from '$lib/moodNotify.js';
 
 	export let data;
 
@@ -65,23 +66,27 @@
 				(payload) => {
 					studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
 				}
-			).on( 'postgres_changes', {
+			)
+			.on(
+				'postgres_changes',
+				{
 					event: 'INSERT',
 					schema: 'public',
 					table: 'AnonMood'
 				},
 				(payload) => {
-			    console.log("AnonMood: New Entry!")
+					console.log('AnonMood: New Entry!');
 					anonMoodData = _.cloneDeep([...anonMoodData, payload.new]);
 				}
-			).subscribe((status) => console.log('/dashboard/+page.svelte:', status));
+			)
+			.subscribe((status) => console.log('/dashboard/+page.svelte:', status));
 
 		return () => {
 			dashboardChannel.unsubscribe();
 		};
 	});
 
-	$: {
+	$: if (studentMoodData) {
 		recentStudent = _.last(studentMoodData)['name'];
 
 		const groupedData = _.groupBy(studentMoodData, (data) => {
@@ -95,8 +100,8 @@
 		});
 
 		const moodCount = _.countBy(studentMoodData, 'mood_label');
-		xDataMC = _.keys(moodCount);
-		yDataMC = _.values(moodCount);
+		xDataMC = _.keys(moodCount) || ['-'];
+		yDataMC = _.values(moodCount) || ['-'];
 
 		uniqueMoodLabels = _.uniqBy(studentMoodData, 'mood_label').map((data) => data.mood_label);
 
@@ -107,7 +112,10 @@
 	}
 
 	$: if (selectedLineChart === 'today') {
-		const todaysEntries = _.filter(studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today);
+		const todaysEntries = _.filter(
+			studentMoodData,
+			(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
+		);
 
 		timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss'));
 		todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score);
@@ -118,7 +126,6 @@
 	}
 
 	$: if (selectedLineChart === 'daily') {
-		
 		const groupedByDay = _.groupBy(studentMoodData, (entry) =>
 			dayjs(entry.created_at).format('YYYY-MM-DD')
 		);
@@ -134,7 +141,6 @@
 	}
 
 	$: if (selectedLineChart === 'weekly') {
-		
 		const groupedByWeek = _.groupBy(studentMoodData, (entry) =>
 			getWeekNumberString(dayjs(entry.created_at))
 		);
@@ -153,7 +159,6 @@
 	}
 
 	$: if (selectedLineChart === 'monthly') {
-		
 		const groupedByMonth = _.groupBy(studentMoodData, (entry) =>
 			dayjs(entry.created_at).format('YYYY-MM')
 		);
@@ -169,7 +174,6 @@
 	}
 
 	$: if (selectedLineChart === 'yearly') {
-		
 		const groupedByYear = _.groupBy(studentMoodData, (entry) =>
 			dayjs(entry.created_at).format('YYYY')
 		);
@@ -183,11 +187,92 @@
 			_(groupedByYear).flatMap().countBy('reason_label').entries().maxBy(_.last)
 		);
 	}
+
+	function findConsecutiveLowMoods() {
+		const groupedData = _.reduce(studentMoodData, (result, entry) => {
+			const { created_at, student_id, mood_score, reason_label } = entry;
+			const date = created_at.split('T')[0];
+			const key = `${date}_${student_id}`;
+
+			if (!result[key]) {
+				result[key] = {
+					moodScores: [],
+					averageLowMoodScore: 0,
+					reasonLabels: []
+				};
+			}
+
+			if (mood_score < 0) {
+				result[key].moodScores.push(mood_score);
+				result[key].reasonLabels.push(reason_label);
+				const moodScores = result[key].moodScores;
+				if (moodScores.length > 0) {
+					const sum = moodScores.reduce((acc, score) => acc + score, 0);
+					result[key].averageLowMoodScore = sum / moodScores.length;
+				}
+			}
+			return result;
+		}, {} );
+
+		console.log(groupedData);
+		const consecutiveLowMoodStudents = new Map();
+
+		for (const key in groupedData) {
+			const [date, student_id] = key.split('_');
+			const studentData = groupedData[key];
+			const consecutiveLowMood = studentData.moodScores.every((score) => score < 0);
+
+			if (consecutiveLowMood) {
+				const lastInfo = consecutiveLowMoodStudents.get(student_id) || {
+					count: 0,
+					startDate: date,
+					endDate: date
+				};
+
+				const daysDifference = Math.ceil(
+					(new Date(date) - new Date(lastInfo.endDate)) / (1000 * 60 * 60 * 24)
+				);
+
+				consecutiveLowMoodStudents.set(student_id, {
+					count: daysDifference === 1 ? lastInfo.count + 1 : 1,
+					startDate: daysDifference === 1 ? lastInfo.startDate : date,
+					endDate: date
+				});
+			} else {
+				consecutiveLowMoodStudents.set(student_id, {
+					count: 0,
+					startDate: '',
+					endDate: ''
+				});
+			}
+		}
+
+		const dateRanges = Array.from(consecutiveLowMoodStudents)
+			.filter(([student_id, info]) => info.count >= 4)
+			.map(([student_id, info]) => {
+				const { startDate, endDate } = info;
+				const regex = new RegExp(`^${startDate}_${student_id}|${endDate}_${student_id}$`);
+				const moodScores = [];
+				const reasonLabels = [];
+
+				for (const key in groupedData) {
+					if (regex.test(key)) {
+						moodScores.push(...groupedData[key].moodScores);
+						reasonLabels.push(...groupedData[key].reasonLabels);
+					}
+				}
+
+				return { student_id, startDate, endDate, moodScores, reasonLabels };
+			});
+		console.log(dateRanges);
+	}
 </script>
 
 <svelte:head>
 	<title>Dashboard</title>
 </svelte:head>
+
+<Button on:click={findConsecutiveLowMoods} />
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3">
 	<div class="flex justify-end space-x-3 mt-0.5 outline outline-teal-500 outline-1">
@@ -294,15 +379,35 @@
 					</div>
 
 					{#if selectedLineChart === 'today'}
-						<TodayLineChart bind:xData={timestamps} bind:yData={todaysMoodScores} elementID={'dashboardTLC'} />
+						<TodayLineChart
+							bind:xData={timestamps}
+							bind:yData={todaysMoodScores}
+							elementID={'dashboardTLC'}
+						/>
 					{:else if selectedLineChart === 'daily'}
-						<DailyLineChart bind:xData={daily} bind:yData={dailyAverages} elementID={'dashboardDLC'} />
+						<DailyLineChart
+							bind:xData={daily}
+							bind:yData={dailyAverages}
+							elementID={'dashboardDLC'}
+						/>
 					{:else if selectedLineChart === 'weekly'}
-						<WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} elementID={'dashboardWLC'} />
+						<WeeklyLineChart
+							bind:xData={weekly}
+							bind:yData={weeklyAverages}
+							elementID={'dashboardWLC'}
+						/>
 					{:else if selectedLineChart === 'monthly'}
-						<MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} elementID={'dashboardMLC'} />
+						<MonthlyLineChart
+							bind:xData={monthly}
+							bind:yData={monthlyAverages}
+							elementID={'dashboardMLC'}
+						/>
 					{:else if selectedLineChart === 'yearly'}
-						<YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} elementID={'dashboardYLC'} />
+						<YearlyLineChart
+							bind:xData={yearly}
+							bind:yData={yearlyAverages}
+							elementID={'dashboardYLC'}
+						/>
 					{/if}
 				</div>
 			</div>
