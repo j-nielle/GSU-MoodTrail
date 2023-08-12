@@ -13,7 +13,7 @@
       <span>Enter the email associated with your account</span>
       <Input type="email" name="email" class="font-normal" placeholder="name@company.com" required>
         <svelte:fragment slot="left">
-          <EnvelopeSolid size="xs" class="ml-1" />
+          <EnvelopeSolid tabindex="-1" size="xs" class="ml-1" />
         </svelte:fragment>
       </Input>
     </Label>

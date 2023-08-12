@@ -10,8 +10,8 @@
     <Label class="space-y-2">
       <span>Email</span>
       <Input type="email" id="email" name="email" class="font-normal" placeholder="name@company.com" required>
-        <svelte:fragment slot="left">
-          <EnvelopeSolid size="xs" class="ml-1" />
+        <svelte:fragment slot="left" >
+          <EnvelopeSolid tabindex="-1" size="xs" class="ml-1" />
         </svelte:fragment>
       </Input>
     </Label>
@@ -19,7 +19,7 @@
       <span>Password</span>
       <Input type="password" id="password" name="password" class="font-normal" placeholder="•••••••" required autocomplete>
         <svelte:fragment slot="left">
-          <ShieldSolid size="xs" class="ml-1" />
+          <ShieldSolid tabindex="-1" size="xs" class="ml-1" />
         </svelte:fragment>
       </Input>
     </Label>
