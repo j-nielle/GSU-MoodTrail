@@ -21,7 +21,7 @@
 	$: user = {};
 
 	$: ({ supabase, session } = data);
-	console.log(data);
+  
 	onMount(() => {
 		const {
 			data: { subscription }
