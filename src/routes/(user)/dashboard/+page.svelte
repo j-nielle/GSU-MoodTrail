@@ -16,76 +16,64 @@
 
 	export let data;
 
-	let studentMoodData = data.studentMood;
-	let anonMoodData = data.anonMood;
-
-	$: ({ supabase } = data);
+	let studentMoodData = [];
+	let anonMoodData = [];
 
 	let xDataMBC, yDataMBC;
-	//let uniqueMoodLabels;
-	let todayMostFreqMood, todayMostFreqReason;
-	let dailyMostFreqMood, dailyMostFreqReason;
-	let weeklyMostFreqMood, weeklyMostFreqReason;
-	let monthlyMostFreqMood, monthlyMostFreqReason;
-	let yearlyMostFreqMood, yearlyMostFreqReason;
+	let todayMostFreqMood = [], todayMostFreqReason = [];
+	let dailyMostFreqMood = [], dailyMostFreqReason = [];
+	let weeklyMostFreqMood = [], weeklyMostFreqReason = [];
+	let monthlyMostFreqMood = [], monthlyMostFreqReason = [];
+	let yearlyMostFreqMood = [], yearlyMostFreqReason = [];
 
-	let daily, dailyAverages;
-	let weekly, weeklyAverages;
-	let monthly, monthlyAverages;
-	let yearly, yearlyAverages;
+	let daily = [], dailyAverages = [];
+	let weekly = [], weeklyAverages = [];
+	let monthly = [], monthlyAverages = [];
+	let yearly = [], yearlyAverages = [];
 
-	let timestamps, todaysMoodScores;
+	let timestamps = [], todaysMoodScores = [];
 
 	let recentStudent;
 
 	let heatmapData;
 
-	let today = dayjs().format('YYYY-MM-DD');
 	let selectedLineChart = 'today';
 
-	function toggleChart(chart) {
-		selectedLineChart = chart;
-	}
+  let filteredStudents;
+	const consecutiveDaysMap = new Map();
 
-	const getWeekNumberString = (date) => {
-		const firstDayOfYear = dayjs(date).startOf('year').day(1);
-		const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
-		return `Week ${weekDiff}`;
-	};
+  let newStudentData = false;
+
+  $: ({ supabase } = data);
 
 	onMount(() => {
 		const dashboardChannel = supabase
 			.channel('dashboard')
-			.on(
-				'postgres_changes',
-				{
+			.on('postgres_changes', {
 					event: 'INSERT',
 					schema: 'public',
 					table: 'StudentMoodEntries'
-				},
-				(payload) => {
-					studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
+				}, (payload) => {
+					console.log('New Student Data!');
+          newStudentData = true
+					studentMoodData = _.cloneDeep([...data.studentMood, payload.new]);
 				}
-			)
-			.on(
-				'postgres_changes',
-				{
+			).on('postgres_changes', {
 					event: 'INSERT',
 					schema: 'public',
 					table: 'AnonMood'
-				},
-				(payload) => {
-					anonMoodData = _.cloneDeep([...anonMoodData, payload.new]);
+				}, (payload) => {
+					anonMoodData = _.cloneDeep([...data.anonMood, payload.new]);
 				}
-			)
-			.subscribe((status) => console.log('/dashboard/+page.svelte:', status));
+			).subscribe((status) => console.log('inside /dashboard/+page.svelte', status));
 
-		// return () => {
-		// 	dashboardChannel.unsubscribe();
-		// };
+		return () => {
+			dashboardChannel.unsubscribe();
+		};
 	});
 
-	$: if (studentMoodData) {
+	$: if (newStudentData && studentMoodData.length > 0) {
+    console.log('re-run')
 		recentStudent = _.last(studentMoodData)['name'];
 
 		const groupedData = _.groupBy(studentMoodData, (data) => {
@@ -98,169 +86,181 @@
 			return [[parseInt(hour), parseInt(day), data.length || '-']];
 		});
 
-		const moodCount = _.countBy(studentMoodData, 'mood_label');
-		xDataMBC = _.keys(moodCount) || ['-'];
-		yDataMBC = _.values(moodCount) || ['-'];
+		const moodCount = _.countBy(studentMoodData, 'mood_label') || [];
+		xDataMBC = _.keys(moodCount);
+		yDataMBC = _.values(moodCount);
 
-		// for future use idk, i forgor
-		//uniqueMoodLabels = _.uniqBy(studentMoodData, 'mood_label').map((data) => data.mood_label);
-
-		// for ?? chart (count of reasons for each mood)
-		// const groupedByMood = _.groupBy(studentMoodData, 'mood_label');
-		// const countReasons = _.mapValues(groupedByMood, (moodGroup) =>
-		// 	_.countBy(moodGroup, 'reason_label')
-		// );
-	}
-
-	$: if (selectedLineChart === 'today') {
-		const todaysEntries = _.filter(
-			studentMoodData,
-			(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
-		);
-
-		timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss'));
-		todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score);
-		const todaysMoodLabels = _.map(todaysEntries, (entry) => entry.mood_label);
-		const todaysReasonLabels = _.map(todaysEntries, (entry) => entry.reason_label);
-		todayMostFreqMood = _.head(_(todaysMoodLabels).countBy().entries().maxBy(_.last));
-		todayMostFreqReason = _.head(_(todaysReasonLabels).countBy().entries().maxBy(_.last));
-	}
-
-	$: if (selectedLineChart === 'daily') {
-		const groupedByDay = _.groupBy(studentMoodData, (entry) =>
-			dayjs(entry.created_at).format('YYYY-MM-DD')
-		);
-
-		dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		daily = _.sortBy(_.keys(groupedByDay));
-		dailyMostFreqMood = _.head(
-			_(groupedByDay).flatMap().countBy('mood_label').entries().maxBy(_.last)
-		);
-		dailyMostFreqReason = _.head(
-			_(groupedByDay).flatMap().countBy('reason_label').entries().maxBy(_.last)
-		);
-	}
-
-	$: if (selectedLineChart === 'weekly') {
-		const groupedByWeek = _.groupBy(studentMoodData, (entry) =>
-			getWeekNumberString(dayjs(entry.created_at))
-		);
-
-		weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
-			const weekNumber = parseInt(week.replace('Week ', ''));
-			return weekNumber;
-		});
-		weeklyMostFreqMood = _.head(
-			_(groupedByWeek).flatMap().countBy('mood_label').entries().maxBy(_.last)
-		);
-		weeklyMostFreqReason = _.head(
-			_(groupedByWeek).flatMap().countBy('reason_label').entries().maxBy(_.last)
-		);
-	}
-
-	$: if (selectedLineChart === 'monthly') {
-		const groupedByMonth = _.groupBy(studentMoodData, (entry) =>
-			dayjs(entry.created_at).format('YYYY-MM')
-		);
-
-		monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		monthly = _.sortBy(_.keys(groupedByMonth));
-		monthlyMostFreqMood = _.head(
-			_(groupedByMonth).flatMap().countBy('mood_label').entries().maxBy(_.last)
-		);
-		monthlyMostFreqReason = _.head(
-			_(groupedByMonth).flatMap().countBy('reason_label').entries().maxBy(_.last)
-		);
-	}
-
-	$: if (selectedLineChart === 'yearly') {
-		const groupedByYear = _.groupBy(studentMoodData, (entry) =>
-			dayjs(entry.created_at).format('YYYY')
-		);
-
-		yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		yearly = _.sortBy(_.keys(groupedByYear));
-		yearlyMostFreqMood = _.head(
-			_(groupedByYear).flatMap().countBy('mood_label').entries().maxBy(_.last)
-		);
-		yearlyMostFreqReason = _.head(
-			_(groupedByYear).flatMap().countBy('reason_label').entries().maxBy(_.last)
-		);
-	}
-	let studentsWithConsecutiveLowMood = [];
-	$: {
-		const consecutiveLowMoodThreshold = 4;
-		const filteredStudents = new Map();
-
-		studentMoodData.forEach((studentMoodEntry) => {
-			const { student_id, mood_score, reason_label, created_at } = studentMoodEntry;
-
-			if (!created_at || mood_score >= 0) {
-				return; // Skip entries without created_at or with non-negative mood_score
-			}
-
-			const dateKey = new Date(created_at).toLocaleDateString();
-
-			if (!filteredStudents.has(student_id)) {
-				filteredStudents.set(student_id, new Map());
-			}
-
-			const studentData = filteredStudents.get(student_id);
-			if (!studentData.has(dateKey)) {
-				studentData.set(dateKey, {
-					moodScores: [],
-					reasonLabels: []
-				});
-			}
-
-			studentData.get(dateKey).moodScores.push(mood_score);
-			studentData.get(dateKey).reasonLabels.push(reason_label);
-		});
-
-		const consecutiveThreshold = 4;
+    const consecutiveThreshold = 4;
 		let maxConsecutiveDays = 0;
-		const consecutiveDaysMap = new Map();
-    
+
+		filteredStudents = studentMoodData.reduce(
+			(students, { student_id, mood_score, reason_label, created_at }) => {
+				if (!created_at || mood_score >= 0) {
+					return students;
+				}
+
+				const dateKey = new Date(created_at).toLocaleDateString();
+
+				const studentData = students.get(student_id) || new Map();
+				studentData.set(dateKey, {
+					moodScores: [...(studentData.get(dateKey)?.moodScores || []), mood_score],
+					reasonLabels: [...(studentData.get(dateKey)?.reasonLabels || []), reason_label]
+				});
+
+				return students.set(student_id, studentData);
+			},
+			new Map()
+		);
+
 		for (const [studentId, studentEntry] of filteredStudents) {
 			let consecutiveDays = 0;
 			let previousDate = null;
+			let currentStreakData = null;
 
 			for (const [dateKey, moodData] of studentEntry) {
 				const currentDate = dayjs(dateKey);
-				const moodScores = moodData.moodScores;
 
-				if (previousDate === null) {
-					consecutiveDays = 1; // Initialize the streak
+				if (previousDate === null || currentDate.diff(previousDate, 'day') === 1) {
+					consecutiveDays++;
 				} else {
-					// Check if the current date is consecutive to the previous date
-					if (currentDate.diff(previousDate, 'day') === 1) {
-						consecutiveDays++;
-					} else {
-						consecutiveDays = 1; // Reset streak if not consecutive
-					}
+					consecutiveDays = 1;
 				}
 
 				if (consecutiveDays >= consecutiveThreshold) {
-					maxConsecutiveDays = Math.max(maxConsecutiveDays, consecutiveDays);
+					const lastRecord = (consecutiveDaysMap.get(studentId) || []).slice(-1)[0];
 
-					if (!consecutiveDaysMap.has(studentId)) {
-						consecutiveDaysMap.set(studentId, []);
+					if (
+						lastRecord &&
+						lastRecord.endDate === currentDate.subtract(1, 'day').format('M/D/YYYY')
+					) {
+						lastRecord.endDate = currentDate.format('M/D/YYYY');
+						lastRecord.moodScores.push(...moodData.moodScores);
+						lastRecord.reasonLabels.push(...moodData.reasonLabels);
+					} else {
+						maxConsecutiveDays = Math.max(maxConsecutiveDays, consecutiveDays);
+
+						currentStreakData = {
+							startDate: currentDate.subtract(consecutiveDays - 1, 'day').format('M/D/YYYY'),
+							endDate: currentDate.format('M/D/YYYY'),
+							moodScores: [],
+							reasonLabels: []
+						};
+
+						for (let i = 0; i < consecutiveDays; i++) {
+							const streakDate = currentDate
+								.subtract(consecutiveDays - 1 - i, 'day')
+								.format('M/D/YYYY');
+							const streakMoodData = studentEntry.get(streakDate);
+
+							if (streakMoodData) {
+								currentStreakData.moodScores.push(...streakMoodData.moodScores);
+								currentStreakData.reasonLabels.push(...streakMoodData.reasonLabels);
+							}
+						}
+
+						consecutiveDaysMap.set(
+							studentId,
+							(consecutiveDaysMap.get(studentId) || []).concat(currentStreakData)
+						);
 					}
-
-					consecutiveDaysMap.get(studentId).push({
-						startDate: previousDate.subtract(consecutiveDays - 1, 'day').format('YYYY-MM-DD'), // Corrected calculation
-						endDate: currentDate.format('YYYY-MM-DD'),
-						moodScores: moodScores,
-						reasonLabels: moodData.reasonLabels
-					});
 				}
-
 				previousDate = currentDate;
 			}
 		}
-		console.log(consecutiveDaysMap);
 	}
+
+  $: if(selectedLineChart === 'today'){
+    const todaysEntries = _.filter(
+      studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
+    ) || [];
+
+    timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss')) || [];
+    todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score) || [];
+    const todaysMoodLabels = _.map(todaysEntries, (entry) => entry.mood_label) || [];
+    const todaysReasonLabels = _.map(todaysEntries, (entry) => entry.reason_label) || [];
+    todayMostFreqMood = _.head(_(todaysMoodLabels).countBy().entries().maxBy(_.last));
+    todayMostFreqReason = _.head(_(todaysReasonLabels).countBy().entries().maxBy(_.last));
+  }
+
+  $: if(consecutiveDaysMap.length > 0){
+    for (const [studentId, streaks] of consecutiveDaysMap) {
+			consistentLowMoods.update((prevMap) => {
+				return new Map(prevMap).set(studentId, streaks);
+			});
+		}
+    console.log($consistentLowMoods)
+  }
+
+  function toggleChart(chart) {
+		selectedLineChart = chart;
+
+    if (selectedLineChart === 'daily') {
+      console.log('daily')
+      const groupedByDay = _.groupBy(studentMoodData, (entry) =>
+        dayjs(entry.created_at).format('YYYY-MM-DD')
+      );
+
+      dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      daily = _.sortBy(_.keys(groupedByDay));
+      dailyMostFreqMood = _.head(
+        _(groupedByDay).flatMap().countBy('mood_label').entries().maxBy(_.last)
+      );
+      dailyMostFreqReason = _.head(
+        _(groupedByDay).flatMap().countBy('reason_label').entries().maxBy(_.last)
+      );  
+    }else if(selectedLineChart === 'weekly'){
+      console.log('weekly')
+      const groupedByWeek = _.groupBy(studentMoodData, (entry) =>
+        getWeekNumberString(dayjs(entry.created_at))
+      );
+
+      weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
+        const weekNumber = parseInt(week.replace('Week ', ''));
+        return weekNumber;
+      });
+      weeklyMostFreqMood = _.head(
+        _(groupedByWeek).flatMap().countBy('mood_label').entries().maxBy(_.last)
+      );
+      weeklyMostFreqReason = _.head(
+        _(groupedByWeek).flatMap().countBy('reason_label').entries().maxBy(_.last)
+      );
+    }else if(selectedLineChart === 'monthly'){
+      console.log('monthly')
+      const groupedByMonth = _.groupBy(studentMoodData, (entry) =>
+        dayjs(entry.created_at).format('YYYY-MM')
+      );
+
+      monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      monthly = _.sortBy(_.keys(groupedByMonth));
+      monthlyMostFreqMood = _.head(
+        _(groupedByMonth).flatMap().countBy('mood_label').entries().maxBy(_.last)
+      );
+      monthlyMostFreqReason = _.head(
+        _(groupedByMonth).flatMap().countBy('reason_label').entries().maxBy(_.last)
+      );
+    }else if(selectedLineChart === 'yearly'){
+      console.log('yearly')
+      const groupedByYear = _.groupBy(studentMoodData, (entry) =>
+        dayjs(entry.created_at).format('YYYY')
+      );
+
+      yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      yearly = _.sortBy(_.keys(groupedByYear));
+      yearlyMostFreqMood = _.head(
+        _(groupedByYear).flatMap().countBy('mood_label').entries().maxBy(_.last)
+      );
+      yearlyMostFreqReason = _.head(
+        _(groupedByYear).flatMap().countBy('reason_label').entries().maxBy(_.last)
+      );
+    }
+	}
+
+	const getWeekNumberString = (date) => {
+		const firstDayOfYear = dayjs(date).startOf('year').day(1);
+		const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
+		return `Week ${weekDiff}`;
+	};
 </script>
 
 <svelte:head>

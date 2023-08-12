@@ -25,9 +25,6 @@
 		];
 		const moodScores = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
 
-		// a lodash function that returns the object with the minimum value of the callback function
-		// which is the absolute value of the difference between the mood score and the current score
-		// a.k.a the nearest mood score
 		const nearestIndex = minBy(moodScores, (moodScore) => Math.abs(moodScore - score));
 		return moodLabels[moodScores.indexOf(nearestIndex)];
 	}

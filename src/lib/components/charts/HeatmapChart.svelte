@@ -49,7 +49,7 @@
 				{
 					name: 'Test',
 					type: 'heatmap',
-					data: heatmapData,
+					data: heatmapData || [],
 					label: {
 						show: true
 					},
