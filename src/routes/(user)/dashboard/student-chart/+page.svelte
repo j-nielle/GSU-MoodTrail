@@ -199,7 +199,7 @@
 	<title>Student Chart</title>
 </svelte:head>
 
-<div class="bg-zinc-50 p-4 flex flex-col space-y-5 outline outline-red-500 outline-1">
+<div class="bg-zinc-50 p-4 flex flex-col space-y-5">
 	<div class="space-x-4 flex flex-row max-w-full items-end">
 		<div class="flex gap-2">
 			<Search size="md" class="w-fit h-11 bg-white" placeholder="Search for ID or name" bind:value={searchTerm} on:input={() => {
