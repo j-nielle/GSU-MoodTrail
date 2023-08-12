@@ -42,19 +42,15 @@
 </script>
 
 {#if $newRequest}
-	<Toast
-		position="top-right"
-		simple
-		contentClass="flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center"
-	>
-		<BellRingSolid class="text-blue-700" />
+	<Toast position="top-right" simple contentClass="flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center">
+		<span tabindex="-1"><BellRingSolid class="text-blue-700" /></span>
 		<div class="pl-4">
 			<span class="font-bold text-blue-700">(NEW)</span> Help request received!
 		</div>
 	</Toast>
 {/if}
 
-<div class="p-10 mt-3 bg-slate-200/20">
+<div class="p-10">
 	<div class="flex items-stretch space-x-3">
 		<Sidebar>
 			<SidebarWrapper class="bg-white drop-shadow-lg ring-1 h-screen">
@@ -79,3 +75,5 @@
 		</Sidebar>
 	</div>
 </div>
+
+<slot />

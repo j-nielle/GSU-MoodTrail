@@ -18,15 +18,15 @@
 
 	export let data;
 
-	let user = {};
+	$: user = {};
 
 	$: ({ supabase, session } = data);
-
+	console.log(data);
 	onMount(() => {
-		const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-			// @ts-ignore
-			if (session != null) user = session.user;
-			if (event == 'SIGNED_OUT') {
+		const {
+			data: { subscription }
+		} = supabase.auth.onAuthStateChange((event, _session) => {
+			if (_session?.expires_at !== session?.expires_at) {
 				invalidate('supabase:auth');
 			}
 		});
@@ -37,7 +37,10 @@
 	$: activeUrl = $page.url.pathname;
 </script>
 
-<Navbar class="p-4 drop-shadow-sm relative z-50" navDivClass="mx-auto flex flex-wrap justify-between items-center container">
+<Navbar
+	class="p-4 drop-shadow-sm relative z-50"
+	navDivClass="mx-auto flex flex-wrap justify-between items-center container"
+>
 	{#if session}
 		<NavBrand href="/dashboard" class="space-x-4">
 			<img src="/src/lib/img/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit" />
@@ -50,36 +53,57 @@
 
 	{#if session}
 		<NavUl>
-			<NavLi href="/dashboard" active={activeUrl === '/dashboard'} activeClass="font-semibold text-blue-700">Dashboard</NavLi>
-			<NavLi href="/dashboard/requests" active={activeUrl === '/dashboard/requests'} activeClass="font-semibold text-blue-700">Requests</NavLi>
-			<NavLi href="/dashboard/student-chart" active={activeUrl === '/dashboard/student-chart'} activeClass="font-semibold text-blue-700">Student Chart</NavLi>
+			<NavLi
+				href="/dashboard"
+				active={activeUrl === '/dashboard'}
+				activeClass="font-semibold text-blue-700">Dashboard</NavLi
+			>
+			<NavLi
+				href="/dashboard/requests"
+				active={activeUrl === '/dashboard/requests'}
+				activeClass="font-semibold text-blue-700">Requests</NavLi
+			>
+			<NavLi
+				href="/dashboard/student-chart"
+				active={activeUrl === '/dashboard/student-chart'}
+				activeClass="font-semibold text-blue-700">Student Chart</NavLi
+			>
 		</NavUl>
 		<label for="avatar-menu">
 			<Avatar
 				class="cursor-pointer fixed"
-				data-name={user?.user_metadata?.name ?? 'User'}
+				data-name={session?.user?.user_metadata?.name ?? 'User'}
 				id="avatar-menu"
 				alt="User Profile Pic"
 				border
-				>{user?.user_metadata?.name ?? 'User'}
+				>{session?.user?.user_metadata?.name ?? 'User'}
 			</Avatar>
 		</label>
-		<Dropdown placement=left
-			triggeredBy="#avatar-menu" 
-			containerClass="drop-shadow-lg w-fit mt-8">		
+		<Dropdown
+			placement="left"
+			triggeredBy="#avatar-menu"
+			containerClass="drop-shadow-lg w-fit mt-8"
+		>
 			<DropdownHeader>
-				<span class="block text-sm"> {user?.user_metadata?.name ?? 'User'} </span>
-				<span class="block text-sm font-medium truncate"> {user?.email} </span>
+				<span class="block text-sm"> {session?.user?.user_metadata?.name ?? 'User'} </span>
+				<span class="block text-sm font-medium truncate"> {session?.user?.email} </span>
 			</DropdownHeader>
-			<DropdownItem class="cursor-pointer" href="/dashboard/settings/profile">Settings</DropdownItem>
+			<DropdownItem class="cursor-pointer" href="/dashboard/settings/profile">Settings</DropdownItem
+			>
 			<DropdownDivider />
 			<form method="POST" action="/logout">
-				<DropdownItem type="submit" class="py-2 text-sm font-medium cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600">Logout</DropdownItem>
+				<DropdownItem
+					type="submit"
+					class="py-2 text-sm font-medium cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600"
+					>Logout</DropdownItem
+				>
 			</form>
 		</Dropdown>
 	{:else}
 		<div class="flex space-x-4">
-			<Button href="/register" color="alternative" class="hover:text-gray-900 focus:text-gray-900">Register Account</Button>
+			<Button href="/register" color="alternative" class="hover:text-gray-900 focus:text-gray-900"
+				>Register Account</Button
+			>
 			<Button href="/login" color="purple" class="">Login</Button>
 		</div>
 	{/if}

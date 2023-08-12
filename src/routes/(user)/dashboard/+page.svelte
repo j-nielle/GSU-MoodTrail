@@ -21,8 +21,8 @@
 
 	$: ({ supabase } = data);
 
-	let xDataMC, yDataMC;
-	let uniqueMoodLabels;
+	let xDataMBC, yDataMBC;
+	//let uniqueMoodLabels;
 	let todayMostFreqMood, todayMostFreqReason;
 	let dailyMostFreqMood, dailyMostFreqReason;
 	let weeklyMostFreqMood, weeklyMostFreqReason;
@@ -75,15 +75,14 @@
 					table: 'AnonMood'
 				},
 				(payload) => {
-					console.log('AnonMood: New Entry!');
 					anonMoodData = _.cloneDeep([...anonMoodData, payload.new]);
 				}
 			)
 			.subscribe((status) => console.log('/dashboard/+page.svelte:', status));
 
-		return () => {
-			dashboardChannel.unsubscribe();
-		};
+		// return () => {
+		// 	dashboardChannel.unsubscribe();
+		// };
 	});
 
 	$: if (studentMoodData) {
@@ -100,15 +99,17 @@
 		});
 
 		const moodCount = _.countBy(studentMoodData, 'mood_label');
-		xDataMC = _.keys(moodCount) || ['-'];
-		yDataMC = _.values(moodCount) || ['-'];
+		xDataMBC = _.keys(moodCount) || ['-'];
+		yDataMBC = _.values(moodCount) || ['-'];
 
-		uniqueMoodLabels = _.uniqBy(studentMoodData, 'mood_label').map((data) => data.mood_label);
+		// for future use idk, i forgor
+		//uniqueMoodLabels = _.uniqBy(studentMoodData, 'mood_label').map((data) => data.mood_label);
 
-		const groupedByMood = _.groupBy(studentMoodData, 'mood_label');
-		const countReasons = _.mapValues(groupedByMood, (moodGroup) =>
-			_.countBy(moodGroup, 'reason_label')
-		); // for ?? chart (count of reasons for each mood)
+		// for ?? chart (count of reasons for each mood)
+		// const groupedByMood = _.groupBy(studentMoodData, 'mood_label');
+		// const countReasons = _.mapValues(groupedByMood, (moodGroup) =>
+		// 	_.countBy(moodGroup, 'reason_label')
+		// );
 	}
 
 	$: if (selectedLineChart === 'today') {
@@ -187,92 +188,84 @@
 			_(groupedByYear).flatMap().countBy('reason_label').entries().maxBy(_.last)
 		);
 	}
+	let studentsWithConsecutiveLowMood = [];
+	$: {
+		const consecutiveLowMoodThreshold = 4;
+		const filteredStudents = new Map();
 
-	function findConsecutiveLowMoods() {
-		const groupedData = _.reduce(studentMoodData, (result, entry) => {
-			const { created_at, student_id, mood_score, reason_label } = entry;
-			const date = created_at.split('T')[0];
-			const key = `${date}_${student_id}`;
+		studentMoodData.forEach((studentMoodEntry) => {
+			const { student_id, mood_score, reason_label, created_at } = studentMoodEntry;
 
-			if (!result[key]) {
-				result[key] = {
+			if (!created_at || mood_score >= 0) {
+				return; // Skip entries without created_at or with non-negative mood_score
+			}
+
+			const dateKey = new Date(created_at).toLocaleDateString();
+
+			if (!filteredStudents.has(student_id)) {
+				filteredStudents.set(student_id, new Map());
+			}
+
+			const studentData = filteredStudents.get(student_id);
+			if (!studentData.has(dateKey)) {
+				studentData.set(dateKey, {
 					moodScores: [],
-					averageLowMoodScore: 0,
 					reasonLabels: []
-				};
-			}
-
-			if (mood_score < 0) {
-				result[key].moodScores.push(mood_score);
-				result[key].reasonLabels.push(reason_label);
-				const moodScores = result[key].moodScores;
-				if (moodScores.length > 0) {
-					const sum = moodScores.reduce((acc, score) => acc + score, 0);
-					result[key].averageLowMoodScore = sum / moodScores.length;
-				}
-			}
-			return result;
-		}, {} );
-
-		console.log(groupedData);
-		const consecutiveLowMoodStudents = new Map();
-
-		for (const key in groupedData) {
-			const [date, student_id] = key.split('_');
-			const studentData = groupedData[key];
-			const consecutiveLowMood = studentData.moodScores.every((score) => score < 0);
-
-			if (consecutiveLowMood) {
-				const lastInfo = consecutiveLowMoodStudents.get(student_id) || {
-					count: 0,
-					startDate: date,
-					endDate: date
-				};
-
-				const daysDifference = Math.ceil(
-					(new Date(date) - new Date(lastInfo.endDate)) / (1000 * 60 * 60 * 24)
-				);
-
-				consecutiveLowMoodStudents.set(student_id, {
-					count: daysDifference === 1 ? lastInfo.count + 1 : 1,
-					startDate: daysDifference === 1 ? lastInfo.startDate : date,
-					endDate: date
-				});
-			} else {
-				consecutiveLowMoodStudents.set(student_id, {
-					count: 0,
-					startDate: '',
-					endDate: ''
 				});
 			}
-		}
 
-		const dateRanges = Array.from(consecutiveLowMoodStudents)
-			.filter(([student_id, info]) => info.count >= 4)
-			.map(([student_id, info]) => {
-				const { startDate, endDate } = info;
-				const regex = new RegExp(`^${startDate}_${student_id}|${endDate}_${student_id}$`);
-				const moodScores = [];
-				const reasonLabels = [];
+			studentData.get(dateKey).moodScores.push(mood_score);
+			studentData.get(dateKey).reasonLabels.push(reason_label);
+		});
 
-				for (const key in groupedData) {
-					if (regex.test(key)) {
-						moodScores.push(...groupedData[key].moodScores);
-						reasonLabels.push(...groupedData[key].reasonLabels);
+		const consecutiveThreshold = 4;
+		let maxConsecutiveDays = 0;
+		const consecutiveDaysMap = new Map();
+    
+		for (const [studentId, studentEntry] of filteredStudents) {
+			let consecutiveDays = 0;
+			let previousDate = null;
+
+			for (const [dateKey, moodData] of studentEntry) {
+				const currentDate = dayjs(dateKey);
+				const moodScores = moodData.moodScores;
+
+				if (previousDate === null) {
+					consecutiveDays = 1; // Initialize the streak
+				} else {
+					// Check if the current date is consecutive to the previous date
+					if (currentDate.diff(previousDate, 'day') === 1) {
+						consecutiveDays++;
+					} else {
+						consecutiveDays = 1; // Reset streak if not consecutive
 					}
 				}
 
-				return { student_id, startDate, endDate, moodScores, reasonLabels };
-			});
-		console.log(dateRanges);
+				if (consecutiveDays >= consecutiveThreshold) {
+					maxConsecutiveDays = Math.max(maxConsecutiveDays, consecutiveDays);
+
+					if (!consecutiveDaysMap.has(studentId)) {
+						consecutiveDaysMap.set(studentId, []);
+					}
+
+					consecutiveDaysMap.get(studentId).push({
+						startDate: previousDate.subtract(consecutiveDays - 1, 'day').format('YYYY-MM-DD'), // Corrected calculation
+						endDate: currentDate.format('YYYY-MM-DD'),
+						moodScores: moodScores,
+						reasonLabels: moodData.reasonLabels
+					});
+				}
+
+				previousDate = currentDate;
+			}
+		}
+		console.log(consecutiveDaysMap);
 	}
 </script>
 
 <svelte:head>
 	<title>Dashboard</title>
 </svelte:head>
-
-<Button on:click={findConsecutiveLowMoods} />
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3">
 	<div class="flex justify-end space-x-3 mt-0.5 outline outline-teal-500 outline-1">
@@ -360,7 +353,7 @@
 		<!-- Bar Chart and Line Chart -->
 		<div class="flex justify-between outline outline-pink-500 outline-1">
 			<div class="flex p-3 outline outline-blue-500 outline-1 bg-white rounded-sm drop-shadow-xl">
-				<MoodBarChart bind:xData={xDataMC} bind:yData={yDataMC} elementID={'dashboardMBC'} />
+				<MoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'dashboardMBC'} />
 			</div>
 			<div class="flex outline outline-purple-500 outline-1 bg-white rounded-sm drop-shadow-xl">
 				<div class="flex flex-col p-3">
