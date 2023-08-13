@@ -55,10 +55,10 @@
           consistentStreaksInfo.set(studentId, { streaksLength });
         });
       });
-		// return () => {
-		// 	toastChannel.unsubscribe();
-    //   unsubscribe();
-		// }
+		return () => {
+			toastChannel.unsubscribe();
+      unsubscribe();
+		}
 	});
 
   newRequest.set(false);

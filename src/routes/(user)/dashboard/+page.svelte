@@ -3,21 +3,33 @@
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
-	import { Card, Button, ButtonGroup, Label } from 'flowbite-svelte';
+	import { 
+    Card, 
+    Button, 
+    ButtonGroup, 
+    Label,
+    Table,
+		TableBody,
+		TableBodyCell,
+		TableBodyRow,
+		TableHead,
+		TableHeadCell,
+		TableSearch
+  } from 'flowbite-svelte';
 	import { ProfileCardOutline, FaceLaughOutline, BrainOutline } from 'flowbite-svelte-icons';
-	import TodayLineChart from '$lib/components/charts/TodayLineChart.svelte';
-	import DailyLineChart from '$lib/components/charts/DailyLineChart.svelte';
-	import WeeklyLineChart from '$lib/components/charts/WeeklyLineChart.svelte';
-	import MonthlyLineChart from '$lib/components/charts/MonthlyLineChart.svelte';
-	import YearlyLineChart from '$lib/components/charts/YearlyLineChart.svelte';
-	import MoodBarChart from '$lib/components/charts/MoodBarChart.svelte';
-	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
+	import * as Charts from '$lib/components/charts';  
 	import { consistentLowMoods } from '$lib/moodNotify.js';
 
 	export let data;
 
 	let studentMoodData = data.studentMood;
 	let anonMoodData = data.anonMood;
+
+  const { 
+    TodayLineChart, DailyLineChart, 
+    WeeklyLineChart, MonthlyLineChart, 
+    YearlyLineChart, MoodBarChart, HeatmapChart 
+  } = Charts;
 
 	let xDataMBC, yDataMBC;
 	let todayMostFreqMood = [], todayMostFreqReason = [];
@@ -410,10 +422,8 @@
 			<div class="bg-white rounded-sm drop-shadow-xl p-4 outline outline-yellow-500 outline-1">
 				<HeatmapChart {heatmapData} elementID={'dashboardHM'} />
 			</div>
-			<Card
-				class="max-h-8 justify-center outline outline-pink-600 outline-1 bg-slate-800 flex-row items-center space-x-2"
-			>
-				<Label class="text-white">Another chart here</Label>
+			<Card class="max-h-8 justify-center outline outline-pink-600 outline-1 bg-slate-800 flex-row items-center space-x-2">
+				
 			</Card>
 		</div>
 	</div>
