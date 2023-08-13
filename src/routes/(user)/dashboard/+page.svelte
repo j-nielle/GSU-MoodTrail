@@ -362,7 +362,7 @@
 	</div>
 	<div class="flex flex-col space-y-3">
 		<!-- Bar Chart and Line Chart -->
-		<div class="flex justify-between outline outline-pink-500 outline-1">
+		<div class="flex justify-between">
 			<div class="flex p-3 outline outline-blue-500 outline-1 bg-white rounded-sm drop-shadow-xl">
 				<MoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'dashboardMBC'} />
 			</div>
