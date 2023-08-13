@@ -18,9 +18,10 @@
 
 	export let data;
 
-	let requestsData = data.requests;
+	let requestsData;
 
-	$: ({ supabase, page, limit, maxPage } = data);
+  $: requestsData = data.requests;
+	$: ({ supabase, maxPage, page, limit} = data);
 
 	let searchTerm = '';
 	let dateFilter = '';
@@ -32,7 +33,7 @@
 					schema: 'public',
 					table: 'RequestEntries'
 				},(payload) => {
-					requestsData = [payload.new, ...requestsData];
+					requestsData = [...requestsData, payload.new];
 				}
 			).subscribe((status) => console.log('inside /requests/+page.svelte:', status));
 

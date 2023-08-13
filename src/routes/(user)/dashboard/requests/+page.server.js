@@ -13,7 +13,7 @@ export async function load({ url, locals: { supabase, getSession } }) {
 
 	const { count } = await supabase
   .from("RequestEntries")
-  .select("id", { count: "exact" });
+  .select("id", { count: "estimated" });
 
   const { data: requests } = await supabase
     .from("RequestEntries")
@@ -21,7 +21,9 @@ export async function load({ url, locals: { supabase, getSession } }) {
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
-	const maxPage = Math.ceil(count / limit);
+  let maxPage = 0;
+
+  if(count != null)	{ maxPage = Math.ceil(count / limit); }
 
   return {
     requests: requests || [],
