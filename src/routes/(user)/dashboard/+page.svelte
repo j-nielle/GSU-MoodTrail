@@ -16,8 +16,8 @@
 
 	export let data;
 
-	let studentMoodData = [];
-	let anonMoodData = [];
+	let studentMoodData = data.studentMood;
+	let anonMoodData = data.anonMood;
 
 	let xDataMBC, yDataMBC;
 	let todayMostFreqMood = [], todayMostFreqReason = [];
@@ -30,19 +30,11 @@
 	let weekly = [], weeklyAverages = [];
 	let monthly = [], monthlyAverages = [];
 	let yearly = [], yearlyAverages = [];
-
 	let timestamps = [], todaysMoodScores = [];
 
 	let recentStudent;
-
 	let heatmapData;
-
 	let selectedLineChart = 'today';
-
-  let filteredStudents;
-	const consecutiveDaysMap = new Map();
-
-  let newStudentData = false;
 
   $: ({ supabase } = data);
 
@@ -54,27 +46,28 @@
 					schema: 'public',
 					table: 'StudentMoodEntries'
 				}, (payload) => {
-					console.log('New Student Data!');
-          newStudentData = true
-					studentMoodData = _.cloneDeep([...data.studentMood, payload.new]);
+					studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
 				}
 			).on('postgres_changes', {
 					event: 'INSERT',
 					schema: 'public',
 					table: 'AnonMood'
 				}, (payload) => {
-					anonMoodData = _.cloneDeep([...data.anonMood, payload.new]);
+					anonMoodData = _.cloneDeep([...anonMoodData, payload.new]);
 				}
-			).subscribe((status) => console.log('inside /dashboard/+page.svelte', status));
+			).subscribe((status) => console.log('inside dashboard page', status));
 
 		return () => {
 			dashboardChannel.unsubscribe();
 		};
 	});
 
-	$: if (newStudentData && studentMoodData.length > 0) {
-    console.log('re-run')
-		recentStudent = _.last(studentMoodData)['name'];
+	$: if(studentMoodData.length > 0){
+    let filteredStudents = new Map();
+	  const consecutiveDaysMap = new Map();
+    consistentLowMoods.set([]);
+
+    recentStudent = _.last(studentMoodData)['name'];
 
 		const groupedData = _.groupBy(studentMoodData, (data) => {
 			const date = new Date(data.created_at);
@@ -167,6 +160,21 @@
 				previousDate = currentDate;
 			}
 		}
+
+    consecutiveDaysMap.forEach((streakData, studentId) => {
+      const studentStreaks = streakData.map((streak) => ({
+        startDate: streak.startDate,
+        endDate: streak.endDate,
+        moodScores: streak.moodScores,
+        reasonLabels: streak.reasonLabels,
+      }));
+
+      consistentLowMoods.update((moods) => [
+        ...moods,
+        { studentId, streaks: studentStreaks },
+      ]);
+    });
+    console.log("consistentLowMoods",$consistentLowMoods)
 	}
 
   $: if(selectedLineChart === 'today'){
@@ -180,15 +188,6 @@
     const todaysReasonLabels = _.map(todaysEntries, (entry) => entry.reason_label) || [];
     todayMostFreqMood = _.head(_(todaysMoodLabels).countBy().entries().maxBy(_.last));
     todayMostFreqReason = _.head(_(todaysReasonLabels).countBy().entries().maxBy(_.last));
-  }
-
-  $: if(consecutiveDaysMap.length > 0){
-    for (const [studentId, streaks] of consecutiveDaysMap) {
-			consistentLowMoods.update((prevMap) => {
-				return new Map(prevMap).set(studentId, streaks);
-			});
-		}
-    console.log($consistentLowMoods)
   }
 
   function toggleChart(chart) {
