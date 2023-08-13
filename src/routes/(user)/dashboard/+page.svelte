@@ -418,13 +418,43 @@
 		</div>
 
 		<!-- Heatmap Chart -->
-		<div class="flex justify-start space-x-3 outline outline-fuchsia-500 outline-1">
+		<div class="flex space-x-4">
 			<div class="bg-white rounded-sm drop-shadow-xl p-4 outline outline-yellow-500 outline-1">
 				<HeatmapChart {heatmapData} elementID={'dashboardHM'} />
 			</div>
-			<Card class="max-h-8 justify-center outline outline-pink-600 outline-1 bg-slate-800 flex-row items-center space-x-2">
-				
-			</Card>
+			<div class="outline outline-1 p-5 self-stretch shadow-xl">
+        <Table divClass="text-left text-sm text-gray-500 dark:text-gray-400">
+          <caption class="text-lg font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
+            Students with consistent low moods
+            <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
+              By default, blah blah blah
+            </p>
+          </caption>
+          <TableHead class="border border-zinc-300">
+            <TableHeadCell>ID Number</TableHeadCell>
+            <TableHeadCell>Name</TableHeadCell>
+            <TableHeadCell>Date Range</TableHeadCell>
+            <TableHeadCell>Moods</TableHeadCell>
+            <TableHeadCell>Associated Reasons</TableHeadCell>
+          </TableHead>
+          <TableBody tableBodyClass="divide-y border border-zinc-300 max-h-40 overflow-y-auto">
+              <TableBodyRow>
+                <TableBodyCell>No data</TableBodyCell>
+                <TableBodyCell>No data</TableBodyCell>
+                <TableBodyCell>No data</TableBodyCell>
+                <TableBodyCell>No data</TableBodyCell>
+                <TableBodyCell>No data</TableBodyCell>
+              </TableBodyRow>
+                <TableBodyRow>
+                  <TableBodyCell></TableBodyCell>
+                  <TableBodyCell></TableBodyCell>
+                  <TableBodyCell></TableBodyCell>
+                  <TableBodyCell></TableBodyCell>
+                  <TableBodyCell></TableBodyCell>
+                </TableBodyRow>
+          </TableBody>
+        </Table>
+      </div>
 		</div>
 	</div>
 </div>

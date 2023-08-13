@@ -8,7 +8,7 @@
   export let elementID;
 
   // Define the days and hours for the axis labels
-  var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  var days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
   var hours = Array.from({ length: 24 }, (_, i) => i); // 
 
 	let heatmapChart;
@@ -95,4 +95,4 @@
 	});
 </script>
 
-<div id={elementID} style="width:750px; height:350px;" />
+<div id={elementID} style="width:620px; height:350px;" />
