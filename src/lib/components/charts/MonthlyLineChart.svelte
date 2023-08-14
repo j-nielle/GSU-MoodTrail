@@ -111,4 +111,4 @@
 	});
 </script>
 
-<div id={elementID} class="m-2" style="width:850px; height:297px;" />
+<div id={elementID} class="m-2" style="width:840px; height:297px;" />

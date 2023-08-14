@@ -95,4 +95,4 @@
 	});
 </script>
 
-<div id={elementID} style="width:620px; height:350px;" />
+<div id={elementID} style="width:610px; height:350px;" />
