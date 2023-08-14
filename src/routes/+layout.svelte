@@ -42,11 +42,11 @@
 	navDivClass="mx-auto flex flex-wrap justify-between items-center container"
 >
 	{#if session}
-		<NavBrand href="/dashboard" class="space-x-4">
+		<NavBrand tabindex="-1" href="/dashboard" class="space-x-4">
 			<img src="/src/lib/img/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit" />
 		</NavBrand>
 	{:else}
-		<NavBrand href="/">
+		<NavBrand tabindex="-1" href="/">
 			<img src="/src/lib/img/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit" />
 		</NavBrand>
 	{/if}
