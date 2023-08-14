@@ -208,8 +208,7 @@
 					selectedCourse = '';
 					selectedYearLevel = '';
 					selectedStudentName = '';
-				}}
-			/>
+			}} />
 		</div>
 
 		<Select placeholder="Select a course" class="font-normal w-56 h-11 bg-white" items={course} bind:value={selectedCourse}
@@ -218,16 +217,13 @@
         selectedYearLevel = '';
         selectedStudentName = '';
 				selectedCourse = e.target.value;
-			}}
-		/>
+		}} />
 		<Select placeholder="Select a year level" class="font-normal w-fit h-11 bg-white" items={yearLevel} bind:value={selectedYearLevel}
 			on:change={(e) => {
         selectedStudentName = '';
 				selectedYearLevel = e.target.value;
-			}}
-		/>
-		<Select placeholder="Select a student" class="font-normal w-full h-11 bg-white" items={student} bind:value={selectedStudentName}
-		/>
+		}} />
+		<Select placeholder="Select a student" class="font-normal w-full h-11 bg-white" items={student} bind:value={selectedStudentName} />
 		<Button class="h-11" size="sm" color="red"
 			on:click={() => {
 				dropdownFilter = false;
@@ -235,9 +231,7 @@
 				selectedCourse = '';
 				selectedYearLevel = '';
 				selectedStudentName = '';
-			}}
-		>Reset
-		</Button>
+		}}>Reset</Button>
 	</div>
 
 	<div class="bg-white dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col">

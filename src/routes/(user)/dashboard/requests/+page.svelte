@@ -129,9 +129,7 @@
 							<TableBodyCell>{req.request_type}</TableBodyCell>
 							<TableBodyCell>{new Date(req.created_at).toLocaleString()}</TableBodyCell>
 							<TableBodyCell class="flex justify-center">
-								<Checkbox
-									class="cursor-pointer mr-0"
-									bind:checked={req.iscompleted}
+								<Checkbox class="cursor-pointer mr-0" bind:checked={req.iscompleted}
 									on:change={() => toggleRequestStatus(req)}
 								/>
 							</TableBodyCell>

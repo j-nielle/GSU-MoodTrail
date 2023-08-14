@@ -288,7 +288,7 @@
 	<title>Dashboard</title>
 </svelte:head>
 
-<div class="bg-zinc-50 p-4 flex flex-col space-y-3">
+<div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-0">
 	<div class="flex justify-end space-x-3 mt-0.5 outline outline-teal-500 outline-1">
 		<Card class="max-h-8 w-fit justify-center drop-shadow-md flex-row items-center space-x-2">
 			<!-- (SOON): once recentStudent gets clicked, user will be led to the individual student section/page -->
@@ -440,7 +440,7 @@
           </p>
         </caption>
         <Table divClass="text-left text-sm text-gray-500 border border-zinc-300 dark:text-gray-400 max-h-72 overflow-y-scroll">
-          <TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky z-[1000]">
+          <TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky">
             <TableHeadCell>ID Number</TableHeadCell>
             <TableHeadCell>Date Range</TableHeadCell>
             <TableHeadCell>Average Mood</TableHeadCell>

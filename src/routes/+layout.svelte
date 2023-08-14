@@ -37,10 +37,7 @@
 	$: activeUrl = $page.url.pathname;
 </script>
 
-<Navbar
-	class="p-4 drop-shadow-sm relative z-50"
-	navDivClass="mx-auto flex flex-wrap justify-between items-center container"
->
+<Navbar class="!p-4 drop-shadow-sm w-full mx-auto " navDivClass="!mx-auto flex justify-between items-center w-full">
 	{#if session}
 		<NavBrand tabindex="-1" href="/dashboard" class="space-x-4">
 			<img src="/src/lib/img/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit" />
@@ -79,11 +76,7 @@
 				>{session?.user?.user_metadata?.name ?? 'User'}
 			</Avatar>
 		</label>
-		<Dropdown
-			placement="left"
-			triggeredBy="#avatar-menu"
-			containerClass="drop-shadow-lg w-fit mt-8"
-		>
+		<Dropdown  placement="left" triggeredBy="#avatar-menu" containerClass="z-50 drop-shadow-lg w-fit mt-8">
 			<DropdownHeader>
 				<span class="block text-sm"> {session?.user?.user_metadata?.name ?? 'User'} </span>
 				<span class="block text-sm font-medium truncate"> {session?.user?.email} </span>
@@ -92,18 +85,12 @@
 			>
 			<DropdownDivider />
 			<form method="POST" action="/logout">
-				<DropdownItem
-					type="submit"
-					class="py-2 text-sm font-medium cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600"
-					>Logout</DropdownItem
-				>
+				<DropdownItem type="submit" class="py-2 text-sm font-medium cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600">Logout</DropdownItem>
 			</form>
 		</Dropdown>
 	{:else}
 		<div class="flex space-x-4">
-			<Button href="/register" color="alternative" class="hover:text-gray-900 focus:text-gray-900"
-				>Register Account</Button
-			>
+			<Button href="/register" color="alternative" class="hover:text-gray-900 focus:text-gray-900">Register Account</Button>
 			<Button href="/login" color="purple" class="">Login</Button>
 		</div>
 	{/if}
