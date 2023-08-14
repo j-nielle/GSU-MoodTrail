@@ -1,7 +1,9 @@
 <script>
 	// @ts-nocheck
 	import _ from 'lodash';
+  import { page } from '$app/stores';
 	import dayjs from 'dayjs';
+  import { get } from 'svelte/store';
 	import { onMount } from 'svelte';
 	import { Card, Search, Button, ButtonGroup, Select } from 'flowbite-svelte';
   import {
@@ -124,47 +126,41 @@
 		todaysMoodScores = todaysEntries.map((entry) => entry.mood_score);
   }
 
-  $: if (selectedLineChart === 'daily') {
-		const groupedByDay = _.groupBy(filteredSearch, (entry) =>
-			dayjs(entry.created_at).format('YYYY-MM-DD')
-		);
-
-		dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		daily = _.sortBy(_.keys(groupedByDay));
-	}
-
-	$: if (selectedLineChart === 'weekly') {
-		const groupedByWeek = _.groupBy(filteredSearch, (entry) =>
-			getWeekNumberString(dayjs(entry.created_at))
-		);
-
-		weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
-			const weekNumber = parseInt(week.replace('Week ', ''));
-			return weekNumber;
-		});
-	}
-
-	$: if (selectedLineChart === 'monthly') {
-		const groupedByMonth = _.groupBy(filteredSearch, (entry) =>
-			dayjs(entry.created_at).format('YYYY-MM')
-		);
-
-		monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		monthly = _.sortBy(_.keys(groupedByMonth));
-	}
-
-	$: if (selectedLineChart === 'yearly') {
-		const groupedByYear = _.groupBy(filteredSearch, (entry) =>
-			dayjs(entry.created_at).format('YYYY')
-		);
-
-		yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-		yearly = _.sortBy(_.keys(groupedByYear));
-	}
-
 	function toggleChart(chart) {
 		selectedLineChart = chart;
+
+    if (selectedLineChart === 'daily') {
+      const groupedByDay = _.groupBy(filteredSearch, (entry) =>
+        dayjs(entry.created_at).format('YYYY-MM-DD')
+      );
+
+      dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      daily = _.sortBy(_.keys(groupedByDay));
+    } else if (selectedLineChart === 'weekly') {
+      const groupedByWeek = _.groupBy(filteredSearch, (entry) =>
+        getWeekNumberString(dayjs(entry.created_at))
+      );
+
+      weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
+        const weekNumber = parseInt(week.replace('Week ', ''));
+        return weekNumber;
+      });
+    } else if (selectedLineChart === 'monthly') {
+      const groupedByMonth = _.groupBy(filteredSearch, (entry) =>
+        dayjs(entry.created_at).format('YYYY-MM')
+      );
+
+      monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      monthly = _.sortBy(_.keys(groupedByMonth));
+    } else if (selectedLineChart === 'yearly') {
+      const groupedByYear = _.groupBy(filteredSearch, (entry) =>
+        dayjs(entry.created_at).format('YYYY')
+      );
+
+      yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      yearly = _.sortBy(_.keys(groupedByYear));
+	  }
 	}
 
   const getWeekNumberString = (date) => {
@@ -174,6 +170,12 @@
 	};
 
 	onMount(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchValue = urlParams.get('search');
+    if (searchValue) {
+      searchTerm = searchValue;
+    }
+
 		const dashboardChannel = supabase
 			.channel('dashboard')
 			.on(

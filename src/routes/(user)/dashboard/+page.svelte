@@ -3,6 +3,7 @@
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
 	import { 
     Card, 
     Button, 
@@ -13,8 +14,7 @@
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell,
-		TableSearch
+		TableHeadCell
   } from 'flowbite-svelte';
 	import { ProfileCardOutline, FaceLaughOutline, BrainOutline } from 'flowbite-svelte-icons';
   import {
@@ -287,7 +287,7 @@
 <svelte:head>
 	<title>Dashboard</title>
 </svelte:head>
-<!-- <Button on:click={scrollToTable} /> -->
+
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3">
 	<div class="flex justify-end space-x-3 mt-0.5 outline outline-teal-500 outline-1">
 		<Card class="max-h-8 w-fit justify-center drop-shadow-md flex-row items-center space-x-2">
@@ -458,7 +458,11 @@
             {#each $consistentLowMoods as student}
               {#each student.streaks as streak}
               <TableBodyRow class="z-10">
-                <TableBodyCell>{student.studentId}</TableBodyCell>
+                <TableBodyCell>
+                  <a href="/dashboard/student-chart?search={student.studentId}" rel="noopener noreferrer">
+                    {student.studentId}
+                  </a>
+                </TableBodyCell>
                 <TableBodyCell>{streak.startDate} - {streak.endDate}</TableBodyCell>
                 <TableBodyCell>{moodLabels[Math.round(streak.moodScores.reduce((a, b) => a + b, 0) / streak.moodScores.length) + 4]}</TableBodyCell>
                 <TableBodyCell>{streak.reasonLabels.reduce((a, b, i, arr) => (arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b))}</TableBodyCell>
