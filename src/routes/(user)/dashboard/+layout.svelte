@@ -1,9 +1,11 @@
 <script>
 	import { onMount } from 'svelte';
+  import { page } from '$app/stores';
 	import { newRequest } from '$lib/newRequest';
 	import { Alert } from 'flowbite-svelte';
 	import { BellRingSolid, CloseSolid } from 'flowbite-svelte-icons';
   import { consistentLowMoods } from '$lib/moodNotify.js';
+  import { focusTable } from '$lib/focusTable.js';
 	
 	export let data
 
@@ -15,7 +17,10 @@
 	$: ({ supabase } = data);
 
 	onMount(() => {
-		const toastChannel = supabase
+    newRequest.set(false);
+    focusTable.set(false);
+
+    const toastChannel = supabase
 			.channel('toast-requests')
 			.on('postgres_changes', {
 					event: 'INSERT',
@@ -61,25 +66,35 @@
 		}
 	});
 
-  newRequest.set(false);
+  $: if(activeUrl != '/dashboard') {
+    focusTable.update(()=>false)
+  }
+
+  $: activeUrl = $page.url.pathname;
 </script>
 
 <div class="items-center">
 	{#if $newRequest}
     <Alert color="blue" class="flex m-5 justify-between items-center content-center">
-      <BellRingSolid class="text-blue-700" />
+      <BellRingSolid tabindex="-1" class="text-blue-700" />
       <div>
         <span class="font-bold text-blue-700">(NEW)</span> Help request received!
       </div>
-      <CloseSolid class="cursor-pointer w-4 h-4 text-blue-500 hover:text-blue-700" on:click={() => newRequest.update(() => false)} />
+      <CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-blue-500 hover:text-blue-700" on:click={() => newRequest.update(() => false)} />
     </Alert>
   {:else if newLowMoodData}
     <Alert color="red" class="flex m-5 justify-between items-center content-center">
-      <BellRingSolid class="text-red-700" />
+      <BellRingSolid tabindex="-1" class="text-red-700" />
+      {#if activeUrl != '/dashboard'}
       <div class="text-center">
-        Click <a href="/dashboard"><span class="font-bold hover:underline">here</span></a> to view the list of students experiencing consistent low moods for atleast 4 consecutive days.
+        Go to dashboard to view the list of students experiencing consistent low moods for atleast 4 consecutive days.
       </div>
-      <CloseSolid class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700" on:click={() => newLowMoodData = false} />
+      {:else}
+      <div class="text-center">
+        Click <span role="button" tabindex="0" class="font-bold hover:underline" on:click={() => focusTable.update(()=>true)} on:keydown={() => focusTable.update(()=>true)}>here</span> to view the list of students experiencing consistent low moods for atleast 4 consecutive days.
+      </div>
+      {/if}
+      <CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700" on:click={() => newLowMoodData = false} />
     </Alert>
 	{/if}
 	<slot />
