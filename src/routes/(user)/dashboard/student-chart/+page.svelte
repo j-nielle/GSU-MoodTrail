@@ -4,13 +4,15 @@
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
 	import { Card, Search, Button, ButtonGroup, Select } from 'flowbite-svelte';
-	import TodayLineChart from '$lib/components/charts/TodayLineChart.svelte';
-	import DailyLineChart from '$lib/components/charts/DailyLineChart.svelte';
-	import WeeklyLineChart from '$lib/components/charts/WeeklyLineChart.svelte';
-	import MonthlyLineChart from '$lib/components/charts/MonthlyLineChart.svelte';
-	import YearlyLineChart from '$lib/components/charts/YearlyLineChart.svelte';
-	import MoodBarChart from '$lib/components/charts/MoodBarChart.svelte';
-	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
+  import {
+    TodayLineChart,
+    DailyLineChart,
+    WeeklyLineChart,
+    MonthlyLineChart,
+    YearlyLineChart,
+    MoodBarChart,
+    HeatmapChart
+  } from '$lib/components/charts/index.js';
 
 	export let data;
 	let studentMoodData = data.studentMood;
@@ -191,8 +193,6 @@
 			dashboardChannel.unsubscribe();
 		};
 	});
-
-  $: console.log(studentMoodData)
 </script>
 
 <svelte:head>

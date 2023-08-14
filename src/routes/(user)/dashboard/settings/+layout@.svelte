@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { Toast, Sidebar, SidebarGroup, SidebarItem, SidebarWrapper } from 'flowbite-svelte';
-	import { newRequest } from '$lib/newRequest';
+	import { newRequest } from '$lib/stores/index.js';
 	import { BellRingSolid } from 'flowbite-svelte-icons';
 
 	export let data

@@ -1,11 +1,9 @@
 <script>
 	import { onMount } from 'svelte';
   import { page } from '$app/stores';
-	import { newRequest } from '$lib/newRequest';
 	import { Alert } from 'flowbite-svelte';
 	import { BellRingSolid, CloseSolid } from 'flowbite-svelte-icons';
-  import { consistentLowMoods } from '$lib/moodNotify.js';
-  import { focusTable } from '$lib/focusTable.js';
+  import { consistentLowMoods, focusTable, newRequest } from '$lib/stores/index.js';
 	
 	export let data
 

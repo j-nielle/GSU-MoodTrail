@@ -18,15 +18,16 @@
 		TableSearch
   } from 'flowbite-svelte';
 	import { ProfileCardOutline, FaceLaughOutline, BrainOutline } from 'flowbite-svelte-icons';
-	import TodayLineChart from '$lib/components/charts/TodayLineChart.svelte';
-	import DailyLineChart from '$lib/components/charts/DailyLineChart.svelte';
-	import WeeklyLineChart from '$lib/components/charts/WeeklyLineChart.svelte';
-	import MonthlyLineChart from '$lib/components/charts/MonthlyLineChart.svelte';
-	import YearlyLineChart from '$lib/components/charts/YearlyLineChart.svelte';
-	import MoodBarChart from '$lib/components/charts/MoodBarChart.svelte';
-	import HeatmapChart from '$lib/components/charts/HeatmapChart.svelte';
-	import { consistentLowMoods } from '$lib/moodNotify.js';
-  import { focusTable } from '$lib/focusTable.js';
+  import {
+    TodayLineChart,
+    DailyLineChart,
+    WeeklyLineChart,
+    MonthlyLineChart,
+    YearlyLineChart,
+    MoodBarChart,
+    HeatmapChart
+  } from '$lib/components/charts/index.js';
+	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
 
 	export let data;
 
