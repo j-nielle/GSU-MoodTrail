@@ -57,7 +57,7 @@
   $: ({ supabase } = data);
 
 	onMount(() => {
-    const timer = setInterval(updateCurrent, interval);
+    //const timer = setInterval(updateCurrent, interval);
 
 		const dashboardChannel = supabase
 			.channel('dashboard')
@@ -78,7 +78,7 @@
 			).subscribe((status) => console.log('inside dashboard page', status));
 
 		return () => {
-      clearInterval(timer);
+      //clearInterval(timer);
 			dashboardChannel.unsubscribe();
 		};
 	});

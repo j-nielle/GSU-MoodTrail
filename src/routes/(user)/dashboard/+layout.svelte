@@ -71,9 +71,10 @@
   $: activeUrl = $page.url.pathname;
 </script>
 
-<div class="items-center">
-	{#if $newRequest}
-    <Alert color="blue" class="flex m-5 justify-between items-center content-center">
+<div class="bg-zinc-50 items-center">
+	<div class="px-4 pt-4">
+    {#if $newRequest}
+    <Alert class="bg-blue-100 text-blue-900 flex justify-between items-center content-center">
       <BellRingSolid tabindex="-1" class="text-blue-700" />
       <div>
         <span class="font-bold text-blue-700">(NEW)</span> Help request received!
@@ -81,7 +82,7 @@
       <CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-blue-500 hover:text-blue-700" on:click={() => newRequest.update(() => false)} />
     </Alert>
   {:else if newLowMoodData}
-    <Alert color="red" class="flex m-5 justify-between items-center content-center">
+    <Alert class="bg-red-200 flex justify-between items-center content-center text-red-900">
       <BellRingSolid tabindex="-1" class="text-red-700" />
       {#if activeUrl != '/dashboard'}
       <div class="text-center">
@@ -95,5 +96,6 @@
       <CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700" on:click={() => newLowMoodData = false} />
     </Alert>
 	{/if}
+  </div>
 	<slot />
 </div>
