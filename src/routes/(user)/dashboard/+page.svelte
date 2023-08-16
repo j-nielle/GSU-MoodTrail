@@ -51,9 +51,14 @@
 	let selectedLineChart = 'today';
   const moodLabels = ['Sad', 'Annoyed', 'Nervous', 'Bored', 'Neutral', 'Calm', 'Relaxed', 'Happy', 'Excited'];
 
+  let current = dayjs();
+  const interval = 1000; 
+
   $: ({ supabase } = data);
 
 	onMount(() => {
+    const timer = setInterval(updateCurrent, interval);
+
 		const dashboardChannel = supabase
 			.channel('dashboard')
 			.on('postgres_changes', {
@@ -73,6 +78,7 @@
 			).subscribe((status) => console.log('inside dashboard page', status));
 
 		return () => {
+      clearInterval(timer);
 			dashboardChannel.unsubscribe();
 		};
 	});
@@ -275,6 +281,10 @@
 		return `Week ${weekDiff}`;
 	};
 
+  function updateCurrent() {
+    current = dayjs().format('ddd MMMM D, YYYY h:mm:ss A');
+  }
+
   let tableRef;
 
   $: if ($focusTable) {
@@ -289,8 +299,11 @@
 </svelte:head>
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-0">
-	<div class="flex justify-end space-x-3 mt-0.5 outline outline-teal-500 outline-1">
-		<Card class="max-h-8 w-fit justify-center drop-shadow-md flex-row items-center space-x-2">
+	<div class="flex justify-between space-x-5">
+    <Card class="max-h-10 w-fit justify-center drop-shadow-md flex-row items-center space-x-2">
+      <Label class="font-semibold">{current}</Label>
+    </Card>
+		<Card class="max-h-10 w-full justify-center drop-shadow-md flex-row items-center space-x-2">
 			<!-- (SOON): once recentStudent gets clicked, user will be led to the individual student section/page -->
 			<ProfileCardOutline tabindex="-1" class="text-slate-900" />
 			<Label class="text-slate-900"
@@ -299,13 +312,13 @@
 			>
 		</Card>
 		{#if selectedLineChart === 'today'}
-			<Card class="max-h-8 w-fit justify-center drop-shadow-md flex-row items-center space-x-2">
+			<Card class="max-h-10 w-fit justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900"
 					>Most Frequent Mood: <span class="font-bold">{todayMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
-			<Card class="max-h-8 w-fit justify-center drop-shadow-md flex-row items-center space-x-2">
+			<Card class="max-h-10 w-fit justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900"
 					>Most Frequent Reason: <span class="font-bold">{todayMostFreqReason ?? 'N/A'}</span
@@ -313,13 +326,13 @@
 				>
 			</Card>
 		{:else if selectedLineChart === 'daily'}
-			<Card class="max-h-8 justify-center drop-shadow-md flex-row items-center space-x-2">
+			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900"
 					>Most Frequent Mood: <span class="font-bold">{dailyMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
-			<Card class="max-h-8 justify-center drop-shadow-md flex-row items-center space-x-2">
+			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900"
 					>Most Frequent Reason: <span class="font-bold">{dailyMostFreqReason ?? 'N/A'}</span
@@ -327,13 +340,13 @@
 				>
 			</Card>
 		{:else if selectedLineChart === 'weekly'}
-			<Card class="max-h-8 justify-center drop-shadow-md flex-row items-center space-x-2">
+			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900"
 					>Most Frequent Mood: <span class="font-bold">{weeklyMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
-			<Card class="max-h-8 justify-center drop-shadow-md flex-row items-center space-x-2">
+			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900"
 					>Most Frequent Reason: <span class="font-bold">{weeklyMostFreqReason ?? 'N/A'}</span
@@ -341,13 +354,13 @@
 				>
 			</Card>
 		{:else if selectedLineChart === 'monthly'}
-			<Card class="max-h-8 justify-center drop-shadow-md flex-row items-center space-x-2">
+			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900"
 					>Most Frequent Mood: <span class="font-bold">{monthlyMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
-			<Card class="max-h-8 justify-center drop-shadow-md flex-row items-center space-x-2">
+			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900"
 					>Most Frequent Reason: <span class="font-bold">{monthlyMostFreqReason ?? 'N/A'}</span
@@ -355,13 +368,13 @@
 				>
 			</Card>
 		{:else if selectedLineChart === 'yearly'}
-			<Card class="max-h-8 justify-center drop-shadow-md flex-row items-center space-x-2">
+			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900"
 					>Most Frequent Mood: <span class="font-bold">{yearlyMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
-			<Card class="max-h-8 justify-center drop-shadow-md flex-row items-center space-x-2">
+			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900"
 					>Most Frequent Reason: <span class="font-bold">{yearlyMostFreqReason ?? 'N/A'}</span
@@ -373,10 +386,10 @@
 	<div class="flex flex-col space-y-3">
 		<!-- Bar Chart and Line Chart -->
 		<div class="flex space-x-4">
-			<div class="p-4 outline outline-blue-500 outline-1 bg-white rounded-sm drop-shadow-xl">
+			<div class="p-4 bg-white rounded-sm  drop-shadow-md">
 				<MoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'dashboardMBC'} />
 			</div>
-			<div class="flex outline w-full outline-purple-500 outline-1 bg-white rounded-sm drop-shadow-xl items-center justify-center">
+			<div class="flex w-full bg-white rounded-sm  drop-shadow-md items-center justify-center">
 				<div class="flex flex-col p-3">
 					<div class="flex justify-between mb-4">
 						<ButtonGroup>
@@ -429,10 +442,10 @@
 
 		<!-- Heatmap Chart -->
 		<div class="flex space-x-4">
-			<div class="bg-white flex items-center rounded-sm drop-shadow-xl p-4 outline outline-yellow-500 outline-1">
+			<div class="bg-white flex items-center rounded-sm  drop-shadow-md p-4">
 				<HeatmapChart {heatmapData} elementID={'dashboardHM'} />
 			</div>
-			<div id="low-moods" bind:this={tableRef}  class="bg-white rounded-sm outline outline-1 !p-5 shadow-xl w-full">
+			<div id="low-moods" bind:this={tableRef}  class="bg-white rounded-sm !p-5 shadow-xl w-full">
         <caption class="text-lg font-bold text-left w-max text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
           Students with consistent low moods
           <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
