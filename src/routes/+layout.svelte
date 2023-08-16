@@ -5,6 +5,7 @@
 	import { page } from '$app/stores';
 	import {
 		Avatar,
+    Modal,
 		Navbar,
 		NavBrand,
 		NavLi,
@@ -18,7 +19,7 @@
 
 	export let data;
 
-	$: user = {};
+  let sessionExpired = false;
 
 	$: ({ supabase, session } = data);
   
@@ -27,6 +28,7 @@
 			data: { subscription }
 		} = supabase.auth.onAuthStateChange((event, _session) => {
 			if (_session?.expires_at !== session?.expires_at) {
+        sessionExpired = true;
 				invalidate('supabase:auth');
 			}
 		});
@@ -36,6 +38,12 @@
 
 	$: activeUrl = $page.url.pathname;
 </script>
+
+<Modal bind:open={sessionExpired} size="md">
+  <div class="text-center">
+    <h3 class="text-lg font-normal text-gray-500 dark:text-gray-400">Session expired. Refreshing page...</h3>
+  </div>
+</Modal>
 
 <Navbar class="!p-4 drop-shadow-sm w-full mx-auto " navDivClass="!mx-auto flex justify-between items-center w-full">
 	{#if session}
