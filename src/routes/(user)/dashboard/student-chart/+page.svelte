@@ -1,9 +1,7 @@
 <script>
 	// @ts-nocheck
 	import _ from 'lodash';
-  import { page } from '$app/stores';
 	import dayjs from 'dayjs';
-  import { get } from 'svelte/store';
 	import { onMount } from 'svelte';
 	import { Card, Search, Button, ButtonGroup, Select } from 'flowbite-svelte';
   import {
@@ -13,6 +11,7 @@
     MonthlyLineChart,
     YearlyLineChart,
     MoodBarChart,
+    PieChart,
     HeatmapChart
   } from '$lib/components/charts/index.js';
 
@@ -30,7 +29,6 @@
 	let selectedYearLevel;
 	let selectedStudentName;
 
-	let studentInfo;
 	let filteredSearch;
 
 	let dropdownFilter = false;
@@ -47,7 +45,10 @@
 	let monthly, monthlyAverages;
 	let yearly, yearlyAverages;
 
-	$: {
+  let xDataMBC, yDataMBC;
+  let pcData;
+
+	$: if(studentMoodData){
 		course = _.uniq(studentMoodData.map((data) => data.course)).map((course) => ({
 			value: course,
 			name: course
@@ -68,10 +69,8 @@
 			.sort()
 			.map((name) => ({ value: name, name: name }))
 			.value();
-	}
 
-  $: {
-    filteredSearch = _.filter(studentMoodData, (req) => {
+      filteredSearch = _.filter(studentMoodData, (req) => {
       const searchTermNumeric = /^\d{10}$/.test(searchTerm);
       const idMatch = searchTermNumeric && req.student_id.toString() === searchTerm;      
       const nameMatch = req.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -116,7 +115,18 @@
 		leastFrequentMood = sortedMoods[sortedMoods.length - 1];
 
 		countReasonsForMood = countReasons[sortedMoods[0]];
-  }
+
+    const moodCount = _.countBy(filteredSearch, 'mood_label') || [];
+		xDataMBC = _.keys(moodCount);
+		yDataMBC = _.values(moodCount);
+
+    pcData = xDataMBC.map((label, index) => {
+      return {
+        value: yDataMBC[index],
+        name: label
+      };
+    });
+	}
 
   $: if(selectedLineChart === 'today'){
     const todaysEntries = filteredSearch.filter(
@@ -231,13 +241,15 @@
 				selectedCourse = '';
 				selectedYearLevel = '';
 				selectedStudentName = '';
+        selectedLineChart = 'today';
 		}}>Reset</Button>
 	</div>
 
 	<div class="bg-white dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col">
-		<div class="flex flex-row space-x-6 justify-between">
+		<div class="flex space-x-6 justify-between">
 			<div class="flex flex-col p-5">
 				<h2 class="font-bold mb-2 text-xl">STUDENT INFORMATION</h2>
+        <hr class="mb-5">
 				{#if dropdownFilter || filteredSearch?.length > 0}
 					<p><strong>ID:</strong> {filteredSearch[0].student_id}</p>
 					<p><strong>Name:</strong> {filteredSearch[0].name}</p>
@@ -274,5 +286,9 @@
         {/if}
       </div>
 		</div>
+    <div class="flex outline outline-1 space-x-6 justify-between">
+      <PieChart bind:data={pcData} elementID={'studentPC'} />
+      <MoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'studentMBC'} />
+    </div>
 	</div>
 </div>

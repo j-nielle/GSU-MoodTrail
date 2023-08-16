@@ -4,37 +4,23 @@
 	import { onMount, afterUpdate } from 'svelte';
   import { moodColors } from '$lib/etc/index.js'
 
-	export let xData;
-	export let yData;
+	export let data;
   export let elementID;
 
-	let moodBarChart;
+	let pieChart;
 
 	onMount(() => {
-		moodBarChart = echarts.init(document.getElementById(elementID));
+		pieChart = echarts.init(document.getElementById(elementID));
 
-		moodBarChart.setOption({
+		pieChart.setOption({
 			title: {
-				text: 'Overall Mood Counts'
-			},
-			xAxis: {
-				type: 'category',
-				data: xData
-			},
-			yAxis: {
-				type: 'value'
+				text: 'Test'
 			},
 			series: [{
-        label: {
-          show: true,
-          rotate: 90,
-          color: 'black',
-          formatter: '{b}'
-        },
-        data: yData,
-        type: 'bar',
+        data: data,
+        type: 'pie',
+        radius: '50%',
         itemStyle: {
-          realtimeSort: true,
           color: function(params) {
             return moodColors[params.name] || '#5470c6';
           }
@@ -42,15 +28,11 @@
       }],
 			tooltip: {
 				show: true,
-				trigger: 'axis'
+				trigger: 'item'
 			},
 			toolbox: {
 				show: true,
 				feature: {
-					dataZoom: {
-						show: true,
-						yAxisIndex: 'none'
-					},
 					dataView: {
 						show: true,
 						readOnly: false
@@ -63,17 +45,14 @@
 		});
 
 		return () => {
-			moodBarChart.dispose();
+			pieChart.dispose();
 		};
 	});
 
 	afterUpdate(() => {
-		moodBarChart.setOption({
-			xAxis: {
-				data: xData
-			},
+		pieChart.setOption({
 			series: [{
-        data: yData
+        data: data
       }]
 		});
 	});
