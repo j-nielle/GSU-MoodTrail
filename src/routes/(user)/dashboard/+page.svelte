@@ -53,6 +53,8 @@
   let current = dayjs();
   const interval = 1000; 
 
+  let viewAnonData = false;
+
   $: ({ supabase } = data);
 
 	onMount(() => {
@@ -195,6 +197,11 @@
       ]);
     });
 	}
+
+  $: {
+    if(viewAnonData) console.log('view anonymous data')
+    else console.log('view student data')
+  }
 
   $: if(selectedLineChart === 'today'){
     const todaysEntries = _.filter(
@@ -400,8 +407,8 @@
 							<Button color="light" on:click={() => toggleChart('yearly')}>Yearly</Button>
 						</ButtonGroup>
 						<ButtonGroup>
-							<Button pill color="dark">Students</Button>
-							<Button pill>Anonymous</Button>
+							<Button pill color="dark" on:click={() => viewAnonData = false}>Students</Button>
+							<Button pill on:click={() => viewAnonData = true}>Anonymous</Button>
 						</ButtonGroup>
 					</div>
 
