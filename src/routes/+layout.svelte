@@ -24,12 +24,9 @@
 	$: ({ supabase, session } = data);
   
 	onMount(() => {
-		const {
-			data: { subscription }
-		} = supabase.auth.onAuthStateChange((event, _session) => {
+		const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {
       console.log(event)
-			if (_session?.expires_at !== session?.expires_at) {
-        sessionExpired = true;
+			if (_session?.expires_at !== session?.expires_at) { // token_refreshed event
 				invalidate('supabase:auth');
 			}
 		});
@@ -42,7 +39,7 @@
 
 <Modal bind:open={sessionExpired} size="md">
   <div class="text-center">
-    <h3 class="text-lg font-normal text-gray-500 dark:text-gray-400">Session expired. Refreshing page...</h3>
+    <h3 class="text-lg font-normal text-gray-500 dark:text-gray-400">Session has expired.</h3>
   </div>
 </Modal>
 
@@ -59,33 +56,25 @@
 
 	{#if session}
 		<NavUl>
-			<NavLi
-				href="/dashboard"
-				active={activeUrl === '/dashboard'}
-				activeClass="font-semibold text-blue-700">Dashboard</NavLi
-			>
-			<NavLi
-				href="/dashboard/requests"
-				active={activeUrl === '/dashboard/requests'}
-				activeClass="font-semibold text-blue-700">Requests</NavLi
-			>
-			<NavLi
-				href="/dashboard/student-chart"
-				active={activeUrl === '/dashboard/student-chart'}
-				activeClass="font-semibold text-blue-700">Student Chart</NavLi
-			>
+			<NavLi href="/dashboard" active={activeUrl === '/dashboard'} activeClass="font-semibold text-blue-700">
+        Dashboard
+      </NavLi>
+			<NavLi href="/dashboard/requests" active={activeUrl === '/dashboard/requests'} activeClass="font-semibold text-blue-700">
+        Requests
+      </NavLi>
+			<NavLi href="/dashboard/student-chart" active={activeUrl === '/dashboard/student-chart'} activeClass="font-semibold text-blue-700">
+        Student Chart
+      </NavLi>
 		</NavUl>
 		<label for="avatar-menu">
-			<Avatar
-				class="cursor-pointer fixed"
-				data-name={session?.user?.user_metadata?.name ?? 'User'}
+			<Avatar class="cursor-pointer fixed" data-name={session?.user?.user_metadata?.name ?? 'User'}
 				id="avatar-menu"
 				alt="User Profile Pic"
 				border
 				>{session?.user?.user_metadata?.name ?? 'User'}
 			</Avatar>
 		</label>
-		<Dropdown  placement="left" triggeredBy="#avatar-menu" containerClass="z-50 drop-shadow-lg w-fit mt-8">
+		<Dropdown placement="left" triggeredBy="#avatar-menu" containerClass="z-50 drop-shadow-lg w-fit mt-8">
 			<DropdownHeader>
 				<span class="block text-sm"> {session?.user?.user_metadata?.name ?? 'User'} </span>
 				<span class="block text-sm font-medium truncate"> {session?.user?.email} </span>
