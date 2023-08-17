@@ -286,7 +286,6 @@
 
   let tableRef;
 
-  $: console.log("dashboard",$focusTable, tableRef)
   $: if ($focusTable) {
     if (tableRef) {
       window.scrollTo(0, tableRef.offsetTop);
