@@ -8,9 +8,9 @@
 	export let data
 
   let newLowMoodData = false;
-  // let notificationText = '';
-  // let consistentStreaksInfo = new Map();
-  // const students = []
+  let notificationText = '';
+  let consistentStreaksInfo = new Map();
+  const students = []
 
 	$: ({ supabase } = data);
 
@@ -31,33 +31,33 @@
 				}
 			).subscribe((status) => console.log("inside dashboard layout",status));
 	
-      // const unsubscribe = consistentLowMoods.subscribe(updatedMoods => {
-      //   updatedMoods.forEach(moodEntry => {
-      //     const studentId = moodEntry.studentId;
-      //     const streaksLength = moodEntry.streaks.length;
+      const unsubscribe = consistentLowMoods.subscribe(updatedMoods => {
+        updatedMoods.forEach(moodEntry => {
+          const studentId = moodEntry.studentId;
+          const streaksLength = moodEntry.streaks.length;
 
-      //     if (!students.includes(studentId)) {
-      //       students.push(studentId);
-      //     }
+          if (!students.includes(studentId)) {
+            students.push(studentId);
+          }
 
-      //     if (consistentStreaksInfo.has(studentId)) {
-      //       if (streaksLength !== consistentStreaksInfo.get(studentId).streaksLength) {
-      //         newLowMoodData = true;
-      //         notificationText += `New low mood streaks for student ${studentId}`;
-      //         console.log('new streaks for student', studentId)
-      //       }
-      //     } else {
-      //       newLowMoodData = true;
-      //       notificationText += `Low mood streak for student ${studentId}`;
-      //       console.log('Low mood streak for student', studentId)
-      //     }
+          if (consistentStreaksInfo.has(studentId)) {
+            if (streaksLength !== consistentStreaksInfo.get(studentId).streaksLength) {
+              newLowMoodData = true;
+              notificationText += `New low mood streaks for student ${studentId}`;
+              console.log('new streaks for student', studentId)
+            }
+          } else {
+            newLowMoodData = true;
+            notificationText += `Low mood streak for student ${studentId}`;
+            console.log('Low mood streak for student', studentId)
+          }
 
-      //     consistentStreaksInfo.set(studentId, { streaksLength });
-      //   });
-      // });
+          consistentStreaksInfo.set(studentId, { streaksLength });
+        });
+      });
 		return () => {
 			toastChannel.unsubscribe();
-      //unsubscribe();
+      unsubscribe();
 		}
 	});
 
@@ -65,12 +65,8 @@
     focusTable.update(()=>false)
   }
 
-  $: if($consistentLowMoods){
-    newLowMoodData = true;
-  }
-
   $: activeUrl = $page.url.pathname;
-  $: console.log("layout",$focusTable)
+  $: console.log("layout",newLowMoodData)
 </script>
 
 <div class="bg-zinc-50 items-center">
@@ -91,7 +87,7 @@
       <BellRingSolid tabindex="-1" class="text-red-700" />
       <div class="text-center">
         {#if activeUrl != '/dashboard'}
-        Go to dashboard to view the full list of students experiencing consistent low moods for atleast 4 consecutive days.
+        To view the list of students experiencing consistent low moods for atleast 4 consecutive days, navigate to <span class="font-semibold">dashboard</span>.
         {:else}
         Click <span role="button" tabindex="0" class="font-bold hover:underline" on:click={() => focusTable.update(()=>true)} on:keypress={() => focusTable.update(()=>true)}>here</span> to view the list of students experiencing consistent low moods for atleast 4 consecutive days.
         {/if}
