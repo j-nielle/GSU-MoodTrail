@@ -3,7 +3,6 @@
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
 	import { 
     Card, 
     Button, 
@@ -287,9 +286,11 @@
 
   let tableRef;
 
+  $: console.log("dashboard",$focusTable, tableRef)
   $: if ($focusTable) {
     if (tableRef) {
       window.scrollTo(0, tableRef.offsetTop);
+      focusTable.set(false)
     }
   }
 </script>
