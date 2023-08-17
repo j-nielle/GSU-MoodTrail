@@ -8,16 +8,13 @@
 	export let data
 
   let newLowMoodData = false;
-  let notificationText = '';
-  let consistentStreaksInfo = new Map();
-  const students = []
+  // let notificationText = '';
+  // let consistentStreaksInfo = new Map();
+  // const students = []
 
 	$: ({ supabase } = data);
 
 	onMount(() => {
-    newRequest.set(false);
-    focusTable.set(false);
-
     const toastChannel = supabase
 			.channel('toast-requests')
 			.on('postgres_changes', {
@@ -28,39 +25,39 @@
 					if (payload.new) {
 						newRequest.update(() => true)
 						setTimeout(() => {
-							newRequest.update(() => false)
+							newRequest.set(false);
 						}, 5000);
 					}
 				}
 			).subscribe((status) => console.log("inside dashboard layout",status));
 	
-      const unsubscribe = consistentLowMoods.subscribe(updatedMoods => {
-        updatedMoods.forEach(moodEntry => {
-          const studentId = moodEntry.studentId;
-          const streaksLength = moodEntry.streaks.length;
+      // const unsubscribe = consistentLowMoods.subscribe(updatedMoods => {
+      //   updatedMoods.forEach(moodEntry => {
+      //     const studentId = moodEntry.studentId;
+      //     const streaksLength = moodEntry.streaks.length;
 
-          if (!students.includes(studentId)) {
-            students.push(studentId);
-          }
+      //     if (!students.includes(studentId)) {
+      //       students.push(studentId);
+      //     }
 
-          if (consistentStreaksInfo.has(studentId)) {
-            if (streaksLength !== consistentStreaksInfo.get(studentId).streaksLength) {
-              newLowMoodData = true;
-              notificationText += `New low mood streaks for student ${studentId}`;
-              console.log('new streaks for student', studentId)
-            }
-          } else {
-            newLowMoodData = true;
-            notificationText += `Low mood streak for student ${studentId}`;
-            console.log('Low mood streak for student', studentId)
-          }
+      //     if (consistentStreaksInfo.has(studentId)) {
+      //       if (streaksLength !== consistentStreaksInfo.get(studentId).streaksLength) {
+      //         newLowMoodData = true;
+      //         notificationText += `New low mood streaks for student ${studentId}`;
+      //         console.log('new streaks for student', studentId)
+      //       }
+      //     } else {
+      //       newLowMoodData = true;
+      //       notificationText += `Low mood streak for student ${studentId}`;
+      //       console.log('Low mood streak for student', studentId)
+      //     }
 
-          consistentStreaksInfo.set(studentId, { streaksLength });
-        });
-      });
+      //     consistentStreaksInfo.set(studentId, { streaksLength });
+      //   });
+      // });
 		return () => {
 			toastChannel.unsubscribe();
-      unsubscribe();
+      //unsubscribe();
 		}
 	});
 
@@ -68,12 +65,17 @@
     focusTable.update(()=>false)
   }
 
+  $: if($consistentLowMoods){
+    newLowMoodData = true;
+  }
+
   $: activeUrl = $page.url.pathname;
+  $: console.log("layout",$focusTable)
 </script>
 
 <div class="bg-zinc-50 items-center">
+  {#if $newRequest}
 	<div class="px-4 pt-4">
-    {#if $newRequest}
     <Alert class="bg-blue-100 text-blue-900 flex justify-between items-center content-center">
       <BellRingSolid tabindex="-1" class="text-blue-700" />
       <div>
@@ -81,21 +83,22 @@
       </div>
       <CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-blue-500 hover:text-blue-700" on:click={() => newRequest.update(() => false)} />
     </Alert>
-  {:else if newLowMoodData}
+  </div>
+  {/if}
+  {#if newLowMoodData}
+  <div class="px-4 pt-4">
     <Alert class="bg-red-200 flex justify-between items-center content-center text-red-900">
       <BellRingSolid tabindex="-1" class="text-red-700" />
-      {#if activeUrl != '/dashboard'}
       <div class="text-center">
-        Go to dashboard to view the list of students experiencing consistent low moods for atleast 4 consecutive days.
-      </div>
-      {:else}
-      <div class="text-center">
+        {#if activeUrl != '/dashboard'}
+        Go to dashboard to view the full list of students experiencing consistent low moods for atleast 4 consecutive days.
+        {:else}
         Click <span role="button" tabindex="0" class="font-bold hover:underline" on:click={() => focusTable.update(()=>true)} on:keypress={() => focusTable.update(()=>true)}>here</span> to view the list of students experiencing consistent low moods for atleast 4 consecutive days.
+        {/if}
       </div>
-      {/if}
       <CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700" on:click={() => newLowMoodData = false} />
     </Alert>
-	{/if}
   </div>
-	<slot />
+  {/if}
 </div>
+<slot />
