@@ -8,12 +8,13 @@
 	export let yData;
   export let elementID;
 
-	let moodBarChart;
+	let horizontalMoodBarChart;
 
 	onMount(() => {
-		moodBarChart = echarts.init(document.getElementById(elementID));
+    console.log(xData,yData)
+		horizontalMoodBarChart = echarts.init(document.getElementById(elementID));
 
-		moodBarChart.setOption({
+		horizontalMoodBarChart.setOption({
 			title: {
 				text: 'Overall Mood Counts'
 			},
@@ -35,7 +36,6 @@
 			series: [{
         data: yData,
         type: 'bar',
-        realtimeSort: true,
         barMaxWidth: 15,
         itemStyle: {
           color: function(params) {
@@ -69,13 +69,13 @@
 		});
 
 		return () => {
-			moodBarChart.dispose();
+			horizontalMoodBarChart.dispose();
 		};
 	});
 
 	afterUpdate(() => {
-		moodBarChart.setOption({
-			xAxis: {
+		horizontalMoodBarChart.setOption({
+			yAxis: {
 				data: xData
 			},
 			series: [{

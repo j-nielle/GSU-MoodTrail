@@ -22,7 +22,7 @@
     WeeklyLineChart,
     MonthlyLineChart,
     YearlyLineChart,
-    MoodBarChart,
+    HorizontalMoodBarChart,
     HeatmapChart
   } from '$lib/components/charts/index.js';
 	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
@@ -102,7 +102,7 @@
 		const moodCount = _.countBy(studentMoodData, 'mood_label') || [];
 		xDataMBC = _.keys(moodCount);
 		yDataMBC = _.values(moodCount);
-
+    
     const consecutiveThreshold = 4;
 		let maxConsecutiveDays = 0;
 
@@ -387,7 +387,7 @@
 		<!-- Bar Chart and Line Chart -->
 		<div class="flex space-x-4">
 			<div class="p-4 bg-white rounded-sm drop-shadow-md">
-				<MoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'dashboardMBC'} />
+				<HorizontalMoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'dashboardHMBC'} />
 			</div>
 			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center">
 				<div class="flex flex-col space-y-7">
