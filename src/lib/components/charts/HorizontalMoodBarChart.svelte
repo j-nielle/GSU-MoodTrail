@@ -11,7 +11,6 @@
 	let horizontalMoodBarChart;
 
 	onMount(() => {
-    console.log(xData,yData)
 		horizontalMoodBarChart = echarts.init(document.getElementById(elementID));
 
 		horizontalMoodBarChart.setOption({
