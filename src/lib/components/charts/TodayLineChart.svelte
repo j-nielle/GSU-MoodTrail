@@ -110,4 +110,4 @@
 	});
 </script>
 
-<div id={elementID} class="m-2" style="width:840px; height:280px;" />
+<div id={elementID} style="width:790px; height:280px;" />

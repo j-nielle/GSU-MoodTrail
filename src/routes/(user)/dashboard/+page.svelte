@@ -300,10 +300,10 @@
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-0">
 	<div class="flex justify-between space-x-5">
-    <Card class="max-h-10 w-fit justify-center drop-shadow-md flex-row items-center space-x-2">
+    <Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
       <Label class="font-semibold">{current}</Label>
     </Card>
-		<Card class="max-h-10 w-full justify-center drop-shadow-md flex-row items-center space-x-2">
+		<Card class="max-h-10 w-full justify-center flex-row items-center space-x-2">
 			<!-- (SOON): once recentStudent gets clicked, user will be led to the individual student section/page -->
 			<ProfileCardOutline tabindex="-1" class="text-slate-900" />
 			<Label class="text-slate-900"
@@ -312,13 +312,13 @@
 			>
 		</Card>
 		{#if selectedLineChart === 'today'}
-			<Card class="max-h-10 w-fit justify-center drop-shadow-md flex-row items-center space-x-2">
+			<Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900"
 					>Most Frequent Mood: <span class="font-bold">{todayMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
-			<Card class="max-h-10 w-fit justify-center drop-shadow-md flex-row items-center space-x-2">
+			<Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900"
 					>Most Frequent Reason: <span class="font-bold">{todayMostFreqReason ?? 'N/A'}</span
@@ -386,12 +386,12 @@
 	<div class="flex flex-col space-y-3">
 		<!-- Bar Chart and Line Chart -->
 		<div class="flex space-x-4">
-			<div class="p-4 bg-white rounded-sm  drop-shadow-md">
+			<div class="p-4 bg-white rounded-sm drop-shadow-md">
 				<MoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'dashboardMBC'} />
 			</div>
-			<div class="flex w-full bg-white rounded-sm  drop-shadow-md items-center justify-center">
-				<div class="flex flex-col p-3">
-					<div class="flex justify-between mb-4">
+			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center">
+				<div class="flex flex-col space-y-7">
+					<div class="flex justify-between">
 						<ButtonGroup>
 							<Button color="light" on:click={() => toggleChart('today')}>Today</Button>
 							<Button color="light" on:click={() => toggleChart('daily')}>Daily</Button>
@@ -442,10 +442,10 @@
 
 		<!-- Heatmap Chart -->
 		<div class="flex space-x-4">
-			<div class="bg-white flex items-center rounded-sm  drop-shadow-md p-4">
+			<div class="bg-white flex items-center rounded-sm drop-shadow-md p-4">
 				<HeatmapChart {heatmapData} elementID={'dashboardHM'} />
 			</div>
-			<div id="low-moods" bind:this={tableRef}  class="bg-white rounded-sm !p-5 shadow-xl w-full">
+			<div id="low-moods" bind:this={tableRef}  class="bg-white rounded-sm !p-5 drop-shadow-md w-full">
         <caption class="text-lg font-bold text-left w-max text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
           Students with consistent low moods
           <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">

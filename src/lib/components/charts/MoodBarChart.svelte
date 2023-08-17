@@ -17,24 +17,27 @@
 			title: {
 				text: 'Overall Mood Counts'
 			},
-			xAxis: {
-				type: 'category',
-				data: xData
-			},
 			yAxis: {
-				type: 'value'
+				type: 'category',
+				data: xData,
+        axisLabel: {
+          fontSize: 10,
+          interval: 0, 
+          rotate: 40 
+        }
+			},
+			xAxis: {
+				type: 'value',
+        axisLabel: {
+          fontSize: 10
+        }
 			},
 			series: [{
-        label: {
-          show: true,
-          rotate: 90,
-          color: 'black',
-          formatter: '{b}'
-        },
         data: yData,
         type: 'bar',
+        realtimeSort: true,
+        barMaxWidth: 15,
         itemStyle: {
-          realtimeSort: true,
           color: function(params) {
             return moodColors[params.name] || '#5470c6';
           }
@@ -42,7 +45,10 @@
       }],
 			tooltip: {
 				show: true,
-				trigger: 'axis'
+				trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        }
 			},
 			toolbox: {
 				show: true,
@@ -79,4 +85,4 @@
 	});
 </script>
 
-<div id={elementID} style="width:390px; height:350px;" />
+<div id={elementID} style="width:440px; height:350px;" />
