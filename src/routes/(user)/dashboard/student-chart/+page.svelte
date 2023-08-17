@@ -10,10 +10,11 @@
     WeeklyLineChart,
     MonthlyLineChart,
     YearlyLineChart,
-    MoodBarChart,
+    HorizontalMoodBarChart,
     PieChart,
     HeatmapChart
   } from '$lib/components/charts/index.js';
+  import { consistentLowMoods } from '$lib/stores/index.js';
 
 	export let data;
 	let studentMoodData = data.studentMood;
@@ -253,6 +254,8 @@
 				{#if dropdownFilter || filteredSearch?.length > 0}
 					<p><strong>ID:</strong> {filteredSearch[0].student_id}</p>
 					<p><strong>Name:</strong> {filteredSearch[0].name}</p>
+          <p><strong>Course:</strong> {filteredSearch[0].course}</p>
+          <p><strong>Year Level:</strong> {filteredSearch[0].year_level}</p>
 					<p><strong>Latest Mood:</strong> {filteredSearch[filteredSearch.length - 1].mood_label ?? 'loading...'}
 					</p>
 					<p><strong>Most Frequent Mood:</strong> {mostFrequentMood ?? 'loading...'}</p>
@@ -288,7 +291,7 @@
 		</div>
     <div class="flex outline outline-1 space-x-6 justify-between">
       <PieChart bind:data={pcData} elementID={'studentPC'} />
-      <MoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'studentMBC'} />
+      <HorizontalMoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'studentHMBC'} />
     </div>
 	</div>
 </div>
