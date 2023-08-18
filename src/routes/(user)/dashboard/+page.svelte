@@ -15,7 +15,7 @@
 		TableHead,
 		TableHeadCell
   } from 'flowbite-svelte';
-	import { ProfileCardOutline, FaceLaughOutline, BrainOutline } from 'flowbite-svelte-icons';
+	import { ProfileCardOutline, FaceLaughOutline, BrainOutline, PrintSolid } from 'flowbite-svelte-icons';
   import {
     TodayLineChart,
     DailyLineChart,
@@ -31,7 +31,9 @@
 
 	let studentMoodData = data.studentMood;
 	let anonMoodData = data.anonMood;
+  let currentData = []
   
+  let todaysEntries = [];
 	let xDataMBC, yDataMBC;
 	let todayMostFreqMood = [], todayMostFreqReason = [];
 	let dailyMostFreqMood = [], dailyMostFreqReason = [];
@@ -53,7 +55,10 @@
   let current = dayjs();
   const interval = 1000; 
 
+  let tableRef;
   let viewAnonData = false;
+  let studentBtnColor = "dark";
+  let anonBtnColor = "light";
 
   $: ({ supabase } = data);
 
@@ -72,7 +77,7 @@
 			).on('postgres_changes', {
 					event: 'INSERT',
 					schema: 'public',
-					table: 'AnonMood'
+					table: 'AnonMoodEntries'
 				}, (payload) => {
 					anonMoodData = _.cloneDeep([...anonMoodData, payload.new]);
 				}
@@ -84,14 +89,14 @@
 		};
 	});
 
-	$: if(studentMoodData.length > 0){
+	$: if(currentData.length > 0){
     let filteredStudents = new Map();
 	  const consecutiveDaysMap = new Map();
     consistentLowMoods.set([]);
 
     recentStudent = _.last(studentMoodData)['name'];
 
-		const groupedData = _.groupBy(studentMoodData, (data) => {
+		const groupedData = _.groupBy(currentData, (data) => {
 			const date = new Date(data.created_at);
 			return [date.getDay(), date.getHours()];
 		});
@@ -101,7 +106,7 @@
 			return [[parseInt(hour), parseInt(day), data.length || '-']];
 		});
 
-		const moodCount = _.countBy(studentMoodData, 'mood_label') || [];
+		const moodCount = _.countBy(currentData, 'mood_label') || [];
 		xDataMBC = _.keys(moodCount);
 		yDataMBC = _.values(moodCount);
     
@@ -199,29 +204,28 @@
 	}
 
   $: {
-    if(viewAnonData) console.log('view anonymous data')
-    else console.log('view student data')
+    if(viewAnonData){
+      currentData = anonMoodData;
+    }else{
+      currentData = studentMoodData;
+    }
   }
-
-  $: if(selectedLineChart === 'today'){
-    const todaysEntries = _.filter(
-      studentMoodData, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
-    ) || [];
-
-    timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss')) || [];
-    todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score) || [];
-    const todaysMoodLabels = _.map(todaysEntries, (entry) => entry.mood_label) || [];
-    const todaysReasonLabels = _.map(todaysEntries, (entry) => entry.reason_label) || [];
-    todayMostFreqMood = _.head(_(todaysMoodLabels).countBy().entries().maxBy(_.last));
-    todayMostFreqReason = _.head(_(todaysReasonLabels).countBy().entries().maxBy(_.last));
-  }
-
-  function toggleChart(chart) {
-		selectedLineChart = chart;
-
-    if (selectedLineChart === 'daily') {
+  
+  $: {
+    if(selectedLineChart === 'today'){
+      todaysEntries = _.filter(
+        currentData, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
+      );   
+      timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss'));
+      todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score);
+      const todaysMoodLabels = _.map(todaysEntries, (entry) => entry.mood_label) || [];
+      const todaysReasonLabels = _.map(todaysEntries, (entry) => entry.reason_label) || [];
+      todayMostFreqMood = _.head(_(todaysMoodLabels).countBy().entries().maxBy(_.last));
+      todayMostFreqReason = _.head(_(todaysReasonLabels).countBy().entries().maxBy(_.last));
+    }
+    else if (selectedLineChart === 'daily') {
       console.log('daily')
-      const groupedByDay = _.groupBy(studentMoodData, (entry) =>
+      const groupedByDay = _.groupBy(currentData, (entry) =>
         dayjs(entry.created_at).format('YYYY-MM-DD')
       );
 
@@ -233,9 +237,10 @@
       dailyMostFreqReason = _.head(
         _(groupedByDay).flatMap().countBy('reason_label').entries().maxBy(_.last)
       );  
-    }else if(selectedLineChart === 'weekly'){
+    }
+    else if(selectedLineChart === 'weekly'){
       console.log('weekly')
-      const groupedByWeek = _.groupBy(studentMoodData, (entry) =>
+      const groupedByWeek = _.groupBy(currentData, (entry) =>
         getWeekNumberString(dayjs(entry.created_at))
       );
 
@@ -250,9 +255,10 @@
       weeklyMostFreqReason = _.head(
         _(groupedByWeek).flatMap().countBy('reason_label').entries().maxBy(_.last)
       );
-    }else if(selectedLineChart === 'monthly'){
+    }
+    else if(selectedLineChart === 'monthly'){
       console.log('monthly')
-      const groupedByMonth = _.groupBy(studentMoodData, (entry) =>
+      const groupedByMonth = _.groupBy(currentData, (entry) =>
         dayjs(entry.created_at).format('YYYY-MM')
       );
 
@@ -264,9 +270,10 @@
       monthlyMostFreqReason = _.head(
         _(groupedByMonth).flatMap().countBy('reason_label').entries().maxBy(_.last)
       );
-    }else if(selectedLineChart === 'yearly'){
+    }
+    else if(selectedLineChart === 'yearly'){
       console.log('yearly')
-      const groupedByYear = _.groupBy(studentMoodData, (entry) =>
+      const groupedByYear = _.groupBy(currentData, (entry) =>
         dayjs(entry.created_at).format('YYYY')
       );
 
@@ -279,6 +286,17 @@
         _(groupedByYear).flatMap().countBy('reason_label').entries().maxBy(_.last)
       );
     }
+  }
+
+  $: if ($focusTable) {
+    if (tableRef) {
+      window.scrollTo(0, tableRef.offsetTop);
+      focusTable.set(false)
+    }
+  }
+
+  function toggleChart(chart) {
+		selectedLineChart = chart;
 	}
 
 	const getWeekNumberString = (date) => {
@@ -287,17 +305,14 @@
 		return `Week ${weekDiff}`;
 	};
 
-  function updateCurrent() {
-    current = dayjs().format('ddd MMMM D, YYYY h:mm:ss A');
+  function toggleDataView() {
+    viewAnonData = !viewAnonData;
+    studentBtnColor = viewAnonData ? "light" : "dark";
+    anonBtnColor = viewAnonData ? "dark" : "light";
   }
 
-  let tableRef;
-
-  $: if ($focusTable) {
-    if (tableRef) {
-      window.scrollTo(0, tableRef.offsetTop);
-      focusTable.set(false)
-    }
+  function updateCurrent() {
+    current = dayjs();
   }
 </script>
 
@@ -306,14 +321,14 @@
 </svelte:head>
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-0">
-	<div class="flex justify-between space-x-5">
+	<div class="flex justify-between">
     <Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
-      <Label class="font-semibold">{current}</Label>
+      <Label class="font-semibold text-sm">{current.format('ddd MMMM D, YYYY h:mm:ss A')}</Label>
     </Card>
-		<Card class="max-h-10 w-full justify-center flex-row items-center space-x-2">
+		<Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
 			<!-- (SOON): once recentStudent gets clicked, user will be led to the individual student section/page -->
 			<ProfileCardOutline tabindex="-1" class="text-slate-900" />
-			<Label class="text-slate-900"
+			<Label class="text-slate-900 text-sm"
 				>Recent Student: <span class="font-bold cursor-pointer">{recentStudent ?? 'N/A'}</span
 				></Label
 			>
@@ -321,13 +336,13 @@
 		{#if selectedLineChart === 'today'}
 			<Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900"
+				<Label class="text-slate-900 text-sm"
 					>Most Frequent Mood: <span class="font-bold">{todayMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
 			<Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900"
+				<Label class="text-slate-900 text-sm"
 					>Most Frequent Reason: <span class="font-bold">{todayMostFreqReason ?? 'N/A'}</span
 					></Label
 				>
@@ -335,13 +350,13 @@
 		{:else if selectedLineChart === 'daily'}
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900"
+				<Label class="text-slate-900 text-sm"
 					>Most Frequent Mood: <span class="font-bold">{dailyMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900"
+				<Label class="text-slate-900 text-sm"
 					>Most Frequent Reason: <span class="font-bold">{dailyMostFreqReason ?? 'N/A'}</span
 					></Label
 				>
@@ -349,13 +364,13 @@
 		{:else if selectedLineChart === 'weekly'}
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900"
+				<Label class="text-slate-900 text-sm"
 					>Most Frequent Mood: <span class="font-bold">{weeklyMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900"
+				<Label class="text-slate-900 text-sm"
 					>Most Frequent Reason: <span class="font-bold">{weeklyMostFreqReason ?? 'N/A'}</span
 					></Label
 				>
@@ -363,13 +378,13 @@
 		{:else if selectedLineChart === 'monthly'}
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900"
+				<Label class="text-slate-900 text-sm"
 					>Most Frequent Mood: <span class="font-bold">{monthlyMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900"
+				<Label class="text-slate-900 text-sm"
 					>Most Frequent Reason: <span class="font-bold">{monthlyMostFreqReason ?? 'N/A'}</span
 					></Label
 				>
@@ -377,18 +392,21 @@
 		{:else if selectedLineChart === 'yearly'}
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900"
+				<Label class="text-slate-900 text-sm"
 					>Most Frequent Mood: <span class="font-bold">{yearlyMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900"
+				<Label class="text-slate-900 text-sm"
 					>Most Frequent Reason: <span class="font-bold">{yearlyMostFreqReason ?? 'N/A'}</span
 					></Label
 				>
 			</Card>
 		{/if}
+    <Button class="max-h-14 justify-center shadow-md flex-row items-center space-x-2" on:click={() => window.print()}>
+      <PrintSolid tabindex="-1" class="text-white" />
+    </Button>
 	</div>
 	<div class="flex flex-col space-y-3">
 		<!-- Bar Chart and Line Chart -->
@@ -396,7 +414,7 @@
 			<div class="p-4 bg-white rounded-sm drop-shadow-md">
 				<HorizontalMoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'dashboardHMBC'} />
 			</div>
-			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center">
+			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center p-4">
 				<div class="flex flex-col space-y-7">
 					<div class="flex justify-between">
 						<ButtonGroup>
@@ -407,8 +425,8 @@
 							<Button color="light" on:click={() => toggleChart('yearly')}>Yearly</Button>
 						</ButtonGroup>
 						<ButtonGroup>
-							<Button pill color="dark" on:click={() => viewAnonData = false}>Students</Button>
-							<Button pill on:click={() => viewAnonData = true}>Anonymous</Button>
+							<Button pill color={studentBtnColor} on:click={toggleDataView}>Students</Button>
+							<Button pill color={anonBtnColor} on:click={toggleDataView}>Anonymous</Button>
 						</ButtonGroup>
 					</div>
 
