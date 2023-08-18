@@ -68,6 +68,9 @@
 						show: true,
 						yAxisIndex: 'none'
 					},
+          restore: {
+						show: true
+					},
 					saveAsImage: {
 						show: true
 					}

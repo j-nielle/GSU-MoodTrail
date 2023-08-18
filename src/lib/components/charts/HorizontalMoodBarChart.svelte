@@ -54,7 +54,7 @@
 				feature: {
 					dataZoom: {
 						show: true,
-						yAxisIndex: 'none'
+						xAxisIndex: 'none'
 					},
 					dataView: {
 						show: true,
@@ -62,7 +62,10 @@
 					},
 					saveAsImage: {
 						show: true
-					}
+					},
+          restore: {
+						show: true
+					},
 				}
 			}
 		});

@@ -30,7 +30,6 @@
 	}
 
 	$: mood = yData.map((score) => getNearestMoodLabel(score));
-
 	onMount(() => {
 		todayLineChart = echarts.init(document.getElementById(elementID));
 
@@ -65,7 +64,7 @@
 				trigger: 'axis',
 				formatter: (params) => {
 					const index = params[0].dataIndex;
-					const moodScore = yData[index].toFixed(2);
+					const moodScore = yData[index];
 					const moodLabel = mood[index];
 					return `Mood: ${moodLabel} (<span class="font-bold">${moodScore}</span>)`;
 				}
