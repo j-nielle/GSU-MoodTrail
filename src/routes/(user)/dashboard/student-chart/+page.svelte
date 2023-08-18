@@ -2,8 +2,11 @@
 	// @ts-nocheck
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
+  import relativeTime from 'dayjs/plugin/relativeTime';
+  dayjs.extend(relativeTime);
 	import { onMount } from 'svelte';
-	import { Card, Search, Button, ButtonGroup, Select } from 'flowbite-svelte';
+  import { ClockSolid } from 'flowbite-svelte-icons';
+	import { Badge, Card, Search, Button, ButtonGroup, Select } from 'flowbite-svelte';
   import {
     TodayLineChart,
     DailyLineChart,
@@ -30,7 +33,7 @@
 	let selectedYearLevel;
 	let selectedStudentName;
 
-	let filteredSearch;
+	let result;
 
 	let dropdownFilter = false;
 	let mostFrequentMood;
@@ -48,6 +51,8 @@
 
   let xDataMBC, yDataMBC;
   let pcData;
+
+  let lcBtnColors = {}
 
 	$: if(studentMoodData){
 		course = _.uniq(studentMoodData.map((data) => data.course)).map((course) => ({
@@ -71,7 +76,7 @@
 			.map((name) => ({ value: name, name: name }))
 			.value();
 
-      filteredSearch = _.filter(studentMoodData, (req) => {
+      result = _.filter(studentMoodData, (req) => {
       const searchTermNumeric = /^\d{10}$/.test(searchTerm);
       const idMatch = searchTermNumeric && req.student_id.toString() === searchTerm;      
       const nameMatch = req.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -84,7 +89,7 @@
         (selectedStudentName ? (courseMatch && yearLevelMatch && studentNameMatch) : false);
     }).sort((a, b) => (dayjs(a.created_at).isBefore(dayjs(b.created_at)) ? -1 : 1));
 
-		const moodReason = filteredSearch.map((obj) => {
+		const moodReason = result.map((obj) => {
 			return {
 				mood: obj.mood_label,
 				reason: obj.reason_label
@@ -92,8 +97,8 @@
 		});
 
     // basically counts the number of occurences of each mood_labels
-    // sa filteredSearch 
-		let { moodCounts } = filteredSearch.reduce(
+    // sa result 
+		let { moodCounts } = result.reduce(
 			(acc, { mood_label }) => {
 				acc.moodCounts[mood_label] = (acc.moodCounts[mood_label] || 0) + 1;
 				return acc;
@@ -117,7 +122,7 @@
 
 		countReasonsForMood = countReasons[sortedMoods[0]];
 
-    const moodCount = _.countBy(filteredSearch, 'mood_label') || [];
+    const moodCount = _.countBy(result, 'mood_label') || [];
 		xDataMBC = _.keys(moodCount);
 		yDataMBC = _.values(moodCount);
 
@@ -130,25 +135,35 @@
 	}
 
   $: if(selectedLineChart === 'today'){
-    const todaysEntries = filteredSearch.filter(
+    const todaysEntries = result.filter(
 			(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
 		);
 		timestamps = todaysEntries.map((entry) => dayjs(entry.created_at).format('HH:mm:ss'));
 		todaysMoodScores = todaysEntries.map((entry) => entry.mood_score);
   }
 
+  $: {
+    lcBtnColors = {
+      today: selectedLineChart === "today" ? "blue" : "light",
+      daily: selectedLineChart === "daily" ? "blue" : "light",
+      weekly: selectedLineChart === "weekly" ? "blue" : "light",
+      monthly: selectedLineChart === "monthly" ? "blue" : "light",
+      yearly: selectedLineChart === "yearly" ? "blue" : "light",
+    };
+  }
+
 	function toggleChart(chart) {
 		selectedLineChart = chart;
 
     if (selectedLineChart === 'daily') {
-      const groupedByDay = _.groupBy(filteredSearch, (entry) =>
+      const groupedByDay = _.groupBy(result, (entry) =>
         dayjs(entry.created_at).format('YYYY-MM-DD')
       );
 
       dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
       daily = _.sortBy(_.keys(groupedByDay));
     } else if (selectedLineChart === 'weekly') {
-      const groupedByWeek = _.groupBy(filteredSearch, (entry) =>
+      const groupedByWeek = _.groupBy(result, (entry) =>
         getWeekNumberString(dayjs(entry.created_at))
       );
 
@@ -158,14 +173,14 @@
         return weekNumber;
       });
     } else if (selectedLineChart === 'monthly') {
-      const groupedByMonth = _.groupBy(filteredSearch, (entry) =>
+      const groupedByMonth = _.groupBy(result, (entry) =>
         dayjs(entry.created_at).format('YYYY-MM')
       );
 
       monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
       monthly = _.sortBy(_.keys(groupedByMonth));
     } else if (selectedLineChart === 'yearly') {
-      const groupedByYear = _.groupBy(filteredSearch, (entry) =>
+      const groupedByYear = _.groupBy(result, (entry) =>
         dayjs(entry.created_at).format('YYYY')
       );
 
@@ -251,17 +266,21 @@
 			<div class="flex flex-col p-5">
 				<h2 class="font-bold mb-2 text-xl">STUDENT INFORMATION</h2>
         <hr class="mb-5">
-				{#if dropdownFilter || filteredSearch?.length > 0}
-					<p><strong>ID:</strong> {filteredSearch[0].student_id}</p>
-					<p><strong>Name:</strong> {filteredSearch[0].name}</p>
-          <p><strong>Course:</strong> {filteredSearch[0].course}</p>
-          <p><strong>Year Level:</strong> {filteredSearch[0].year_level}</p>
-					<p><strong>Latest Mood:</strong> {filteredSearch[filteredSearch.length - 1].mood_label ?? 'loading...'}
-					</p>
-					<p><strong>Most Frequent Mood:</strong> {mostFrequentMood ?? 'loading...'}</p>
-					<p><strong>Least Frequent Mood:</strong> {leastFrequentMood ?? 'loading...'}</p>
-          <p><strong>Latest Log Date:</strong> {dayjs(filteredSearch[filteredSearch.length - 1].created_at).format(`MMM D, YYYY - HH:mm a`)}</p>
-				{:else if filteredSearch.length === 0 || searchTerm.length < 2}
+				{#if dropdownFilter || result?.length > 0}
+					<p><strong>ID:</strong> {result[0].student_id}</p>
+					<p><strong>Name:</strong> {result[0].name}</p>
+					<p><strong>Latest Mood:</strong> {result[result.length - 1].mood_label}</p>
+					<p><strong>Most Frequent Mood:</strong> {mostFrequentMood}</p>
+					<p><strong>Least Frequent Mood:</strong> {leastFrequentMood}</p>
+          <div class="flex space-x-2">
+            <Badge large border class="w-fit mt-2" color="green">{result[0].course}</Badge>
+            <Badge large border class="w-fit mt-2" color="purple">{result[0].year_level}</Badge>
+            <Badge large border class="w-fit mt-2" color="purple">
+              <ClockSolid class="text-primary-800 dark:text-primary-400 w-2.5 h-2.5 mr-1.5" />
+              { dayjs(result[result.length - 1].created_at).fromNow() }
+            </Badge>
+          </div>
+				{:else if result.length === 0 || searchTerm.length < 2}
 					<h2>Student not found.</h2>
 				{/if}
 			</div>
@@ -269,11 +288,11 @@
 			<div class="flex flex-col">
         <div class="flex justify-end h-fit">
           <ButtonGroup>
-            <Button color="light" on:click={() => toggleChart('today')}>Today</Button>
-            <Button color="light" on:click={() => toggleChart('daily')}>Daily</Button>
-            <Button color="light" on:click={() => toggleChart('weekly')}>Weekly</Button>
-            <Button color="light" on:click={() => toggleChart('monthly')}>Monthly</Button>
-            <Button color="light" on:click={() => toggleChart('yearly')}>Yearly</Button>
+            <Button color={lcBtnColors.today} on:click={() => toggleChart('today')}>Today</Button>
+						<Button color={lcBtnColors.weekly} on:click={() => toggleChart('weekly')}>Weekly</Button>
+						<Button color={lcBtnColors.monthly} on:click={() => toggleChart('monthly')}>Monthly</Button>
+						<Button color={lcBtnColors.yearly} on:click={() => toggleChart('yearly')}>Yearly</Button>
+            <Button color={lcBtnColors.daily} on:click={() => toggleChart('daily')}>All</Button>
           </ButtonGroup>
         </div>
         {#if selectedLineChart === 'today'}
