@@ -59,6 +59,7 @@
   let viewAnonData = false;
   let studentBtnColor = "dark";
   let anonBtnColor = "light";
+  let lcBtnColors = {}
 
   $: ({ supabase } = data);
 
@@ -212,6 +213,14 @@
   }
   
   $: {
+    lcBtnColors = {
+      today: selectedLineChart === "today" ? "blue" : "light",
+      daily: selectedLineChart === "daily" ? "blue" : "light",
+      weekly: selectedLineChart === "weekly" ? "blue" : "light",
+      monthly: selectedLineChart === "monthly" ? "blue" : "light",
+      yearly: selectedLineChart === "yearly" ? "blue" : "light",
+    };
+
     if(selectedLineChart === 'today'){
       todaysEntries = _.filter(
         currentData, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
@@ -418,15 +427,15 @@
 				<div class="flex flex-col space-y-7">
 					<div class="flex justify-between">
 						<ButtonGroup>
-							<Button color="light" on:click={() => toggleChart('today')}>Today</Button>
-							<Button color="light" on:click={() => toggleChart('daily')}>Daily</Button>
-							<Button color="light" on:click={() => toggleChart('weekly')}>Weekly</Button>
-							<Button color="light" on:click={() => toggleChart('monthly')}>Monthly</Button>
-							<Button color="light" on:click={() => toggleChart('yearly')}>Yearly</Button>
+							<Button color={lcBtnColors.today} on:click={() => toggleChart('today')}>Today</Button>
+							<Button color={lcBtnColors.weekly} on:click={() => toggleChart('weekly')}>Weekly</Button>
+							<Button color={lcBtnColors.monthly} on:click={() => toggleChart('monthly')}>Monthly</Button>
+							<Button color={lcBtnColors.yearly} on:click={() => toggleChart('yearly')}>Yearly</Button>
+              <Button color={lcBtnColors.daily} on:click={() => toggleChart('daily')}>All</Button>
 						</ButtonGroup>
 						<ButtonGroup>
-							<Button pill color={studentBtnColor} on:click={toggleDataView}>Students</Button>
-							<Button pill color={anonBtnColor} on:click={toggleDataView}>Anonymous</Button>
+              <Button color={anonBtnColor} on:click={toggleDataView}>Anonymous</Button>
+							<Button color={studentBtnColor} on:click={toggleDataView}>Students</Button>
 						</ButtonGroup>
 					</div>
 
