@@ -8,7 +8,7 @@ export async function load({ parent }) {
   }
 
 	const { data: studentMood } = await supabase.from("StudentMoodEntries").select().order("created_at", { ascending: true });
-	const { data: anonMood } = await supabase.from("AnonMood").select().order("created_at", { ascending: true });
+	const { data: anonMood } = await supabase.from("AnonMoodEntries").select().order("created_at", { ascending: true });
 
 	return {
 		studentMood: studentMood || [],
