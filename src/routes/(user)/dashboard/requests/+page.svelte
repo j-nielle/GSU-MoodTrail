@@ -18,22 +18,22 @@
 
 	export let data;
 
-	let requestsData;
-
-  $: requestsData = data.requests;
-	$: ({ supabase, maxPage, page, limit} = data);
-
-	let searchTerm = '';
+  let searchTerm = '';
 	let dateFilter = '';
 	let filteredItems;
 
+	$: requestsData = data.requests;
+
+	$: ({ supabase, maxPage, page, limit} = data);
+
 	onMount(() => {
-		const requestsChannel = supabase.channel('schema-db-changes').on('postgres_changes',{
+		const requestsChannel = supabase.channel('schema-db-changes')
+        .on('postgres_changes',{
 					event: 'INSERT',
 					schema: 'public',
 					table: 'RequestEntries'
 				},(payload) => {
-					requestsData = [...requestsData, payload.new];
+					requestsData = _.cloneDeep([payload.new,...requestsData]);
 				}
 			).subscribe((status) => console.log('inside /requests/+page.svelte:', status));
 
