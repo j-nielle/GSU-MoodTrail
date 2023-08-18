@@ -36,7 +36,7 @@
 
 		dailyLineChart.setOption({
 			title: {
-				text: 'Daily Mood Averages',
+				text: 'Overall Mood Averages',
 				itemGap: 12,
 				subtext:
 					'Sad (-4), Annoyed (-3), Nervous (-2), Bored (-1), Neutral (0), Calm (1), Relaxed (2), Happy (3), Excited (4)',
