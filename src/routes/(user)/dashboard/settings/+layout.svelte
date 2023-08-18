@@ -12,23 +12,19 @@
 	onMount(() => {
 		const toastChannelTwo = supabase
 			.channel('toast-requests-2')
-			.on(
-				'postgres_changes',
-				{
+			.on( 'postgres_changes', {
 					event: 'INSERT',
 					schema: 'public',
 					table: 'RequestEntries'
-				},
-				(payload) => {
+				}, (payload) => {
 					if (payload.new) {
-						newRequest.set(true);
+						newRequest.update(() => true)
 						setTimeout(() => {
 							newRequest.set(false);
 						}, 8000);
 					}
 				}
-			)
-			.subscribe((status) => console.log("inside /dashboard/settings/+layout.svelte:",status));
+			).subscribe((status) => console.log("inside /dashboard/settings/+layout.svelte:",status));
 	
 		return () => {
 			toastChannelTwo.unsubscribe();
