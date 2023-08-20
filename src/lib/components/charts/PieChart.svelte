@@ -20,6 +20,12 @@
         data: data,
         type: 'pie',
         radius: '50%',
+        emphasis: {
+          focus: 'self'
+        },
+        label: {
+          formatter: '{b}: {@2012} ({d}%)'
+        },
         itemStyle: {
           color: function(params) {
             return moodColors[params.name] || '#5470c6';
@@ -58,4 +64,4 @@
 	});
 </script>
 
-<div id={elementID} style="width:390px; height:350px;" />
+<div id={elementID} style="width:490px; height:350px;" />

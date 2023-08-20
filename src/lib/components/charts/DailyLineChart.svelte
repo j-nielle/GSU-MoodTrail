@@ -60,6 +60,12 @@
 					type: 'line'
 				}
 			],
+      dataZoom: [
+        {
+          start: 0,
+          end: 20
+        }
+      ],
 			tooltip: {
 				show: 'true',
 				trigger: 'axis',
@@ -69,7 +75,10 @@
 					const moodScore = yData[index].toFixed(2);
 					const moodLabel = mood[index];
 					return `${date}: <span class="font-bold">${moodLabel}</ span>`;
-				}
+				},
+        axisPointer: {
+          animation: false
+        }
 			},
 			toolbox: {
 				show: true,

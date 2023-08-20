@@ -36,6 +36,9 @@
         data: yData,
         type: 'bar',
         barMaxWidth: 15,
+        emphasis: {
+          focus: 'self'
+        },
         itemStyle: {
           color: function(params) {
             return moodColors[params.name] || '#5470c6';

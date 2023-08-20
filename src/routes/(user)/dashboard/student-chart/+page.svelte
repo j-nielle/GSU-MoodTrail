@@ -273,12 +273,12 @@
 					<p><strong>Most Frequent Mood:</strong> {mostFrequentMood}</p>
 					<p><strong>Least Frequent Mood:</strong> {leastFrequentMood}</p>
           <div class="flex space-x-2">
-            <Badge large border class="w-fit mt-2" color="green">{result[0].course}</Badge>
-            <Badge large border class="w-fit mt-2" color="purple">{result[0].year_level}</Badge>
-            <Badge large border class="w-fit mt-2" color="purple">
+            <Badge large border class="w-fit mt-2" color="blue">
               <ClockSolid class="text-primary-800 dark:text-primary-400 w-2.5 h-2.5 mr-1.5" />
               { dayjs(result[result.length - 1].created_at).fromNow() }
             </Badge>
+            <Badge large border class="w-fit mt-2" color="green">{result[0].course}</Badge>
+            <Badge large border class="w-fit mt-2" color="purple">{result[0].year_level}</Badge>
           </div>
 				{:else if result.length === 0 || searchTerm.length < 2}
 					<h2>Student not found.</h2>
