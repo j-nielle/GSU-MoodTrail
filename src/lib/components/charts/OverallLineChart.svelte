@@ -8,7 +8,7 @@
 	export let yData;
   export let elementID;
 
-	let dailyLineChart;
+	let overallLC;
 	let mood;
 
 	function getNearestMoodLabel(score) {
@@ -32,9 +32,9 @@
 	$: mood = yData.map((score) => getNearestMoodLabel(score));
 
 	onMount(() => { 
-		dailyLineChart = echarts.init(document.getElementById(elementID));
+		overallLC = echarts.init(document.getElementById(elementID));
 
-		dailyLineChart.setOption({
+		overallLC.setOption({
 			title: {
 				text: 'Overall Mood Averages',
 				itemGap: 12,
@@ -92,9 +92,6 @@
 						show: true,
 						readOnly: false
 					},
-					restore: {
-						show: true
-					},
 					saveAsImage: {
 						show: true
 					}
@@ -103,12 +100,12 @@
 		});
 
 		return () => {
-			dailyLineChart.dispose();
+			overallLC.dispose();
 		};
 	});
 
 	afterUpdate(() => {
-		dailyLineChart.setOption({
+		overallLC.setOption({
 			xAxis: {
 				data: xData
 			},

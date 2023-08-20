@@ -18,7 +18,7 @@
 	import { ProfileCardOutline, FaceLaughOutline, BrainOutline, PrintSolid } from 'flowbite-svelte-icons';
   import {
     TodayLineChart,
-    DailyLineChart,
+    OverallLineChart,
     WeeklyLineChart,
     MonthlyLineChart,
     YearlyLineChart,
@@ -36,12 +36,12 @@
   let todaysEntries = [];
 	let xDataMBC, yDataMBC;
 	let todayMostFreqMood = [], todayMostFreqReason = [];
-	let dailyMostFreqMood = [], dailyMostFreqReason = [];
+	let overallMostFreqMood = [], overallMostFreqReason = [];
 	let weeklyMostFreqMood = [], weeklyMostFreqReason = [];
 	let monthlyMostFreqMood = [], monthlyMostFreqReason = [];
 	let yearlyMostFreqMood = [], yearlyMostFreqReason = [];
 
-	let daily = [], dailyAverages = [];
+	let overall = [], overallAverages = [];
 	let weekly = [], weeklyAverages = [];
 	let monthly = [], monthlyAverages = [];
 	let yearly = [], yearlyAverages = [];
@@ -213,7 +213,7 @@
   $: {
     lcBtnColors = {
       today: selectedLineChart === "today" ? "blue" : "light",
-      daily: selectedLineChart === "daily" ? "blue" : "light",
+      overall: selectedLineChart === "overall" ? "blue" : "light",
       weekly: selectedLineChart === "weekly" ? "blue" : "light",
       monthly: selectedLineChart === "monthly" ? "blue" : "light",
       yearly: selectedLineChart === "yearly" ? "blue" : "light",
@@ -230,18 +230,18 @@
       todayMostFreqMood = _.head(_(todaysMoodLabels).countBy().entries().maxBy(_.last));
       todayMostFreqReason = _.head(_(todaysReasonLabels).countBy().entries().maxBy(_.last));
     }
-    else if (selectedLineChart === 'daily') {
-      console.log('daily')
+    else if (selectedLineChart === 'overall') {
+      console.log('overall')
       const groupedByDay = _.groupBy(currentData, (entry) =>
         dayjs(entry.created_at).format('YYYY-MM-DD')
       );
 
-      dailyAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-      daily = _.sortBy(_.keys(groupedByDay));
-      dailyMostFreqMood = _.head(
+      overallAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      overall = _.sortBy(_.keys(groupedByDay));
+      overallMostFreqMood = _.head(
         _(groupedByDay).flatMap().countBy('mood_label').entries().maxBy(_.last)
       );
-      dailyMostFreqReason = _.head(
+      overallMostFreqReason = _.head(
         _(groupedByDay).flatMap().countBy('reason_label').entries().maxBy(_.last)
       );  
     }
@@ -322,6 +322,7 @@
 </svelte:head>
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-0">
+  <!-- Info Cards -->
 	<div class="flex justify-between">
     <Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
       <Label class="font-semibold text-sm">{current.format('ddd MMMM D, YYYY h:mm:ss A')}</Label>
@@ -348,17 +349,17 @@
 					></Label
 				>
 			</Card>
-		{:else if selectedLineChart === 'daily'}
+		{:else if selectedLineChart === 'overall'}
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900 text-sm"
-					>Most Frequent Mood: <span class="font-bold">{dailyMostFreqMood ?? 'N/A'}</span></Label
+					>Most Frequent Mood: <span class="font-bold">{overallMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900 text-sm"
-					>Most Frequent Reason: <span class="font-bold">{dailyMostFreqReason ?? 'N/A'}</span
+					>Most Frequent Reason: <span class="font-bold">{overallMostFreqReason ?? 'N/A'}</span
 					></Label
 				>
 			</Card>
@@ -409,38 +410,44 @@
       <PrintSolid tabindex="-1" class="text-white" />
     </Button>
 	</div>
+
 	<div class="flex flex-col space-y-3">
-		<!-- Bar Chart and Line Chart -->
 		<div class="flex space-x-4">
+      <!-- Horizontal Mood Bar Chart -->
 			<div class="p-4 bg-white rounded-sm drop-shadow-md">
 				<HorizontalMoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'dashboardHMBC'} />
 			</div>
+
 			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center p-4">
 				<div class="flex flex-col space-y-7">
 					<div class="flex justify-between">
+            <!-- Buttons for Time Intervals -->
 						<ButtonGroup>
 							<Button color={lcBtnColors.today} on:click={() => toggleChart('today')}>Today</Button>
 							<Button color={lcBtnColors.weekly} on:click={() => toggleChart('weekly')}>Weekly</Button>
 							<Button color={lcBtnColors.monthly} on:click={() => toggleChart('monthly')}>Monthly</Button>
 							<Button color={lcBtnColors.yearly} on:click={() => toggleChart('yearly')}>Yearly</Button>
-              <Button color={lcBtnColors.daily} on:click={() => toggleChart('daily')}>All</Button>
+              <Button color={lcBtnColors.overall} on:click={() => toggleChart('overall')}>Overall</Button>
 						</ButtonGroup>
+
+            <!-- Buttons for Data Type (Anon/Students) -->
 						<ButtonGroup>
               <Button color={viewAnonData ? "dark" : "light"} on:click={() => viewAnonData = true}>Anonymous</Button>
 							<Button color={!viewAnonData ? "dark" : "light"} on:click={() => viewAnonData = false}>Students</Button>
 						</ButtonGroup>
 					</div>
 
+          <!-- Line Charts for each time intervals -->
 					{#if selectedLineChart === 'today'}
 						<TodayLineChart
 							bind:xData={timestamps}
 							bind:yData={todaysMoodScores}
 							elementID={'dashboardTLC'}
 						/>
-					{:else if selectedLineChart === 'daily'}
-						<DailyLineChart
-							bind:xData={daily}
-							bind:yData={dailyAverages}
+					{:else if selectedLineChart === 'overall'}
+						<OverallLineChart
+							bind:xData={overall}
+							bind:yData={overallAverages}
 							elementID={'dashboardDLC'}
 						/>
 					{:else if selectedLineChart === 'weekly'}

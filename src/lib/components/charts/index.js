@@ -1,6 +1,6 @@
 // @ts-nocheck
 export { default as TodayLineChart } from '$lib/components/charts/TodayLineChart.svelte';
-export { default as DailyLineChart } from '$lib/components/charts/DailyLineChart.svelte';
+export { default as OverallLineChart } from '$lib/components/charts/OverallLineChart.svelte';
 export { default as WeeklyLineChart } from '$lib/components/charts/WeeklyLineChart.svelte';
 export { default as MonthlyLineChart } from '$lib/components/charts/MonthlyLineChart.svelte';
 export { default as YearlyLineChart } from '$lib/components/charts/YearlyLineChart.svelte';

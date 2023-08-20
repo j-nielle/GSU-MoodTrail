@@ -65,10 +65,7 @@
 					},
 					saveAsImage: {
 						show: true
-					},
-          restore: {
-						show: true
-					},
+					}
 				}
 			}
 		});
