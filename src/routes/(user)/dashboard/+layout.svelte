@@ -87,7 +87,7 @@
       <BellRingSolid tabindex="-1" class="text-red-700" />
       <div class="text-center">
         {#if activeUrl != '/dashboard'}
-        To view the list of students experiencing consistent low moods for atleast 4 consecutive days, navigate to <span class="font-semibold">dashboard</span>.
+        To view the list of students experiencing consistent low moods for atleast 4 consecutive days, please navigate to <span class="font-semibold">dashboard</span>.
         {:else}
         Click <span role="button" tabindex="0" class="font-bold hover:underline" on:click={() => focusTable.update(()=>true)} on:keypress={() => focusTable.update(()=>true)}>here</span> to view the list of students experiencing consistent low moods for atleast 4 consecutive days.
         {/if}
