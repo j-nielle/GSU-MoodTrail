@@ -481,9 +481,9 @@
         <Table divClass="text-left text-sm text-gray-500 border border-zinc-300 dark:text-gray-400 max-h-72 overflow-y-scroll">
           <TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky">
             <TableHeadCell>ID Number</TableHeadCell>
-            <TableHeadCell>Date Range</TableHeadCell>
-            <TableHeadCell>Average Mood</TableHeadCell>
-            <TableHeadCell>Most Common Reason</TableHeadCell>
+            <TableHeadCell>Time Period</TableHeadCell>
+            <TableHeadCell class="text-center">Average Mood</TableHeadCell>
+            <TableHeadCell class="text-center">Dominant Reason</TableHeadCell>
           </TableHead>
           <TableBody tableBodyClass="divide-y bg-white">
             {#if $consistentLowMoods === undefined || $consistentLowMoods.length === 0}
@@ -498,13 +498,13 @@
               {#each student.streaks as streak}
               <TableBodyRow class="z-10">
                 <TableBodyCell>
-                  <a href="/dashboard/student-chart?search={student.studentId}" rel="noopener noreferrer">
+                  <a class="hover:underline" href="/dashboard/student-chart?search={student.studentId}" rel="noopener noreferrer">
                     {student.studentId}
                   </a>
                 </TableBodyCell>
                 <TableBodyCell>{streak.startDate} - {streak.endDate}</TableBodyCell>
-                <TableBodyCell>{moodLabels[Math.round(streak.moodScores.reduce((a, b) => a + b, 0) / streak.moodScores.length) + 4]}</TableBodyCell>
-                <TableBodyCell>{streak.reasonLabels.reduce((a, b, i, arr) => (arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b))}</TableBodyCell>
+                <TableBodyCell class="text-center">{moodLabels[Math.round(streak.moodScores.reduce((a, b) => a + b, 0) / streak.moodScores.length) + 4]}</TableBodyCell>
+                <TableBodyCell class="text-center">{streak.reasonLabels.reduce((a, b, i, arr) => (arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b))}</TableBodyCell>
               </TableBodyRow>
               {/each}
             {/each}
