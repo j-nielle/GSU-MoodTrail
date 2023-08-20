@@ -57,8 +57,6 @@
 
   let tableRef;
   let viewAnonData = false;
-  let studentBtnColor = "dark";
-  let anonBtnColor = "light";
   let lcBtnColors = {}
 
   $: ({ supabase } = data);
@@ -314,12 +312,6 @@
 		return `Week ${weekDiff}`;
 	};
 
-  function toggleDataView() {
-    viewAnonData = !viewAnonData;
-    studentBtnColor = viewAnonData ? "light" : "dark";
-    anonBtnColor = viewAnonData ? "dark" : "light";
-  }
-
   function updateCurrent() {
     current = dayjs();
   }
@@ -434,8 +426,8 @@
               <Button color={lcBtnColors.daily} on:click={() => toggleChart('daily')}>All</Button>
 						</ButtonGroup>
 						<ButtonGroup>
-              <Button color={anonBtnColor} on:click={toggleDataView}>Anonymous</Button>
-							<Button color={studentBtnColor} on:click={toggleDataView}>Students</Button>
+              <Button color={viewAnonData ? "dark" : "light"} on:click={() => viewAnonData = true}>Anonymous</Button>
+							<Button color={!viewAnonData ? "dark" : "light"} on:click={() => viewAnonData = false}>Students</Button>
 						</ButtonGroup>
 					</div>
 
