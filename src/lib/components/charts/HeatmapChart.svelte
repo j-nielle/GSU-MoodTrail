@@ -9,7 +9,12 @@
 
   // Define the days and hours for the axis labels
   var days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
-  var hours = Array.from({ length: 24 }, (_, i) => i); // 
+  var hours = Array.from({ length: 24 }, (_, i) => {
+    const hour = i % 12 === 0 ? 12 : i % 12;
+    const period = i < 12 ? 'AM' : 'PM';
+    return `${hour} ${period}`;
+  });
+
 
 	let heatmapChart;
 
@@ -18,24 +23,22 @@
 
 		heatmapChart.setOption({
       tooltip: {
-        position: 'top'
+        position: 'top',
+        formatter: function (params) {
+          return 'Total Moods: ' + params.value[2]
+        },
       },
 			title: {
-				text: 'Heatmap Chart'
+				text: 'Mood Occurrences by Day and Hour'
 			},
       xAxis: {
         type: 'category',
         data: hours,
-        splitArea: {
-          show: true
-        }
+        alignTicks: true,
       },
       yAxis: {
         type: 'category',
         data: days,
-        splitArea: {
-          show: true
-        }
       },
 			visualMap: {
 				min: 0,
@@ -45,22 +48,20 @@
 				left: 'center',
 				orient: 'horizontal',
 			},
-			series: [
-				{
-					name: 'Test',
-					type: 'heatmap',
-					data: heatmapData || [],
-					label: {
-						show: true
+			series: [{
+				type: 'heatmap',
+				data: heatmapData || [],
+				label: {
+					show: true
+				},
+				emphasis: {
+					itemStyle: {
+						shadowBlur: 10,
+						shadowColor: 'rgba(0, 0, 0, 0.5)'
 					},
-					emphasis: {
-						itemStyle: {
-							shadowBlur: 10,
-							shadowColor: 'rgba(0, 0, 0, 0.5)'
-						}
+          focus: 'self',
 					}
-				}
-			],
+			}],
 			toolbox: {
 				show: true,
 				feature: {
@@ -96,4 +97,4 @@
 	});
 </script>
 
-<div id={elementID} style="width:610px; height:350px;" />
+<div id={elementID} style="width:620px; height:350px;" />

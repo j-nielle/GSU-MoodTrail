@@ -66,7 +66,6 @@
   }
 
   $: activeUrl = $page.url.pathname;
-  $: console.log("layout",newLowMoodData)
 </script>
 
 <div class="bg-zinc-50 items-center">
@@ -77,7 +76,7 @@
       <div>
         <span class="font-bold text-blue-700">(NEW)</span> Help request received!
       </div>
-      <CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-blue-500 hover:text-blue-700" on:click={() => newRequest.update(() => false)} />
+      <CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-blue-500 hover:text-blue-700 focus:outline-none" on:click={() => newRequest.update(() => false)} />
     </Alert>
   </div>
   {/if}
@@ -92,7 +91,7 @@
         Click <span role="button" tabindex="0" class="font-bold hover:underline" on:click={() => focusTable.update(()=>true)} on:keypress={() => focusTable.update(()=>true)}>here</span> to view the list of students experiencing consistent low moods for atleast 4 consecutive days.
         {/if}
       </div>
-      <CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700" on:click={() => newLowMoodData = false} />
+      <CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700 focus:outline-none" on:click={() => newLowMoodData = false} />
     </Alert>
   </div>
   {/if}

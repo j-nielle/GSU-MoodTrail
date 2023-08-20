@@ -31,7 +31,7 @@
 
 	let studentMoodData = data.studentMood;
 	let anonMoodData = data.anonMood;
-  let currentData = []
+  let dataType = []
   
   let todaysEntries = [];
 	let xDataMBC, yDataMBC;
@@ -88,14 +88,15 @@
 		};
 	});
 
-	$: if(currentData.length > 0){
+	$: if(dataType.length > 0){
     let filteredStudents = new Map();
 	  const consecutiveDaysMap = new Map();
     consistentLowMoods.set([]);
 
-    recentStudent = _.last(studentMoodData)['name'];
+    recentStudent = _.last(studentMoodData)['name']; // info card
 
-		const groupedData = _.groupBy(currentData, (data) => {
+    // heatmap
+		const groupedData = _.groupBy(dataType, (data) => {
 			const date = new Date(data.created_at);
 			return [date.getDay(), date.getHours()];
 		});
@@ -105,10 +106,12 @@
 			return [[parseInt(hour), parseInt(day), data.length || '-']];
 		});
 
-		const moodCount = _.countBy(currentData, 'mood_label') || [];
+    // horizontal mood bar chart
+		const moodCount = _.countBy(dataType, 'mood_label') || [];
 		xDataMBC = _.keys(moodCount);
 		yDataMBC = _.values(moodCount);
     
+    // table of students w consistent low moods
     const consecutiveThreshold = 4;
 		let maxConsecutiveDays = 0;
 
@@ -203,11 +206,8 @@
 	}
 
   $: {
-    if(viewAnonData){
-      currentData = anonMoodData;
-    }else{
-      currentData = studentMoodData;
-    }
+    if(viewAnonData){ dataType = anonMoodData; }
+    else{ dataType = studentMoodData; }
   }
   
   $: {
@@ -221,7 +221,7 @@
 
     if(selectedLineChart === 'today'){
       todaysEntries = _.filter(
-        currentData, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
+        dataType, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
       );   
       timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss'));
       todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score);
@@ -231,8 +231,7 @@
       todayMostFreqReason = _.head(_(todaysReasonLabels).countBy().entries().maxBy(_.last));
     }
     else if (selectedLineChart === 'overall') {
-      console.log('overall')
-      const groupedByDay = _.groupBy(currentData, (entry) =>
+      const groupedByDay = _.groupBy(dataType, (entry) =>
         dayjs(entry.created_at).format('YYYY-MM-DD')
       );
 
@@ -246,8 +245,7 @@
       );  
     }
     else if(selectedLineChart === 'weekly'){
-      console.log('weekly')
-      const groupedByWeek = _.groupBy(currentData, (entry) =>
+      const groupedByWeek = _.groupBy(dataType, (entry) =>
         getWeekNumberString(dayjs(entry.created_at))
       );
 
@@ -264,8 +262,7 @@
       );
     }
     else if(selectedLineChart === 'monthly'){
-      console.log('monthly')
-      const groupedByMonth = _.groupBy(currentData, (entry) =>
+      const groupedByMonth = _.groupBy(dataType, (entry) =>
         dayjs(entry.created_at).format('YYYY-MM')
       );
 
@@ -279,8 +276,7 @@
       );
     }
     else if(selectedLineChart === 'yearly'){
-      console.log('yearly')
-      const groupedByYear = _.groupBy(currentData, (entry) =>
+      const groupedByYear = _.groupBy(dataType, (entry) =>
         dayjs(entry.created_at).format('YYYY')
       );
 
@@ -315,6 +311,8 @@
   function updateCurrent() {
     current = dayjs();
   }
+
+  $: console.log($consistentLowMoods)
 </script>
 
 <svelte:head>
@@ -407,7 +405,7 @@
 			</Card>
 		{/if}
     <Button class="max-h-14 justify-center shadow-md flex-row items-center space-x-2" on:click={() => window.print()}>
-      <PrintSolid tabindex="-1" class="text-white" />
+      <PrintSolid tabindex="-1" class="text-white focus:outline-none" />
     </Button>
 	</div>
 
@@ -472,12 +470,14 @@
 				</div>
 			</div>
 		</div>
-
-		<!-- Heatmap Chart -->
+		
 		<div class="flex space-x-4">
+      <!-- Heatmap Chart -->
 			<div class="bg-white flex items-center rounded-sm drop-shadow-md p-4">
 				<HeatmapChart {heatmapData} elementID={'dashboardHM'} />
 			</div>
+
+      <!-- table for students w consistent low moods -->
 			<div id="low-moods" bind:this={tableRef}  class="bg-white rounded-sm !p-5 drop-shadow-md w-full">
         <caption class="text-lg font-bold text-left w-max text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
           Students with consistent low moods
@@ -510,8 +510,14 @@
                   </a>
                 </TableBodyCell>
                 <TableBodyCell>{streak.startDate} - {streak.endDate}</TableBodyCell>
-                <TableBodyCell class="text-center">{moodLabels[Math.round(streak.moodScores.reduce((a, b) => a + b, 0) / streak.moodScores.length) + 4]}</TableBodyCell>
-                <TableBodyCell class="text-center">{streak.reasonLabels.reduce((a, b, i, arr) => (arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b))}</TableBodyCell>
+                <TableBodyCell class="text-center">
+                  {moodLabels[Math.round(streak.moodScores.reduce((accum, elem) => accum + elem, 0) / streak.moodScores.length) + 4]}
+                </TableBodyCell>
+                <TableBodyCell class="text-center">
+                  {streak.reasonLabels.reduce(
+                    (accum, elem, i, arr) => (arr.filter(v => v === accum).length >= arr.filter(v => v === elem).length ? accum : elem)
+                  )}
+                </TableBodyCell>
               </TableBodyRow>
               {/each}
             {/each}
