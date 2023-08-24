@@ -30,6 +30,7 @@ export async function load({ url, locals: { supabase, getSession } }) {
     session: session,
     page: page,
     limit: limit,
+    count: count,
 		maxPage: maxPage
   };
 }

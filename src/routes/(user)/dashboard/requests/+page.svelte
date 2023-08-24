@@ -3,8 +3,10 @@
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
 	import {
 		PaginationItem,
+    Button,
 		Checkbox,
 		Input,
 		Table,
@@ -24,7 +26,7 @@
 
 	$: requestsData = data.requests;
 
-	$: ({ supabase, maxPage, page, limit} = data);
+	$: ({ supabase, maxPage, page, limit, count} = data);
 
 	onMount(() => {
 		const requestsChannel = supabase.channel('schema-db-changes')
@@ -75,6 +77,20 @@
 						: true; // else it will return true which means it will not filter the data
 		});
 	}
+
+  $: {
+    if ((searchTerm !== '' || dateFilter !== '') && page !== 1) {
+      page = 1;
+      goto(`?page=${page}&limit=${limit}`);
+    }
+
+    if (searchTerm !== '' || dateFilter !== '') {
+      maxPage = Math.ceil(filteredItems.length / limit);
+    } else {
+      maxPage = Math.ceil(count / limit);
+    }
+  }
+
 </script>
 
 <svelte:head>
@@ -85,16 +101,10 @@
 	<div class="flex justify-between">
 		<div class="flex items-center">
 			<TableSearch divClass="relative overflow-x-auto ml-4"
-				placeholder="Search by request, phone, or status*" hoverable={true} bind:inputValue={searchTerm}/>
-			<button class="text-slate-700 mt-1" class:hidden={!searchTerm != ''} on:click={() => { searchTerm = ''; }}>
-				<span tabindex="-1">
-          <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-backspace-fill" viewBox="0 0 16 16">
-            <path d="M15.683 3a2 2 0 0 0-2-2h-7.08a2 2 0 0 0-1.519.698L.241 7.35a1 1 0 0 0 0 1.302l4.843 5.65A2 2 0 0 0 6.603 15h7.08a2 2 0 0 0 2-2V3zM5.829 5.854a.5.5 0 1 1 .707-.708l2.147 2.147 2.146-2.147a.5.5 0 1 1 .707.708L9.39 8l2.146 2.146a.5.5 0 0 1-.707.708L8.683 8.707l-2.147 2.147a.5.5 0 0 1-.707-.708L7.976 8 5.829 5.854z" />
-          </svg>
-        </span>
-			</button>
+				placeholder="Search by request, phone, or status*" hoverable={true} bind:inputValue={searchTerm} />
+      <Button class="mt-1 focus:ring-0" color="red" on:click={()=> { searchTerm = ''; dateFilter = ''; }}>Reset Filter</Button>
 		</div>
-		<div class="">
+		<div>
 			<Input type="date" class="w-auto h-auto m-4 mr-8 mt-5" bind:value={dateFilter} />
 		</div>
 	</div>
@@ -139,15 +149,17 @@
 			</TableBody>
 		</Table>
 		<div class="flex flex-col items-center justify-center gap-2 mt-3">
+      {#if maxPage > 1}
 			<div class="text-sm text-center text-gray-700 dark:text-gray-400">
 				Page <span class="font-semibold text-gray-900 dark:text-white">{page} <span class="font-normal">of</span> {maxPage}</span>
 			</div>
 			<div class="flex justify-between space-x-2">
-				<!-- ensures that the page number is never less than 1 -->
-				<PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" href="?page={Math.max(1, page - 1)}&limit={limit}">Prev</PaginationItem>
-				<!-- ensures that the page number does not exceed the maximum page number -->
-				<PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" href="?page={Math.min(maxPage, page + 1)}&limit={limit}">Next</PaginationItem>
-		</div>
+        <!-- ensures that the page number is never less than 1 -->
+        <PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" href="?page={Math.max(1, page - 1)}&limit={limit}">Prev</PaginationItem>
+        <!-- ensures that the page number does not exceed the maximum page number -->
+        <PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" href="?page={Math.min(maxPage, page + 1)}&limit={limit}">Next</PaginationItem>
+		  </div>
+      {/if}
 		</div>
 	</div>
 </div>
