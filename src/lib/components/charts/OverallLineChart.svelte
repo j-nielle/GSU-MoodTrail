@@ -63,7 +63,7 @@
       dataZoom: [
         {
           start: 0,
-          end: 20
+          end: 50
         }
       ],
 			tooltip: {
