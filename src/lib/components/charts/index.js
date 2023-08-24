@@ -5,5 +5,6 @@ export { default as WeeklyLineChart } from '$lib/components/charts/WeeklyLineCha
 export { default as MonthlyLineChart } from '$lib/components/charts/MonthlyLineChart.svelte';
 export { default as YearlyLineChart } from '$lib/components/charts/YearlyLineChart.svelte';
 export { default as HorizontalMoodBarChart } from '$lib/components/charts/HorizontalMoodBarChart.svelte';
+//export { default as GroupedBarChart } from '$lib/components/charts/GroupedBarChart.svelte';
 export { default as HeatmapChart } from '$lib/components/charts/HeatmapChart.svelte';
 export { default as PieChart } from '$lib/components/charts/PieChart.svelte';
