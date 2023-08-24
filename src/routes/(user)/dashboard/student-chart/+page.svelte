@@ -54,12 +54,6 @@
   let lcBtnColors = {}
 
   onMount(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const searchValue = urlParams.get('search');
-    if (searchValue) {
-      searchTerm = searchValue;
-    }
-
 		const dashboardChannel = supabase.channel('dashboard').on( 'postgres_changes', {
 				event: 'INSERT',
 				schema: 'public',
@@ -73,6 +67,14 @@
 			dashboardChannel.unsubscribe();
 		};
 	});
+
+  $: {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchValue = urlParams.get('search');
+    if (searchValue) {
+      searchTerm = searchValue;
+    }
+  }
 
 	$: if(studentMoodData){
     // for the dropdown filter
