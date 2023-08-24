@@ -24,10 +24,12 @@
 	$: ({ supabase } = data);
 
 	let course;
+  let college;
 	let yearLevel;
 	let student;
 
 	let searchTerm = '';
+  let selectedCollege;
 	let selectedCourse;
 	let selectedYearLevel;
 	let selectedStudentName;
@@ -74,10 +76,18 @@
 
 	$: if(studentMoodData){
     // for the dropdown filter
-		course = _.uniq(studentMoodData.map((data) => data.course)).map((course) => ({
-			value: course,
-			name: course
+		college = _.uniq(studentMoodData.map((data) => data.college)).map((college) => ({
+			value: college,
+			name: college
 		}));
+    
+    course = _.chain(studentMoodData)
+			.filter({ college: selectedCollege })
+			.map('course')
+			.uniq()
+			.sort()
+			.map((course) => ({ value: course, name: course }))
+		.value();
 
 		yearLevel = _.chain(studentMoodData)
 			.filter({ course: selectedCourse })
@@ -88,7 +98,7 @@
 		.value();
 
 		student = _.chain(studentMoodData)
-			.filter({ course: selectedCourse, year_level: selectedYearLevel })
+			.filter({ college: selectedCollege, course: selectedCourse, year_level: selectedYearLevel })
 			.map('name')
 			.uniq()
 			.sort()
@@ -101,12 +111,13 @@
       const idMatch = searchTermNumeric && req.student_id.toString() === searchTerm;      
       const nameMatch = req.name.toLowerCase().includes(searchTerm.toLowerCase());
 
+      const collegeMatch = !selectedCollege || req.college === selectedCollege;
       const courseMatch = !selectedCourse || req.course === selectedCourse;
       const yearLevelMatch = !selectedYearLevel || req.year_level === selectedYearLevel;
       const studentNameMatch = !selectedStudentName || req.name === selectedStudentName;
       
       return (searchTerm !== '' && (idMatch || nameMatch)) ||
-        (selectedStudentName ? (courseMatch && yearLevelMatch && studentNameMatch) : false);
+        (selectedStudentName ? (collegeMatch && courseMatch && yearLevelMatch && studentNameMatch) : false);
     })//.sort((a, b) => (dayjs(a.created_at).isBefore(dayjs(b.created_at)) ? -1 : 1));
 
     // info
@@ -119,18 +130,6 @@
 		const sortedMoods = Object.keys(moodCounts).sort((a, b) => moodCounts[b] - moodCounts[a]);
     mostFrequentMood = sortedMoods[0];
 		leastFrequentMood = sortedMoods[sortedMoods.length - 1];
-
-    // grouped bar chart
-    const moodReason = result.map((obj) => {
-			return { mood: obj.mood_label, reason: obj.reason_label };
-		});
-
-		const countReasons = moodReason.reduce( (acc, { mood, reason }) => {
-      acc[mood] = acc[mood] || {};
-      acc[mood][reason] = (acc[mood][reason] || 0) + 1;
-      return acc;
-      }, {}
-    );
 
     // pie chart
     const moodCount = _.countBy(result, 'mood_label') || [];
@@ -184,17 +183,15 @@
 	  }
   }
 
-	function toggleChart(chart) {
-		selectedLineChart = chart;
-	}
-
   const getWeekNumberString = (date) => {
 		const firstDayOfYear = dayjs(date).startOf('year').day(1);
 		const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
 		return `Week ${weekDiff}`;
 	};
 
-
+  function toggleChart(chart) {
+		selectedLineChart = chart;
+	}
 </script>
 
 <svelte:head>
@@ -205,30 +202,31 @@
 	<div class="space-x-4 flex flex-row max-w-full items-end">
     <!-- search filter -->
 		<div class="flex gap-2">
-			<Search size="md" class="w-fit h-11 bg-white" placeholder="Search for ID or name" bind:value={searchTerm} on:input={() => {
-					selectedCourse = '';
-					selectedYearLevel = '';
-					selectedStudentName = '';
+			<Search size="md" class="w-fit h-11 bg-white" placeholder="Search by ID or name" bind:value={searchTerm} on:input={() => {
+        selectedCollege = ''; selectedCourse = '';
+				selectedYearLevel = ''; selectedStudentName = '';
 			}} />
 		</div>
 
     <!-- dropdown filter -->
-		<Select placeholder="Select a course" class="font-normal w-56 h-11 bg-white" items={course} bind:value={selectedCourse}
+    <Select placeholder="College" class="font-normal w-1/3 h-11 bg-white" items={college} bind:value={selectedCollege}
 			on:change={(e) => {
-				searchTerm = '';
-        selectedYearLevel = '';
-        selectedStudentName = '';
-				selectedCourse = e.target.value;
+				searchTerm = ''; selectedCourse = '';
+        selectedYearLevel = ''; selectedStudentName = '';
+				selectedCollege = e.target.value;
 		}} />
-		<Select placeholder="Select a year level" class="font-normal w-fit h-11 bg-white" items={yearLevel} bind:value={selectedYearLevel}
+		<Select placeholder="Course" class="font-normal w-1/5 h-11 bg-white" items={course} bind:value={selectedCourse}
 			on:change={(e) => {
-        selectedStudentName = '';
-				selectedYearLevel = e.target.value;
+				searchTerm = ''; selectedYearLevel = '';
+        selectedStudentName = ''; selectedCourse = e.target.value;
 		}} />
+		<Select placeholder="Year Level" class="font-normal w-2/6 h-11 bg-white" items={yearLevel} bind:value={selectedYearLevel}
+			on:change={(e) => { selectedStudentName = ''; selectedYearLevel = e.target.value; }} />
 		<Select placeholder="Select a student" class="font-normal w-full h-11 bg-white" items={student} bind:value={selectedStudentName} />
 		<Button class="h-11" size="sm" color="red"
 			on:click={() => {
 				searchTerm = '';
+        selectedCollege = ''; 
 				selectedCourse = '';
 				selectedYearLevel = '';
 				selectedStudentName = '';
@@ -245,12 +243,13 @@
 				{#if result?.length > 0}
 					<p><strong>ID:</strong> {result[0].student_id}</p>
 					<p><strong>Name:</strong> {result[0].name}</p>
+          <p><strong>College:</strong> {result[0].college}</p>
 					<p><strong>Latest Mood:</strong> {result[result.length - 1].mood_label}</p>
 					<p><strong>Most Frequent Mood:</strong> {mostFrequentMood}</p>
 					<p><strong>Least Frequent Mood:</strong> {leastFrequentMood}</p>
           <div class="flex space-x-2">
             <Badge large border class="w-fit mt-2">
-              <ClockSolid class="text-primary-800 dark:text-primary-400 w-2.5 h-2.5 mr-1.5" />
+              <ClockSolid class="text-primary-800 dark:text-primary-400 w-fit h-2.5 mr-1.5" />
               { dayjs(result[result.length - 1].created_at).fromNow() }
             </Badge>
             <Badge large border class="w-fit mt-2">{result[0].course}</Badge>
@@ -292,6 +291,9 @@
     <div class="flex space-x-6 justify-between">
       <PieChart bind:data={pieChartData} elementID={'studentPC'} />
       <HorizontalMoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'studentHMBC'} />
+    </div>
+    <div class="flex space-x-6 justify-between">
+      <Card>Add new chart here like scatter clustering or whatever...</Card>
     </div>
 	</div>
 </div>
