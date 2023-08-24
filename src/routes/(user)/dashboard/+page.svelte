@@ -311,8 +311,6 @@
   function updateCurrent() {
     current = dayjs();
   }
-
-  $: console.log($consistentLowMoods)
 </script>
 
 <svelte:head>
