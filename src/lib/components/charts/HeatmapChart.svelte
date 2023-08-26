@@ -25,6 +25,7 @@
       tooltip: {
         position: 'top',
         formatter: function (params) {
+          console.log(params)
           return 'Total Moods: ' + params.value[2]
         },
       },
@@ -54,13 +55,6 @@
 				label: {
 					show: true
 				},
-				emphasis: {
-					itemStyle: {
-						shadowBlur: 10,
-						shadowColor: 'rgba(0, 0, 0, 0.5)'
-					},
-          focus: 'self',
-					}
 			}],
 			toolbox: {
 				show: true,
