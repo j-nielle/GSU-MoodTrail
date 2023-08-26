@@ -25,7 +25,6 @@
       tooltip: {
         position: 'top',
         formatter: function (params) {
-          console.log(params)
           return 'Total Moods: ' + params.value[2]
         },
       },
