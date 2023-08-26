@@ -88,14 +88,9 @@
 		};
 	});
 
+  $: viewAnonData ? dataType = anonMoodData : dataType = studentMoodData;
+
 	$: if(dataType.length > 0){
-    let filteredStudents = new Map();
-	  const consecutiveDaysMap = new Map();
-    consistentLowMoods.set([]);
-
-    recentStudent = _.last(studentMoodData)['name']; // info card
-
-    // heatmap
 		const groupedData = _.groupBy(dataType, (data) => {
 			const date = new Date(data.created_at);
 			return [date.getDay(), date.getHours()];
@@ -110,7 +105,97 @@
 		const moodCount = _.countBy(dataType, 'mood_label') || [];
 		xDataMBC = _.keys(moodCount);
 		yDataMBC = _.values(moodCount);
+
+    // line charts
+    lcBtnColors = {
+      today: selectedLineChart === "today" ? "blue" : "light",
+      overall: selectedLineChart === "overall" ? "blue" : "light",
+      weekly: selectedLineChart === "weekly" ? "blue" : "light",
+      monthly: selectedLineChart === "monthly" ? "blue" : "light",
+      yearly: selectedLineChart === "yearly" ? "blue" : "light",
+    };
+
+    if(selectedLineChart === 'today'){
+      todaysEntries = _.filter(
+        dataType, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
+      );   
+      timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss'));
+      todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score);
+      const todaysMoodLabels = _.map(todaysEntries, (entry) => entry.mood_label) || [];
+      const todaysReasonLabels = _.map(todaysEntries, (entry) => entry.reason_label) || [];
+      todayMostFreqMood = _.head(_(todaysMoodLabels).countBy().entries().maxBy(_.last));
+      todayMostFreqReason = _.head(_(todaysReasonLabels).countBy().entries().maxBy(_.last));
+    }
+    else if (selectedLineChart === 'overall') {
+      const groupedByDay = _.groupBy(dataType, (entry) =>
+        dayjs(entry.created_at).format('YYYY-MM-DD')
+      );
+
+      overallAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      overall = _.sortBy(_.keys(groupedByDay));
+      overallMostFreqMood = _.head(
+        _(groupedByDay).flatMap().countBy('mood_label').entries().maxBy(_.last)
+      );
+      overallMostFreqReason = _.head(
+        _(groupedByDay).flatMap().countBy('reason_label').entries().maxBy(_.last)
+      );  
+    }
+    else if(selectedLineChart === 'weekly'){
+      const groupedByWeek = _.groupBy(dataType, (entry) =>
+        getWeekNumberString(dayjs(entry.created_at))
+      );
+
+      weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
+        const weekNumber = parseInt(week.replace('Week ', ''));
+        return weekNumber;
+      });
+      weeklyMostFreqMood = _.head(
+        _(groupedByWeek).flatMap().countBy('mood_label').entries().maxBy(_.last)
+      );
+      weeklyMostFreqReason = _.head(
+        _(groupedByWeek).flatMap().countBy('reason_label').entries().maxBy(_.last)
+      );
+    }
+    else if(selectedLineChart === 'monthly'){
+      const groupedByMonth = _.groupBy(dataType, (entry) =>
+        dayjs(entry.created_at).format('YYYY-MM')
+      );
+
+      monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      monthly = _.sortBy(_.keys(groupedByMonth));
+      monthlyMostFreqMood = _.head(
+        _(groupedByMonth).flatMap().countBy('mood_label').entries().maxBy(_.last)
+      );
+      monthlyMostFreqReason = _.head(
+        _(groupedByMonth).flatMap().countBy('reason_label').entries().maxBy(_.last)
+      );
+    }
+    else if(selectedLineChart === 'yearly'){
+      const groupedByYear = _.groupBy(dataType, (entry) =>
+        dayjs(entry.created_at).format('YYYY')
+      );
+
+      yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      yearly = _.sortBy(_.keys(groupedByYear));
+      yearlyMostFreqMood = _.head(
+        _(groupedByYear).flatMap().countBy('mood_label').entries().maxBy(_.last)
+      );
+      yearlyMostFreqReason = _.head(
+        _(groupedByYear).flatMap().countBy('reason_label').entries().maxBy(_.last)
+      );
+    }
     
+    // scatter 1
+	}
+
+  $: if(studentMoodData.length > 0){
+    let filteredStudents = new Map();
+	  const consecutiveDaysMap = new Map();
+    consistentLowMoods.set([]);
+
+    recentStudent = _.last(studentMoodData)['name']; // info card
+
     // table of students w consistent low moods
     const consecutiveThreshold = 4;
 		let maxConsecutiveDays = 0;
@@ -203,92 +288,6 @@
         { studentId, streaks: studentStreaks },
       ]);
     });
-	}
-
-  $: {
-    if(viewAnonData){ dataType = anonMoodData; }
-    else{ dataType = studentMoodData; }
-  }
-  
-  $: {
-    lcBtnColors = {
-      today: selectedLineChart === "today" ? "blue" : "light",
-      overall: selectedLineChart === "overall" ? "blue" : "light",
-      weekly: selectedLineChart === "weekly" ? "blue" : "light",
-      monthly: selectedLineChart === "monthly" ? "blue" : "light",
-      yearly: selectedLineChart === "yearly" ? "blue" : "light",
-    };
-
-    if(selectedLineChart === 'today'){
-      todaysEntries = _.filter(
-        dataType, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
-      );   
-      timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss'));
-      todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score);
-      const todaysMoodLabels = _.map(todaysEntries, (entry) => entry.mood_label) || [];
-      const todaysReasonLabels = _.map(todaysEntries, (entry) => entry.reason_label) || [];
-      todayMostFreqMood = _.head(_(todaysMoodLabels).countBy().entries().maxBy(_.last));
-      todayMostFreqReason = _.head(_(todaysReasonLabels).countBy().entries().maxBy(_.last));
-    }
-    else if (selectedLineChart === 'overall') {
-      const groupedByDay = _.groupBy(dataType, (entry) =>
-        dayjs(entry.created_at).format('YYYY-MM-DD')
-      );
-
-      overallAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-      overall = _.sortBy(_.keys(groupedByDay));
-      overallMostFreqMood = _.head(
-        _(groupedByDay).flatMap().countBy('mood_label').entries().maxBy(_.last)
-      );
-      overallMostFreqReason = _.head(
-        _(groupedByDay).flatMap().countBy('reason_label').entries().maxBy(_.last)
-      );  
-    }
-    else if(selectedLineChart === 'weekly'){
-      const groupedByWeek = _.groupBy(dataType, (entry) =>
-        getWeekNumberString(dayjs(entry.created_at))
-      );
-
-      weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-      weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
-        const weekNumber = parseInt(week.replace('Week ', ''));
-        return weekNumber;
-      });
-      weeklyMostFreqMood = _.head(
-        _(groupedByWeek).flatMap().countBy('mood_label').entries().maxBy(_.last)
-      );
-      weeklyMostFreqReason = _.head(
-        _(groupedByWeek).flatMap().countBy('reason_label').entries().maxBy(_.last)
-      );
-    }
-    else if(selectedLineChart === 'monthly'){
-      const groupedByMonth = _.groupBy(dataType, (entry) =>
-        dayjs(entry.created_at).format('YYYY-MM')
-      );
-
-      monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-      monthly = _.sortBy(_.keys(groupedByMonth));
-      monthlyMostFreqMood = _.head(
-        _(groupedByMonth).flatMap().countBy('mood_label').entries().maxBy(_.last)
-      );
-      monthlyMostFreqReason = _.head(
-        _(groupedByMonth).flatMap().countBy('reason_label').entries().maxBy(_.last)
-      );
-    }
-    else if(selectedLineChart === 'yearly'){
-      const groupedByYear = _.groupBy(dataType, (entry) =>
-        dayjs(entry.created_at).format('YYYY')
-      );
-
-      yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
-      yearly = _.sortBy(_.keys(groupedByYear));
-      yearlyMostFreqMood = _.head(
-        _(groupedByYear).flatMap().countBy('mood_label').entries().maxBy(_.last)
-      );
-      yearlyMostFreqReason = _.head(
-        _(groupedByYear).flatMap().countBy('reason_label').entries().maxBy(_.last)
-      );
-    }
   }
 
   $: if ($focusTable) {
@@ -524,5 +523,11 @@
         </Table>
       </div>
 		</div>
+
+    <div class="flex space-x-4">
+      <div class="p-4 bg-white rounded-sm drop-shadow-md">
+        Test
+      </div>
+    </div>
 	</div>
 </div>
