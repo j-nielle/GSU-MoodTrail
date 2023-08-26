@@ -1,4 +1,5 @@
 <script>
+  // @ts-nocheck
 	import '../app.postcss';
 	import { invalidate } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -19,14 +20,14 @@
 
 	export let data;
 
-  let sessionExpired = false;
-
 	$: ({ supabase, session } = data);
+
+  let sessionExpired = session === null;
   
 	onMount(() => {
 		const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {
       console.log(event)
-			if (_session?.expires_at !== session?.expires_at) { // token_refreshed event
+			if (_session?.expires_at !== session?.expires_at) {
 				invalidate('supabase:auth');
 			}
 		});
