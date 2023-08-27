@@ -450,7 +450,7 @@
             By default, blah blah blah
           </p>
         </caption>
-        <Table divClass="text-left text-sm text-gray-500 border border-zinc-300 dark:text-gray-400 max-h-72 overflow-y-scroll">
+        <Table divClass="text-left text-sm text-gray-500 border border-zinc-300 dark:text-gray-400 max-h-72 overflow-y-auto">
           <TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky">
             <TableHeadCell>ID Number</TableHeadCell>
             <TableHeadCell>Time Period</TableHeadCell>
@@ -494,17 +494,17 @@
 
     <div class="flex space-x-4">
       <div class="p-4 bg-white rounded-sm drop-shadow-md">
-        <div>
+        <!-- <div>
           {#if !controlState}
-          <div id="scatter-controls" class="flex flex-col space-y-2 bg-slate-900 w-56 pl-4 pt-4 pr-4">
-            <Label class="text-white">xAxis</Label><Select placeholder="" items={filteredProperties} bind:value={xAxisScatter} />
-            <Label class="text-white">yAxis</Label><Select placeholder="" items={filteredProperties} bind:value={yAxisScatter} />
-          </div>
+            <div id="scatter-controls" class="flex flex-col space-y-2 bg-slate-900 w-56 pl-4 pt-4 pr-4">
+              <Label class="text-white">xAxis</Label><Select placeholder="" items={filteredProperties} bind:value={xAxisScatter} />
+              <Label class="text-white">yAxis</Label><Select placeholder="" items={filteredProperties} bind:value={yAxisScatter} />
+            </div>
           {/if}
           <div class="flex flex-col bg-slate-900 p-4 w-56">
             <Button class="focus:ring-0" color="red" on:click={() => controlState = !controlState}>{controlsText}</Button>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
 	</div>

@@ -58,7 +58,8 @@
 			series: [
 				{
 					data: yData,
-					type: 'line'
+					type: 'line',
+          showSymbol: false,
 				}
 			],
 			tooltip: {

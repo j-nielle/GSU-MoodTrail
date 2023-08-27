@@ -20,6 +20,6 @@
 	{#if title === '' && icon === ''}
     <Label class="text-slate-900 text-sm">{data}</Label>
   {:else}
-    <Label class="text-slate-900 text-sm">{title} <span class="font-bold cursor-pointer">{data}</span></Label>
+    <Label class="text-slate-900 text-sm">{title} <span class="font-bold cursor-pointer">{data ?? 'N/A'}</span></Label>
   {/if}
 </Card>
