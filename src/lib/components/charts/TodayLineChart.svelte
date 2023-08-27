@@ -48,16 +48,20 @@
 				data: xData,
 				axisLine: {
 					onZero: false
-				}
+				},
+        boundaryGap: false,
 			},
 			yAxis: {
-				type: 'value'
+				type: 'value',
+        boundaryGap: [0, '100%']
 			},
 			series: [
 				{
 					data: yData,
 					type: 'line',
           showSymbol: false,
+          symbol: 'none',
+          sampling: 'lttb',
 				}
 			],
 			tooltip: {

@@ -378,7 +378,7 @@
 		<div class="flex space-x-4">
       <!-- Horizontal Mood Bar Chart -->
 			<div class="p-4 bg-white rounded-sm drop-shadow-md">
-				<HorizontalMoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'dashboardHMBC'} />
+				<HorizontalMoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID='dashboardHMBC' />
 			</div>
 
 			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center p-4">
@@ -402,35 +402,15 @@
 
           <!-- Line Charts for each time intervals -->
 					{#if selectedLineChart === 'today'}
-						<TodayLineChart
-							bind:xData={timestamps}
-							bind:yData={todaysMoodScores}
-							elementID={'dashboardTLC'}
-						/>
+						<TodayLineChart bind:xData={timestamps} bind:yData={todaysMoodScores} elementID='dashboardTLC' />
 					{:else if selectedLineChart === 'overall'}
-						<OverallLineChart
-							bind:xData={overall}
-							bind:yData={overallAverages}
-							elementID={'dashboardDLC'}
-						/>
+						<OverallLineChart bind:xData={overall} bind:yData={overallAverages} elementID='dashboardDLC' />
 					{:else if selectedLineChart === 'weekly'}
-						<WeeklyLineChart
-							bind:xData={weekly}
-							bind:yData={weeklyAverages}
-							elementID={'dashboardWLC'}
-						/>
+						<WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} elementID='dashboardWLC' />
 					{:else if selectedLineChart === 'monthly'}
-						<MonthlyLineChart
-							bind:xData={monthly}
-							bind:yData={monthlyAverages}
-							elementID={'dashboardMLC'}
-						/>
+						<MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} elementID='dashboardMLC' />
 					{:else if selectedLineChart === 'yearly'}
-						<YearlyLineChart
-							bind:xData={yearly}
-							bind:yData={yearlyAverages}
-							elementID={'dashboardYLC'}
-						/>
+						<YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} elementID='dashboardYLC' />
 					{/if}
 				</div>
 			</div>
@@ -439,7 +419,7 @@
 		<div class="flex space-x-4">
       <!-- Heatmap Chart -->
 			<div class="bg-white flex items-center rounded-sm drop-shadow-md p-4">
-				<HeatmapChart {heatmapData} elementID={'dashboardHM'} />
+				<HeatmapChart {heatmapData} elementID='dashboardHM' />
 			</div>
 
       <!-- table for students w consistent low moods -->
