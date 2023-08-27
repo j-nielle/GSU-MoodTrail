@@ -54,8 +54,6 @@
 
   let lcBtnColors = {}
 
-  let searchValue = '';
-
   onMount(() => {
 		const dashboardChannel = supabase.channel('dashboard').on( 'postgres_changes', {
 				event: 'INSERT',
@@ -71,12 +69,11 @@
 		};
 	});
 
-  $: if($page.url.searchParams.get('search')){
-    searchValue = $page.url.searchParams.get('search');
-    searchTerm = searchValue;
-  }else{ searchValue = ''; }
+  $: if($page.url.search != ''){
+    searchTerm = $page.url.searchParams.get('search');
+  }
 
-	$: if(studentMoodData && searchTerm != ''){
+	$: if(studentMoodData){
     // for the dropdown filter
 		college = _.uniq(studentMoodData.map((data) => data.college)).map((college) => ({
 			value: college,
