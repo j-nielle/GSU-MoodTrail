@@ -2,6 +2,7 @@
 	// @ts-nocheck
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
+  import { page } from '$app/stores';
   import relativeTime from 'dayjs/plugin/relativeTime';
   dayjs.extend(relativeTime);
 	import { onMount } from 'svelte';
@@ -53,6 +54,8 @@
 
   let lcBtnColors = {}
 
+  let searchValue = '';
+
   onMount(() => {
 		const dashboardChannel = supabase.channel('dashboard').on( 'postgres_changes', {
 				event: 'INSERT',
@@ -68,15 +71,12 @@
 		};
 	});
 
-  $: {
-    const urlParams = new URLSearchParams(window.location.search);
-    const searchValue = urlParams.get('search');
-    if (searchValue) {
-      searchTerm = searchValue;
-    }
-  }
+  $: if($page.url.searchParams.get('search')){
+    searchValue = $page.url.searchParams.get('search');
+    searchTerm = searchValue;
+  }else{ searchValue = ''; }
 
-	$: if(studentMoodData){
+	$: if(studentMoodData && searchTerm != ''){
     // for the dropdown filter
 		college = _.uniq(studentMoodData.map((data) => data.college)).map((college) => ({
 			value: college,
@@ -123,20 +123,15 @@
     })//.sort((a, b) => (dayjs(a.created_at).isBefore(dayjs(b.created_at)) ? -1 : 1));
 
     // info
-		let { moodCounts } = result.reduce( (acc, { mood_label }) => {
-			acc.moodCounts[mood_label] = (acc.moodCounts[mood_label] || 0) + 1;
-			return acc;
-			}, { moodCounts: {} }
-		);
-
-		const sortedMoods = Object.keys(moodCounts).sort((a, b) => moodCounts[b] - moodCounts[a]);
-    mostFrequentMood = sortedMoods[0];
-		leastFrequentMood = sortedMoods[sortedMoods.length - 1];
+    const moodCount = _.countBy(result, 'mood_label');
+		const sortedMoodsArr = Object.keys(moodCount).sort((a, b) => moodCount[b] - moodCount[a]);
+    mostFrequentMood = sortedMoodsArr[0];
+		leastFrequentMood = sortedMoodsArr.slice(-1)[0];
 
     // pie chart
-    const moodCount = _.countBy(result, 'mood_label') || [];
-		xDataMBC = _.keys(moodCount);
-		yDataMBC = _.values(moodCount);
+    const sortedMoodObj = Object.fromEntries(Object.entries(moodCount).sort(([, a], [, b]) => a - b));
+		xDataMBC = _.keys(sortedMoodObj);
+		yDataMBC = _.values(sortedMoodObj);
 
     pieChartData = xDataMBC.map((label, index) => {
       return {
