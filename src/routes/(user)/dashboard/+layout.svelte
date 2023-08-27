@@ -61,9 +61,9 @@
 		}
 	});
 
-  $: if(activeUrl != '/dashboard') {
-    focusTable.update(()=>false)
-  }
+  // $: if(activeUrl != '/dashboard') {
+  //   focusTable.update(()=>false)
+  // }
 
   $: activeUrl = $page.url.pathname;
 </script>
