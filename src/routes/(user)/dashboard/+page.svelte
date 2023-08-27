@@ -2,6 +2,7 @@
 	// @ts-nocheck
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
+  import { fade, fly, slide } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { 
     Card, 
@@ -16,7 +17,7 @@
 		TableHead,
 		TableHeadCell
   } from 'flowbite-svelte';
-	import { ProfileCardOutline, FaceLaughOutline, BrainOutline, PrintSolid } from 'flowbite-svelte-icons';
+	import { PrintSolid } from 'flowbite-svelte-icons';
   import {
     TodayLineChart,
     OverallLineChart,
@@ -27,6 +28,7 @@
     HeatmapChart
   } from '$lib/components/charts/index.js';
 	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
+  import { CardInfo } from '$lib/components/elements/index.js'
 
 	export let data;
 
@@ -53,7 +55,7 @@
 	let selectedLineChart = 'today';
   const moodLabels = ['Sad', 'Annoyed', 'Nervous', 'Bored', 'Neutral', 'Calm', 'Relaxed', 'Happy', 'Excited'];
 
-  let current = dayjs();
+  let current = dayjs().format('ddd MMMM D, YYYY h:mm:ss A');
   const interval = 1000; 
 
   let tableRef;
@@ -114,7 +116,7 @@
 
 		xDataMBC = _.keys(sortedMoodCount);
 		yDataMBC = _.values(sortedMoodCount);
-    
+
     // line charts
     lcBtnColors = {
       today: selectedLineChart === "today" ? "blue" : "light",
@@ -328,86 +330,44 @@
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-0">
   <!-- Info Cards -->
 	<div class="flex justify-between">
-    <Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
-      <Label class="font-semibold text-sm">{current.format('ddd MMMM D, YYYY h:mm:ss A')}</Label>
-    </Card>
-		<Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
-			<ProfileCardOutline tabindex="-1" class="text-slate-900" />
-			<Label class="text-slate-900 text-sm"
-				>Recent Student: <span class="font-bold cursor-pointer">{recentStudent ?? 'N/A'}</span
-				></Label
-			>
-		</Card>
+    <CardInfo title="" icon="" bind:data={current} />
+    <CardInfo title="Latest Student:" icon="ProfileCardOutline" bind:data={recentStudent} />
+    
 		{#if selectedLineChart === 'today'}
-			<Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
-				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900 text-sm"
-					>Prevailing Mood: <span class="font-bold">{todayMostFreqMood ?? 'N/A'}</span></Label
-				>
-			</Card>
-			<Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
-				<BrainOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900 text-sm"
-					>Prevailing Reason: <span class="font-bold">{todayMostFreqReason ?? 'N/A'}</span
-					></Label
-				>
-			</Card>
+      <div transition:fly>
+        <CardInfo title="Today's Top Mood:" icon="FaceLaughOutline" bind:data={todayMostFreqMood} />
+      </div>
+      <div transition:fly>
+        <CardInfo title="Today's Top Reason:" icon="BrainOutline" bind:data={todayMostFreqReason} />
+      </div>
 		{:else if selectedLineChart === 'overall'}
-			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
-				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900 text-sm"
-					>Prevailing Mood: <span class="font-bold">{overallMostFreqMood ?? 'N/A'}</span></Label
-				>
-			</Card>
-			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
-				<BrainOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900 text-sm"
-					>Prevailing Reason: <span class="font-bold">{overallMostFreqReason ?? 'N/A'}</span
-					></Label
-				>
-			</Card>
+      <div transition:fly>
+        <CardInfo title="Dominant Mood (Overall):" icon="FaceLaughOutline" bind:data={overallMostFreqMood} />
+      </div>
+      <div transition:fly>
+        <CardInfo title="Dominant Reason (Overall):" icon="BrainOutline" bind:data={overallMostFreqReason} />
+      </div>
 		{:else if selectedLineChart === 'weekly'}
-			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
-				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900 text-sm"
-					>Prevailing Mood: <span class="font-bold">{weeklyMostFreqMood ?? 'N/A'}</span></Label
-				>
-			</Card>
-			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
-				<BrainOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900 text-sm"
-					>Prevailing Reason: <span class="font-bold">{weeklyMostFreqReason ?? 'N/A'}</span
-					></Label
-				>
-			</Card>
+      <div transition:fly>
+        <CardInfo title="Dominant Mood (Weekly):" icon="FaceLaughOutline" bind:data={weeklyMostFreqMood} />
+      </div>
+      <div transition:fly>
+        <CardInfo title="Dominant Reason (Weekly):" icon="BrainOutline" bind:data={weeklyMostFreqReason} />
+      </div>
 		{:else if selectedLineChart === 'monthly'}
-			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
-				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900 text-sm"
-					>Prevailing Mood: <span class="font-bold">{monthlyMostFreqMood ?? 'N/A'}</span></Label
-				>
-			</Card>
-			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
-				<BrainOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900 text-sm"
-					>Prevailing Reason: <span class="font-bold">{monthlyMostFreqReason ?? 'N/A'}</span
-					></Label
-				>
-			</Card>
+      <div transition:fly>
+        <CardInfo title="Dominant Mood (Monthly):" icon="FaceLaughOutline" bind:data={monthlyMostFreqMood} />
+      </div>
+      <div transition:fly>
+        <CardInfo title="Dominant Reason (Monthly):" icon="BrainOutline" bind:data={monthlyMostFreqReason} />
+      </div>
 		{:else if selectedLineChart === 'yearly'}
-			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
-				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900 text-sm"
-					>Prevailing Mood: <span class="font-bold">{yearlyMostFreqMood ?? 'N/A'}</span></Label
-				>
-			</Card>
-			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
-				<BrainOutline tabindex="-1" class="text-slate-900" />
-				<Label class="text-slate-900 text-sm"
-					>Prevailing Reason: <span class="font-bold">{yearlyMostFreqReason ?? 'N/A'}</span
-					></Label
-				>
-			</Card>
+      <div transition:fly>
+        <CardInfo title="Dominant Mood (Yearly):" icon="FaceLaughOutline" bind:data={yearlyMostFreqMood} />
+      </div>
+      <div transition:fly>
+        <CardInfo title="Dominant Reason (Yearly):" icon="BrainOutline" bind:data={yearlyMostFreqReason} />
+      </div>
 		{/if}
     <Button class="max-h-14 justify-center shadow-md flex-row items-center space-x-2" on:click={() => window.print()}>
       <PrintSolid tabindex="-1" class="text-white focus:outline-none" />

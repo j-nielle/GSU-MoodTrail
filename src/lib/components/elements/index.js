@@ -1,0 +1,1 @@
+export { default as CardInfo } from '$lib/components/elements/CardInfo.svelte';
