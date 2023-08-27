@@ -8,6 +8,7 @@
     Button, 
     ButtonGroup, 
     Label,
+    Select,
     Table,
 		TableBody,
 		TableBodyCell,
@@ -59,6 +60,11 @@
   let viewAnonData = false;
   let lcBtnColors = {}
 
+  let filteredProperties;
+  let controlState = false
+  let averageMoodByReason;
+  let xAxisScatter, yAxisScatter;
+
   $: ({ supabase } = data);
 
 	onMount(() => {
@@ -88,6 +94,7 @@
 		};
 	});
 
+  $: controlsText = controlState ? "Show Controls" : "Hide Controls"
   $: viewAnonData ? dataType = anonMoodData : dataType = studentMoodData;
 
 	$: if(dataType.length > 0){
@@ -102,10 +109,12 @@
 		});
 
     // horizontal mood bar chart
-		const moodCount = _.countBy(dataType, 'mood_label') || [];
-		xDataMBC = _.keys(moodCount);
-		yDataMBC = _.values(moodCount);
+		const moodCount = _.countBy(dataType, 'mood_label');
+    const sortedMoodCount = Object.fromEntries(Object.entries(moodCount).sort(([, a], [, b]) => a - b));
 
+		xDataMBC = _.keys(sortedMoodCount);
+		yDataMBC = _.values(sortedMoodCount);
+    
     // line charts
     lcBtnColors = {
       today: selectedLineChart === "today" ? "blue" : "light",
@@ -197,7 +206,6 @@
     recentStudent = _.last(studentMoodData)['name']; // info card
 
     // table of students w consistent low moods
-    const consecutiveThreshold = 4;
 		let maxConsecutiveDays = 0;
 
 		filteredStudents = studentMoodData.reduce(
@@ -205,7 +213,6 @@
 				if (!created_at || mood_score >= 0) {
 					return students;
 				}
-
 				const dateKey = new Date(created_at).toLocaleDateString();
 
 				const studentData = students.get(student_id) || new Map();
@@ -213,10 +220,8 @@
 					moodScores: [...(studentData.get(dateKey)?.moodScores || []), mood_score],
 					reasonLabels: [...(studentData.get(dateKey)?.reasonLabels || []), reason_label]
 				});
-
 				return students.set(student_id, studentData);
-			},
-			new Map()
+			}, new Map()
 		);
 
 		for (const [studentId, studentEntry] of filteredStudents) {
@@ -233,13 +238,10 @@
 					consecutiveDays = 1;
 				}
 
-				if (consecutiveDays >= consecutiveThreshold) {
+				if (consecutiveDays >= 4) {
 					const lastRecord = (consecutiveDaysMap.get(studentId) || []).slice(-1)[0];
 
-					if (
-						lastRecord &&
-						lastRecord.endDate === currentDate.subtract(1, 'day').format('M/D/YYYY')
-					) {
+					if ( lastRecord && lastRecord.endDate === currentDate.subtract(1, 'day').format('M/D/YYYY') ) {
 						lastRecord.endDate = currentDate.format('M/D/YYYY');
 						lastRecord.moodScores.push(...moodData.moodScores);
 						lastRecord.reasonLabels.push(...moodData.reasonLabels);
@@ -254,9 +256,7 @@
 						};
 
 						for (let i = 0; i < consecutiveDays; i++) {
-							const streakDate = currentDate
-								.subtract(consecutiveDays - 1 - i, 'day')
-								.format('M/D/YYYY');
+							const streakDate = currentDate.subtract(consecutiveDays - 1 - i, 'day').format('M/D/YYYY');
 							const streakMoodData = studentEntry.get(streakDate);
 
 							if (streakMoodData) {
@@ -288,6 +288,15 @@
         { studentId, streaks: studentStreaks },
       ]);
     });
+
+    const sampleStudent = studentMoodData[0];
+    const features = ["course", "year_level", "college", "reason_score", "created_at"];
+
+    filteredProperties = Object.keys(sampleStudent)
+      .map(property => {
+        return { name: property, value: property };
+      }).filter(propertyWithIndex => features.includes(propertyWithIndex.name));
+
   }
 
   $: if ($focusTable) {
@@ -323,7 +332,6 @@
       <Label class="font-semibold text-sm">{current.format('ddd MMMM D, YYYY h:mm:ss A')}</Label>
     </Card>
 		<Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
-			<!-- (SOON): once recentStudent gets clicked, user will be led to the individual student section/page -->
 			<ProfileCardOutline tabindex="-1" class="text-slate-900" />
 			<Label class="text-slate-900 text-sm"
 				>Recent Student: <span class="font-bold cursor-pointer">{recentStudent ?? 'N/A'}</span
@@ -334,13 +342,13 @@
 			<Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900 text-sm"
-					>Most Frequent Mood: <span class="font-bold">{todayMostFreqMood ?? 'N/A'}</span></Label
+					>Prevailing Mood: <span class="font-bold">{todayMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
 			<Card class="max-h-10 w-fit justify-center flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900 text-sm"
-					>Most Frequent Reason: <span class="font-bold">{todayMostFreqReason ?? 'N/A'}</span
+					>Prevailing Reason: <span class="font-bold">{todayMostFreqReason ?? 'N/A'}</span
 					></Label
 				>
 			</Card>
@@ -348,13 +356,13 @@
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900 text-sm"
-					>Most Frequent Mood: <span class="font-bold">{overallMostFreqMood ?? 'N/A'}</span></Label
+					>Prevailing Mood: <span class="font-bold">{overallMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900 text-sm"
-					>Most Frequent Reason: <span class="font-bold">{overallMostFreqReason ?? 'N/A'}</span
+					>Prevailing Reason: <span class="font-bold">{overallMostFreqReason ?? 'N/A'}</span
 					></Label
 				>
 			</Card>
@@ -362,13 +370,13 @@
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900 text-sm"
-					>Most Frequent Mood: <span class="font-bold">{weeklyMostFreqMood ?? 'N/A'}</span></Label
+					>Prevailing Mood: <span class="font-bold">{weeklyMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900 text-sm"
-					>Most Frequent Reason: <span class="font-bold">{weeklyMostFreqReason ?? 'N/A'}</span
+					>Prevailing Reason: <span class="font-bold">{weeklyMostFreqReason ?? 'N/A'}</span
 					></Label
 				>
 			</Card>
@@ -376,13 +384,13 @@
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900 text-sm"
-					>Most Frequent Mood: <span class="font-bold">{monthlyMostFreqMood ?? 'N/A'}</span></Label
+					>Prevailing Mood: <span class="font-bold">{monthlyMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900 text-sm"
-					>Most Frequent Reason: <span class="font-bold">{monthlyMostFreqReason ?? 'N/A'}</span
+					>Prevailing Reason: <span class="font-bold">{monthlyMostFreqReason ?? 'N/A'}</span
 					></Label
 				>
 			</Card>
@@ -390,13 +398,13 @@
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<FaceLaughOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900 text-sm"
-					>Most Frequent Mood: <span class="font-bold">{yearlyMostFreqMood ?? 'N/A'}</span></Label
+					>Prevailing Mood: <span class="font-bold">{yearlyMostFreqMood ?? 'N/A'}</span></Label
 				>
 			</Card>
 			<Card class="max-h-10 justify-center drop-shadow-md flex-row items-center space-x-2">
 				<BrainOutline tabindex="-1" class="text-slate-900" />
 				<Label class="text-slate-900 text-sm"
-					>Most Frequent Reason: <span class="font-bold">{yearlyMostFreqReason ?? 'N/A'}</span
+					>Prevailing Reason: <span class="font-bold">{yearlyMostFreqReason ?? 'N/A'}</span
 					></Label
 				>
 			</Card>
@@ -487,7 +495,7 @@
             <TableHeadCell>ID Number</TableHeadCell>
             <TableHeadCell>Time Period</TableHeadCell>
             <TableHeadCell class="text-center">Average Mood</TableHeadCell>
-            <TableHeadCell class="text-center">Dominant Reason</TableHeadCell>
+            <TableHeadCell class="text-center">Prevailing Reason</TableHeadCell>
           </TableHead>
           <TableBody tableBodyClass="divide-y bg-white">
             {#if $consistentLowMoods === undefined || $consistentLowMoods.length === 0}
@@ -526,7 +534,17 @@
 
     <div class="flex space-x-4">
       <div class="p-4 bg-white rounded-sm drop-shadow-md">
-        Test
+        <div>
+          {#if !controlState}
+          <div id="scatter-controls" class="flex flex-col space-y-2 bg-slate-900 w-56 pl-4 pt-4 pr-4">
+            <Label class="text-white">xAxis</Label><Select placeholder="" items={filteredProperties} bind:value={xAxisScatter} />
+            <Label class="text-white">yAxis</Label><Select placeholder="" items={filteredProperties} bind:value={yAxisScatter} />
+          </div>
+          {/if}
+          <div class="flex flex-col bg-slate-900 p-4 w-56">
+            <Button class="focus:ring-0" color="red" on:click={() => controlState = !controlState}>{controlsText}</Button>
+          </div>
+        </div>
       </div>
     </div>
 	</div>
