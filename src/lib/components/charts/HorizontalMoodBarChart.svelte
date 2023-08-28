@@ -46,7 +46,6 @@
         }
       }],
 			tooltip: {
-				show: true,
 				trigger: 'axis',
         axisPointer: {
           type: 'shadow'

@@ -36,7 +36,6 @@
   $: mood.length != 1 ? showSymbol = false : showSymbol = true;
 
 	onMount(() => {
-    console.log(elementID, mood.length)
 		lineChart = echarts.init(document.getElementById(elementID));
 
 		lineChart.setOption({
@@ -49,18 +48,21 @@
 					fontSize: 11
 				}
 			},
-			xAxis: {
+			xAxis: [{
 				type: 'category',
 				data: xData,
 				axisLine: {
 					onZero: false
 				},
         boundaryGap: false,
-			},
-			yAxis: {
+			}],
+			yAxis: [{
+        splitLine: {
+          show: true
+        },
 				type: 'value',
         boundaryGap: [0, '100%']
-			},
+      }],
 			series: [
 				{
 					data: yData,
@@ -75,14 +77,13 @@
 				formatter: (params) => {
 					const index = params[0].dataIndex;
           const temp = xData[index];
-					const moodScore = yData[index];
+					const moodScore = yData[index].toFixed(2);
 					const moodLabel = mood[index];
-					return `Mood: ${temp} (<span class="font-bold">${moodLabel}</span>)`;
+					return `<span class="font-bold">[${temp}]</span> Mood: <span class="font-bold">${moodLabel}</span> (${moodScore})`;
 				}
 			},
       dataZoom: [
         {
-          type: 'inside',
           realtime: true,
           start: 0,
           end: 1000
