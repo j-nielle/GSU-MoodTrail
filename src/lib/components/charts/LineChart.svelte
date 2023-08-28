@@ -7,10 +7,12 @@
 	export let xData;
 	export let yData;
 	export let style;
+  export let title;
   export let elementID;
 
-	let monthlyLineChart;
+	let lineChart;
 	let mood;
+  let showSymbol = false;
 
 	function getNearestMoodLabel(score) {
 		const moodLabels = [
@@ -31,13 +33,15 @@
 	}
 
 	$: mood = yData.map((score) => getNearestMoodLabel(score));
+  $: mood.length != 1 ? showSymbol = false : showSymbol = true;
 
 	onMount(() => {
-		monthlyLineChart = echarts.init(document.getElementById(elementID));
+    console.log(elementID, mood.length)
+		lineChart = echarts.init(document.getElementById(elementID));
 
-		monthlyLineChart.setOption({
+		lineChart.setOption({
 			title: {
-				text: 'Average Mood Monthly',
+				text: title,
 				itemGap: 12,
 				subtext:
 					'Sad (-4), Annoyed (-3), Nervous (-2), Bored (-1), Neutral (0), Calm (1), Relaxed (2), Happy (3), Excited (4)',
@@ -61,22 +65,29 @@
 				{
 					data: yData,
 					type: 'line',
-          showSymbol: false,
-          symbol: 'none',
           sampling: 'lttb',
+          showSymbol: showSymbol
 				}
 			],
 			tooltip: {
-				show: 'true',
+				show: true,
 				trigger: 'axis',
 				formatter: (params) => {
 					const index = params[0].dataIndex;
-          const date = xData[index];
-					const moodScore = yData[index].toFixed(2);
+          const temp = xData[index];
+					const moodScore = yData[index];
 					const moodLabel = mood[index];
-					return `${date}: <span class="font-bold">${moodLabel}</ span>`;
+					return `Mood: ${temp} (<span class="font-bold">${moodLabel}</span>)`;
 				}
 			},
+      dataZoom: [
+        {
+          type: 'inside',
+          realtime: true,
+          start: 0,
+          end: 1000
+        }
+      ],
 			toolbox: {
 				show: true,
 				feature: {
@@ -96,12 +107,12 @@
 		});
 
 		return () => {
-			monthlyLineChart.dispose();
+			lineChart.dispose();
 		};
 	});
 
-	afterUpdate(() => {
-		monthlyLineChart.setOption({
+	afterUpdate(() => {  
+		lineChart.setOption({
 			xAxis: {
 				data: xData
 			},
@@ -110,7 +121,7 @@
 					data: yData
 				}
 			]
-		});
+		}); 
 	});
 </script>
 
