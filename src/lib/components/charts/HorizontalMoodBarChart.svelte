@@ -2,7 +2,7 @@
 	// @ts-nocheck
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
-  import { moodColors } from '$lib/etc/index.js'
+  import { moodColors } from '$lib/constants/index.js'
 
 	export let xData;
 	export let yData;

@@ -3,6 +3,7 @@
 	import { minBy } from 'lodash';
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
+  import { moodLabels, moodScores } from "$lib/constants/index.js"
 
 	export let xData;
 	export let yData;
@@ -15,19 +16,6 @@
   let showSymbol = false;
 
 	function getNearestMoodLabel(score) {
-		const moodLabels = [
-			'Sad',
-			'Annoyed',
-			'Nervous',
-			'Bored',
-			'Neutral',
-			'Calm',
-			'Relaxed',
-			'Happy',
-			'Excited'
-		];
-		const moodScores = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
-
 		const nearestIndex = minBy(moodScores, (moodScore) => Math.abs(moodScore - score));
 		return moodLabels[moodScores.indexOf(nearestIndex)];
 	}

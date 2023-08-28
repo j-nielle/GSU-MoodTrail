@@ -1,3 +1,5 @@
-export { focusTable } from '$lib/stores/focusTable.js';
-export { consistentLowMoods } from '$lib/stores/consistentLowMoods.js';
-export { newRequest } from '$lib/stores/newRequest.js';
+import { writable } from 'svelte/store';
+
+export const newRequest = writable(false);
+export const focusTable = writable(false);
+export const consistentLowMoods = writable(new Map());
