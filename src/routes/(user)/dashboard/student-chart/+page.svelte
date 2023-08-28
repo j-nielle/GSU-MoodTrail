@@ -12,6 +12,7 @@
     LineChart,
     HorizontalMoodBarChart,
     PieChart,
+    RadarChart,
     HeatmapChart
   } from '$lib/components/charts/index.js';
 
@@ -302,6 +303,7 @@
       bind:yData={yDataMBC} elementID={'studentHMBC'} />
     </div>
     <div class="flex space-x-6 justify-between">
+      
       <Card>Add new chart here like scatter clustering or whatever...</Card>
     </div>
 	</div>
