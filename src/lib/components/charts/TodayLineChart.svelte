@@ -6,6 +6,7 @@
 
 	export let xData;
 	export let yData;
+	export let style;
   export let elementID;
 
 	let todayLineChart;
@@ -111,4 +112,4 @@
 	});
 </script>
 
-<div id={elementID} style="width:790px; height:280px;" />
+<div id={elementID} {style} />

@@ -7,6 +7,7 @@
 
 	export let xData;
 	export let yData;
+	export let style;
   export let elementID;
 
 	let yearlyLineChart;
@@ -37,7 +38,7 @@
 
 		yearlyLineChart.setOption({
 			title: {
-				text: 'Yearly Mood Averages',
+				text: 'Average Mood Yearly',
 				itemGap: 12,
 				subtext:
 					'Sad (-4), Annoyed (-3), Nervous (-2), Bored (-1), Neutral (0), Calm (1), Relaxed (2), Happy (3), Excited (4)',
@@ -62,9 +63,6 @@
 					data: yData,
 					type: 'line',
           sampling: 'lttb',
-          itemStyle: {
-            color: 'rgb(255, 70, 131)'
-          },
 				}
 			],
 			tooltip: {
@@ -115,4 +113,4 @@
 	});
 </script>
 
-<div id={elementID} style="width:790px; height:280px;" />
+<div id={elementID} {style} />

@@ -291,13 +291,15 @@
       ]);
     });
 
-    const sampleStudent = studentMoodData[0];
-    const features = ["course", "year_level", "college", "reason_score", "created_at"];
+    // const sampleStudent = studentMoodData[0];
+    // const features = ["course", "year_level", "college", "reason_score", "created_at"];
 
-    filteredProperties = Object.keys(sampleStudent)
-      .map(property => {
-        return { name: property, value: property };
-      }).filter(propertyWithIndex => features.includes(propertyWithIndex.name));
+    // filteredProperties = Object.keys(sampleStudent)
+    //   .map(property => {
+    //     return { name: property, value: property };
+    //   }).filter(propertyWithIndex => features.includes(propertyWithIndex.name));
+
+    
 
   }
 
@@ -375,13 +377,13 @@
 	</div>
 
 	<div class="flex flex-col space-y-3">
+    <!-- Horizontal Mood Bar Chart and Line Charts -->
 		<div class="flex space-x-4">
-      <!-- Horizontal Mood Bar Chart -->
-			<div class="p-4 bg-white rounded-sm drop-shadow-md">
+			<div class="p-4 bg-white rounded-sm drop-shadow-md hover:ring-1">
 				<HorizontalMoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID='dashboardHMBC' />
 			</div>
 
-			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center p-4">
+			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center p-4 hover:ring-1">
 				<div class="flex flex-col space-y-7">
 					<div class="flex justify-between">
             <!-- Buttons for Time Intervals -->
@@ -402,28 +404,37 @@
 
           <!-- Line Charts for each time intervals -->
 					{#if selectedLineChart === 'today'}
-						<TodayLineChart bind:xData={timestamps} bind:yData={todaysMoodScores} elementID='dashboardTLC' />
+						<TodayLineChart 
+            bind:xData={timestamps} 
+            bind:yData={todaysMoodScores} elementID='dashboardTLC' style="width:790px; height:280px;" />
 					{:else if selectedLineChart === 'overall'}
-						<OverallLineChart bind:xData={overall} bind:yData={overallAverages} elementID='dashboardDLC' />
+						<OverallLineChart 
+            bind:xData={overall} 
+            bind:yData={overallAverages} elementID='dashboardDLC' style="width:790px; height:280px;" />
 					{:else if selectedLineChart === 'weekly'}
-						<WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} elementID='dashboardWLC' />
+						<WeeklyLineChart 
+            bind:xData={weekly} 
+            bind:yData={weeklyAverages} elementID='dashboardWLC' style="width:790px; height:280px;" />
 					{:else if selectedLineChart === 'monthly'}
-						<MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} elementID='dashboardMLC' />
+						<MonthlyLineChart 
+            bind:xData={monthly} 
+            bind:yData={monthlyAverages} elementID='dashboardMLC' style="width:790px; height:280px;" />
 					{:else if selectedLineChart === 'yearly'}
-						<YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} elementID='dashboardYLC' />
+						<YearlyLineChart 
+            bind:xData={yearly} 
+            bind:yData={yearlyAverages} elementID='dashboardYLC' style="width:790px; height:280px;" />
 					{/if}
 				</div>
 			</div>
 		</div>
-		
+
+		<!-- Heatmap Chart and table for students w consistent low moods -->
 		<div class="flex space-x-4">
-      <!-- Heatmap Chart -->
-			<div class="bg-white flex items-center rounded-sm drop-shadow-md p-4">
+			<div class="bg-white flex items-center rounded-sm drop-shadow-md p-4 hover:ring-1">
 				<HeatmapChart {heatmapData} elementID='dashboardHM' />
 			</div>
 
-      <!-- table for students w consistent low moods -->
-			<div id="low-moods" bind:this={tableRef}  class="bg-white rounded-sm !p-5 drop-shadow-md w-full">
+			<div id="low-moods" bind:this={tableRef}  class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
         <caption class="text-lg font-bold text-left w-max text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
           Students with consistent low moods
           <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">

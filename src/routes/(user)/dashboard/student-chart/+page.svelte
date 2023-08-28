@@ -7,7 +7,7 @@
   dayjs.extend(relativeTime);
 	import { onMount } from 'svelte';
   import { ClockSolid } from 'flowbite-svelte-icons';
-	import { Badge, Card, Search, Button, ButtonGroup, Select } from 'flowbite-svelte';
+	import { P, Badge, Card, Search, Button, ButtonGroup, Select } from 'flowbite-svelte';
   import {
     TodayLineChart,
     OverallLineChart,
@@ -136,6 +136,8 @@
         name: label
       };
     });
+
+    //radar chart
 	}
 
   $: {
@@ -232,15 +234,15 @@
 		<div class="flex space-x-6 justify-between">
       <!-- student info section -->
 			<div class="flex flex-col p-5">
-				<h2 class="font-bold mb-2 text-xl">STUDENT INFORMATION</h2>
+				<P size="2xl" weight="bold" space="wider" class="mb-2 text-center">STUDENT INFORMATION</P>
         <hr class="mb-5">
 				{#if result?.length > 0}
-					<p><strong>ID:</strong> {result[0].student_id}</p>
-					<p><strong>Name:</strong> {result[0].name}</p>
-          <p><strong>College:</strong> {result[0].college}</p>
-					<p><strong>Latest Mood:</strong> {result[result.length - 1].mood_label}</p>
-					<p><strong>Most Frequent Mood:</strong> {mostFrequentMood}</p>
-					<p><strong>Least Frequent Mood:</strong> {leastFrequentMood}</p>
+					<P><strong>ID:</strong> {result[0].student_id}</P>
+					<P><strong>Name:</strong> {result[0].name}</P>
+          <P><strong>College:</strong> {result[0].college}</P>
+					<P><strong>Latest Mood:</strong> {result[result.length - 1].mood_label}</P>
+					<P><strong>Most Frequent Mood:</strong> {mostFrequentMood}</P>
+					<P><strong>Least Frequent Mood:</strong> {leastFrequentMood}</P>
           <div class="flex space-x-2">
             <Badge large border class="w-fit mt-2">
               <ClockSolid class="text-primary-800 dark:text-primary-400 w-fit h-2.5 mr-1.5" />
@@ -250,7 +252,7 @@
             <Badge large border class="w-fit mt-2">{result[0].year_level}</Badge>
           </div>
 				{:else if result.length === 0}
-					<h2>Student not found.</h2>
+					<P>Student not found.</P>
 				{/if}
 			</div>
 
@@ -268,15 +270,25 @@
 
         <!-- line charts -->
         {#if selectedLineChart === 'today'}
-          <TodayLineChart bind:xData={timestamps} bind:yData={todaysMoodScores} elementID={'IndTLC'} />
+          <TodayLineChart 
+          bind:xData={timestamps} 
+          bind:yData={todaysMoodScores} elementID={'IndTLC'} style="width:790px; height:320px;" />
         {:else if selectedLineChart === 'overall'}
-          <OverallLineChart bind:xData={overall} bind:yData={overallAverages} elementID={'IndDLC'} />
+          <OverallLineChart 
+          bind:xData={overall} 
+          bind:yData={overallAverages} elementID={'IndDLC'} style="width:790px; height:320px;" />
         {:else if selectedLineChart === 'weekly'}
-          <WeeklyLineChart bind:xData={weekly} bind:yData={weeklyAverages} elementID={'IndWLC'} />
+          <WeeklyLineChart 
+          bind:xData={weekly} 
+          bind:yData={weeklyAverages} elementID={'IndWLC'} style="width:790px; height:320px;" />
         {:else if selectedLineChart === 'monthly'}
-          <MonthlyLineChart bind:xData={monthly} bind:yData={monthlyAverages} elementID={'IndMLC'} />
+          <MonthlyLineChart 
+          bind:xData={monthly} 
+          bind:yData={monthlyAverages} elementID={'IndMLC'} style="width:790px; height:320px;" />
         {:else if selectedLineChart === 'yearly'}
-          <YearlyLineChart bind:xData={yearly} bind:yData={yearlyAverages} elementID={'IndYLC'} />
+          <YearlyLineChart 
+          bind:xData={yearly} 
+          bind:yData={yearlyAverages} elementID={'IndYLC'} style="width:790px; height:320px;" />
         {/if}
       </div>
 		</div>
@@ -284,7 +296,9 @@
     <!-- pie chart & horizontal mood bar chart -->
     <div class="flex space-x-6 justify-between">
       <PieChart bind:data={pieChartData} elementID={'studentPC'} />
-      <HorizontalMoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID={'studentHMBC'} />
+      <HorizontalMoodBarChart 
+      bind:xData={xDataMBC} 
+      bind:yData={yDataMBC} elementID={'studentHMBC'} />
     </div>
     <div class="flex space-x-6 justify-between">
       <Card>Add new chart here like scatter clustering or whatever...</Card>

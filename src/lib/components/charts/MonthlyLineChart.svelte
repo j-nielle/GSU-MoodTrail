@@ -6,6 +6,7 @@
 
 	export let xData;
 	export let yData;
+	export let style;
   export let elementID;
 
 	let monthlyLineChart;
@@ -36,7 +37,7 @@
 
 		monthlyLineChart.setOption({
 			title: {
-				text: 'Monthly Mood Averages',
+				text: 'Average Mood Monthly',
 				itemGap: 12,
 				subtext:
 					'Sad (-4), Annoyed (-3), Nervous (-2), Bored (-1), Neutral (0), Calm (1), Relaxed (2), Happy (3), Excited (4)',
@@ -113,4 +114,4 @@
 	});
 </script>
 
-<div id={elementID} style="width:790px; height:280px;" />
+<div id={elementID} {style} />

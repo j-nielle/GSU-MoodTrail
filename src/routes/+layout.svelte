@@ -6,6 +6,7 @@
 	import { page } from '$app/stores';
 	import {
 		Avatar,
+    DarkMode,
     Modal,
 		Navbar,
 		NavBrand,
@@ -17,6 +18,7 @@
 		DropdownHeader,
 		DropdownItem
 	} from 'flowbite-svelte';
+  import { SunSolid, MoonSolid } from 'flowbite-svelte-icons';
 
 	export let data;
 
@@ -67,6 +69,14 @@
         Student Chart
       </NavLi>
 		</NavUl>
+    <!-- <DarkMode class="text-lg">
+      <svelte:fragment slot="lightIcon">
+        <SunSolid />
+      </svelte:fragment>
+      <svelte:fragment slot="darkIcon">
+        <MoonSolid />
+      </svelte:fragment>
+    </DarkMode> -->
 		<label for="avatar-menu">
 			<Avatar class="cursor-pointer fixed" data-name={session?.user?.user_metadata?.name ?? 'User'}
 				id="avatar-menu"
