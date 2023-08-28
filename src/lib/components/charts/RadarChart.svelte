@@ -2,11 +2,13 @@
 	// @ts-nocheck
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
+	import { moodLabels, moodColors } from '$lib/constants/index.js';
 
-	//export let data;
 	export let elementID;
 	export let title;
 	export let style;
+	export let indicator;
+	export let data;
 
 	let radarChart;
 
@@ -18,37 +20,75 @@
 				text: title
 			},
 			legend: {
-				data: ['Allocated Budget', 'Actual Spending'],
-        itemHeight: 9.5
+				data: moodLabels,
+				bottom: 0,
+				left: 0,
+				itemWidth: 13.5,
+				orient: 'vertical',
+				textStyle: {
+					fontSize: 9
+				}
 			},
 			radar: {
 				//shape: 'circle',
-				indicator: [
-					{ name: 'Sales', max: 6500 },
-					{ name: 'Administration', max: 16000 },
-					{ name: 'Information Technology', max: 30000 },
-					{ name: 'Customer Support', max: 38000 },
-					{ name: 'Development', max: 52000 },
-					{ name: 'Marketing', max: 25000 }
-				],
-        axisName: {
-          color: "rgba(54, 54, 54, 1)"
-        }
+				indicator: indicator,
+				axisName: {
+					color: 'rgba(54, 54, 54, 1)'
+				},
+				axisTick: {
+					//show: true,
+				},
+				axisLabel: {
+					//show:true,
+				},
+				splitLine: {
+					show: true
+				},
+				nameGap: 10,
+				scale: true
+				// splitLine: {
+				//   lineStyle: {
+				//     color: [
+				//       'rgba(238, 197, 102, 0.1)',
+				//       'rgba(238, 197, 102, 0.2)',
+				//       'rgba(238, 197, 102, 0.4)',
+				//       'rgba(238, 197, 102, 0.6)',
+				//       'rgba(238, 197, 102, 0.8)',
+				//       'rgba(238, 197, 102, 1)'
+				//     ].reverse()
+				//   }
+				// },
+				// splitArea: {
+				//   show: false
+				// },
+				// axisLine: {
+				//   lineStyle: {
+				//     color: 'rgba(238, 197, 102, 0.5)'
+				//   }
+				// }
 			},
 			series: [
 				{
-					name: 'Budget vs spending',
+					name: 'Moods',
 					type: 'radar',
-					data: [
-						{
-							value: [4200, 3000, 20000, 35000, 50000, 18000],
-							name: 'Allocated Budget'
-						},
-						{
-							value: [5000, 14000, 28000, 26000, 42000, 21000],
-							name: 'Actual Spending'
+					data: data,
+					symbol: 'none',
+					// itemStyle: {
+					//   color: '#F9713C'
+					// },
+					areaStyle: {
+						opacity: 0.1,
+					},
+					emphasis: {
+						focus: 'self',
+						//blurScope: 'global'
+					},
+					itemStyle: {
+            opacity: 0.6,
+						color: function (params) {
+							return moodColors[params.name] || '#5470c6';
 						}
-					]
+					}
 				}
 			],
 			tooltip: {
@@ -78,16 +118,7 @@
 		radarChart.setOption({
 			series: [
 				{
-					data: [
-						{
-							value: [4200, 3000, 20000, 35000, 50000, 18000],
-							name: 'Allocated Budget'
-						},
-						{
-							value: [5000, 14000, 28000, 26000, 42000, 21000],
-							name: 'Actual Spending'
-						}
-					]
+					data: data
 				}
 			]
 		});

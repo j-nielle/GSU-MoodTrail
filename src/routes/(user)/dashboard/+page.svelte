@@ -18,13 +18,10 @@
 		TableHeadCell
   } from 'flowbite-svelte';
 	import { PrintSolid } from 'flowbite-svelte-icons';
-  import {
-    LineChart,
-    HorizontalMoodBarChart,
-    HeatmapChart
-  } from '$lib/components/charts/index.js';
+  import { RadarChart, LineChart, HorizontalMoodBarChart, HeatmapChart } from '$lib/components/charts/index.js';
 	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
   import { CardInfo } from '$lib/components/elements/index.js'
+  import { moodLabels, reasonLabels } from "$lib/constants/index.js"
 
 	export let data;
 
@@ -49,7 +46,6 @@
 	let recentStudent;
 	let heatmapData;
 	let selectedLineChart = 'today';
-  const moodLabels = ['Sad', 'Annoyed', 'Nervous', 'Bored', 'Neutral', 'Calm', 'Relaxed', 'Happy', 'Excited'];
 
   let current = dayjs().format('ddd MMMM D, YYYY h:mm:ss A');
   const interval = 1000; 
@@ -58,10 +54,12 @@
   let viewAnonData = false;
   let lcBtnColors = {}
 
-  let filteredProperties;
-  let controlState = false
-  let averageMoodByReason;
-  let xAxisScatter, yAxisScatter;
+  let moodRadarData,reasonRadarIndicator;
+
+  // let filteredProperties;
+  // let controlState = false
+  // let averageMoodByReason;
+  // let xAxisScatter, yAxisScatter;
 
   $: ({ supabase } = data);
 
@@ -92,7 +90,7 @@
 		};
 	});
 
-  $: controlsText = controlState ? "Show Controls" : "Hide Controls"
+  //$: controlsText = controlState ? "Show Controls" : "Hide Controls"
   $: viewAnonData ? dataType = anonMoodData : dataType = studentMoodData;
 
 	$: if(dataType.length > 0){
@@ -112,7 +110,7 @@
 
 		xDataMBC = _.keys(sortedMoodCount);
 		yDataMBC = _.values(sortedMoodCount);
-
+    
     // line charts
     lcBtnColors = {
       today: selectedLineChart === "today" ? "blue" : "light",
@@ -294,9 +292,28 @@
     //   .map(property => {
     //     return { name: property, value: property };
     //   }).filter(propertyWithIndex => features.includes(propertyWithIndex.name));
+    const moodData = {};
+    for (const moodLabel of moodLabels) moodData[moodLabel] = Array(reasonLabels.length).fill(0);
 
-    
+    for (const student of studentMoodData) {
+      const moodIndex = moodLabels.indexOf(student.mood_label);
+      const reasonIndex = reasonLabels.indexOf(student.reason_label);
+      if (moodIndex !== -1 && reasonIndex !== -1) moodData[student.mood_label][reasonIndex]++;
+    }
 
+    moodRadarData = moodLabels.map((moodLabel) => ({
+      value: reasonLabels.map((reasonLabel) => moodData[moodLabel][reasonLabels.indexOf(reasonLabel)]),
+      name: moodLabel,
+    }));
+
+    const maxValues = reasonLabels.map((reasonLabel, reasonIndex) =>
+      Math.max(...moodRadarData.map((mood) => mood.value[reasonIndex]))
+    );
+
+    reasonRadarIndicator = reasonLabels.map((reasonLabel, reasonIndex) => ({
+      name: reasonLabel,
+      max: maxValues[reasonIndex] + 3,
+    }));
   }
 
   $: if ($focusTable) {
@@ -485,7 +502,10 @@
 		</div>
 
     <div class="flex space-x-4">
-      <div class="p-4 bg-white rounded-sm drop-shadow-md">
+      <div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center">
+        <RadarChart 
+        bind:data={moodRadarData} bind:indicator={reasonRadarIndicator}
+        title="test radar" elementID="testRadar" style="width:600px; height:450px;" />
         <!-- <div>
           {#if !controlState}
             <div id="scatter-controls" class="flex flex-col space-y-2 bg-slate-900 w-56 pl-4 pt-4 pr-4">
