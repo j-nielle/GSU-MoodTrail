@@ -4,6 +4,7 @@
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
 
+  export let title;
 	export let heatmapData;
   export let elementID;
 
@@ -29,7 +30,7 @@
         },
       },
 			title: {
-				text: 'Mood Occurrences by Day and Hour'
+				text: title,
 			},
       xAxis: {
         type: 'category',

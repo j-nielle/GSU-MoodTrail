@@ -19,11 +19,7 @@
   } from 'flowbite-svelte';
 	import { PrintSolid } from 'flowbite-svelte-icons';
   import {
-    TodayLineChart,
-    OverallLineChart,
-    WeeklyLineChart,
-    MonthlyLineChart,
-    YearlyLineChart,
+    LineChart,
     HorizontalMoodBarChart,
     HeatmapChart
   } from '$lib/components/charts/index.js';
@@ -404,25 +400,30 @@
 
           <!-- Line Charts for each time intervals -->
 					{#if selectedLineChart === 'today'}
-						<TodayLineChart 
+						<LineChart 
             bind:xData={timestamps} 
-            bind:yData={todaysMoodScores} elementID='dashboardTLC' style="width:790px; height:280px;" />
+            bind:yData={todaysMoodScores} 
+            elementID='dashboardTLC' title="Today's Moods" style="width:790px; height:280px;" />
 					{:else if selectedLineChart === 'overall'}
-						<OverallLineChart 
+						<LineChart 
             bind:xData={overall} 
-            bind:yData={overallAverages} elementID='dashboardDLC' style="width:790px; height:280px;" />
+            bind:yData={overallAverages} 
+            elementID='dashboardDLC' title="Average Mood Overall" style="width:790px; height:280px;" />
 					{:else if selectedLineChart === 'weekly'}
-						<WeeklyLineChart 
+						<LineChart 
             bind:xData={weekly} 
-            bind:yData={weeklyAverages} elementID='dashboardWLC' style="width:790px; height:280px;" />
+            bind:yData={weeklyAverages} 
+            elementID='dashboardWLC' title="Average Mood Weekly" style="width:790px; height:280px;" />
 					{:else if selectedLineChart === 'monthly'}
-						<MonthlyLineChart 
+						<LineChart 
             bind:xData={monthly} 
-            bind:yData={monthlyAverages} elementID='dashboardMLC' style="width:790px; height:280px;" />
+            bind:yData={monthlyAverages} 
+            elementID='dashboardMLC' title="Average Mood Monthly" style="width:790px; height:280px;" />
 					{:else if selectedLineChart === 'yearly'}
-						<YearlyLineChart 
+						<LineChart 
             bind:xData={yearly} 
-            bind:yData={yearlyAverages} elementID='dashboardYLC' style="width:790px; height:280px;" />
+            bind:yData={yearlyAverages} 
+            elementID='dashboardYLC' title="Average Mood Yearly" style="width:790px; height:280px;" />
 					{/if}
 				</div>
 			</div>
@@ -431,7 +432,7 @@
 		<!-- Heatmap Chart and table for students w consistent low moods -->
 		<div class="flex space-x-4">
 			<div class="bg-white flex items-center rounded-sm drop-shadow-md p-4 hover:ring-1">
-				<HeatmapChart {heatmapData} elementID='dashboardHM' />
+				<HeatmapChart title="Mood Occurrences by Day and Hour" {heatmapData} elementID='dashboardHM' />
 			</div>
 
 			<div id="low-moods" bind:this={tableRef}  class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">

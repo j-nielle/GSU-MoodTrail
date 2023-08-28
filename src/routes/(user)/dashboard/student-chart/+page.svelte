@@ -9,11 +9,7 @@
   import { ClockSolid } from 'flowbite-svelte-icons';
 	import { P, Badge, Card, Search, Button, ButtonGroup, Select } from 'flowbite-svelte';
   import {
-    TodayLineChart,
-    OverallLineChart,
-    WeeklyLineChart,
-    MonthlyLineChart,
-    YearlyLineChart,
+    LineChart,
     HorizontalMoodBarChart,
     PieChart,
     HeatmapChart
@@ -270,25 +266,30 @@
 
         <!-- line charts -->
         {#if selectedLineChart === 'today'}
-          <TodayLineChart 
+          <LineChart 
           bind:xData={timestamps} 
-          bind:yData={todaysMoodScores} elementID={'IndTLC'} style="width:790px; height:320px;" />
+          bind:yData={todaysMoodScores} 
+          elementID={'IndTLC'} style="width:790px; height:320px;" title="Today's Moods" />
         {:else if selectedLineChart === 'overall'}
-          <OverallLineChart 
+          <LineChart 
           bind:xData={overall} 
-          bind:yData={overallAverages} elementID={'IndDLC'} style="width:790px; height:320px;" />
+          bind:yData={overallAverages} 
+          elementID={'IndDLC'} style="width:790px; height:320px;" title="Average Mood Overall" />
         {:else if selectedLineChart === 'weekly'}
-          <WeeklyLineChart 
+          <LineChart 
           bind:xData={weekly} 
-          bind:yData={weeklyAverages} elementID={'IndWLC'} style="width:790px; height:320px;" />
+          bind:yData={weeklyAverages} 
+          elementID={'IndWLC'} style="width:790px; height:320px;" title="Average Mood Weekly" />
         {:else if selectedLineChart === 'monthly'}
-          <MonthlyLineChart 
+          <LineChart 
           bind:xData={monthly} 
-          bind:yData={monthlyAverages} elementID={'IndMLC'} style="width:790px; height:320px;" />
+          bind:yData={monthlyAverages} 
+          elementID={'IndMLC'} style="width:790px; height:320px;" title="Average Mood Monthly" />
         {:else if selectedLineChart === 'yearly'}
-          <YearlyLineChart 
+          <LineChart 
           bind:xData={yearly} 
-          bind:yData={yearlyAverages} elementID={'IndYLC'} style="width:790px; height:320px;" />
+          bind:yData={yearlyAverages} 
+          elementID={'IndYLC'} style="width:790px; height:320px;" title="Average Mood Yearly" />
         {/if}
       </div>
 		</div>
