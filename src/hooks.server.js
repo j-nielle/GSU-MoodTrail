@@ -1,6 +1,7 @@
 import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 import { createSupabaseServerClient } from '@supabase/auth-helpers-sveltekit';
+import { redirect } from '@sveltejs/kit'
 
 export const handle = async ({ event, resolve }) => {
 	// createSupabaseLoadClient caches the client when running in a
@@ -18,6 +19,14 @@ export const handle = async ({ event, resolve }) => {
 		} = await event.locals.supabase.auth.getSession();
 		return session;
 	};
+
+  const userNotAllowed = ['/login', '/'];
+  if (userNotAllowed.includes(event.url.pathname)) {
+    const session = await event.locals.getSession();
+    if (session) {
+      throw redirect(303, '/dashboard');
+    }
+  }
 
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {
