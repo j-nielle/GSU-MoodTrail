@@ -28,6 +28,13 @@ export const handle = async ({ event, resolve }) => {
     }
   }
 
+  if(event.url.pathname === '/dashboard/settings/manage-users') {
+    const session = await event.locals.getSession();
+    if(session?.user.role != 'ADMIN') {
+      throw redirect(303, '/dashboard/settings/profile');
+    }
+  }
+
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {
 			return name === 'content-range';
