@@ -67,6 +67,12 @@
             <UserSettingsOutline />
           </svelte:fragment>
         </SidebarItem>
+        <SidebarItem label="Manage Users" href="/dashboard/settings/manage-users" activeClass={spanClass}
+          active={activeUrl === '/dashboard/settings/manage-users'}>
+          <svelte:fragment slot="icon">
+            <UserSettingsOutline />
+          </svelte:fragment>
+        </SidebarItem>
       </SidebarGroup>
     </SidebarWrapper>
   </Sidebar>
