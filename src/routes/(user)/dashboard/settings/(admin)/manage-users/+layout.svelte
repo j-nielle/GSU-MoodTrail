@@ -1,6 +1,6 @@
 <script>
 </script>
 
-<div class="p-10 outline outline-red-500 bg-blue-500 w-screen">
+<div class="p-10 ring-1 bg-white w-fit">
   <slot />
 </div>

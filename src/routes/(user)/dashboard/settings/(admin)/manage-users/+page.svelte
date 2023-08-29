@@ -1,17 +1,136 @@
 <script>
+  // @ts-nocheck
+  import _ from 'lodash';
+  import { onMount } from 'svelte';
+	import {
+    PaginationItem,
+    Badge, 
+    Input,
+    Card, 
+    Button, 
+    ButtonGroup, 
+    Label,
+    Select,
+    Table,
+		TableBody,
+		TableBodyCell,
+		TableBodyRow,
+		TableHead,
+		TableHeadCell,
+		Search
+  } from 'flowbite-svelte';
+  import { TrashBinSolid } from 'flowbite-svelte-icons';
+
 	export let data;
 
-	let usersData = data.users;
+  let searchTerm = '';
+  let filteredItems;
 
-	$: ({ supabase } = data);
+  let roleColors = {};
+
+  $: ({ supabase } = data);
+  $: usersData = data.users;
+
+  $: {
+    roleColors = {
+      'ADMIN': 'purple',
+      'COUNSELOR': 'pink',
+      'STAFF': 'dark'
+    }
+  }
+
+  // const toggleRequestStatus = async (req) => {
+	// 	let isCompleted = req.iscompleted;
+
+	// 	try {
+	// 		const { data, error } = await supabase
+	// 			.from('RequestEntries')
+	// 			.update({ iscompleted: isCompleted })
+	// 			.eq('id', req.id)
+	// 			.select()
+	// 			.single();
+	// 	} catch (error) {
+	// 		console.log(error);
+	// 	}
+	// }
+  
+	$: filteredItems = usersData.filter((req) => {
+    // "id", "email" "password", "name", "user_role"
+    const nameMatch = req?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const emailMatch = req?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const roleMatch = req?.user_role?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+		return (searchTerm !== '') // if
+		  ? (nameMatch || emailMatch || roleMatch) : true; // else 
+	});
+  
+  onMount(() => {
+		const usersChannel = supabase.channel('schema-db-changes')
+        .on('postgres_changes',{
+					event: '*',
+					schema: 'public',
+					table: 'Users'
+				},(payload) => {
+					usersData = _.cloneDeep([payload.new,...usersData]);
+				}
+			).subscribe((status) => console.log('inside /manage-users/+page.svelte:', status));
+
+		return () => {
+			usersChannel.unsubscribe();
+		};
+	});
+
 </script>
 
 <svelte:head>
 	<title>Manage Users</title>
 </svelte:head>
 
-{#each usersData as user}
-	<p>{user.email}</p>
-	<p>{user.name}</p>
-	<p>{user.user_role}</p>
-{/each}
+<div>
+  <div class="grid justify-between justify-items-end grid-cols-2 outline outline-blue-500 outline-1">
+    <Search size="md" class="w-72" placeholder="Search by name, email, or role" bind:value={searchTerm} />
+    <Button size="sm" shadow color="purple" pill>Add New User</Button>
+  </div>
+  <div class='w-full mt-4 outline outline-red-500 outline-1'>
+    <caption class="text-xl mt-3 font-bold text-left w-max text-gray-900 dark:text-white dark:bg-gray-800 mb-6">
+      User Management
+      <p class="mt-1 mb-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+        Blah blah blah
+      </p>
+    </caption>
+    <Table divClass="text-left text-sm w-full text-gray-500 border border-zinc-300 dark:text-gray-400 max-h-72 overflow-y-auto">
+      <TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky">
+        <TableHeadCell>Name</TableHeadCell>
+        <TableHeadCell>Email Address</TableHeadCell>
+        <TableHeadCell class="text-center">Role</TableHeadCell>
+        <TableHeadCell></TableHeadCell>
+        <TableHeadCell></TableHeadCell>
+      </TableHead>
+      <TableBody tableBodyClass="divide-y bg-white">
+        {#if filteredItems === undefined || filteredItems.length === 0}
+          <TableBodyRow class="border border-zinc-300 z-10">
+            <TableBodyCell>No data</TableBodyCell>
+            <TableBodyCell>No data</TableBodyCell>
+            <TableBodyCell class="text-center">No data</TableBodyCell>
+            <TableBodyCell></TableBodyCell>
+            <TableBodyCell></TableBodyCell>
+          </TableBodyRow>
+        {:else}
+        {#each filteredItems as user}
+          <TableBodyRow class="z-10">
+            <TableBodyCell> {user.name ?? 'N/A'} </TableBodyCell>
+            <TableBodyCell> {user.email} </TableBodyCell>
+            <TableBodyCell class="text-center">  
+              <Badge border rounded color={roleColors[user.user_role]}>{user.user_role}</Badge> 
+            </TableBodyCell>
+            <TableBodyCell class="cursor-pointer text-center hover:underline text-blue-700">Edit</TableBodyCell>
+            <TableBodyCell class="flex justify-center cursor-pointer ">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="red" class="bi bi-trash-fill" viewBox="0 0 16 16"> <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/> </svg>
+            </TableBodyCell>
+          </TableBodyRow>
+        {/each}
+        {/if}
+      </TableBody>
+    </Table>
+  </div>
+</div>

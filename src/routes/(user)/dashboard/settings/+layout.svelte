@@ -3,11 +3,11 @@
 	import { page } from '$app/stores';
 	import { Toast, Sidebar, SidebarGroup, SidebarItem, SidebarWrapper } from 'flowbite-svelte';
 	import { newRequest } from '$lib/stores/index.js';
-	import { BellRingSolid, UserCircleOutline, UserEditOutline, UserSettingsOutline } from 'flowbite-svelte-icons';
+	import { BellRingSolid, DatabaseSolid, UserCircleOutline, UserEditOutline, UserSettingsOutline } from 'flowbite-svelte-icons';
 
 	export let data
 
-	$: ({ supabase } = data);
+	$: ({ supabase, session } = data);
 
 	onMount(() => {
 		const toastChannelTwo = supabase
@@ -35,6 +35,8 @@
 		'flex items-center p-2 text-base text-white bg-blue-600 rounded-lg hover:bg-blue-700';
 
 	$: activeUrl = $page.url.pathname;
+
+  $: console.log(session)
 </script>
 
 {#if $newRequest}
@@ -47,32 +49,34 @@
 {/if}
 <div class="p-4 bg-zinc-50 flex space-x-3">
 	<Sidebar class="w-fit">
-    <SidebarWrapper class="bg-white drop-shadow-lg ring-1 h-fit w-36 flex p-4 justify-center">
+    <SidebarWrapper class="bg-white drop-shadow-lg ring-1 h-fit w-32 flex p-3 justify-center">
       <SidebarGroup>
-        <SidebarItem label="Profile" href="/dashboard/settings/profile" activeClass={spanClass}
+        <SidebarItem class="text-sm" label="Profile" href="/dashboard/settings/profile" activeClass={spanClass}
           active={activeUrl === '/dashboard/settings/profile'}>
           <svelte:fragment slot="icon">
             <UserCircleOutline />
           </svelte:fragment>
         </SidebarItem>
-        <SidebarItem label="Account" href="/dashboard/settings/account" activeClass={spanClass}
+        <SidebarItem class="text-sm"  label="Account" href="/dashboard/settings/account" activeClass={spanClass}
           active={activeUrl === '/dashboard/settings/account'}>
           <svelte:fragment slot="icon">
             <UserEditOutline />
           </svelte:fragment>
         </SidebarItem>
-        <SidebarItem label="Security" href="/dashboard/settings/security" activeClass={spanClass}
+        <SidebarItem class="text-sm"  label="Security" href="/dashboard/settings/security" activeClass={spanClass}
           active={activeUrl === '/dashboard/settings/security'}>
           <svelte:fragment slot="icon">
             <UserSettingsOutline />
           </svelte:fragment>
         </SidebarItem>
-        <SidebarItem label="Manage Users" href="/dashboard/settings/manage-users" activeClass={spanClass}
-          active={activeUrl === '/dashboard/settings/manage-users'}>
-          <svelte:fragment slot="icon">
-            <UserSettingsOutline />
-          </svelte:fragment>
-        </SidebarItem>
+        {#if session?.user.role === 'ADMIN'}
+          <SidebarItem class="text-sm"  label="Users" href="/dashboard/settings/manage-users" activeClass={spanClass}
+            active={activeUrl === '/dashboard/settings/manage-users'}>
+            <svelte:fragment slot="icon">
+              <DatabaseSolid />
+            </svelte:fragment>
+          </SidebarItem>
+        {/if}
       </SidebarGroup>
     </SidebarWrapper>
   </Sidebar>
