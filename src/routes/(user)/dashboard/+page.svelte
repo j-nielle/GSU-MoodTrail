@@ -342,7 +342,7 @@
 	<title>Dashboard</title>
 </svelte:head>
 
-<div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-0">
+<div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-10">
   <!-- Info Cards -->
 	<div class="flex justify-between">
     <CardInfo title="" icon="" bind:data={current} />
