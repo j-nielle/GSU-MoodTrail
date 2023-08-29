@@ -46,7 +46,7 @@
   </div>
 </Modal>
 
-<Navbar class="!p-4 drop-shadow-sm w-full mx-auto " navDivClass="!mx-auto flex justify-between items-center w-full">
+<Navbar class="!p-4 drop-shadow-sm w-full mx-auto relative" navDivClass="!mx-auto flex justify-between items-center w-full !z-50">
 	{#if session}
 		<NavBrand tabindex="-1" href="/dashboard" class="space-x-4">
 			<img src="/src/lib/img/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit" />
@@ -85,7 +85,7 @@
 				>{session?.user?.user_metadata?.name ?? 'User'}
 			</Avatar>
 		</label>
-		<Dropdown placement="left" triggeredBy="#avatar-menu" containerClass="z-50 drop-shadow-lg w-fit mt-8">
+		<Dropdown class="z-40 relative" placement="left" triggeredBy="#avatar-menu" containerClass="z-50 drop-shadow-lg w-fit mt-8">
 			<DropdownHeader>
 				<span class="block text-sm"> {session?.user?.user_metadata?.name ?? 'User'} </span>
 				<span class="block text-sm font-medium truncate"> {session?.user?.email} </span>
