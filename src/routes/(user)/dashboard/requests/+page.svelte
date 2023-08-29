@@ -15,7 +15,7 @@
 		TableBodyRow,
 		TableHead,
 		TableHeadCell,
-		TableSearch
+		Search
 	} from 'flowbite-svelte';
 
 	export let data;
@@ -99,10 +99,9 @@
 
 <div class="bg-white">
 	<div class="flex justify-between">
-		<div class="flex items-center">
-			<TableSearch divClass="relative overflow-x-auto ml-4"
-				placeholder="Search by request, phone, or status*" hoverable={true} bind:inputValue={searchTerm} />
-      <Button class="mt-1 focus:ring-0" color="red" on:click={()=> { searchTerm = ''; dateFilter = ''; }}>Reset Filter</Button>
+		<div class="flex items-center ml-8">
+			<Search size="md" class="w-80 mr-3" placeholder="Search by request, phone, or status*" bind:value={searchTerm} />
+      <Button class="h-10 p-4 w-fit focus:ring-0" color="red" on:click={()=> { searchTerm = ''; dateFilter = ''; }}>Reset</Button>
 		</div>
 		<div>
 			<Input type="date" class="w-auto h-auto m-4 mr-8 mt-5" bind:value={dateFilter} />

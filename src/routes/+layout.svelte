@@ -105,6 +105,6 @@
 	{/if}
 </Navbar>
 
-<main>
+<main class="">
 	<slot />
 </main>
