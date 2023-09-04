@@ -56,11 +56,6 @@
 
   let moodRadarData,reasonRadarIndicator;
 
-  // let filteredProperties;
-  // let controlState = false
-  // let averageMoodByReason;
-  // let xAxisScatter, yAxisScatter;
-
   $: ({ supabase } = data);
 
 	onMount(() => {
@@ -136,11 +131,18 @@
         dayjs(entry.created_at).format('YYYY-MM-DD')
       );
 
-      overallAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      overallAverages = Object.values(groupedByDay).map(entries => {
+        const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
+        const averageMoodScore = totalMoodScore / entries.length;
+        return averageMoodScore;
+      });
+
       overall = _.sortBy(_.keys(groupedByDay));
+
       overallMostFreqMood = _.head(
         _(groupedByDay).flatMap().countBy('mood_label').entries().maxBy(_.last)
       );
+
       overallMostFreqReason = _.head(
         _(groupedByDay).flatMap().countBy('reason_label').entries().maxBy(_.last)
       );  
@@ -149,12 +151,18 @@
       const groupedByWeek = _.groupBy(dataType, (entry) =>
         getWeekNumberString(dayjs(entry.created_at))
       );
+      
+      weeklyAverages = Object.values(groupedByWeek).map(entries => {
+        const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
+        const averageMoodScore = totalMoodScore / entries.length;
+        return averageMoodScore;
+      });
 
-      weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
       weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
         const weekNumber = parseInt(week.replace('Week ', ''));
         return weekNumber;
       });
+      
       weeklyMostFreqMood = _.head(
         _(groupedByWeek).flatMap().countBy('mood_label').entries().maxBy(_.last)
       );
@@ -167,11 +175,18 @@
         dayjs(entry.created_at).format('YYYY-MM')
       );
 
-      monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      monthlyAverages = Object.values(groupedByMonth).map(entries => {
+        const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
+        const averageMoodScore = totalMoodScore / entries.length;
+        return averageMoodScore;
+      });
+
       monthly = _.sortBy(_.keys(groupedByMonth));
+
       monthlyMostFreqMood = _.head(
         _(groupedByMonth).flatMap().countBy('mood_label').entries().maxBy(_.last)
       );
+
       monthlyMostFreqReason = _.head(
         _(groupedByMonth).flatMap().countBy('reason_label').entries().maxBy(_.last)
       );
@@ -181,11 +196,18 @@
         dayjs(entry.created_at).format('YYYY')
       );
 
-      yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+      yearlyAverages = Object.values(groupedByYear).map(entries => {
+        const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
+        const averageMoodScore = totalMoodScore / entries.length;
+        return averageMoodScore;
+      });
+
       yearly = _.sortBy(_.keys(groupedByYear));
+
       yearlyMostFreqMood = _.head(
         _(groupedByYear).flatMap().countBy('mood_label').entries().maxBy(_.last)
       );
+      
       yearlyMostFreqReason = _.head(
         _(groupedByYear).flatMap().countBy('reason_label').entries().maxBy(_.last)
       );
@@ -219,7 +241,7 @@
 				return students.set(student_id, studentData);
 			}, new Map()
 		);
-
+    
 		for (const [studentId, studentEntry] of filteredStudents) {
 			let consecutiveDays = 0;
 			let previousDate = null;
@@ -284,7 +306,7 @@
         { studentId, streaks: studentStreaks },
       ]);
     });
-
+    console.log(consecutiveDaysMap)
     // const sampleStudent = studentMoodData[0];
     // const features = ["course", "year_level", "college", "reason_score", "created_at"];
 
@@ -485,7 +507,7 @@
                 </TableBodyCell>
                 <TableBodyCell>{streak.startDate} - {streak.endDate}</TableBodyCell>
                 <TableBodyCell class="text-center">
-                  {moodLabels[Math.round(streak.moodScores.reduce((accum, elem) => accum + elem, 0) / streak.moodScores.length) + 4]}
+                  {moodLabels[Math.round(streak.moodScores.reduce((accum, elem) => accum + parseInt(elem), 0) / streak.moodScores.length) + 4]}
                 </TableBodyCell>
                 <TableBodyCell class="text-center">
                   {streak.reasonLabels.reduce(

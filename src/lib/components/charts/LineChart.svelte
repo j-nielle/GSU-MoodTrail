@@ -24,6 +24,7 @@
   $: mood.length != 1 ? showSymbol = false : showSymbol = true;
 
 	onMount(() => {
+    //console.log(xData,yData)
 		lineChart = echarts.init(document.getElementById(elementID));
 
 		lineChart.setOption({

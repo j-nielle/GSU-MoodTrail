@@ -153,12 +153,24 @@
     } 
     else if (selectedLineChart === 'overall') {
       const groupedByDay = _.groupBy(result, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD'));
-      overallAverages = _.map(groupedByDay, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+
+      overallAverages = Object.values(groupedByDay).map(entries => {
+        const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
+        const averageMoodScore = totalMoodScore / entries.length;
+        return averageMoodScore;
+      });
+
       overall = _.sortBy(_.keys(groupedByDay));
     } 
     else if (selectedLineChart === 'weekly') {
       const groupedByWeek = _.groupBy(result, (entry) => getWeekNumberString(dayjs(entry.created_at)));
-      weeklyAverages = _.map(groupedByWeek, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+
+      weeklyAverages = Object.values(groupedByWeek).map(entries => {
+        const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
+        const averageMoodScore = totalMoodScore / entries.length;
+        return averageMoodScore;
+      });
+
       weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
         const weekNumber = parseInt(week.replace('Week ', ''));
         return weekNumber;
@@ -166,12 +178,24 @@
     } 
     else if (selectedLineChart === 'monthly') {
       const groupedByMonth = _.groupBy(result, (entry) => dayjs(entry.created_at).format('YYYY-MM'));
-      monthlyAverages = _.map(groupedByMonth, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+
+      monthlyAverages = Object.values(groupedByMonth).map(entries => {
+        const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
+        const averageMoodScore = totalMoodScore / entries.length;
+        return averageMoodScore;
+      });
+
       monthly = _.sortBy(_.keys(groupedByMonth));
     } 
     else if (selectedLineChart === 'yearly') {
       const groupedByYear = _.groupBy(result, (entry) => dayjs(entry.created_at).format('YYYY'));
-      yearlyAverages = _.map(groupedByYear, (moodScores) => _.meanBy(moodScores, 'mood_score'));
+
+      yearlyAverages = Object.values(groupedByYear).map(entries => {
+        const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
+        const averageMoodScore = totalMoodScore / entries.length;
+        return averageMoodScore;
+      });
+      
       yearly = _.sortBy(_.keys(groupedByYear));
 	  }
   }
