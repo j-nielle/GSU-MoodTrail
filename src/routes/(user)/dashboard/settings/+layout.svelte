@@ -35,8 +35,6 @@
 		'flex items-center p-2 text-base text-white bg-blue-600 rounded-lg hover:bg-blue-700';
 
 	$: activeUrl = $page.url.pathname;
-
-  $: console.log(session)
 </script>
 
 {#if $newRequest}
@@ -47,7 +45,7 @@
 		</div>
 	</Toast>
 {/if}
-<div class="p-4 bg-zinc-50 flex space-x-3">
+<div class="p-4 bg-zinc-50 flex space-x-3 overflow-x-hidden">
 	<Sidebar class="w-fit">
     <SidebarWrapper class="bg-white drop-shadow-lg ring-1 h-fit w-32 flex p-3 justify-center">
       <SidebarGroup>

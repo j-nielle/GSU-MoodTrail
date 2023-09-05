@@ -207,7 +207,7 @@
       yearlyMostFreqMood = _.head(
         _(groupedByYear).flatMap().countBy('mood_label').entries().maxBy(_.last)
       );
-      
+
       yearlyMostFreqReason = _.head(
         _(groupedByYear).flatMap().countBy('reason_label').entries().maxBy(_.last)
       );
@@ -306,7 +306,7 @@
         { studentId, streaks: studentStreaks },
       ]);
     });
-    console.log(consecutiveDaysMap)
+
     // const sampleStudent = studentMoodData[0];
     // const features = ["course", "year_level", "college", "reason_score", "created_at"];
 
