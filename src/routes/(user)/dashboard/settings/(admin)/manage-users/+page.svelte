@@ -1,6 +1,7 @@
 <script>
   // @ts-nocheck
-  import _ from 'lodash';
+  import _ from 'lodash';  
+  import { enhance } from '$app/forms';
   import { onMount } from 'svelte';
 	import {
     PaginationItem,
@@ -17,27 +18,21 @@
 		TableBodyRow,
 		TableHead,
 		TableHeadCell,
-		Search
+		Search, 
+    FloatingLabelInput, 
+    Helper
   } from 'flowbite-svelte';
-  import { TrashBinSolid } from 'flowbite-svelte-icons';
+  import { roleColor, roles, buttonState } from '$lib/constants/index.js';
+  import { addNewUser, editUser } from '$lib/stores/index.js';
+  import { AddUser, EditUser } from '$lib/components/forms/index.js';
 
 	export let data;
 
   let searchTerm = '';
   let filteredItems;
 
-  let roleColors = {};
-
   $: ({ supabase } = data);
-  $: usersData = data.users;
-
-  $: {
-    roleColors = {
-      'ADMIN': 'purple',
-      'COUNSELOR': 'pink',
-      'STAFF': 'dark'
-    }
-  }
+  let usersData = data.users;
 
   // const toggleRequestStatus = async (req) => {
 	// 	let isCompleted = req.iscompleted;
@@ -55,10 +50,10 @@
 	// }
   
 	$: filteredItems = usersData.filter((req) => {
-    // "id", "email" "password", "name", "user_role"
+    // "id", "email" "password", "name", "role"
     const nameMatch = req?.name?.toLowerCase().includes(searchTerm.toLowerCase());
     const emailMatch = req?.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    const roleMatch = req?.user_role?.toLowerCase().includes(searchTerm.toLowerCase());
+    const roleMatch = req?.role?.toLowerCase().includes(searchTerm.toLowerCase());
       
 		return (searchTerm !== '') // if
 		  ? (nameMatch || emailMatch || roleMatch) : true; // else 
@@ -80,18 +75,33 @@
 		};
 	});
 
+  function handleAddUser(){
+    editUser.update(() => false);
+    addNewUser.update(value  => !value);
+  }
+
+  function handleEditUser(){
+    addNewUser.update(() => false);
+    editUser.update(value  => !value);
+  }
+
+  $: console.log($addNewUser)
 </script>
 
 <svelte:head>
 	<title>Manage Users</title>
 </svelte:head>
 
-<div>
-  <div class="grid justify-between justify-items-end grid-cols-2 outline outline-blue-500 outline-1">
+<div class="p-10 ring-1 bg-white w-fit shadow-md drop-shadow-md rounded">
+  <div class="grid justify-between justify-items-end grid-cols-2">
     <Search size="md" class="w-72" placeholder="Search by name, email, or role" bind:value={searchTerm} />
-    <Button size="sm" shadow color="purple" pill>Add New User</Button>
+    {#if !$addNewUser}
+      <Button size="sm" shadow color="purple" pill on:click={handleAddUser}>Add New User</Button>
+    {:else}
+      <Button size="sm" shadow color="red" pill on:click={handleAddUser}>Hide Form</Button>
+    {/if}
   </div>
-  <div class='w-full mt-4 outline outline-red-500 outline-1'>
+  <div class='w-full mt-4'>
     <caption class="text-xl mt-3 font-bold text-left w-max text-gray-900 dark:text-white dark:bg-gray-800 mb-6">
       User Management
       <p class="mt-1 mb-2 text-sm font-normal text-gray-500 dark:text-gray-400">
@@ -102,7 +112,7 @@
       <TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky">
         <TableHeadCell>Name</TableHeadCell>
         <TableHeadCell>Email Address</TableHeadCell>
-        <TableHeadCell class="text-center">Role</TableHeadCell>
+        <TableHeadCell>User Role</TableHeadCell>
         <TableHeadCell></TableHeadCell>
         <TableHeadCell></TableHeadCell>
       </TableHead>
@@ -111,7 +121,7 @@
           <TableBodyRow class="border border-zinc-300 z-10">
             <TableBodyCell>No data</TableBodyCell>
             <TableBodyCell>No data</TableBodyCell>
-            <TableBodyCell class="text-center">No data</TableBodyCell>
+            <TableBodyCell>No data</TableBodyCell>
             <TableBodyCell></TableBodyCell>
             <TableBodyCell></TableBodyCell>
           </TableBodyRow>
@@ -120,10 +130,12 @@
           <TableBodyRow class="z-10">
             <TableBodyCell> {user.name ?? 'N/A'} </TableBodyCell>
             <TableBodyCell> {user.email} </TableBodyCell>
-            <TableBodyCell class="text-center">  
-              <Badge border rounded color={roleColors[user.user_role]}>{user.user_role}</Badge> 
+            <TableBodyCell>  
+              <Badge border rounded color={roleColor[user.role]}>{user.role}</Badge> 
             </TableBodyCell>
-            <TableBodyCell class="cursor-pointer text-center hover:underline text-blue-700">Edit</TableBodyCell>
+            <TableBodyCell class="cursor-pointer text-center hover:underline text-blue-700">
+              <button on:click={handleEditUser} class="hover:underline">Edit User</button>
+            </TableBodyCell>
             <TableBodyCell class="flex justify-center cursor-pointer ">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="red" class="bi bi-trash-fill" viewBox="0 0 16 16"> <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/> </svg>
             </TableBodyCell>
@@ -134,3 +146,37 @@
     </Table>
   </div>
 </div>
+{#if $addNewUser}
+  <AddUser />
+{/if}
+<!-- {#if $addNewUser}
+  <div transition:blur={{ amount: 5, duration: 200 }}>
+    <Card class="p-4 h-max space-y-5 rounded bg-white dark:bg-gray-800 self-start" size="lg" padding='xl'>
+      {#if message}
+        <p>{message}</p>
+      {/if}
+      <h3 class="font-bold text-slate-950 text-center text-xl">Create New User</h3>
+      <form class="space-y-5" action="?/newUser" method="POST" use:enhance>
+        <FloatingLabelInput size="small" style="outlined" id="addName" name="name" type="text" label="Name" />
+        <FloatingLabelInput size="small" style="outlined" id="addEmail" name="email" type="text" label="Email Address" required />
+        <FloatingLabelInput size="small" style="outlined" id="addPassword" name="password" type="password" label="Password" autocomplete required />
+        <input type="hidden" id="addRole" name="role" bind:value={addRole} />
+      </form>
+      <div class="space-y-3">
+        <p class="text-sm">Choose their role:</p>
+        <div class="flex flex-row space-x-2">
+          {#each roles as role}
+            <button on:click={() => addRole = role.label}>
+              <Badge class={addRole === role.label ? buttonState.active : buttonState.inactive} border rounded color={role.color}>{role.label}</Badge>
+            </button>
+          {/each}
+        </div>
+      </div>
+      <Button pill shadow type="submit" color="purple" class="w-full font-bold leading-relaxed">SAVE</Button>
+    </Card>
+  </div>
+{:else if $editUser}
+  <div transition:blur={{ amount: 5, duration: 200 }}>
+    <EditUser />
+  </div>
+{/if} -->
