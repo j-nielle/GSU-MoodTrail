@@ -99,7 +99,6 @@
 		</Dropdown>
 	{:else}
 		<div class="flex space-x-4">
-			<Button href="/register" color="alternative" class="hover:text-gray-900 focus:text-gray-900">Register Account</Button>
 			<Button href="/login" color="purple" class="">Login</Button>
 		</div>
 	{/if}
