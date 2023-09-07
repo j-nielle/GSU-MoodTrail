@@ -24,7 +24,6 @@
   $: mood.length != 1 ? showSymbol = false : showSymbol = true;
 
 	onMount(() => {
-    //console.log(xData,yData)
 		lineChart = echarts.init(document.getElementById(elementID));
 
 		lineChart.setOption({
@@ -40,15 +39,11 @@
 			xAxis: [{
 				type: 'category',
 				data: xData,
-				axisLine: {
-					onZero: false
-				},
+				axisLine: { onZero: false },
         boundaryGap: false,
 			}],
 			yAxis: [{
-        splitLine: {
-          show: true
-        },
+        splitLine: { show: true },
 				type: 'value',
         boundaryGap: [0, '100%']
       }],
@@ -72,26 +67,15 @@
 				}
 			},
       dataZoom: [
-        {
-          realtime: true,
-          start: 0,
-          end: 1000
-        }
+        { type: 'inside' },
+        { type: 'slider', height: 20 }
       ],
 			toolbox: {
 				show: true,
 				feature: {
-					dataZoom: {
-						show: true,
-						yAxisIndex: 'none'
-					},
-					dataView: {
-						show: true,
-						readOnly: false
-					},
-					saveAsImage: {
-						show: true
-					}
+					dataZoom: { show: true, yAxisIndex: 'none' },
+					dataView: { show: true, readOnly: false },
+					saveAsImage: { show: true }
 				}
 			}
 		});
@@ -103,13 +87,9 @@
 
 	afterUpdate(() => {  
 		lineChart.setOption({
-			xAxis: {
-				data: xData
-			},
+			xAxis: { data: xData },
 			series: [
-				{
-					data: yData
-				}
+				{ data: yData }
 			]
 		}); 
 	});
