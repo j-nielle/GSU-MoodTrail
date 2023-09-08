@@ -2,7 +2,7 @@
 	// @ts-nocheck
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
-  import { fade, fly, slide } from 'svelte/transition';
+  import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { 
     Card, 
@@ -18,7 +18,13 @@
 		TableHeadCell
   } from 'flowbite-svelte';
 	import { PrintSolid } from 'flowbite-svelte-icons';
-  import { RadarChart, LineChart, HorizontalMoodBarChart, HeatmapChart } from '$lib/components/charts/index.js';
+  import { 
+    RadarChart, 
+    LineChart, 
+    HorizontalMoodBarChart, 
+    HeatmapChart,
+    NegativeBarChart
+   } from '$lib/components/charts/index.js';
 	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
   import { CardInfo } from '$lib/components/elements/index.js'
   import { moodLabels, reasonLabels } from "$lib/constants/index.js"
@@ -46,6 +52,7 @@
 	let recentStudent;
 	let heatmapData;
 	let selectedLineChart = 'today';
+  let selectedBarChart = 'course';
 
   let current = dayjs().format('ddd MMMM D, YYYY h:mm:ss A');
   const interval = 1000; 
@@ -53,8 +60,12 @@
   let tableRef;
   let viewAnonData = false;
   let lcBtnColors = {}
+  let bcBtnColors = {}
 
   let moodRadarData,reasonRadarIndicator;
+
+  let courseYData, yearLvlYData, reasonYData;
+  let avgMoodByCourse, avgMoodByYearLvl, avgMoodByReason;
 
   $: ({ supabase } = data);
 
@@ -85,7 +96,6 @@
 		};
 	});
 
-  //$: controlsText = controlState ? "Show Controls" : "Hide Controls"
   $: viewAnonData ? dataType = anonMoodData : dataType = studentMoodData;
 
 	$: if(dataType.length > 0){
@@ -217,8 +227,111 @@
 	}
 
   $: if(studentMoodData.length > 0){
+    if(selectedBarChart === 'course'){
+      const courseData = studentMoodData.reduce((acc, entry) => {
+        const existingCourse = acc.find(item => item.course === entry.course);
+
+        if (existingCourse) {
+          existingCourse.mood_scores.push(entry.mood_score);
+        } else {
+          acc.push({ course: entry.course, mood_scores: [entry.mood_score] });
+        }
+        return acc;
+      }, []);
+
+      avgMoodByCourse = courseData.map(course => {
+        const moodScores = course.mood_scores;
+        
+        if (moodScores.length > 0) {
+          const totalMoodScore = moodScores.reduce((sum, score) => sum + parseInt(score), 0);
+          const avgMoodScore = totalMoodScore / moodScores.length;
+
+          if (avgMoodScore < 0) {
+            return { value: avgMoodScore, label: { position: 'right' } };
+          } else {
+            return avgMoodScore;
+          }
+        } else {
+          return null;
+        }
+      });
+
+      courseYData = courseData.map(course => course.course)
+    }
+    else if(selectedBarChart === 'year_level'){
+      const yearLevelData = studentMoodData.reduce((acc, entry) => {
+        const yearLevel = acc.find(item => item.yearLevel === entry.year_level);
+
+        if (yearLevel) {
+          yearLevel.mood_scores.push(entry.mood_score);
+        } else {
+          acc.push({ yearLevel: entry.year_level, mood_scores: [entry.mood_score] });
+        }
+
+        return acc;
+      }, []);
+
+      avgMoodByYearLvl = yearLevelData.map(yearLevel => {
+        const moodScores = yearLevel.mood_scores;
+        
+        if (moodScores.length > 0) {
+          const totalMoodScore = moodScores.reduce((sum, score) => sum + parseInt(score), 0);
+          const avgMoodScore = totalMoodScore / moodScores.length;
+
+          if (avgMoodScore < 0) {
+            return { value: avgMoodScore, label: { position: 'right' } };
+          } else {
+            return avgMoodScore;
+          }
+        } else {
+          return null;
+        }
+      });
+
+      yearLvlYData = yearLevelData.map(yearLevel => yearLevel.yearLevel)
+    }
+    else if(selectedBarChart === 'reason'){
+      const reasonData = studentMoodData.reduce((acc, entry) => {
+        const { reason_label, mood_score } = entry;
+        const existingReason = acc.find(item => item.reason_label === reason_label);
+
+        if (existingReason) {
+          existingReason.mood_scores.push(mood_score);
+        } else {
+          acc.push({ reason_label, mood_scores: [mood_score] });
+        }
+
+        return acc;
+      }, []);
+
+      avgMoodByReason = reasonData.map(reason => {
+        const moodScores = reason.mood_scores;
+        
+        if (moodScores.length > 0) {
+          const totalMoodScore = moodScores.reduce((sum, score) => sum + parseInt(score), 0);
+          const avgMoodScore = totalMoodScore / moodScores.length;
+
+          if (avgMoodScore < 0) {
+            return { value: avgMoodScore, label: { position: 'right' } };
+          } else {
+            return avgMoodScore;
+          }
+        } else {
+          return null;
+        }
+      });
+
+      reasonYData = reasonData.map(reason => reason.reason_label)
+    }
+
+    bcBtnColors = {
+      course: selectedBarChart === "course" ? "dark" : "light",
+      year_level: selectedBarChart === "year_level" ? "dark" : "light",
+      reason: selectedBarChart === "reason" ? "dark" : "light",
+    };
+    
     let filteredStudents = new Map();
-	  const consecutiveDaysMap = new Map();
+	  let consecutiveDaysMap = new Map();
     consistentLowMoods.set([]);
 
     recentStudent = _.last(studentMoodData)['name']; // info card
@@ -345,9 +458,13 @@
     }
   }
 
-  function toggleChart(chart) {
-		selectedLineChart = chart;
-	}
+  const selectLineChart = (chart) => {
+    selectedLineChart = chart;
+  }
+
+  const selectBarChart = (chart) => {
+    selectedBarChart = chart;
+  }
 
 	const getWeekNumberString = (date) => {
 		const firstDayOfYear = dayjs(date).startOf('year').day(1);
@@ -423,11 +540,11 @@
 					<div class="flex justify-between">
             <!-- Buttons for Time Intervals -->
 						<ButtonGroup>
-							<Button color={lcBtnColors.today} on:click={() => toggleChart('today')}>Today</Button>
-							<Button color={lcBtnColors.weekly} on:click={() => toggleChart('weekly')}>Weekly</Button>
-							<Button color={lcBtnColors.monthly} on:click={() => toggleChart('monthly')}>Monthly</Button>
-							<Button color={lcBtnColors.yearly} on:click={() => toggleChart('yearly')}>Yearly</Button>
-              <Button color={lcBtnColors.overall} on:click={() => toggleChart('overall')}>Overall</Button>
+							<Button color={lcBtnColors.today} on:click={() => selectLineChart('today')}>Today</Button>
+							<Button color={lcBtnColors.weekly} on:click={() => selectLineChart('weekly')}>Weekly</Button>
+							<Button color={lcBtnColors.monthly} on:click={() => selectLineChart('monthly')}>Monthly</Button>
+							<Button color={lcBtnColors.yearly} on:click={() => selectLineChart('yearly')}>Yearly</Button>
+              <Button color={lcBtnColors.overall} on:click={() => selectLineChart('overall')}>Overall</Button>
 						</ButtonGroup>
 
             <!-- Buttons for Data Type (Anon/Students) -->
@@ -523,11 +640,15 @@
       </div>
 		</div>
 
+     
     <div class="flex space-x-4">
-      <div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center">
-        <RadarChart 
-        bind:data={moodRadarData} bind:indicator={reasonRadarIndicator}
-        title="test radar" elementID="testRadar" style="width:600px; height:450px;" />
+      <div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+        <div class="flex flex-col">
+          <p class="text-xl font-bold self-start">Radar Chart (Test)</p>
+          <RadarChart 
+          bind:data={moodRadarData} bind:indicator={reasonRadarIndicator}
+          title="test radar" elementID="testRadar" style="width:616px; height:450px;" />
+        </div>
         <!-- <div>
           {#if !controlState}
             <div id="scatter-controls" class="flex flex-col space-y-2 bg-slate-900 w-56 pl-4 pt-4 pr-4">
@@ -540,6 +661,25 @@
           </div>
         </div> -->
       </div>
+      <div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+        <div class="flex flex-col">
+          <div class="flex justify-between">
+            <p class="self-center text-xl font-bold ml-1">Bar Chart (Test)</p>
+            <ButtonGroup class="mb-3">
+             <Button color={bcBtnColors.course} on:click={() => selectBarChart('course')}>By Course</Button>
+             <Button color={bcBtnColors.year_level} on:click={() => selectBarChart('year_level')}>By Year Level</Button>
+             <Button color={bcBtnColors.reason} on:click={() => selectBarChart('reason')}>By Reason</Button>
+           </ButtonGroup>
+          </div>
+          {#if selectedBarChart === 'course'}
+            <NegativeBarChart bind:xData={avgMoodByCourse} bind:yData={courseYData} elementID="test-1" style="width:615px; height:410px;" />
+          {:else if selectedBarChart === 'year_level'}
+            <NegativeBarChart bind:xData={avgMoodByYearLvl} bind:yData={yearLvlYData} elementID="test-2" style="width:615px; height:410px;" />
+          {:else if selectedBarChart === 'reason'}
+            <NegativeBarChart bind:xData={avgMoodByReason} bind:yData={reasonYData} elementID="test-3" style="width:615px; height:410px;" />
+          {/if}
+          </div> 
+        </div>
     </div>
 	</div>
 </div>
