@@ -5,7 +5,6 @@
 	import { moodLabels, moodColors } from '$lib/constants/index.js';
 
 	export let elementID;
-	export let title;
 	export let style;
 	export let indicator;
 	export let data;
@@ -16,12 +15,9 @@
 		radarChart = echarts.init(document.getElementById(elementID));
 
 		radarChart.setOption({
-			title: {
-				text: title
-			},
 			legend: {
 				data: moodLabels,
-				bottom: 0,
+				top: 20,
 				left: 0,
 				itemWidth: 13.5,
 				orient: 'vertical',
@@ -73,18 +69,15 @@
 					type: 'radar',
 					data: data,
 					symbol: 'none',
-					// itemStyle: {
-					//   color: '#F9713C'
-					// },
 					areaStyle: {
-						opacity: 0.1,
+						opacity: 0.5,
 					},
 					emphasis: {
 						focus: 'self',
 						//blurScope: 'global'
 					},
 					itemStyle: {
-            opacity: 0.6,
+            //opacity: 0.1,
 						color: function (params) {
 							return moodColors[params.name] || '#5470c6';
 						}
@@ -98,13 +91,8 @@
 			toolbox: {
 				show: true,
 				feature: {
-					dataView: {
-						show: true,
-						readOnly: false
-					},
-					saveAsImage: {
-						show: true
-					}
+					dataView: { show: true, readOnly: false },
+					saveAsImage: { show: true }
 				}
 			}
 		});
