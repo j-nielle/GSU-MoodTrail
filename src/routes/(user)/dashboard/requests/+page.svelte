@@ -24,9 +24,13 @@
 	let dateFilter = '';
 	let filteredItems;
 
+  let page = 1;
+  let limit = 5;
+  let maxPage,startIndex, endIndex, paginatedItems;
+
 	$: requestsData = data.requests;
 
-	$: ({ supabase, maxPage, page, limit, count} = data);
+  $: ({ supabase } = data);
 
 	onMount(() => {
 		const requestsChannel = supabase.channel('schema-db-changes')
@@ -37,7 +41,7 @@
 				},(payload) => {
 					requestsData = _.cloneDeep([payload.new,...requestsData]);
 				}
-			).subscribe((status) => console.log('inside /requests/+page.svelte:', status));
+			).subscribe((status) => console.log(status));
 
 		return () => {
 			requestsChannel.unsubscribe();
@@ -64,8 +68,6 @@
 			const phoneMatch = req.contact_num.includes(searchTerm);
 			const reqMatch = req.request_type.toLowerCase().includes(searchTerm.toLowerCase());
 			const statusMatch = req.iscompleted.toString().toLowerCase().includes(searchTerm.toLowerCase());
-			// this statement checks if the date filter is not empty, if it is not empty, it will format the date to YYYY-MM-DD
-			// if dateFilter is empty then it will return true which means it will not filter the data
 			const dateMatch = dateFilter !== '' ? dayjs(req.created_at).format('YYYY-MM-DD') === dayjs(dateFilter).format('YYYY-MM-DD') : true;
 
 			return (searchTerm !== '' && dateFilter !== '') // if both search term and date filter are not empty
@@ -79,15 +81,15 @@
 	}
 
   $: {
-    if ((searchTerm !== '' || dateFilter !== '') && page !== 1) {
-      page = 1;
-      goto(`?page=${page}&limit=${limit}`);
-    }
+    startIndex = (page - 1) * limit;
+    endIndex = startIndex + limit;
+    maxPage = Math.ceil(requestsData.length / limit);
+    paginatedItems = filteredItems.slice(startIndex, endIndex);
+  }
 
-    if (searchTerm !== '' || dateFilter !== '') {
-      maxPage = Math.ceil(filteredItems.length / limit);
-    } else {
-      maxPage = Math.ceil(count / limit);
+  function changePage(newPage) {
+    if (newPage >= 1 && newPage <= maxPage) {
+      page = newPage;
     }
   }
 
@@ -109,7 +111,7 @@
 	</div>
 	<div class="ml-4-6 ml-4 mb-7 mr-11">
 		<Table divClass="w-full text-left text-sm text-gray-500 dark:text-gray-400 ml-4">
-			<caption class="text-lg font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
+			<caption class="text-lg font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-4">
 				Help Requests from the Kiosk
 				<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
 					By default, it shows requests for the current date and is sorted according to the latest
@@ -124,7 +126,7 @@
 				<TableHeadCell class="text-center">Status</TableHeadCell>
 			</TableHead>
 			<TableBody tableBodyClass="divide-y border border-zinc-300 max-h-40 overflow-y-auto">
-				{#if filteredItems === undefined || filteredItems.length === 0}
+				{#if paginatedItems === undefined || paginatedItems.length === 0}
 					<TableBodyRow>
 						<TableBodyCell>No data</TableBodyCell>
 						<TableBodyCell>No data</TableBodyCell>
@@ -132,7 +134,7 @@
 						<TableBodyCell>No data</TableBodyCell>
 					</TableBodyRow>
 				{:else}
-					{#each filteredItems as req}
+					{#each paginatedItems as req}
 						<TableBodyRow>
 							<TableBodyCell>{req.contact_num}</TableBodyCell>
 							<TableBodyCell>{req.request_type}</TableBodyCell>
@@ -147,17 +149,15 @@
 				{/if}
 			</TableBody>
 		</Table>
-		<div class="flex flex-col items-center justify-center gap-2 mt-3">
+		<div class="flex flex-col items-center justify-center space-y-2 mt-2">
       {#if maxPage > 1}
-			<div class="text-sm text-center text-gray-700 dark:text-gray-400">
-				Page <span class="font-semibold text-gray-900 dark:text-white">{page} <span class="font-normal">of</span> {maxPage}</span>
-			</div>
-			<div class="flex justify-between space-x-2">
-        <!-- ensures that the page number is never less than 1 -->
-        <PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" href="?page={Math.max(1, page - 1)}&limit={limit}">Prev</PaginationItem>
-        <!-- ensures that the page number does not exceed the maximum page number -->
-        <PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" href="?page={Math.min(maxPage, page + 1)}&limit={limit}">Next</PaginationItem>
-		  </div>
+        <div class="flex text-sm text-center text-gray-700 dark:text-gray-400">
+          <span class="font-semibold text-gray-900 dark:text-white">{page} <span class="font-normal">of</span> {maxPage}</span>
+        </div>
+        <div class="flex space-x-1.5">
+          <PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" on:click={() => changePage(page - 1)}>Prev</PaginationItem>
+          <PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" on:click={() => changePage(page + 1)}>Next</PaginationItem>
+        </div>
       {/if}
 		</div>
 	</div>

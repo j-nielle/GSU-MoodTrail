@@ -7,30 +7,13 @@ export async function load({ url, locals: { supabase, getSession } }) {
     throw redirect(303, '/login');
   }
 
-  const page = parseInt(url.searchParams.get('page') || '1');
-  const limit = parseInt(url.searchParams.get('limit') || '5');
-  const offset = (page - 1) * limit;
-
-	const { count } = await supabase
-  .from("RequestEntries")
-  .select("id", { count: "estimated" });
-
   const { data: requests } = await supabase
     .from("RequestEntries")
     .select()
     .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1);
-
-  let maxPage = 0;
-
-  if(count != null)	{ maxPage = Math.ceil(count / limit); }
 
   return {
     requests: requests || [],
-    session: session,
-    page: page,
-    limit: limit,
-    count: count,
-		maxPage: maxPage
+    session: session
   };
 }
