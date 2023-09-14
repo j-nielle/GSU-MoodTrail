@@ -65,6 +65,9 @@
 			<NavLi href="/dashboard/requests" active={activeUrl === '/dashboard/requests'} activeClass="font-semibold text-blue-700">
         Requests
       </NavLi>
+      <NavLi href="/dashboard/all-students" active={activeUrl === '/dashboard/all-students'} activeClass="font-semibold text-blue-700">
+        Students
+      </NavLi>
 			<NavLi href="/dashboard/student-chart" active={activeUrl === '/dashboard/student-chart'} activeClass="font-semibold text-blue-700">
         Student Chart
       </NavLi>

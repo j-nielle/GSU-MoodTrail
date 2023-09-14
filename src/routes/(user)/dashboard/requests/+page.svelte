@@ -28,7 +28,7 @@
   let limit = 5;
   let maxPage,startIndex, endIndex, paginatedItems;
 
-	$: requestsData = data.requests;
+	let requestsData = data.requests;
 
   $: ({ supabase } = data);
 

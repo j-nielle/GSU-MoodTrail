@@ -18,7 +18,7 @@
 		return moodLabels[moodScores.indexOf(nearestIndex)];
 	}
 
-	$: mood = xData.map((score) => getNearestMoodLabel(score))
+	$: mood = xData?.map((score) => getNearestMoodLabel(score))
 
 	onMount(() => {
 		negativeBarChart = echarts.init(document.getElementById(elementID));

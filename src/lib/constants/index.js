@@ -41,3 +41,10 @@ export const buttonState = {
   active: 'opacity-100 cursor-pointer drop-shadow-md',
   inactive: 'opacity-50 cursor-pointer'
 }
+
+export const yearLvl = {
+  1: '1st Year',
+  2: '2nd Year',
+  3: '3rd Year',
+  4: '4th Year',
+}
