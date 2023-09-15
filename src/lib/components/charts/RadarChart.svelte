@@ -40,7 +40,7 @@
 				splitLine: {
 					show: true
 				},
-				nameGap: 10,
+				axisNameGap: 10,
 				scale: true
 				// splitLine: {
 				//   lineStyle: {

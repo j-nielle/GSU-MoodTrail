@@ -645,9 +645,8 @@
       <div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
         <div class="flex flex-col">
           <p class="text-xl font-bold self-start">Radar Chart (Test)</p>
-          <RadarChart 
-          bind:data={moodRadarData} bind:indicator={reasonRadarIndicator}
-          title="test radar" elementID="testRadar" style="width:616px; height:450px;" />
+          <RadarChart bind:data={moodRadarData} bind:indicator={reasonRadarIndicator}
+          elementID="testRadar" style="width:616px; height:450px;" />
         </div>
         <!-- <div>
           {#if !controlState}
