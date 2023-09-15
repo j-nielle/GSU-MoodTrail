@@ -5,17 +5,17 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import {
-		PaginationItem,
     Button,
 		P,
-		Input,
+		Label,
 		Table,
 		TableBody,
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
 		TableHeadCell,
-		Search,
+		Search, 
+    Modal,
     Select
 	} from 'flowbite-svelte';
   import { yearLvl } from '$lib/constants/index.js'
@@ -28,11 +28,7 @@
   let studentsData = data.students;
 
   let searchTerm = '';
-  let course;
-	let yearLevel;
-
-	let selectedCourse;
-	let selectedYearLevel;
+  let addStudentModal = false;
 
   let currentPage = 1;
   let limit = 5;
@@ -117,18 +113,16 @@
 </svelte:head>
 
 <div class="bg-white space-y-3 mt-5">
-	<div class="flex justify-center">
+
+	<div class="flex justify-between">
     <div class="space-x-3 flex flex-row">
       <div class="flex gap-2 ml-8">
         <Search size="md" class="w-96 h-11 bg-white" placeholder="Search by ID, Name, Year Level, Course" bind:value={searchTerm} />
       </div>
-  
-      <Button class="h-11" size="sm" color="red" on:click={() => { searchTerm = ''; }}>
-        Reset
-      </Button>
-      <Button class="h-11" size="sm" color="green">Add New Student</Button>
     </div>
+    <Button class="h-11 mr-7" size="sm" color="green" on:click={() => { addStudentModal = true; }}>Add New Student</Button>
 	</div>
+
 	<div class="ml-4-6 ml-4 mb-7 mr-11">
     <div class="flex justify-between ml-4">
       <P class="text-lg mt-3 font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
@@ -149,13 +143,14 @@
         </div>
       {/if}
     </div>
+
 		<Table divClass="w-full text-left text-sm text-gray-500 dark:text-gray-400 ml-4">
 			<TableHead class="border border-zinc-300 text-center">
 				<TableHeadCell>Student ID</TableHeadCell>
 				<TableHeadCell>Full Name</TableHeadCell>
 				<TableHeadCell>Year Level</TableHeadCell>
 				<TableHeadCell>Course</TableHeadCell>
-        <TableHeadCell>Notes</TableHeadCell>
+        <TableHeadCell>Notes [?]</TableHeadCell>
 			</TableHead>
 			<TableBody tableBodyClass="divide-y border border-zinc-300 max-h-40 overflow-y-auto">
 				{#if paginatedItems === undefined || paginatedItems?.length === 0}
@@ -187,3 +182,11 @@
     
 	</div>
 </div>
+
+<Modal title="Testing" bind:open={addStudentModal} autoclose>
+	<p>Hello World</p>
+	<svelte:fragment slot="footer">
+    <Button on:click={() => console.log('Save')}>Save</Button>
+    <Button color="alternative">Cancel</Button>
+  </svelte:fragment>
+</Modal>
