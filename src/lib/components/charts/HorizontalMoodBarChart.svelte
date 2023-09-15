@@ -86,4 +86,4 @@
 	});
 </script>
 
-<div id={elementID} style="width:440px; height:350px;" />
+<div id={elementID} style="width:390px; height:350px;" />
