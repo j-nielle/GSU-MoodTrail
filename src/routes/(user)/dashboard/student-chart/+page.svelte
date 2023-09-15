@@ -245,8 +245,6 @@
 	function toggleChart(chart) {
 		selectedLineChart = chart;
 	}
-
-  $: console.log(result.length)
 </script>
 
 <svelte:head>
@@ -254,14 +252,11 @@
 </svelte:head>
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-5">
+
 	<div class="space-x-4 flex flex-row max-w-full items-end">
 		<!-- search filter -->
 		<div class="flex gap-2">
-			<Search
-				size="md"
-				class="w-fit h-11 bg-white"
-				placeholder="Search by ID or name"
-				bind:value={searchTerm}
+			<Search size="md" class="w-fit h-11 bg-white" placeholder="Search by ID or name" bind:value={searchTerm}
 				on:input={() => {
           urlSearch = '';
 					selectedCollege = '';
@@ -418,9 +413,11 @@
 				elementID={'studentHMBC'}
 			/>
 		</div>
+
 		<div class="flex space-x-6 justify-between">
 			<Card>Add new chart here like scatter clustering or whatever...</Card>
 		</div>
+		
 	</div>
 </div>
 
