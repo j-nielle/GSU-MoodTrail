@@ -20,6 +20,12 @@
 		return moodLabels[moodScores.indexOf(nearestIndex)];
 	}
 
+	function isSingleDigit(number) {
+		number = Math.abs(number);
+		console.log("number", number)
+		return number >= -9 && number <= 9;
+	}
+
 	$: mood = yData.map((score) => getNearestMoodLabel(score));
   $: mood.length != 1 ? showSymbol = false : showSymbol = true;
 
@@ -61,7 +67,10 @@
 				formatter: (params) => {
 					const index = params[0].dataIndex;
           const temp = xData[index];
-					const moodScore = yData[index].toFixed(2);
+					
+					let moodScore;
+					yData[index].length < 3 ? moodScore = yData[index] : moodScore = yData[index].toFixed(2);
+
 					const moodLabel = mood[index];
 					return `<span class="font-bold">[${temp}]</span> Mood: <span class="font-bold">${moodLabel}</span> (${moodScore})`;
 				}
