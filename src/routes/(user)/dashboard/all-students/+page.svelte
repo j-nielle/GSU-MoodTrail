@@ -88,13 +88,13 @@
   $: {
     startIndex = (currentPage - 1) * limit;
     endIndex = startIndex + limit;
-    maxPage = Math.ceil(studentsData.length / limit);
+    maxPage = Math.ceil(filteredItems.length / limit);
     paginatedItems = filteredItems.slice(startIndex, endIndex);
   }
 
   $: {
     filteredItems = studentsData.filter((req) => {
-      const idMatch = req.id.includes(searchTerm);
+      const idMatch = req.id.toString().includes(searchTerm);
       const nameMatch = req.name.toLowerCase().includes(searchTerm.toLowerCase());
       const courseMatch = req.course_id.toLowerCase().includes(searchTerm.toLowerCase());
       const yearLevelMatch = req.year_level_id.toString().toLowerCase().includes(searchTerm.toLowerCase());
