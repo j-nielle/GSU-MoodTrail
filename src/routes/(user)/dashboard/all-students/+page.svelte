@@ -7,7 +7,7 @@
 	import {
 		PaginationItem,
     Button,
-		Checkbox,
+		P,
 		Input,
 		Table,
 		TableBody,
@@ -19,7 +19,7 @@
     Select
 	} from 'flowbite-svelte';
   import { yearLvl } from '$lib/constants/index.js'
-  import { AnnotationSolid } from 'flowbite-svelte-icons'
+  import { AnnotationSolid, ChevronLeftSolid, ChevronRightSolid } from 'flowbite-svelte-icons'
 
   export let data;
 
@@ -103,7 +103,6 @@
         (idMatch || nameMatch || courseMatch || yearLevelMatch)
         : true;
     });
-    console.log(filteredItems)
   }
 
   function changePage(newPage) {
@@ -118,25 +117,39 @@
 </svelte:head>
 
 <div class="bg-white space-y-3 mt-5">
-	<div class="flex justify-between">
-    <div class="space-x-4 flex flex-row max-w-full items-end">
+	<div class="flex justify-center">
+    <div class="space-x-3 flex flex-row">
       <div class="flex gap-2 ml-8">
-        <Search size="md" class="w-fit h-11 bg-white" placeholder="Search by ID or name" bind:value={searchTerm} />
+        <Search size="md" class="w-96 h-11 bg-white" placeholder="Search by ID, Name, Year Level, Course" bind:value={searchTerm} />
       </div>
   
       <Button class="h-11" size="sm" color="red" on:click={() => { searchTerm = ''; }}>
         Reset
       </Button>
+      <Button class="h-11" size="sm" color="green">Add New Student</Button>
     </div>
 	</div>
 	<div class="ml-4-6 ml-4 mb-7 mr-11">
+    <div class="flex justify-between ml-4">
+      <P class="text-lg mt-3 font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
+        List of All Students
+        <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
+          Blah blah blah
+        </p>
+      </P>
+      {#if maxPage > 1}
+        <div class="flex flex-row items-center justify-center space-x-2">
+            <div class="flex text-sm text-center text-gray-700 dark:text-gray-400">
+              <span class="font-semibold text-gray-900 dark:text-white">{currentPage} <span class="font-normal">of</span> {maxPage}</span>
+            </div>
+            <div class="flex space-x-2">
+              <ChevronLeftSolid class="cursor-pointer focus:outline-0" on:click={() => changePage(currentPage - 1)} />
+              <ChevronRightSolid class="cursor-pointer focus:outline-0" on:click={() => changePage(currentPage + 1)} />
+            </div>
+        </div>
+      {/if}
+    </div>
 		<Table divClass="w-full text-left text-sm text-gray-500 dark:text-gray-400 ml-4">
-			<caption class="text-lg mt-3 font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
-				List of All Students
-				<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-					Blah blah blah
-				</p>
-			</caption>
 			<TableHead class="border border-zinc-300 text-center">
 				<TableHeadCell>Student ID</TableHeadCell>
 				<TableHeadCell>Full Name</TableHeadCell>
@@ -171,16 +184,6 @@
 				{/if}
 			</TableBody>
 		</Table>
-    <div class="flex flex-col items-center justify-center space-y-2 mt-2">
-      {#if maxPage > 1}
-        <div class="flex text-sm text-center text-gray-700 dark:text-gray-400">
-          <span class="font-semibold text-gray-900 dark:text-white">{currentPage} <span class="font-normal">of</span> {maxPage}</span>
-        </div>
-        <div class="flex space-x-1.5">
-          <PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" on:click={() => changePage(currentPage - 1)}>Prev</PaginationItem>
-          <PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" on:click={() => changePage(currentPage + 1)}>Next</PaginationItem>
-        </div>
-      {/if}
-		</div>
+    
 	</div>
 </div>

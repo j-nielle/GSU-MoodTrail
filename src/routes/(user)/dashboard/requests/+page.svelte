@@ -15,8 +15,10 @@
 		TableBodyRow,
 		TableHead,
 		TableHeadCell,
-		Search
+		Search,
+		P
 	} from 'flowbite-svelte';
+	import { ChevronLeftSolid, ChevronRightSolid } from 'flowbite-svelte-icons'
 
 	export let data;
 
@@ -110,15 +112,28 @@
 		</div>
 	</div>
 	<div class="ml-4-6 ml-4 mb-7 mr-11">
-		<Table divClass="w-full text-left text-sm text-gray-500 dark:text-gray-400 ml-4">
-			<caption class="text-lg font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-4">
-				Help Requests from the Kiosk
-				<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
+		<div class="flex justify-between ml-4">
+			<P class="text-lg mt-3 font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
+        Help Requests from the Kiosk
+        <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
 					By default, it shows requests for the current date and is sorted according to the latest
 					request.
 				</p>
 				<p class="mt-1 text-xs font-light text-gray-500 dark:text-gray-400">(*status: false/true, pertains to the completion of the request)</p>
-			</caption>
+      </P>
+      {#if maxPage > 1}
+        <div class="flex flex-row items-center justify-center space-x-2">
+            <div class="flex text-sm text-center text-gray-700 dark:text-gray-400">
+              <span class="font-semibold text-gray-900 dark:text-white">{page} <span class="font-normal">of</span> {maxPage}</span>
+            </div>
+            <div class="flex space-x-2">
+              <ChevronLeftSolid class="cursor-pointer focus:outline-0" on:click={() => changePage(page - 1)} />
+              <ChevronRightSolid class="cursor-pointer focus:outline-0" on:click={() => changePage(page + 1)} />
+            </div>
+        </div>
+      {/if}
+		</div>
+		<Table divClass="w-full text-left text-sm text-gray-500 dark:text-gray-400 ml-4">
 			<TableHead class="border border-zinc-300">
 				<TableHeadCell>Phone Number</TableHeadCell>
 				<TableHeadCell>Request Type</TableHeadCell>
@@ -149,16 +164,5 @@
 				{/if}
 			</TableBody>
 		</Table>
-		<div class="flex flex-col items-center justify-center space-y-2 mt-2">
-      {#if maxPage > 1}
-        <div class="flex text-sm text-center text-gray-700 dark:text-gray-400">
-          <span class="font-semibold text-gray-900 dark:text-white">{page} <span class="font-normal">of</span> {maxPage}</span>
-        </div>
-        <div class="flex space-x-1.5">
-          <PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" on:click={() => changePage(page - 1)}>Prev</PaginationItem>
-          <PaginationItem class="bg-slate-900 text-white hover:bg-slate-950 hover:text-white" on:click={() => changePage(page + 1)}>Next</PaginationItem>
-        </div>
-      {/if}
-		</div>
 	</div>
 </div>
