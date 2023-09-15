@@ -5,7 +5,7 @@
   export let title;
   export let icon;
   export let data;
-
+  
   const infoCardClass = "max-h-10 justify-center flex-row items-center space-x-2"
 </script>
 
@@ -18,7 +18,7 @@
     <BrainOutline tabindex="-1" class="text-slate-900" />
   {/if}
 	{#if title === '' && icon === ''}
-    <Label class="text-slate-900 text-sm">{data}</Label>
+    <Label class="text-slate-900 text-sm">{data ?? 'N/A'}</Label>
   {:else}
     <Label class="text-slate-900 text-sm">{title} <span class="font-bold cursor-pointer">{data ?? 'N/A'}</span></Label>
   {/if}
