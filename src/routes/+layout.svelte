@@ -16,15 +16,20 @@
 		Dropdown,
 		DropdownDivider,
 		DropdownHeader,
-		DropdownItem
+		DropdownItem,
+		MegaMenu 
 	} from 'flowbite-svelte';
-  import { SunSolid, MoonSolid } from 'flowbite-svelte-icons';
+  import { ChevronDownOutline } from 'flowbite-svelte-icons';
 
 	export let data;
 
 	$: ({ supabase, session } = data);
 
   let sessionExpired = session === null;
+	let studentsMenu = [
+    { name: 'List of Students', href: '/dashboard/all-students' },
+    { name: 'Visualizations', href: '/dashboard/student-chart' }
+  ];
   
 	onMount(() => {
 		const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {
@@ -40,19 +45,13 @@
 	$: activeUrl = $page.url.pathname;
 </script>
 
-<Modal bind:open={sessionExpired} size="md">
-  <div class="text-center">
-    <h3 class="text-lg font-normal text-gray-500 dark:text-gray-400">Session has expired.</h3>
-  </div>
-</Modal>
-
 <Navbar class="!p-4 drop-shadow-sm w-full mx-auto relative" navDivClass="!mx-auto flex justify-between items-center w-full !z-50">
 	{#if session}
-		<NavBrand tabindex="-1" href="/dashboard" class="space-x-4">
+		<NavBrand tabindex="-1" href="/dashboard" class="ml-3">
 			<img src="/src/lib/img/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit" />
 		</NavBrand>
 	{:else}
-		<NavBrand tabindex="-1" href="/">
+		<NavBrand tabindex="-1" href="/" class="ml-3">
 			<img src="/src/lib/img/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit" />
 		</NavBrand>
 	{/if}
@@ -65,23 +64,17 @@
 			<NavLi href="/dashboard/requests" active={activeUrl === '/dashboard/requests'} activeClass="font-semibold text-blue-700">
         Requests
       </NavLi>
-      <NavLi href="/dashboard/all-students" active={activeUrl === '/dashboard/all-students'} activeClass="font-semibold text-blue-700">
-        Students
-      </NavLi>
-			<NavLi href="/dashboard/student-chart" active={activeUrl === '/dashboard/student-chart'} activeClass="font-semibold text-blue-700">
-        Student Chart
-      </NavLi>
+			<NavLi id="student-menu" class="cursor-pointer">
+				Students<ChevronDownOutline class="w-3 h-3 ml-2 text-primary-800 dark:text-white inline focus:outline-0" />
+			</NavLi>
+			<Dropdown triggeredBy="#student-menu" class="w-44 z-20">
+				<DropdownItem href="/dashboard/all-students">List of Students</DropdownItem>
+				<DropdownItem href="/dashboard/student-chart">Info and Charts</DropdownItem>
+			</Dropdown>
 		</NavUl>
-    <!-- <DarkMode class="text-lg">
-      <svelte:fragment slot="lightIcon">
-        <SunSolid />
-      </svelte:fragment>
-      <svelte:fragment slot="darkIcon">
-        <MoonSolid />
-      </svelte:fragment>
-    </DarkMode> -->
+		
 		<label for="avatar-menu">
-			<Avatar class="cursor-pointer fixed" data-name={session?.user?.user_metadata?.name ?? 'User'}
+			<Avatar class="cursor-pointer fixed mr-3" data-name={session?.user?.user_metadata?.name ?? 'User'}
 				id="avatar-menu"
 				alt="User Profile Pic"
 				border
@@ -102,7 +95,7 @@
 		</Dropdown>
 	{:else}
 		<div class="flex space-x-4">
-			<Button href="/login" color="purple" class="">Login</Button>
+			<Button href="/login" color="purple" class="mr-3">Login</Button>
 		</div>
 	{/if}
 </Navbar>
