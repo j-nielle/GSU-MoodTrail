@@ -8,7 +8,7 @@
     Card, 
     Button, 
     ButtonGroup, 
-    Label,
+    Spinner,
     Select,
     Table,
 		TableBody,
@@ -199,7 +199,7 @@
 
       monthlyMostFreqReason = _.head(
         _(groupedByMonth).flatMap().countBy('reason_label').entries().maxBy(_.last)
-      );
+      ) || '';
     }
     else if(selectedLineChart === 'yearly'){
       const groupedByYear = _.groupBy(dataType, (entry) =>
@@ -222,8 +222,6 @@
         _(groupedByYear).flatMap().countBy('reason_label').entries().maxBy(_.last)
       );
     }
-    
-    // scatter 1
 	}
 
   $: if(studentMoodData.length > 0){
@@ -420,13 +418,6 @@
       ]);
     });
 
-    // const sampleStudent = studentMoodData[0];
-    // const features = ["course", "year_level", "college", "reason_score", "created_at"];
-
-    // filteredProperties = Object.keys(sampleStudent)
-    //   .map(property => {
-    //     return { name: property, value: property };
-    //   }).filter(propertyWithIndex => features.includes(propertyWithIndex.name));
     const moodData = {};
     for (const moodLabel of moodLabels) moodData[moodLabel] = Array(reasonLabels.length).fill(0);
 
@@ -458,12 +449,12 @@
     }
   }
 
-  const selectLineChart = (chart) => {
-    selectedLineChart = chart;
+  function selectLineChart (lineChart) {
+    selectedLineChart = lineChart;
   }
 
-  const selectBarChart = (chart) => {
-    selectedBarChart = chart;
+  function selectBarChart (barChart) {
+    selectedBarChart = barChart;
   }
 
 	const getWeekNumberString = (date) => {
@@ -496,31 +487,31 @@
       </div>
 		{:else if selectedLineChart === 'overall'}
       <div transition:fly>
-        <CardInfo title="Dominant Mood (Overall):" icon="FaceLaughOutline" bind:data={overallMostFreqMood} />
+        <CardInfo title="Top Mood (Overall):" icon="FaceLaughOutline" bind:data={overallMostFreqMood} />
       </div>
       <div transition:fly>
-        <CardInfo title="Dominant Reason (Overall):" icon="BrainOutline" bind:data={overallMostFreqReason} />
+        <CardInfo title="Top Reason (Overall):" icon="BrainOutline" bind:data={overallMostFreqReason} />
       </div>
 		{:else if selectedLineChart === 'weekly'}
       <div transition:fly>
-        <CardInfo title="Dominant Mood (Weekly):" icon="FaceLaughOutline" bind:data={weeklyMostFreqMood} />
+        <CardInfo title="Top Mood (Weekly):" icon="FaceLaughOutline" bind:data={weeklyMostFreqMood} />
       </div>
       <div transition:fly>
-        <CardInfo title="Dominant Reason (Weekly):" icon="BrainOutline" bind:data={weeklyMostFreqReason} />
+        <CardInfo title="Top Reason (Weekly):" icon="BrainOutline" bind:data={weeklyMostFreqReason} />
       </div>
 		{:else if selectedLineChart === 'monthly'}
       <div transition:fly>
-        <CardInfo title="Dominant Mood (Monthly):" icon="FaceLaughOutline" bind:data={monthlyMostFreqMood} />
+        <CardInfo title="Top Mood (Monthly):" icon="FaceLaughOutline" bind:data={monthlyMostFreqMood} />
       </div>
       <div transition:fly>
-        <CardInfo title="Dominant Reason (Monthly):" icon="BrainOutline" bind:data={monthlyMostFreqReason} />
+        <CardInfo title="Top Reason (Monthly):" icon="BrainOutline" bind:data={monthlyMostFreqReason} />
       </div>
 		{:else if selectedLineChart === 'yearly'}
       <div transition:fly>
-        <CardInfo title="Dominant Mood (Yearly):" icon="FaceLaughOutline" bind:data={yearlyMostFreqMood} />
+        <CardInfo title="Top Mood (Yearly):" icon="FaceLaughOutline" bind:data={yearlyMostFreqMood} />
       </div>
       <div transition:fly>
-        <CardInfo title="Dominant Reason (Yearly):" icon="BrainOutline" bind:data={yearlyMostFreqReason} />
+        <CardInfo title="Top Reason (Yearly):" icon="BrainOutline" bind:data={yearlyMostFreqReason} />
       </div>
 		{/if}
     <Button class="max-h-14 justify-center shadow-md flex-row items-center space-x-2" on:click={() => window.print()}>
@@ -532,55 +523,66 @@
     <!-- Horizontal Mood Bar Chart and Line Charts -->
 		<div class="flex space-x-4">
 			<div class="p-4 bg-white rounded-sm drop-shadow-md hover:ring-1">
-				<HorizontalMoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID='dashboardHMBC' />
+        {#if yDataMBC.length === 0 && xDataMBC.length === 0}
+          <div class="flex justify-center items-center" style="width:390px; height:350px;">
+            <Spinner class="w-28 h-28" />
+          </div>
+        {:else}
+          <HorizontalMoodBarChart bind:xData={xDataMBC} bind:yData={yDataMBC} elementID='dashboardHMBC' />
+        {/if}
 			</div>
 
 			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center p-4 hover:ring-1">
 				<div class="flex flex-col space-y-7">
-					<div class="flex justify-between">
-            <!-- Buttons for Time Intervals -->
-						<ButtonGroup>
-							<Button color={lcBtnColors.today} on:click={() => selectLineChart('today')}>Today</Button>
-							<Button color={lcBtnColors.weekly} on:click={() => selectLineChart('weekly')}>Weekly</Button>
-							<Button color={lcBtnColors.monthly} on:click={() => selectLineChart('monthly')}>Monthly</Button>
-							<Button color={lcBtnColors.yearly} on:click={() => selectLineChart('yearly')}>Yearly</Button>
-              <Button color={lcBtnColors.overall} on:click={() => selectLineChart('overall')}>Overall</Button>
-						</ButtonGroup>
+            {#if dataType.length > 0}
+            <div class="flex justify-between">
+                <!-- Buttons for Time Intervals -->
+                <ButtonGroup>
+                  <Button color={lcBtnColors.today} on:click={() => selectLineChart('today')}>Today</Button>
+                  <Button color={lcBtnColors.weekly} on:click={() => selectLineChart('weekly')}>Weekly</Button>
+                  <Button color={lcBtnColors.monthly} on:click={() => selectLineChart('monthly')}>Monthly</Button>
+                  <Button color={lcBtnColors.yearly} on:click={() => selectLineChart('yearly')}>Yearly</Button>
+                  <Button color={lcBtnColors.overall} on:click={() => selectLineChart('overall')}>Overall</Button>
+                </ButtonGroup>
 
-            <!-- Buttons for Data Type (Anon/Students) -->
-						<ButtonGroup>
-              <Button color={viewAnonData ? "dark" : "light"} on:click={() => viewAnonData = true}>Anonymous</Button>
-							<Button color={!viewAnonData ? "dark" : "light"} on:click={() => viewAnonData = false}>Students</Button>
-						</ButtonGroup>
-					</div>
-
-          <!-- Line Charts for each time intervals -->
-					{#if selectedLineChart === 'today'}
-						<LineChart 
-            bind:xData={timestamps} 
-            bind:yData={todaysMoodScores} 
-            elementID='dashboardTLC' title="Today's Moods" style="width:790px; height:280px;" />
-					{:else if selectedLineChart === 'overall'}
-						<LineChart 
-            bind:xData={overall} 
-            bind:yData={overallAverages} 
-            elementID='dashboardDLC' title="Average Mood Overall" style="width:790px; height:280px;" />
-					{:else if selectedLineChart === 'weekly'}
-						<LineChart 
-            bind:xData={weekly} 
-            bind:yData={weeklyAverages} 
-            elementID='dashboardWLC' title="Average Mood Weekly" style="width:790px; height:280px;" />
-					{:else if selectedLineChart === 'monthly'}
-						<LineChart 
-            bind:xData={monthly} 
-            bind:yData={monthlyAverages} 
-            elementID='dashboardMLC' title="Average Mood Monthly" style="width:790px; height:280px;" />
-					{:else if selectedLineChart === 'yearly'}
-						<LineChart 
-            bind:xData={yearly} 
-            bind:yData={yearlyAverages} 
-            elementID='dashboardYLC' title="Average Mood Yearly" style="width:790px; height:280px;" />
-					{/if}
+                <!-- Buttons for Data Type (Anon/Students) -->
+                <ButtonGroup>
+                  <Button color={viewAnonData ? "dark" : "light"} on:click={() => viewAnonData = true}>Anonymous</Button>
+                  <Button color={!viewAnonData ? "dark" : "light"} on:click={() => viewAnonData = false}>Students</Button>
+                </ButtonGroup>
+            </div>
+              <!-- Line Charts for each time intervals -->
+              {#if selectedLineChart === 'today'}
+                <LineChart 
+                bind:xData={timestamps} 
+                bind:yData={todaysMoodScores} 
+                elementID='dashboardTLC' title="Today's Moods" style="width:790px; height:280px;" />
+              {:else if selectedLineChart === 'overall'}
+                <LineChart 
+                bind:xData={overall} 
+                bind:yData={overallAverages} 
+                elementID='dashboardDLC' title="Average Mood Overall" style="width:790px; height:280px;" />
+              {:else if selectedLineChart === 'weekly'}
+                <LineChart 
+                bind:xData={weekly} 
+                bind:yData={weeklyAverages} 
+                elementID='dashboardWLC' title="Average Mood Weekly" style="width:790px; height:280px;" />
+              {:else if selectedLineChart === 'monthly'}
+                <LineChart 
+                bind:xData={monthly} 
+                bind:yData={monthlyAverages} 
+                elementID='dashboardMLC' title="Average Mood Monthly" style="width:790px; height:280px;" />
+              {:else if selectedLineChart === 'yearly'}
+                <LineChart 
+                bind:xData={yearly} 
+                bind:yData={yearlyAverages} 
+                elementID='dashboardYLC' title="Average Mood Yearly" style="width:790px; height:280px;" />
+              {/if}
+            {:else}
+              <div class="flex justify-center items-center" style="width:790px; height:280px;">
+                <Spinner class="w-28 h-28" />
+              </div>
+            {/if}
 				</div>
 			</div>
 		</div>
@@ -588,7 +590,13 @@
 		<!-- Heatmap Chart and table for students w consistent low moods -->
 		<div class="flex space-x-4">
 			<div class="bg-white flex items-center rounded-sm drop-shadow-md p-4 hover:ring-1">
-				<HeatmapChart title="Mood Occurrences by Day and Hour" {heatmapData} elementID='dashboardHM' />
+        {#if heatmapData.length > 0}
+				  <HeatmapChart title="Mood Occurrences by Day and Hour" {heatmapData} elementID='dashboardHM' />
+        {:else}
+          <div class="flex justify-center items-center" style="width:620px; height:350px;">
+            <Spinner class="w-28 h-28" />
+          </div>
+        {/if}
 			</div>
 
 			<div id="low-moods" bind:this={tableRef}  class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
@@ -644,38 +652,39 @@
     <div class="flex space-x-4">
       <div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
         <div class="flex flex-col">
-          <p class="text-xl font-bold self-start">Radar Chart (Test)</p>
-          <RadarChart bind:data={moodRadarData} bind:indicator={reasonRadarIndicator}
-          elementID="testRadar" style="width:616px; height:450px;" />
-        </div>
-        <!-- <div>
-          {#if !controlState}
-            <div id="scatter-controls" class="flex flex-col space-y-2 bg-slate-900 w-56 pl-4 pt-4 pr-4">
-              <Label class="text-white">xAxis</Label><Select placeholder="" items={filteredProperties} bind:value={xAxisScatter} />
-              <Label class="text-white">yAxis</Label><Select placeholder="" items={filteredProperties} bind:value={yAxisScatter} />
+          {#if moodRadarData.length > 0}
+            <p class="text-xl font-bold self-start">Radar Chart (Test)</p>
+            <RadarChart bind:data={moodRadarData} bind:indicator={reasonRadarIndicator}
+            elementID="testRadar" style="width:616px; height:450px;" />
+          {:else}
+            <div class="flex justify-center items-center" style="width:616px; height:450px;">
+              <Spinner class="w-28 h-28" />
             </div>
           {/if}
-          <div class="flex flex-col bg-slate-900 p-4 w-56">
-            <Button class="focus:ring-0" color="red" on:click={() => controlState = !controlState}>{controlsText}</Button>
-          </div>
-        </div> -->
+        </div>
       </div>
       <div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
         <div class="flex flex-col">
-          <div class="flex justify-between">
-            <p class="self-center text-xl font-bold ml-1">Bar Chart (Test)</p>
-            <ButtonGroup class="mb-3">
-             <Button color={bcBtnColors.course} on:click={() => selectBarChart('course')}>By Course</Button>
-             <Button color={bcBtnColors.year_level} on:click={() => selectBarChart('year_level')}>By Year Level</Button>
-             <Button color={bcBtnColors.reason} on:click={() => selectBarChart('reason')}>By Reason</Button>
-           </ButtonGroup>
-          </div>
-          {#if selectedBarChart === 'course'}
-            <NegativeBarChart bind:xData={avgMoodByCourse} bind:yData={courseYData} elementID="test-1" style="width:615px; height:410px;" />
-          {:else if selectedBarChart === 'year_level'}
-            <NegativeBarChart bind:xData={avgMoodByYearLvl} bind:yData={yearLvlYData} elementID="test-2" style="width:615px; height:410px;" />
-          {:else if selectedBarChart === 'reason'}
-            <NegativeBarChart bind:xData={avgMoodByReason} bind:yData={reasonYData} elementID="test-3" style="width:615px; height:410px;" />
+          {#if avgMoodByCourse.length > 0}
+            <div class="flex justify-between">
+              <p class="self-center text-xl font-bold ml-1">Bar Chart (Test)</p>
+              <ButtonGroup class="mb-3">
+              <Button color={bcBtnColors.course} on:click={() => selectBarChart('course')}>By Course</Button>
+              <Button color={bcBtnColors.year_level} on:click={() => selectBarChart('year_level')}>By Year Level</Button>
+              <Button color={bcBtnColors.reason} on:click={() => selectBarChart('reason')}>By Reason</Button>
+            </ButtonGroup>
+            </div>
+            {#if selectedBarChart === 'course'}
+              <NegativeBarChart bind:xData={avgMoodByCourse} bind:yData={courseYData} elementID="test-1" style="width:615px; height:410px;" />
+            {:else if selectedBarChart === 'year_level'}
+              <NegativeBarChart bind:xData={avgMoodByYearLvl} bind:yData={yearLvlYData} elementID="test-2" style="width:615px; height:410px;" />
+            {:else if selectedBarChart === 'reason'}
+              <NegativeBarChart bind:xData={avgMoodByReason} bind:yData={reasonYData} elementID="test-3" style="width:615px; height:410px;" />
+            {/if}
+          {:else}
+            <div class="flex justify-center items-center" style="width:615px; height:410px;">
+              <Spinner class="w-28 h-28" />
+            </div>
           {/if}
           </div> 
         </div>
