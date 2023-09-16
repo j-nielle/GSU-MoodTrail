@@ -1,13 +1,17 @@
 <script>
   // @ts-nocheck
 	import _ from 'lodash';
+  import { enhance } from '$app/forms';
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import {
+    Label, 
+    Input,
+    Badge,
     Button,
 		P,
-		Label,
+		Select,
 		Table,
 		TableBody,
 		TableBodyCell,
@@ -16,9 +20,9 @@
 		TableHeadCell,
 		Search, 
     Modal,
-    Select
+    FloatingLabelInput
 	} from 'flowbite-svelte';
-  import { yearLvl } from '$lib/constants/index.js'
+  import { yearLvl, buttonState } from '$lib/constants/index.js'
   import { AnnotationSolid, ChevronLeftSolid, ChevronRightSolid } from 'flowbite-svelte-icons'
 
   export let data;
@@ -28,13 +32,24 @@
   let studentsData = data.students;
 
   let searchTerm = '';
-  let addStudentModal = false;
-
+  let filteredItems;
   let currentPage = 1;
   let limit = 5;
   let maxPage,startIndex, endIndex, paginatedItems;
 
-  let filteredItems;
+  let selectedYearLevel;
+
+  const selectCourse = data.courses.map(item => ({
+      value: item.course,
+      name: item.course
+  }));
+
+  const year_levels = Object.keys(yearLvl).map(key => ({
+    value: yearLvl[key],
+    name: yearLvl[key]
+  }));
+
+  let addStudentModal = false;
 
   onMount(() => {
     const studentsDataChannel = supabase.channel('schema-db-changes')
@@ -183,10 +198,17 @@
 	</div>
 </div>
 
-<Modal title="Testing" bind:open={addStudentModal} autoclose>
-	<p>Hello World</p>
-	<svelte:fragment slot="footer">
-    <Button on:click={() => console.log('Save')}>Save</Button>
-    <Button color="alternative">Cancel</Button>
-  </svelte:fragment>
+<Modal title="Add New Student" bind:open={addStudentModal} size="xs" autoclose={false} class="w-full">
+  <form class="flex flex-col space-y-6" method="POST" action="?/addStudent" use:enhance>
+    <FloatingLabelInput size="small" style="outlined" name="addID" type="text" label="Student ID" required />
+    <FloatingLabelInput size="small" style="outlined" name="addFName" type="text" label="Full Name" required />
+    <Select size="sm" items={selectCourse} placeholder="Select Course" name="addCourse" required />
+    <div class="flex flex-row space-x-3">
+      {#each Object.keys(yearLvl) as key}
+        <input type="radio" name="addYrLvl" value={yearLvl[key]} on:click={() => console.log(yearLvl[key])} required>
+        <label class="text-sm" for="addYrLvl">{yearLvl[key]}</label>
+      {/each}
+    </div>
+    <Button type="submit" class="w-full1">Save New Student</Button>
+  </form>
 </Modal>
