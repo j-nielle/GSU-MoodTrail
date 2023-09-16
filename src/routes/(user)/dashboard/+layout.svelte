@@ -22,12 +22,10 @@
 					schema: 'public',
 					table: 'RequestEntries'
 				},(payload) => {
-					if (payload.new) {
-						newRequest.update(() => true)
-						setTimeout(() => {
-							newRequest.set(false);
-						}, 5000);
-					}
+					newRequest.update(() => true)
+					setTimeout(() => {
+						newRequest.update(() => false)
+					}, 5000);
 				}
 			).subscribe((status) => console.log("inside dashboard layout",status));
 	
