@@ -2,6 +2,7 @@
 	// @ts-nocheck
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import relativeTime from 'dayjs/plugin/relativeTime';
 	dayjs.extend(relativeTime);
@@ -41,7 +42,6 @@
 	let student;
 
 	let searchTerm = '';
-	let urlSearch = '';
 	let selectedCollege;
 	let selectedCourse;
 	let selectedYearLevel;
@@ -93,83 +93,83 @@
 
 	$: {
 		if ($page.url.search != '') {
-			urlSearch = $page.url.searchParams.get('search');
+			searchTerm = $page.url.searchParams.get('search');
 
-      urlResult = students.filter((student) => student?.id?.toString() === urlSearch);
-			console.log(urlResult);
-		}
-		if (studentMoodData?.length > 0) {
-			college = _.uniq(studentMoodData.map((data) => data.college)).map((college) => ({
-				value: college,
-				name: college
-			}));
-
-			course = _.chain(studentMoodData)
-				.filter({ college: selectedCollege })
-				.map('course')
-				.uniq()
-				.sort()
-				.map((course) => ({ value: course, name: course }))
-				.value();
-
-			yearLevel = _.chain(studentMoodData)
-				.filter({ course: selectedCourse })
-				.map('year_level')
-				.uniq()
-				.sort()
-				.map((yearLevel) => ({ value: yearLevel, name: yearLevel }))
-				.value();
-
-			student = _.chain(studentMoodData)
-				.filter({ college: selectedCollege, course: selectedCourse, year_level: selectedYearLevel })
-				.map('name')
-				.uniq()
-				.sort()
-				.map((name) => ({ value: name, name: name }))
-				.value();
-
-			// for the search filter
-			result = _.filter(studentMoodData, (req) => {
-				const searchTermNumeric = /^\d{10}$/.test(searchTerm);
-				const idMatch = searchTermNumeric && req.student_id.toString() === searchTerm;
-				const nameMatch = req.name.toLowerCase().includes(searchTerm.toLowerCase());
-
-				const collegeMatch = !selectedCollege || req.college === selectedCollege;
-				const courseMatch = !selectedCourse || req.course === selectedCourse;
-				const yearLevelMatch = !selectedYearLevel || req.year_level === selectedYearLevel;
-				const studentNameMatch = !selectedStudentName || req.name === selectedStudentName;
-
-				return (
-					(searchTerm !== '' && (idMatch || nameMatch)) ||
-					(selectedStudentName
-						? collegeMatch && courseMatch && yearLevelMatch && studentNameMatch
-						: false)
-				);
-			}); //.sort((a, b) => (dayjs(a.created_at).isBefore(dayjs(b.created_at)) ? -1 : 1));
-
-			// info
-			const moodCount = _.countBy(result, 'mood_label');
-			const sortedMoodsArr = Object.keys(moodCount).sort((a, b) => moodCount[b] - moodCount[a]);
-			mostFrequentMood = sortedMoodsArr[0];
-			leastFrequentMood = sortedMoodsArr.slice(-1)[0];
-
-			// pie chart
-			const sortedMoodObj = Object.fromEntries(
-				Object.entries(moodCount).sort(([, a], [, b]) => a - b)
-			);
-			xDataMBC = _.keys(sortedMoodObj);
-			yDataMBC = _.values(sortedMoodObj);
-
-			pieChartData = xDataMBC.map((label, index) => {
-				return {
-					value: yDataMBC[index],
-					name: label
-				};
-			});
+			urlResult = students.filter((student) => student?.id?.toString() === searchTerm);
 		}
 	}
 
+	$: if (studentMoodData.length > 0) {
+		college = _.uniq(studentMoodData.map((data) => data.college)).map((college) => ({
+			value: college,
+			name: college
+		}));
+
+		course = _.chain(studentMoodData)
+			.filter({ college: selectedCollege })
+			.map('course')
+			.uniq()
+			.sort()
+			.map((course) => ({ value: course, name: course }))
+			.value();
+
+		yearLevel = _.chain(studentMoodData)
+			.filter({ course: selectedCourse })
+			.map('year_level')
+			.uniq()
+			.sort()
+			.map((yearLevel) => ({ value: yearLevel, name: yearLevel }))
+			.value();
+
+		student = _.chain(studentMoodData)
+			.filter({ college: selectedCollege, course: selectedCourse, year_level: selectedYearLevel })
+			.map('name')
+			.uniq()
+			.sort()
+			.map((name) => ({ value: name, name: name }))
+			.value();
+
+		// for the search filter
+		result = _.filter(studentMoodData, (req) => {
+			const searchTermNumeric = /^\d{10}$/.test(searchTerm);
+			const idMatch = searchTermNumeric && req.student_id.toString() === searchTerm;
+			const nameMatch = req.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+			const collegeMatch = !selectedCollege || req.college === selectedCollege;
+			const courseMatch = !selectedCourse || req.course === selectedCourse;
+			const yearLevelMatch = !selectedYearLevel || req.year_level === selectedYearLevel;
+			const studentNameMatch = !selectedStudentName || req.name === selectedStudentName;
+
+			return (
+				((searchTerm != '' || $page.url.search === '') && (idMatch || nameMatch)) ||
+				(selectedStudentName
+					? collegeMatch && courseMatch && yearLevelMatch && studentNameMatch
+					: false)
+			);
+		});
+	}
+
 	$: {
+		// info
+		const moodCount = _.countBy(result, 'mood_label');
+		const sortedMoodsArr = Object.keys(moodCount).sort((a, b) => moodCount[b] - moodCount[a]);
+		mostFrequentMood = sortedMoodsArr[0];
+		leastFrequentMood = sortedMoodsArr.slice(-1)[0];
+
+		// pie chart
+		const sortedMoodObj = Object.fromEntries(
+			Object.entries(moodCount).sort(([, a], [, b]) => a - b)
+		);
+		xDataMBC = _.keys(sortedMoodObj);
+		yDataMBC = _.values(sortedMoodObj);
+
+		pieChartData = xDataMBC.map((label, index) => {
+			return {
+				value: yDataMBC[index],
+				name: label
+			};
+		});
+
 		lcBtnColors = {
 			today: selectedLineChart === 'today' ? 'blue' : 'light',
 			overall: selectedLineChart === 'overall' ? 'blue' : 'light',
@@ -182,8 +182,8 @@
 			const todaysEntries = result.filter(
 				(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
 			);
-			timestamps = todaysEntries.map((entry) => dayjs(entry.created_at).format('HH:mm:ss'));
-			todaysMoodScores = todaysEntries.map((entry) => entry.mood_score);
+			timestamps = todaysEntries.map((entry) => dayjs(entry.created_at).format('HH:mm:ss')) || [];
+			todaysMoodScores = todaysEntries.map((entry) => entry.mood_score) || [];
 		} else if (selectedLineChart === 'overall') {
 			const groupedByDay = _.groupBy(result, (entry) =>
 				dayjs(entry.created_at).format('YYYY-MM-DD')
@@ -193,9 +193,9 @@
 				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
 				const averageMoodScore = totalMoodScore / entries.length;
 				return averageMoodScore;
-			});
+			}) || [];
 
-			overall = _.sortBy(_.keys(groupedByDay));
+			overall = _.sortBy(_.keys(groupedByDay)) || [];
 		} else if (selectedLineChart === 'weekly') {
 			const groupedByWeek = _.groupBy(result, (entry) =>
 				getWeekNumberString(dayjs(entry.created_at))
@@ -205,12 +205,12 @@
 				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
 				const averageMoodScore = totalMoodScore / entries.length;
 				return averageMoodScore;
-			});
+			}) || [];
 
 			weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
 				const weekNumber = parseInt(week.replace('Week ', ''));
 				return weekNumber;
-			});
+			}) || [];
 		} else if (selectedLineChart === 'monthly') {
 			const groupedByMonth = _.groupBy(result, (entry) =>
 				dayjs(entry.created_at).format('YYYY-MM')
@@ -220,9 +220,9 @@
 				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
 				const averageMoodScore = totalMoodScore / entries.length;
 				return averageMoodScore;
-			});
+			}) || [];
 
-			monthly = _.sortBy(_.keys(groupedByMonth));
+			monthly = _.sortBy(_.keys(groupedByMonth)) || [];
 		} else if (selectedLineChart === 'yearly') {
 			const groupedByYear = _.groupBy(result, (entry) => dayjs(entry.created_at).format('YYYY'));
 
@@ -230,9 +230,9 @@
 				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
 				const averageMoodScore = totalMoodScore / entries.length;
 				return averageMoodScore;
-			});
+			}) || [];
 
-			yearly = _.sortBy(_.keys(groupedByYear));
+			yearly = _.sortBy(_.keys(groupedByYear)) || [];
 		}
 	}
 
@@ -252,25 +252,14 @@
 </svelte:head>
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-5">
-
 	<div class="space-x-4 flex flex-row max-w-full items-end">
-		<!-- search filter -->
-		<div class="flex gap-2">
-			<Search size="md" class="w-fit h-11 bg-white" placeholder="Search by ID or name" bind:value={searchTerm}
-				on:input={() => {
-          urlSearch = '';
-					selectedCollege = '';
-					selectedCourse = '';
-					selectedYearLevel = '';
-					selectedStudentName = '';
-				}}
-			/>
-		</div>
-
 		<!-- dropdown filter -->
-		<Select placeholder="College" class="font-normal w-1/3 h-11 bg-white" items={college} bind:value={selectedCollege}
+		<Select
+			placeholder="College"
+			class="font-normal w-2/4 h-11 bg-white"
+			items={college}
+			bind:value={selectedCollege}
 			on:change={(e) => {
-        urlSearch = '';
 				searchTerm = '';
 				selectedCourse = '';
 				selectedYearLevel = '';
@@ -278,7 +267,11 @@
 				selectedCollege = e.target.value;
 			}}
 		/>
-		<Select placeholder="Course" class="font-normal w-1/5 h-11 bg-white" items={course} bind:value={selectedCourse}
+		<Select
+			placeholder="Course"
+			class="font-normal w-1/5 h-11 bg-white"
+			items={course}
+			bind:value={selectedCourse}
 			on:change={(e) => {
 				searchTerm = '';
 				selectedYearLevel = '';
@@ -286,29 +279,49 @@
 				selectedCourse = e.target.value;
 			}}
 		/>
-		<Select placeholder="Year Level" class="font-normal w-2/6 h-11 bg-white" items={yearLevel} bind:value={selectedYearLevel}
+		<Select
+			placeholder="Year Level"
+			class="font-normal w-2/6 h-11 bg-white"
+			items={yearLevel}
+			bind:value={selectedYearLevel}
 			on:change={(e) => {
 				selectedStudentName = '';
 				selectedYearLevel = e.target.value;
 			}}
 		/>
-		<Select placeholder="Select a student" class="font-normal w-full h-11 bg-white" items={student} bind:value={selectedStudentName} />
-		<Button class="h-11" size="sm" color="red"
+		<Select
+			placeholder="Select a student"
+			class="font-normal w-full h-11 bg-white"
+			items={student}
+			bind:value={selectedStudentName}
+		/>
+		<Button
+			class="h-11"
+			size="sm"
+			color="red"
 			on:click={() => {
-        urlSearch = '';
 				searchTerm = '';
 				selectedCollege = '';
 				selectedCourse = '';
 				selectedYearLevel = '';
 				selectedStudentName = '';
 				selectedLineChart = 'today';
+				goto('/dashboard/student-chart');
 			}}>Reset</Button
 		>
-		<Button class="h-11" size="sm" color="purple" 
-      on:click={() => (modalState = true)}>Import/Export</Button>
+		<Button
+			class="h-11"
+			size="sm"
+			color="purple"
+			on:click={() => {
+				modalState = true;
+			}}>Import/Export</Button
+		>
 	</div>
 
-	<div class="bg-white space-y-4 dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col">
+	<div
+		class="bg-white space-y-4 dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col"
+	>
 		<div class="flex space-x-6 justify-between">
 			<!-- student info section -->
 			<div class="flex flex-col p-5">
@@ -329,7 +342,7 @@
 						<Badge large border class="w-fit mt-2">{result[0].course}</Badge>
 						<Badge large border class="w-fit mt-2">{result[0].year_level}</Badge>
 					</div>
-        {:else if urlResult?.length > 0}
+				{:else if $page.url.search != ''}
 					<P><strong>ID:</strong> {urlResult[0]?.id}</P>
 					<P><strong>Name:</strong> {urlResult[0]?.name}</P>
 					<div class="flex space-x-2">
@@ -417,7 +430,6 @@
 		<div class="flex space-x-6 justify-between">
 			<Card>Add new chart here like scatter clustering or whatever...</Card>
 		</div>
-		
 	</div>
 </div>
 
