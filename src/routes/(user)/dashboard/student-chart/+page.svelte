@@ -92,14 +92,14 @@
 	});
 
 	$: {
-		if ($page.url.search != '') {
+		if ($page?.url.search != '') {
 			searchTerm = $page.url.searchParams.get('search');
 
 			urlResult = students.filter((student) => student?.id?.toString() === searchTerm);
 		}
 	}
 
-	$: if (studentMoodData.length > 0) {
+	$: if (studentMoodData?.length > 0) {
 		college = _.uniq(studentMoodData.map((data) => data.college)).map((college) => ({
 			value: college,
 			name: college
@@ -141,7 +141,7 @@
 			const studentNameMatch = !selectedStudentName || req.name === selectedStudentName;
 
 			return (
-				((searchTerm != '' || $page.url.search === '') && (idMatch || nameMatch)) ||
+				(searchTerm != '' && (idMatch || nameMatch)) ||
 				(selectedStudentName
 					? collegeMatch && courseMatch && yearLevelMatch && studentNameMatch
 					: false)
@@ -252,12 +252,9 @@
 </svelte:head>
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-5">
-	<div class="space-x-4 flex flex-row max-w-full items-end">
+	<div class="space-x-2 flex flex-row max-w-full justify-center">
 		<!-- dropdown filter -->
-		<Select
-			placeholder="College"
-			class="font-normal w-2/4 h-11 bg-white"
-			items={college}
+		<Select placeholder="College" class="font-normal w-max h-11 bg-white" items={college}
 			bind:value={selectedCollege}
 			on:change={(e) => {
 				searchTerm = '';
@@ -267,10 +264,7 @@
 				selectedCollege = e.target.value;
 			}}
 		/>
-		<Select
-			placeholder="Course"
-			class="font-normal w-1/5 h-11 bg-white"
-			items={course}
+		<Select placeholder="Course" class="font-normal w-max h-11 bg-white" items={course}
 			bind:value={selectedCourse}
 			on:change={(e) => {
 				searchTerm = '';
@@ -281,7 +275,7 @@
 		/>
 		<Select
 			placeholder="Year Level"
-			class="font-normal w-2/6 h-11 bg-white"
+			class="font-normal w-max h-11 bg-white"
 			items={yearLevel}
 			bind:value={selectedYearLevel}
 			on:change={(e) => {
@@ -291,12 +285,12 @@
 		/>
 		<Select
 			placeholder="Select a student"
-			class="font-normal w-full h-11 bg-white"
+			class="font-normal w-max h-11 bg-white"
 			items={student}
 			bind:value={selectedStudentName}
 		/>
 		<Button
-			class="h-11"
+			class="h-11 w-fit"
 			size="sm"
 			color="red"
 			on:click={() => {
@@ -305,18 +299,21 @@
 				selectedCourse = '';
 				selectedYearLevel = '';
 				selectedStudentName = '';
+				urlResult = []
 				selectedLineChart = 'today';
 				goto('/dashboard/student-chart');
 			}}>Reset</Button
 		>
-		<Button
-			class="h-11"
-			size="sm"
-			color="purple"
-			on:click={() => {
-				modalState = true;
-			}}>Import/Export</Button
-		>
+		{#if result?.length > 0 || urlResult?.length > 0}
+			<Button
+				class="h-11 w-fit"
+				size="sm"
+				color="purple"
+				on:click={() => {
+					modalState = true;
+				}}>New Mood Entry</Button
+			>
+		{/if}
 	</div>
 
 	<div
@@ -342,7 +339,7 @@
 						<Badge large border class="w-fit mt-2">{result[0].course}</Badge>
 						<Badge large border class="w-fit mt-2">{result[0].year_level}</Badge>
 					</div>
-				{:else if $page.url.search != ''}
+				{:else if urlResult?.length > 0}
 					<P><strong>ID:</strong> {urlResult[0]?.id}</P>
 					<P><strong>Name:</strong> {urlResult[0]?.name}</P>
 					<div class="flex space-x-2">
@@ -434,16 +431,8 @@
 </div>
 
 <Modal title="Terms of Service" bind:open={modalState} autoclose>
-	<Label class="space-y-2 mb-2" bind:this={fileUpload}>
-		<span>Upload data from CSV/Excel file:</span>
-		<Fileupload
-			bind:value={fileValue}
-			bind:this={fileInput}
-			accept=".csv,.xlsx"
-			on:change={(e) => console.log(e)}
-		/>
+	<Label class="space-y-2 mb-2" >Testing
 	</Label>
-	<textarea name="" bind:this={fileResult} cols="30" rows="10" />
 	<!-- <svelte:fragment slot="footer">
     <Button on:click={() => alert('Handle "success"')}>I accept</Button>
     <Button color="alternative">Decline</Button>
