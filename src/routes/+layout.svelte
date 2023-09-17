@@ -67,7 +67,7 @@
 			<NavLi id="student-menu" class="cursor-pointer">
 				Students<ChevronDownOutline class="w-3 h-3 ml-2 text-primary-800 dark:text-white inline focus:outline-0" />
 			</NavLi>
-			<Dropdown triggeredBy="#student-menu" class="w-44 z-20">
+			<Dropdown triggeredBy="#student-menu" class="w-36 items-center z-20">
 				<DropdownItem href="/dashboard/all-students">List of Students</DropdownItem>
 				<DropdownItem href="/dashboard/student-chart">Info and Charts</DropdownItem>
 			</Dropdown>
