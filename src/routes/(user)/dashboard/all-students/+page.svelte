@@ -8,7 +8,7 @@
 	import {
     Label, 
     Input,
-    Badge,
+    Helper,
     Button,
 		P,
 		Select,
@@ -23,9 +23,11 @@
     FloatingLabelInput
 	} from 'flowbite-svelte';
   import { yearLvl, buttonState } from '$lib/constants/index.js'
+  import { InputHelper } from '$lib/components/elements/index.js';
   import { AnnotationSolid, ChevronLeftSolid, ChevronRightSolid } from 'flowbite-svelte-icons'
 
   export let data;
+  export let form;
 
   $: ({ supabase } = data);
 
@@ -37,12 +39,18 @@
   let limit = 5;
   let maxPage,startIndex, endIndex, paginatedItems;
 
-  let selectedYearLevel;
+  const uniqueCourseIds = Object.keys(
+    studentsData.reduce((acc, item) => {
+      acc[item.course_id] = true;
+      return acc;
+    }, {})
+  );
 
-  const selectCourse = data.courses.map(item => ({
-      value: item.course,
-      name: item.course
+  const selectCourse = uniqueCourseIds.map((id) => ({
+    value: id,
+    name: id
   }));
+
 
   const year_levels = Object.keys(yearLvl).map(key => ({
     value: yearLvl[key],
@@ -121,6 +129,8 @@
       currentPage = newPage;
     }
   }
+
+  $: console.log(form)
 </script>
 
 <svelte:head>
@@ -199,16 +209,42 @@
 </div>
 
 <Modal title="Add New Student" bind:open={addStudentModal} size="xs" autoclose={false} class="w-full">
-  <form class="flex flex-col space-y-6" method="POST" action="?/addStudent" use:enhance>
-    <FloatingLabelInput size="small" style="outlined" name="addID" type="text" label="Student ID" required />
-    <FloatingLabelInput size="small" style="outlined" name="addFName" type="text" label="Full Name" required />
-    <Select size="sm" items={selectCourse} placeholder="Select Course" name="addCourse" required />
-    <div class="flex flex-row space-x-3">
+  <form class="flex flex-col" method="POST" action="?/addStudent" use:enhance>
+
+    <div class="mb-2">
+      <FloatingLabelInput size="small" style="outlined" name="addID" type="text" label="Student ID" required />
+    </div>
+    {#if form?.errors}
+      {#each form?.errors as error}
+        {#if error.errorInput === 'addID'}
+          <InputHelper color="red" msg={error.error} />
+        {/if}
+      {/each}
+    {/if}
+
+    <div class="my-2 space-x-4 flex">
+      <FloatingLabelInput size="small" style="outlined" name="addFName" type="text" label="First Name" required />
+      <FloatingLabelInput size="small" style="outlined" name="addMName" type="text" label="Middle Initial" maxlength="1" required />
+      <FloatingLabelInput size="small" style="outlined" name="addLName" type="text" label="Last Name" required />
+    </div>
+    {#if form?.errors}
+      {#each form?.errors as error}
+        {#if error.errorInput === 'newName'}
+          <InputHelper color="red" msg={error.error} />
+        {/if}
+      {/each}
+    {/if}
+
+    <Select size="sm" items={selectCourse} class="my-2" placeholder="Select Course" name="addCourse" required />
+
+    <div class="flex flex-row space-x-3 my-2 justify-between">
       {#each Object.keys(yearLvl) as key}
-        <input type="radio" name="addYrLvl" value={yearLvl[key]} on:click={() => console.log(yearLvl[key])} required>
+        <input type="radio" name="addYrLvl" value={key} title={yearLvl[key]} placeholder="Select Year" required>
         <label class="text-sm" for="addYrLvl">{yearLvl[key]}</label>
       {/each}
     </div>
-    <Button type="submit" class="w-full1">Save New Student</Button>
+
+    <Button type="submit" class="w-full mt-3">Save New Student</Button>
+
   </form>
 </Modal>
