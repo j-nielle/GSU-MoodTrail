@@ -92,7 +92,7 @@
 	<title>Manage Users</title>
 </svelte:head>
 
-<div class="p-10 ring-1 bg-white w-fit shadow-md drop-shadow-md rounded">
+<div class="p-10 ring-1 bg-white w-fit shadow-md drop-shadow-md rounded z-10">
   <div class="grid justify-between justify-items-end grid-cols-2">
     <Search size="md" class="w-72" placeholder="Search by name, email, or role" bind:value={searchTerm} />
     {#if !$addNewUser}
