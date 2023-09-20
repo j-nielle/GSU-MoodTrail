@@ -1,4 +1,4 @@
-import { redirect, fail } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ url, locals: { supabase, getSession } }) {
@@ -36,14 +36,14 @@ export const actions = {
 		const newCourse = formData.get('addCourse');
 		const newYearLevel = formData.get('addYrLvl');
 
-    const newName = `${newFName} ${newMName}. ${newLName}`.trim().toUpperCase();
+		const newName = `${newFName} ${newMName}. ${newLName}`.trim().toUpperCase();
 
-		let errors = [], errorMsg, errorInput;
+		let errors = [];
 
-		if (newID?.length !== 10 || (newID != '' && /[^0-9]/.test(newID))) {
+		if (newID?.length < 10 || (newID?.slice(0, 3) != '202' && /[^0-9]/.test(newID))) {
 			errors.push({
 				errorInput: 'addID',
-				error: 'Please enter a valid ID number.'
+				error: 'Please enter a valid ID number (e.g 2020303123).'
 			});
 		}
 
@@ -54,27 +54,66 @@ export const actions = {
 			});
 		}
 
-		if (errors?.length > 0) {
-			return {
-				errors: errors
-			};
-		} else {
-			try {
+		try {
+			const { data: existingStudent, error } = await supabase
+				.from('Student')
+				.select('*')
+				.eq('id', newID)
+				.eq('name', newName)
+				.eq('year_level_id', newYearLevel)
+				.eq('course_id', newCourse);
+
+			if (existingStudent.length > 0) {
+				errors.push({
+					errorInput: 'existingStudent',
+					error: 'Student already exists.'
+				});
+			} 
+			else {
 				const { data, error } = await supabase
 					.from('Student')
 					.insert([
 						{
 							id: newID,
 							name: newName.toString().toUpperCase(),
-              year_level_id: newYearLevel,
-							course_id: newCourse							
+							year_level_id: newYearLevel,
+							course_id: newCourse
 						}
 					])
 					.select();
-        console.log(data)
-			} catch (error) {
-				console.log(error);
+
+				if (error) {
+					console.log(error);
+					if (error.message === 'duplicate key value violates unique constraint "St_pkey"') {
+						errors.push({
+							errorInput: 'duplicateID',
+							error: 'Student ID already exists.'
+						});
+					}
+					if (
+						error.message ===
+						'duplicate key value violates unique constraint "unique_name_constraint"'
+					) {
+						errors.push({
+							errorInput: 'duplicateName',
+							error: 'Student already exists.'
+						});
+					}
+				}
 			}
+		} catch (error) {
+			console.log(error);
+		}
+
+		if (errors?.length > 0) {
+			return {
+				errors: errors
+			};
+		}else{
+			return {
+				errors: [],
+				success: true
+			};
 		}
 	}
 };
