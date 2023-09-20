@@ -68,8 +68,7 @@ export const actions = {
 					errorInput: 'existingStudent',
 					error: 'Student already exists.'
 				});
-			} 
-			else {
+			} else {
 				const { data, error } = await supabase
 					.from('Student')
 					.insert([
@@ -109,11 +108,43 @@ export const actions = {
 			return {
 				errors: errors
 			};
-		}else{
+		} else {
 			return {
 				errors: [],
 				success: true
 			};
 		}
+	},
+
+	editStudent: async ({ request, locals: { supabase } }) => {
+		const formData = await request.formData();
+		console.log(formData);
+
+		let errors = [];
+
+		// try {
+		// 	const { data: existingStudent, error } = await supabase
+		// 	.from('Student')
+		// 	.select('*')
+		// 	.eq('id', newID)
+		// 	.eq('name', newName)
+		// 	.eq('year_level_id', newYearLevel)
+		// 	.eq('course_id', newCourse);
+		// 	console.log(error)
+		// 	if (existingStudent.length > 0) {
+		// 		errors.push({
+		// 			errorInput: 'existingStudent',
+		// 			error: 'Student already exists.'
+		// 		});
+		// 	}else{
+		// 		const { data, error } = await supabase
+		// 			.from('Student')
+		// 			.update({ other_column: 'otherValue' })
+		// 			.eq('some_column', 'someValue')
+		// 			.select();
+		// 	}
+		// } catch (error) {
+		// 	console.log(error);
+		// }
 	}
 };

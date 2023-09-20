@@ -1,18 +1,11 @@
 <script>
   // @ts-nocheck
 	import _ from 'lodash';
-  import { enhance } from '$app/forms';
-	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import {
-    Label, 
-    Input,
-    Helper,
     Button,
 		P,
-		Select,
 		Table,
 		TableBody,
 		TableBodyCell,
@@ -20,13 +13,10 @@
 		TableHead,
 		TableHeadCell,
 		Search, 
-    Modal,
-    FloatingLabelInput
 	} from 'flowbite-svelte';
-  import { yearLvl, buttonState } from '$lib/constants/index.js'
-  import { InputHelper } from '$lib/components/elements/index.js';
-  import { AnnotationSolid, ChevronLeftSolid, ChevronRightSolid, EditOutline, TrashBinSolid, ArrowUpRightFromSquareOutline } from 'flowbite-svelte-icons';
-  //import { writable } from 'svelte/store';
+  import { yearLvl } from '$lib/constants/index.js'
+  import { AddStudent, EditStudent } from '$lib/components/forms/index.js';
+  import { ChevronLeftSolid, ChevronRightSolid, EditOutline, TrashBinSolid } from 'flowbite-svelte-icons';
 
   export let data;
   export let form;
@@ -45,13 +35,17 @@
   let selectCourse = courses?.map((item) => ({
     value: item.course_id,
     name: item.course
-  }))
+  }));
+
+  let rowToUpdate;
 
   // const sortKey = writable('id'); // default sort key
   // const sortDirection = writable(1); // default sort direction (ascending)
   // const sortItems = writable(studentsData.slice());
 
   let addStudentModal = false;
+  let editStudentModal = false;
+
   let errors = []
 
   onMount(() => {
@@ -66,6 +60,7 @@
             studentsData = _.cloneDeep([payload.new,...studentsData]).sort((a, b) => a.name.localeCompare(b.name));
           }else if(payload.eventType === 'UPDATE'){
             // payload.new returns updated row
+            console.log(payload.new)
             // payload.old returns property "id" of updated row
             /**
              * try{
@@ -132,6 +127,21 @@
       console.log(error)
     }
   }
+
+  async function handleUpdate(student_id){
+    editStudentModal = true;
+    rowToUpdate = studentsData.filter(student => student.id == student_id);
+
+    // try{
+    //   const { data, error } = await supabase
+    //     .from('Student')
+    //     .update({ other_column: 'otherValue' })
+    //     .eq('some_column', 'someValue')
+    //     .select()
+    // }catch(error){
+    //   console.log(error)
+    // }
+  }
 </script>
 
 <svelte:head>
@@ -146,7 +156,7 @@
         <Search size="md" class="w-96 h-11 bg-white" placeholder="Search by ID, Name, Year Level, Course" bind:value={searchTerm} />
       </div>
     </div>
-    <Button class="h-11 mr-7" size="sm" color="green" on:click={() => { addStudentModal = true; errors = []; form.success = ''; }}>Add New Student</Button>
+    <Button class="h-11 mr-7" size="sm" color="green" on:click={() => { addStudentModal = true; errors = []; }}>Add New Student</Button>
 	</div>
 
 	<div class="ml-4-6 ml-4 mb-7 mr-11">
@@ -200,7 +210,7 @@
               <TableBodyCell>{student.course_id}</TableBodyCell>
               <TableBodyCell>
                 <div class="flex justify-center cursor-pointer">
-                  <EditOutline class="text-green-500 focus:outline-none hover:text-green-700" />
+                  <EditOutline class="text-green-500 focus:outline-none hover:text-green-700" on:click={handleUpdate(student.id)} />
                 </div>
               </TableBodyCell>
               <TableBodyCell>
@@ -217,57 +227,5 @@
 	</div>
 </div>
 
-<Modal title="Add New Student" bind:open={addStudentModal} size="xs" autoclose={false} class="w-full">
-  <form class="flex flex-col" method="POST" action="?/addStudent" use:enhance>
-    {#if form?.success}
-      <InputHelper color="green" msg="Student added succesfully!" />
-    {/if}
-
-    {#if form?.errors.length > 0}
-      {#each errors as error}
-        {#if error.errorInput === 'existingStudent'}
-          <InputHelper color="red" msg={error.error} />
-        {/if}
-      {/each}
-    {/if}
-
-    <div class="mb-2">
-      <FloatingLabelInput size="small" style="outlined" name="addID" type="text" label="Student ID" maxlength="10" required />
-    </div>
-    {#if form?.errors.length > 0}
-      {#each errors as error}
-        {#if error.errorInput === 'addID'}
-          <InputHelper color="red" msg={error.error} />
-        {:else if error.errorInput === 'duplicateID' || !error.errorInput === 'existingStudent'}
-          <InputHelper color="red" msg={error.error} />
-        {/if}
-      {/each}
-    {/if}
-
-    <div class="my-2 space-x-4 flex">
-      <FloatingLabelInput size="small" style="outlined" name="addFName" type="text" label="First Name" required />
-      <FloatingLabelInput size="small" style="outlined" name="addMName" type="text" label="Middle Initial" maxlength="1" required />
-      <FloatingLabelInput size="small" style="outlined" name="addLName" type="text" label="Last Name" required />
-    </div>
-    {#if form?.errors.length > 0}
-      {#each errors as error}
-        {#if error.errorInput === 'newName'}
-          <InputHelper color="red" msg={error.error} />
-        {:else if error.errorInput === 'duplicateName'}
-          <InputHelper color="red" msg={error.error} />
-        {/if}
-      {/each}
-    {/if}
-
-    <Select size="sm" items={selectCourse} class="my-2" placeholder="Select Course" name="addCourse" required />
-
-    <div class="flex flex-row space-x-3 my-2 justify-between">
-      {#each Object.keys(yearLvl) as key}
-        <input type="radio" name="addYrLvl" value={key} title={yearLvl[key]} placeholder="Select Year" required>
-        <label class="text-sm" for="addYrLvl">{yearLvl[key]}</label>
-      {/each}
-    </div>
-
-    <Button type="submit" class="w-full mt-3">Save New Student</Button>
-  </form>
-</Modal>
+<AddStudent bind:open={addStudentModal} bind:handler={form} bind:items={selectCourse} />
+<EditStudent bind:open={editStudentModal} bind:handler={form} bind:items={selectCourse} student={rowToUpdate} />
