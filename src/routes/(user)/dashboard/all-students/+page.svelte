@@ -4,6 +4,7 @@
   import { enhance } from '$app/forms';
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import {
     Label, 
@@ -24,7 +25,7 @@
 	} from 'flowbite-svelte';
   import { yearLvl, buttonState } from '$lib/constants/index.js'
   import { InputHelper } from '$lib/components/elements/index.js';
-  import { AnnotationSolid, ChevronLeftSolid, ChevronRightSolid } from 'flowbite-svelte-icons';
+  import { AnnotationSolid, ChevronLeftSolid, ChevronRightSolid, EditOutline, TrashBinSolid, ArrowUpRightFromSquareOutline } from 'flowbite-svelte-icons';
   //import { writable } from 'svelte/store';
 
   export let data;
@@ -77,18 +78,10 @@
                 console.log(error)
              * }
             */
-          }else{
+          }else if(payload.eventType === 'DELETE'){
             // payload.old returns property "id" of deleted row
-            /**
-             * try{
-             *  const { error } = await supabase
-                  .from('Student')
-                  .delete()
-                  .eq('some_column', 'someValue')
-             * }catch(error){
-                console.log(error)
-              }
-            */
+            const updatedStudentsData = studentsData.filter(student => student.id !== payload.old.id);
+            studentsData = updatedStudentsData;
           }
         }
       ).subscribe((status) => console.log($page.url.pathname, status));
@@ -98,7 +91,7 @@
     };
   });
 
-  $: if(studentsData?.length > 0){
+  $: if(studentsData){
     filteredItems = studentsData?.filter((req) => {
       const idMatch = req.id.toString().includes(searchTerm);
       const nameMatch = req.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -109,9 +102,7 @@
         (idMatch || nameMatch || courseMatch || yearLevelMatch)
         : true;
     });
-  }
 
-  $: {
     startIndex = (currentPage - 1) * limit;
     endIndex = startIndex + limit;
     maxPage = Math.ceil(filteredItems?.length / limit);
@@ -125,6 +116,20 @@
   function changePage(newPage) {
     if (newPage >= 1 && newPage <= maxPage) {
       currentPage = newPage;
+    }
+  }
+
+  async function handleRemove(student_id){
+    const rowToDelete = studentsData.filter(student => student.id == student_id);
+
+    try{
+      const { error } = await supabase
+        .from('Student')
+        .delete()
+        .eq('id', rowToDelete[0].id)
+      console.log(error)
+    }catch(error){
+      console.log(error)
     }
   }
 </script>
@@ -147,9 +152,9 @@
 	<div class="ml-4-6 ml-4 mb-7 mr-11">
     <div class="flex justify-between ml-4">
       <P class="text-lg mt-3 font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
-        List of All Students
+        List of Students
         <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-          Blah blah blah
+          Click a [<span class="font-bold">Student's ID</span>] to view more about their student information.
         </p>
       </P>
       {#if maxPage > 1}
@@ -171,7 +176,8 @@
 				<TableHeadCell>Full Name</TableHeadCell>
 				<TableHeadCell>Year Level</TableHeadCell>
 				<TableHeadCell>Course</TableHeadCell>
-        <TableHeadCell>Notes [?]</TableHeadCell>
+        <TableHeadCell>Edit</TableHeadCell>
+        <TableHeadCell>Remove</TableHeadCell>
 			</TableHead>
 			<TableBody tableBodyClass="divide-y border border-zinc-300 max-h-40 overflow-y-auto">
 				{#if paginatedItems === undefined || paginatedItems?.length === 0}
@@ -192,8 +198,15 @@
 							<TableBodyCell>{student.name}</TableBodyCell>
 							<TableBodyCell>{yearLvl[student.year_level_id]}</TableBodyCell>
               <TableBodyCell>{student.course_id}</TableBodyCell>
-              <TableBodyCell class="flex justify-center">
-                <AnnotationSolid />
+              <TableBodyCell>
+                <div class="flex justify-center cursor-pointer">
+                  <EditOutline class="text-green-500 focus:outline-none hover:text-green-700" />
+                </div>
+              </TableBodyCell>
+              <TableBodyCell>
+                <div class="flex justify-center cursor-pointer">
+                  <TrashBinSolid class="text-red-500 focus:outline-none hover:text-red-700" on:click={handleRemove(student.id)} />
+                </div>
               </TableBodyCell>
 						</TableBodyRow>
 					{/each}
