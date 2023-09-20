@@ -67,7 +67,7 @@
             <UserSettingsOutline />
           </svelte:fragment>
         </SidebarItem>
-        {#if session?.user.role === 'ADMIN'}
+        {#if session?.user.role === 'admin'}
           <SidebarItem class="text-sm"  label="Users" href="/dashboard/settings/manage-users" activeClass={spanClass}
             active={activeUrl === '/dashboard/settings/manage-users'}>
             <svelte:fragment slot="icon">
