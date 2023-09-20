@@ -24,7 +24,8 @@
 	} from 'flowbite-svelte';
   import { yearLvl, buttonState } from '$lib/constants/index.js'
   import { InputHelper } from '$lib/components/elements/index.js';
-  import { AnnotationSolid, ChevronLeftSolid, ChevronRightSolid } from 'flowbite-svelte-icons'
+  import { AnnotationSolid, ChevronLeftSolid, ChevronRightSolid } from 'flowbite-svelte-icons';
+  //import { writable } from 'svelte/store';
 
   export let data;
   export let form;
@@ -32,6 +33,7 @@
   $: ({ supabase } = data);
 
   let studentsData = data.students;
+  let courses = data.courses;
 
   let searchTerm = '';
   let filteredItems;
@@ -39,25 +41,17 @@
   let limit = 5;
   let maxPage,startIndex, endIndex, paginatedItems;
 
-  const uniqueCourseIds = Object.keys(
-    studentsData.reduce((acc, item) => {
-      acc[item.course_id] = true;
-      return acc;
-    }, {})
-  );
+  let selectCourse = courses?.map((item) => ({
+    value: item.course_id,
+    name: item.course
+  }))
 
-  const selectCourse = uniqueCourseIds.map((id) => ({
-    value: id,
-    name: id
-  }));
-
-
-  const year_levels = Object.keys(yearLvl).map(key => ({
-    value: yearLvl[key],
-    name: yearLvl[key]
-  }));
+  // const sortKey = writable('id'); // default sort key
+  // const sortDirection = writable(1); // default sort direction (ascending)
+  // const sortItems = writable(studentsData.slice());
 
   let addStudentModal = false;
+  let errors = []
 
   onMount(() => {
     const studentsDataChannel = supabase.channel('schema-db-changes')
@@ -68,7 +62,7 @@
         },(payload) => {
           console.log(payload.eventType)
           if(payload.eventType === 'INSERT'){
-            studentsData = _.cloneDeep([payload.new,...studentsData]);
+            studentsData = _.cloneDeep([payload.new,...studentsData]).sort((a, b) => a.name.localeCompare(b.name));
           }else if(payload.eventType === 'UPDATE'){
             // payload.new returns updated row
             // payload.old returns property "id" of updated row
@@ -104,15 +98,8 @@
     };
   });
 
-  $: {
-    startIndex = (currentPage - 1) * limit;
-    endIndex = startIndex + limit;
-    maxPage = Math.ceil(filteredItems.length / limit);
-    paginatedItems = filteredItems.slice(startIndex, endIndex);
-  }
-
-  $: {
-    filteredItems = studentsData.filter((req) => {
+  $: if(studentsData?.length > 0){
+    filteredItems = studentsData?.filter((req) => {
       const idMatch = req.id.toString().includes(searchTerm);
       const nameMatch = req.name.toLowerCase().includes(searchTerm.toLowerCase());
       const courseMatch = req.course_id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -124,13 +111,22 @@
     });
   }
 
+  $: {
+    startIndex = (currentPage - 1) * limit;
+    endIndex = startIndex + limit;
+    maxPage = Math.ceil(filteredItems?.length / limit);
+    paginatedItems = filteredItems?.slice(startIndex, endIndex);
+  }
+
+  $: if(form?.errors){
+    errors = form?.errors;
+  }
+
   function changePage(newPage) {
     if (newPage >= 1 && newPage <= maxPage) {
       currentPage = newPage;
     }
   }
-
-  $: console.log(form)
 </script>
 
 <svelte:head>
@@ -145,7 +141,7 @@
         <Search size="md" class="w-96 h-11 bg-white" placeholder="Search by ID, Name, Year Level, Course" bind:value={searchTerm} />
       </div>
     </div>
-    <Button class="h-11 mr-7" size="sm" color="green" on:click={() => { addStudentModal = true; }}>Add New Student</Button>
+    <Button class="h-11 mr-7" size="sm" color="green" on:click={() => { addStudentModal = true; errors = []; form.success = ''; }}>Add New Student</Button>
 	</div>
 
 	<div class="ml-4-6 ml-4 mb-7 mr-11">
@@ -210,13 +206,26 @@
 
 <Modal title="Add New Student" bind:open={addStudentModal} size="xs" autoclose={false} class="w-full">
   <form class="flex flex-col" method="POST" action="?/addStudent" use:enhance>
+    {#if form?.success}
+      <InputHelper color="green" msg="Student added succesfully!" />
+    {/if}
+
+    {#if form?.errors.length > 0}
+      {#each errors as error}
+        {#if error.errorInput === 'existingStudent'}
+          <InputHelper color="red" msg={error.error} />
+        {/if}
+      {/each}
+    {/if}
 
     <div class="mb-2">
-      <FloatingLabelInput size="small" style="outlined" name="addID" type="text" label="Student ID" required />
+      <FloatingLabelInput size="small" style="outlined" name="addID" type="text" label="Student ID" maxlength="10" required />
     </div>
-    {#if form?.errors}
-      {#each form?.errors as error}
+    {#if form?.errors.length > 0}
+      {#each errors as error}
         {#if error.errorInput === 'addID'}
+          <InputHelper color="red" msg={error.error} />
+        {:else if error.errorInput === 'duplicateID' || !error.errorInput === 'existingStudent'}
           <InputHelper color="red" msg={error.error} />
         {/if}
       {/each}
@@ -227,9 +236,11 @@
       <FloatingLabelInput size="small" style="outlined" name="addMName" type="text" label="Middle Initial" maxlength="1" required />
       <FloatingLabelInput size="small" style="outlined" name="addLName" type="text" label="Last Name" required />
     </div>
-    {#if form?.errors}
-      {#each form?.errors as error}
+    {#if form?.errors.length > 0}
+      {#each errors as error}
         {#if error.errorInput === 'newName'}
+          <InputHelper color="red" msg={error.error} />
+        {:else if error.errorInput === 'duplicateName'}
           <InputHelper color="red" msg={error.error} />
         {/if}
       {/each}
@@ -245,6 +256,5 @@
     </div>
 
     <Button type="submit" class="w-full mt-3">Save New Student</Button>
-
   </form>
 </Modal>
