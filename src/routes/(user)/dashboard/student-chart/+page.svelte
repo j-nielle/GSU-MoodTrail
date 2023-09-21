@@ -19,7 +19,6 @@
 		Modal,
 		Fileupload,
 		Label,
-		Dropzone
 	} from 'flowbite-svelte';
 	import {
 		LineChart,
@@ -28,6 +27,7 @@
 		RadarChart,
 		HeatmapChart
 	} from '$lib/components/charts/index.js';
+	import { PrintSolid } from 'flowbite-svelte-icons';
 	import { yearLvl } from '$lib/constants/index.js';
 
 	export let data;
@@ -245,6 +245,16 @@
 	function toggleChart(chart) {
 		selectedLineChart = chart;
 	}
+
+	function handleNewEntry(entry){
+		modalState = true;
+		console.log(entry)
+	}
+
+	function handlePrint(entry, another){
+		//window.print()
+		console.log(entry, another)
+	}
 </script>
 
 <svelte:head>
@@ -305,14 +315,11 @@
 			}}>Reset</Button
 		>
 		{#if result?.length > 0 || urlResult?.length > 0}
-			<Button
-				class="h-11 w-fit"
-				size="sm"
-				color="purple"
-				on:click={() => {
-					modalState = true;
-				}}>New Mood Entry</Button
-			>
+			<Button class="h-11 w-fit" size="sm" color="purple"
+				on:click={handleNewEntry(result)}>New Mood Entry</Button>
+			<Button class="max-h-14 justify-center shadow-md flex-row items-center space-x-2" on:click={handlePrint(result, urlResult)}>
+				<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
+			</Button>
 		{/if}
 	</div>
 

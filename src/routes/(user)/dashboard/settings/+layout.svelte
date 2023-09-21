@@ -49,22 +49,10 @@
 	<Sidebar class="w-fit">
     <SidebarWrapper class="bg-white drop-shadow-lg ring-1 h-fit w-32 flex p-3 justify-center">
       <SidebarGroup>
-        <SidebarItem class="text-sm" label="Profile" href="/dashboard/settings/profile" activeClass={spanClass}
-          active={activeUrl === '/dashboard/settings/profile'}>
-          <svelte:fragment slot="icon">
-            <UserCircleOutline />
-          </svelte:fragment>
-        </SidebarItem>
         <SidebarItem class="text-sm"  label="Account" href="/dashboard/settings/account" activeClass={spanClass}
           active={activeUrl === '/dashboard/settings/account'}>
           <svelte:fragment slot="icon">
             <UserEditOutline />
-          </svelte:fragment>
-        </SidebarItem>
-        <SidebarItem class="text-sm"  label="Security" href="/dashboard/settings/security" activeClass={spanClass}
-          active={activeUrl === '/dashboard/settings/security'}>
-          <svelte:fragment slot="icon">
-            <UserSettingsOutline />
           </svelte:fragment>
         </SidebarItem>
         {#if session?.user.role === 'admin'}

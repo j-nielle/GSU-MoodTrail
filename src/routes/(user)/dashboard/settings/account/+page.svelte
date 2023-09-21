@@ -1,9 +1,14 @@
 <script>
-	import { Alert, Card, Button, Label, Input, Checkbox } from 'flowbite-svelte';
+	import { Alert, Card, Button, Label, Input } from 'flowbite-svelte';
   import { ShieldSolid } from 'flowbite-svelte-icons';
 	import { enhance } from '$app/forms';
 
+  export let data;
 	export let form;
+
+  let user = data.user;
+
+  console.log(user)
 </script>
 
 <svelte:head>
@@ -11,23 +16,27 @@
 </svelte:head>
 
 <div class="flex ring-1">
-  {#if form?.success}
-    <div class="p-8">
-      <Alert color="green">
-        <span class="font-medium">Password changed succesfully!</span>
-      </Alert>
-    </div>
-  {:else if form?.error}
-    <div class="p-8">
-      <Alert color="red">
-        <span class="font-medium">Oops! Something went wrong...</span> Please try again later.
-      </Alert>
-    </div>
-  {/if}
+  
+
 	<Card>
+    {#if form?.success}
+      <div>
+        <Alert color="green">
+          <span class="font-medium">Password changed succesfully!</span>
+        </Alert>
+      </div>
+    {:else if form?.error}
+      <div>
+        <Alert color="red">
+          <span class="font-medium">{form?.error}</span> Please try again later.
+        </Alert>
+      </div>
+    {/if}
+    <p class="my-4 font-bold">Email: {user[0]?.email}</p>
+
 		<form class="flex flex-col space-y-6" action="?/resetPassword" method="POST" use:enhance>
 			<Label class="space-y-2 font-semibold">
-				<span>New Password</span>
+				<span>Change Password?</span>
 				<Input type="password" id="password" name="password" placeholder="••••••••" required autocomplete>
 					<svelte:fragment slot="left">
             <ShieldSolid tabindex="-1" size="xs" class="ml-1" />

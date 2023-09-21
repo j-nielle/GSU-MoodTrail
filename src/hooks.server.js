@@ -32,7 +32,7 @@ export const handle = async ({ event, resolve }) => {
   if (event.url.pathname === adminPath || (event.url.pathname === adminPath && event.request.method === 'POST')) {
     const session = await event.locals.getSession();
     if (session?.user.role != 'admin') {
-      throw redirect(303, '/dashboard/settings/profile');
+      throw redirect(303, '/dashboard/settings/account');
     }
   }
 

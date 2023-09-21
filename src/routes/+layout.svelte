@@ -86,7 +86,7 @@
 				<span class="block text-sm"> {session?.user?.user_metadata?.name ?? 'User'} </span>
 				<span class="block text-sm font-medium truncate"> {session?.user?.email} </span>
 			</DropdownHeader>
-			<DropdownItem class="cursor-pointer" href="/dashboard/settings/profile">Settings</DropdownItem
+			<DropdownItem class="cursor-pointer" href="/dashboard/settings/account">Settings</DropdownItem
 			>
 			<DropdownDivider />
 			<form method="POST" action="/logout">

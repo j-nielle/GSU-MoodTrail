@@ -1,5 +1,27 @@
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 
+/** @type {import('./$types').PageServerLoad} */
+export async function load({ locals: { supabase, getSession } }) {
+	const session = await getSession();
+	if (!session) {
+		throw redirect(303, '/login');
+	}
+
+	console.log(session.user.email)
+
+	const { data: user } = await supabase
+		.from("Users")
+		.select()
+		.eq('email', session.user.email)
+
+	console.log(user)
+
+	return {
+		user: user || [],
+	};
+}
+
+/** @type {import('./$types').Actions} */
 export const actions = {
 	resetPassword: async ({ request, locals: { supabase } }) => {
 		const formData = await request.formData();
