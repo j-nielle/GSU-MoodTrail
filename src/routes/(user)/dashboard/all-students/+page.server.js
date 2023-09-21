@@ -118,33 +118,77 @@ export const actions = {
 
 	editStudent: async ({ request, locals: { supabase } }) => {
 		const formData = await request.formData();
-		console.log(formData);
+
+		const editID = formData.get('editID');
+		const editFName = formData.get('editFName');
+		const editMName = formData.get('editMName');
+		const editLName = formData.get('editLName');
+		const editCourse = formData.get('editCourse');
+		const editYearLevel = formData.get('editYrLvl');
+		const editName = `${editFName} ${editMName} ${editLName}`.trim().toUpperCase();
 
 		let errors = [];
 
-		// try {
-		// 	const { data: existingStudent, error } = await supabase
-		// 	.from('Student')
-		// 	.select('*')
-		// 	.eq('id', newID)
-		// 	.eq('name', newName)
-		// 	.eq('year_level_id', newYearLevel)
-		// 	.eq('course_id', newCourse);
-		// 	console.log(error)
-		// 	if (existingStudent.length > 0) {
-		// 		errors.push({
-		// 			errorInput: 'existingStudent',
-		// 			error: 'Student already exists.'
-		// 		});
-		// 	}else{
-		// 		const { data, error } = await supabase
-		// 			.from('Student')
-		// 			.update({ other_column: 'otherValue' })
-		// 			.eq('some_column', 'someValue')
-		// 			.select();
-		// 	}
-		// } catch (error) {
-		// 	console.log(error);
-		// }
+		if (editID?.length < 10 || (editID?.slice(0, 3) != '202' && /[^0-9]/.test(editID))) {
+			errors.push({
+				errorInput: 'editID',
+				error: 'Please enter a valid ID number (e.g 2020303123).'
+			});
+		}
+
+		if (editName?.length < 5 || !/^[A-Za-z]+(?:\s+[A-Za-z]+\s*\.?\s*)+$/.test(editName)) {
+			errors.push({
+				errorInput: 'editName',
+				error: 'Please enter a valid name.'
+			});
+		}
+
+		try {
+			const { data: prevStudentData, error } = await supabase
+			.from('Student')
+			.select('*')
+			.eq('id', editID)
+			.eq('name', editName)
+			.eq('year_level_id', editYearLevel)
+			.eq('course_id', editCourse);
+			console.log(error)
+			if (prevStudentData?.length > 0) {
+				errors.push({
+					errorInput: 'prevStudentData',
+					error: 'No changes made. Please exit and try again.'
+				});
+			} else {
+				const { data, error } = await supabase
+					.from('Student')
+					.update({
+						id: editID,
+						name: editName,
+						year_level_id: editYearLevel,
+						course_id: editCourse,
+					})
+					.eq('id', editID)
+					.select()
+				console.log(data,error)
+				if(error){
+					errors.push({
+						errorInput: 'error',
+						error: error.message
+					});
+				}
+			}
+		} catch (error) {
+			console.log(error);
+		}
+
+		if (errors?.length > 0) {
+			return {
+				errors: errors
+			};
+		} else {
+			return {
+				errors: [],
+				success: true
+			};
+		}
 	}
 };

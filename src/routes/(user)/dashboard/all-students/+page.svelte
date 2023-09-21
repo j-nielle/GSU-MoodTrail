@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import {
+    Alert,
     Button,
 		P,
 		Table,
@@ -39,13 +40,10 @@
 
   let rowToUpdate;
 
-  // const sortKey = writable('id'); // default sort key
-  // const sortDirection = writable(1); // default sort direction (ascending)
-  // const sortItems = writable(studentsData.slice());
-
   let addStudentModal = false;
   let editStudentModal = false;
 
+  let addAlert = false, updateAlert = false, deleteAlert = false;
   let errors = []
 
   onMount(() => {
@@ -57,23 +55,36 @@
         },(payload) => {
           console.log(payload.eventType)
           if(payload.eventType === 'INSERT'){
+            addAlert = true;
+
+            setTimeout(() => {
+              addAlert = false;
+            }, 2000);
+
             studentsData = _.cloneDeep([payload.new,...studentsData]).sort((a, b) => a.name.localeCompare(b.name));
           }else if(payload.eventType === 'UPDATE'){
-            // payload.new returns updated row
-            console.log(payload.new)
-            // payload.old returns property "id" of updated row
-            /**
-             * try{
-             *  const { data, error } = supabase
-                .from('Student')
-                .update({ other_column: 'otherValue' })
-                .eq('some_column', 'someValue')
-                .select()
-             * }catch(error){
-                console.log(error)
-             * }
-            */
+            updateAlert = true;
+
+            setTimeout(() => {
+              updateAlert = false;
+            }, 2000);
+
+            // payload.new returns updated row, payload.old returns property "id" of updated row
+            const updatedIndex = studentsData.findIndex(student => student.id === payload.old.id);
+            
+            if (updatedIndex !== -1) {
+              studentsData[updatedIndex] = payload.new;
+            }
+
+            studentsData = _.cloneDeep(studentsData).sort((a, b) => a.name.localeCompare(b.name));
           }else if(payload.eventType === 'DELETE'){
+            deleteAlert = true;
+
+            setTimeout(() => {
+              deleteAlert = false;
+            }, 2000);
+
+
             // payload.old returns property "id" of deleted row
             const updatedStudentsData = studentsData.filter(student => student.id !== payload.old.id);
             studentsData = updatedStudentsData;
@@ -128,19 +139,10 @@
     }
   }
 
-  async function handleUpdate(student_id){
+
+  function handleUpdate(student_id){
     editStudentModal = true;
     rowToUpdate = studentsData.filter(student => student.id == student_id);
-
-    // try{
-    //   const { data, error } = await supabase
-    //     .from('Student')
-    //     .update({ other_column: 'otherValue' })
-    //     .eq('some_column', 'someValue')
-    //     .select()
-    // }catch(error){
-    //   console.log(error)
-    // }
   }
 </script>
 
@@ -149,7 +151,22 @@
 </svelte:head>
 
 <div class="bg-white space-y-3 mt-5">
-
+  {#if deleteAlert}
+    <Alert color="red" class="mx-8 mb-4">
+      <span class="font-medium">Student has been removed!</span>
+      Change a few things up and try submitting again.
+    </Alert>
+  {:else if addAlert}
+    <Alert color="green" class="mx-8 mb-4">
+      <span class="font-medium">New Student detected!</span>
+      Change a few things up and try submitting again.
+    </Alert>
+  {:else if updateAlert}
+    <Alert color="purple" class="mx-8 mb-4">
+      <span class="font-medium">Student data changes detected!</span>
+      Change a few things up and try submitting again.
+    </Alert>
+  {/if}
 	<div class="flex justify-between">
     <div class="space-x-3 flex flex-row">
       <div class="flex gap-2 ml-8">
@@ -191,7 +208,7 @@
 			</TableHead>
 			<TableBody tableBodyClass="divide-y border border-zinc-300 max-h-40 overflow-y-auto">
 				{#if paginatedItems === undefined || paginatedItems?.length === 0}
-					<TableBodyRow>
+					<TableBodyRow class="text-center">
 						<TableBodyCell>No data</TableBodyCell>
 						<TableBodyCell>No data</TableBodyCell>
 						<TableBodyCell>No data</TableBodyCell>
@@ -210,12 +227,12 @@
               <TableBodyCell>{student.course_id}</TableBodyCell>
               <TableBodyCell>
                 <div class="flex justify-center cursor-pointer">
-                  <EditOutline class="text-green-500 focus:outline-none hover:text-green-700" on:click={handleUpdate(student.id)} />
+                  <EditOutline class="text-purple-600 focus:outline-none hover:text-green-700" on:click={handleUpdate(student.id)} />
                 </div>
               </TableBodyCell>
               <TableBodyCell>
                 <div class="flex justify-center cursor-pointer">
-                  <TrashBinSolid class="text-red-500 focus:outline-none hover:text-red-700" on:click={handleRemove(student.id)} />
+                  <TrashBinSolid class="text-red-600 focus:outline-none hover:text-red-700" on:click={handleRemove(student.id)} />
                 </div>
               </TableBodyCell>
 						</TableBodyRow>

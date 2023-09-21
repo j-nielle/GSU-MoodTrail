@@ -7,7 +7,6 @@
     Modal,
     FloatingLabelInput
 	} from 'flowbite-svelte';
-  import { onMount } from 'svelte';
   import { yearLvl } from '$lib/constants/index.js'
   import { InputHelper } from '$lib/components/elements/index.js';  
   
@@ -17,7 +16,7 @@
   export let student;
 
   let prevID, prevFName, prevMName, prevLName, prevYrLvl, prevCourse;
-  
+
   $: if(student){
     const fullName = student[0]?.name.split(' ')
     const prevMIndex = fullName.findIndex(part => part.length === 2 && part.includes('.'));
@@ -28,38 +27,35 @@
     prevLName = fullName.slice(prevMIndex + 1).join(' ');
     prevYrLvl = student[0]?.year_level_id
     prevCourse = student[0]?.course_id
-    console.log(prevYrLvl)
   }
 </script>
 
 
-<Modal title="Add New Student" bind:open={open} size="xs" class="max-w-xl">
+<Modal title="Edit Student Data" bind:open={open} size="xs" class="max-w-xl">
   <form class="flex flex-col" method="POST" action="?/editStudent" use:enhance>
-    <!-- {#if handler?.success}
-      <InputHelper color="green" msg="Student added succesfully!" />
+    {#if handler?.success}
+      <InputHelper color="green" msg="Student data updated succesfully!" />
     {/if}
 
     {#if handler?.errors.length > 0}
       {#each handler?.errors as error}
-        {#if error.errorInput === 'existingStudent'}
+        {#if error.errorInput === 'prevStudentData'}
           <InputHelper color="red" msg={error.error} />
         {/if}
       {/each}
-    {/if} -->
+    {/if}
 
     <div class="mb-2">
       <FloatingLabelInput size="small" style="outlined" name="editID" type="text" 
         value={prevID} label="Student ID" maxlength="10" required />
     </div>
-    <!-- {#if handler?.errors.length > 0}
+    {#if handler?.errors.length > 0}
       {#each handler?.errors as error}
-        {#if error.errorInput === 'addID'}
-          <InputHelper color="red" msg={error.error} />
-        {:else if error.errorInput === 'duplicateID' || !error.errorInput === 'existingStudent'}
+        {#if error.errorInput === 'editID'}
           <InputHelper color="red" msg={error.error} />
         {/if}
       {/each}
-    {/if} -->
+    {/if}
 
     <div class="my-2">
       <FloatingLabelInput size="small" style="outlined" name="editFName" type="text" 
@@ -76,15 +72,13 @@
           value={prevLName} label="Last Name" minlength="3" required />
       </div>
     </div>
-    <!-- {#if handler?.errors.length > 0}
+    {#if handler?.errors.length > 0}
       {#each handler?.errors as error}
-        {#if error.errorInput === 'newName'}
-          <InputHelper color="red" msg={error.error} />
-        {:else if error.errorInput === 'duplicateName'}
+        {#if error.errorInput === 'editID'}
           <InputHelper color="red" msg={error.error} />
         {/if}
       {/each}
-    {/if} -->
+    {/if}
 
     <Select size="sm" {items} class="my-2" placeholder="Select Course" value={prevCourse} name="editCourse" required />
 
