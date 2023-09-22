@@ -11,12 +11,22 @@ export const moodColors = {
 };
 
 export const moodLabels = [
-  "Sad","Annoyed","Nervous",
-  "Bored","Neutral","Calm",
-  "Relaxed","Happy","Excited"
+  "Sad", "Annoyed", "Nervous", "Bored", "Neutral", "Calm", "Relaxed", "Happy", "Excited"
 ];
 
 export const moodScores = [-4,-3,-2,-1,0,1,2,3,4];
+
+export const mood = {
+  "Sad": -4,
+  "Annoyed": -3,
+  "Nervous": -2,
+  "Bored": -1,
+  "Neutral": 0,
+  "Calm": 1,
+  "Relaxed": 2,
+  "Happy": 3,
+  "Excited": 4
+}
 
 export const reasonLabels = [
   "Family","School","Social Life",
@@ -24,6 +34,15 @@ export const reasonLabels = [
 ];
 
 export const reasonScores = [1,2,3,4,5,6];
+
+export const reason = {
+  "Family": 1,
+  "School": 2,
+  "Social Life": 3,
+  "Financial Situation": 4,
+  "Health": 5,
+  "Unwilling to specify": 6
+}
 
 export const roleColor = {
   admin: "purple",

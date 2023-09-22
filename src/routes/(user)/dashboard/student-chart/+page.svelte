@@ -1,6 +1,6 @@
 <script>
 	// @ts-nocheck
-	import _ from 'lodash';
+	import _, { forEach } from 'lodash';
 	import dayjs from 'dayjs';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -28,7 +28,7 @@
 		HeatmapChart
 	} from '$lib/components/charts/index.js';
 	import { PrintSolid } from 'flowbite-svelte-icons';
-	import { yearLvl } from '$lib/constants/index.js';
+	import { yearLvl, mood, reason } from '$lib/constants/index.js';
 
 	export let data;
 	let studentMoodData = data.studentMood;
@@ -42,13 +42,14 @@
 	let student;
 
 	let searchTerm = '';
-	let selectedCollege;
-	let selectedCourse;
-	let selectedYearLevel;
-	let selectedStudentName;
+	let selectedCollege = '';
+	let selectedCourse = '';
+	let selectedYearLevel = '';
+	let selectedStudent = '';
 
-	let result;
-	let urlResult;
+	let result = '';
+	let urlResult = '';
+	let hasEntry;
 
 	let mostFrequentMood;
 	let leastFrequentMood;
@@ -68,7 +69,6 @@
 	let lcBtnColors = {};
 
 	let modalState = false;
-	let fileValue, fileResult, fileUpload, fileInput;
 
 	onMount(() => {
 		const dashboardChannel = supabase
@@ -92,12 +92,15 @@
 	});
 
 	$: {
-		if ($page?.url.search != '') {
-			searchTerm = $page.url.searchParams.get('search');
+			searchTerm = $page.url.searchParams.get('search') || '';
+			hasEntry = studentMoodData.find(student => student.student_id == searchTerm);
 
-			urlResult = students.filter((student) => student?.id?.toString() === searchTerm);
+			if(hasEntry != undefined){
+				result = studentMoodData.filter((student) => student?.student_id?.toString() === searchTerm);
+			} else {
+				urlResult = students.filter((student) => student?.id?.toString() === searchTerm);
+			}
 		}
-	}
 
 	$: if (studentMoodData?.length > 0) {
 		college = _.uniq(studentMoodData.map((data) => data.college)).map((college) => ({
@@ -123,35 +126,39 @@
 
 		student = _.chain(studentMoodData)
 			.filter({ college: selectedCollege, course: selectedCourse, year_level: selectedYearLevel })
-			.map('name')
+			.map('student_id')
 			.uniq()
+			.map((studentId) => ({
+					value: studentId,
+					name: studentMoodData.find(student => student.student_id === studentId).name
+			}))
 			.sort()
-			.map((name) => ({ value: name, name: name }))
 			.value();
-
-		// for the search filter
-		result = _.filter(studentMoodData, (req) => {
-			const searchTermNumeric = /^\d{10}$/.test(searchTerm);
-			const idMatch = searchTermNumeric && req.student_id.toString() === searchTerm;
-			const nameMatch = req.name.toLowerCase().includes(searchTerm.toLowerCase());
-
-			const collegeMatch = !selectedCollege || req.college === selectedCollege;
-			const courseMatch = !selectedCourse || req.course === selectedCourse;
-			const yearLevelMatch = !selectedYearLevel || req.year_level === selectedYearLevel;
-			const studentNameMatch = !selectedStudentName || req.name === selectedStudentName;
-
-			return (
-				(searchTerm != '' && (idMatch || nameMatch)) ||
-				(selectedStudentName
-					? collegeMatch && courseMatch && yearLevelMatch && studentNameMatch
-					: false)
-			);
-		});
 	}
 
-	$: {
-		// info
-		const moodCount = _.countBy(result, 'mood_label');
+	$: if(selectedStudent?.length != 0){
+		result = studentMoodData.filter((student) => student?.student_id == selectedStudent);
+	}
+
+	$: if(result?.length > 0) {
+		const moodCount = {};
+
+    result.forEach(item => {
+      const moodScore = item.mood_score;
+      let moodLabel = null;
+
+      for (const key in mood) {
+        if (mood[key] == moodScore) {
+          moodLabel = key;
+          break;
+        }
+      }
+
+      if (moodLabel) {
+        moodCount[moodLabel] = (moodCount[moodLabel] || 0) + 1;
+      }
+    })
+
 		const sortedMoodsArr = Object.keys(moodCount).sort((a, b) => moodCount[b] - moodCount[a]);
 		mostFrequentMood = sortedMoodsArr[0];
 		leastFrequentMood = sortedMoodsArr.slice(-1)[0];
@@ -236,6 +243,8 @@
 		}
 	}
 
+	$: console.log(urlResult[0])
+
 	const getWeekNumberString = (date) => {
 		const firstDayOfYear = dayjs(date).startOf('year').day(1);
 		const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
@@ -246,14 +255,13 @@
 		selectedLineChart = chart;
 	}
 
-	function handleNewEntry(entry){
-		modalState = true;
-		console.log(entry)
-	}
+	// function handleNewEntry(entry){
+	// 	modalState = true;
+	// 	console.log(entry)
+	// }
 
 	function handlePrint(entry, another){
-		//window.print()
-		console.log(entry, another)
+		window.print()
 	}
 </script>
 
@@ -261,81 +269,84 @@
 	<title>Student Chart</title>
 </svelte:head>
 
-<div class="bg-zinc-50 p-4 flex flex-col space-y-5">
+<div class="bg-zinc-50 p-4 flex flex-col space-y-3.5">
 	<div class="space-x-2 flex flex-row max-w-full justify-center">
-		<!-- dropdown filter -->
-		<Select placeholder="College" class="font-normal w-max h-11 bg-white" items={college}
-			bind:value={selectedCollege}
-			on:change={(e) => {
-				searchTerm = '';
-				selectedCourse = '';
-				selectedYearLevel = '';
-				selectedStudentName = '';
-				selectedCollege = e.target.value;
-			}}
-		/>
-		<Select placeholder="Course" class="font-normal w-max h-11 bg-white" items={course}
-			bind:value={selectedCourse}
-			on:change={(e) => {
-				searchTerm = '';
-				selectedYearLevel = '';
-				selectedStudentName = '';
-				selectedCourse = e.target.value;
-			}}
-		/>
-		<Select
-			placeholder="Year Level"
-			class="font-normal w-max h-11 bg-white"
-			items={yearLevel}
-			bind:value={selectedYearLevel}
-			on:change={(e) => {
-				selectedStudentName = '';
-				selectedYearLevel = e.target.value;
-			}}
-		/>
-		<Select
-			placeholder="Select a student"
-			class="font-normal w-max h-11 bg-white"
-			items={student}
-			bind:value={selectedStudentName}
-		/>
-		<Button
-			class="h-11 w-fit"
-			size="sm"
-			color="red"
-			on:click={() => {
-				searchTerm = '';
-				selectedCollege = '';
-				selectedCourse = '';
-				selectedYearLevel = '';
-				selectedStudentName = '';
-				urlResult = []
-				selectedLineChart = 'today';
-				goto('/dashboard/student-chart');
-			}}>Reset</Button
-		>
+		{#if hasEntry}
+			<Select placeholder="College" class="font-normal w-max h-11 bg-white" items={college}
+				bind:value={selectedCollege}
+				on:change={(e) => {
+					selectedCollege = e.target.value;
+				}}
+			/>
+			<Select placeholder="Course" class="font-normal w-max h-11 bg-white" items={course}
+				bind:value={selectedCourse}
+				on:change={(e) => {
+					selectedCourse = e.target.value;
+				}}
+			/>
+			<Select
+				placeholder="Year Level"
+				class="font-normal w-max h-11 bg-white"
+				items={yearLevel}
+				bind:value={selectedYearLevel}
+				on:change={(e) => {
+					selectedYearLevel = e.target.value;
+				}}
+			/>
+			<Select
+				placeholder="Select a student"
+				class="font-normal w-max h-11 bg-white"
+				items={student}
+				bind:value={selectedStudent}
+			/>
+			<Button
+				class="h-11 w-fit"
+				size="sm"
+				color="red"
+				on:click={() => {
+					searchTerm = '';
+					selectedCollege = '';
+					selectedCourse = '';
+					selectedYearLevel = '';
+					selectedLineChart = 'today';
+					goto('/dashboard/student-chart');
+				}}>Reset</Button
+			>
+		{/if}
+		{#if !result || urlResult?.length > 0}
+			<div class="space-x-2">
+				<Button class="h-11 w-fit" size="sm" color="dark" on:click={() => goto('/dashboard/all-students')}>Back to Student List</Button>
+			</div>
+		{/if}
 		{#if result?.length > 0 || urlResult?.length > 0}
-			<Button class="h-11 w-fit" size="sm" color="purple"
-				on:click={handleNewEntry(result)}>New Mood Entry</Button>
-			<Button class="max-h-14 justify-center shadow-md flex-row items-center space-x-2" on:click={handlePrint(result, urlResult)}>
-				<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
-			</Button>
+			<div class="space-x-2">
+				<!-- <Button class="h-11 w-fit" size="sm" color="purple"
+				on:click={handleNewEntry(result)}>New Mood Entry</Button> -->
+				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint(result, urlResult)}>
+					<span class="mr-3">Print</span>
+					<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
+				</Button>
+			</div>
 		{/if}
 	</div>
 
-	<div
-		class="bg-white space-y-4 dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col"
-	>
+	<div class="bg-white space-y-4 dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col">
 		<div class="flex space-x-6 justify-between">
-			<!-- student info section -->
 			<div class="flex flex-col p-5">
 				<P size="2xl" weight="bold" space="wider" class="mb-2 text-center">STUDENT INFORMATION</P>
 				<hr class="mb-5" />
-				{#if result?.length > 0}
+				{#if urlResult?.length > 0}
+					<P><strong>ID:</strong> {urlResult[0]?.id}</P>
+					<P><strong>Name:</strong> {urlResult[0]?.name}</P>
+					<div class="flex space-x-2">
+						<Badge large border class="w-fit mt-2">{urlResult[0]?.course_id}</Badge>
+						<Badge large border class="w-fit mt-2">{yearLvl[urlResult[0]?.year_level_id]}</Badge>
+					</div>
+				{:else if result?.length > 0}
 					<P><strong>ID:</strong> {result[0].student_id}</P>
 					<P><strong>Name:</strong> {result[0].name}</P>
 					<P><strong>College:</strong> {result[0].college}</P>
-					<P><strong>Latest Mood:</strong> {result[result.length - 1].mood_label}</P>
+					<P><strong>Latest Mood:</strong> {Object.keys(mood).find((key) => mood[key] == result[result?.length - 1].mood_score)}</P>
 					<P><strong>Most Frequent Mood:</strong> {mostFrequentMood}</P>
 					<P><strong>Least Frequent Mood:</strong> {leastFrequentMood}</P>
 					<div class="flex space-x-2">
@@ -346,102 +357,92 @@
 						<Badge large border class="w-fit mt-2">{result[0].course}</Badge>
 						<Badge large border class="w-fit mt-2">{result[0].year_level}</Badge>
 					</div>
-				{:else if urlResult?.length > 0}
-					<P><strong>ID:</strong> {urlResult[0]?.id}</P>
-					<P><strong>Name:</strong> {urlResult[0]?.name}</P>
-					<div class="flex space-x-2">
-						<Badge large border class="w-fit mt-2">{urlResult[0]?.course_id}</Badge>
-						<Badge large border class="w-fit mt-2">{yearLvl[urlResult[0]?.year_level_id]}</Badge>
-					</div>
 				{:else}
 					<P>Student not found.</P>
 				{/if}
 			</div>
 
-			<div class="flex flex-col">
-				<!-- line chart time intervals btns -->
-				<div class="flex justify-end h-fit">
-					<ButtonGroup>
-						<Button color={lcBtnColors.today} on:click={() => toggleChart('today')}>Today</Button>
-						<Button color={lcBtnColors.weekly} on:click={() => toggleChart('weekly')}>Weekly</Button
-						>
-						<Button color={lcBtnColors.monthly} on:click={() => toggleChart('monthly')}
-							>Monthly</Button
-						>
-						<Button color={lcBtnColors.yearly} on:click={() => toggleChart('yearly')}>Yearly</Button
-						>
-						<Button color={lcBtnColors.overall} on:click={() => toggleChart('overall')}
-							>Overall</Button
-						>
-					</ButtonGroup>
+			{#if result?.length > 0}
+				<div class="flex flex-col">
+					<div class="flex justify-end h-fit">
+						<ButtonGroup>
+							<Button color={lcBtnColors.today} on:click={() => toggleChart('today')}>Today</Button>
+							<Button color={lcBtnColors.weekly} on:click={() => toggleChart('weekly')}>Weekly</Button
+							>
+							<Button color={lcBtnColors.monthly} on:click={() => toggleChart('monthly')}
+								>Monthly</Button
+							>
+							<Button color={lcBtnColors.yearly} on:click={() => toggleChart('yearly')}>Yearly</Button
+							>
+							<Button color={lcBtnColors.overall} on:click={() => toggleChart('overall')}
+								>Overall</Button
+							>
+						</ButtonGroup>
+					</div>
+
+					{#if selectedLineChart === 'today'}
+						<LineChart
+							bind:xData={timestamps}
+							bind:yData={todaysMoodScores}
+							elementID={'IndTLC'}
+							style="width:790px; height:320px;"
+							title="Today's Moods"
+						/>
+					{:else if selectedLineChart === 'overall'}
+						<LineChart
+							bind:xData={overall}
+							bind:yData={overallAverages}
+							elementID={'IndDLC'}
+							style="width:790px; height:320px;"
+							title="Average Mood Overall"
+						/>
+					{:else if selectedLineChart === 'weekly'}
+						<LineChart
+							bind:xData={weekly}
+							bind:yData={weeklyAverages}
+							elementID={'IndWLC'}
+							style="width:790px; height:320px;"
+							title="Average Mood Weekly"
+						/>
+					{:else if selectedLineChart === 'monthly'}
+						<LineChart
+							bind:xData={monthly}
+							bind:yData={monthlyAverages}
+							elementID={'IndMLC'}
+							style="width:790px; height:320px;"
+							title="Average Mood Monthly"
+						/>
+					{:else if selectedLineChart === 'yearly'}
+						<LineChart
+							bind:xData={yearly}
+							bind:yData={yearlyAverages}
+							elementID={'IndYLC'}
+							style="width:790px; height:320px;"
+							title="Average Mood Yearly"
+						/>
+					{/if}
 				</div>
+			{/if}
+		</div>
 
-				<!-- line charts -->
-				{#if selectedLineChart === 'today'}
-					<LineChart
-						bind:xData={timestamps}
-						bind:yData={todaysMoodScores}
-						elementID={'IndTLC'}
-						style="width:790px; height:320px;"
-						title="Today's Moods"
-					/>
-				{:else if selectedLineChart === 'overall'}
-					<LineChart
-						bind:xData={overall}
-						bind:yData={overallAverages}
-						elementID={'IndDLC'}
-						style="width:790px; height:320px;"
-						title="Average Mood Overall"
-					/>
-				{:else if selectedLineChart === 'weekly'}
-					<LineChart
-						bind:xData={weekly}
-						bind:yData={weeklyAverages}
-						elementID={'IndWLC'}
-						style="width:790px; height:320px;"
-						title="Average Mood Weekly"
-					/>
-				{:else if selectedLineChart === 'monthly'}
-					<LineChart
-						bind:xData={monthly}
-						bind:yData={monthlyAverages}
-						elementID={'IndMLC'}
-						style="width:790px; height:320px;"
-						title="Average Mood Monthly"
-					/>
-				{:else if selectedLineChart === 'yearly'}
-					<LineChart
-						bind:xData={yearly}
-						bind:yData={yearlyAverages}
-						elementID={'IndYLC'}
-						style="width:790px; height:320px;"
-						title="Average Mood Yearly"
-					/>
-				{/if}
+		{#if result?.length > 0}
+			<div class="flex space-x-6 justify-between">
+				<PieChart bind:data={pieChartData} elementID={'studentPC'} />
+				<HorizontalMoodBarChart
+					bind:xData={xDataMBC}
+					bind:yData={yDataMBC}
+					elementID={'studentHMBC'}
+				/>
 			</div>
-		</div>
 
-		<!-- pie chart & horizontal mood bar chart -->
-		<div class="flex space-x-6 justify-between">
-			<PieChart bind:data={pieChartData} elementID={'studentPC'} />
-			<HorizontalMoodBarChart
-				bind:xData={xDataMBC}
-				bind:yData={yDataMBC}
-				elementID={'studentHMBC'}
-			/>
-		</div>
-
-		<div class="flex space-x-6 justify-between">
-			<Card>Add new chart here like scatter clustering or whatever...</Card>
-		</div>
+			<div class="flex space-x-6 justify-between">
+				<Card>Add new chart here like scatter clustering or whatever...</Card>
+			</div>
+		{/if}
 	</div>
 </div>
 
-<Modal title="Terms of Service" bind:open={modalState} autoclose>
+<!-- <Modal title="Terms of Service" bind:open={modalState} autoclose>
 	<Label class="space-y-2 mb-2" >Testing
 	</Label>
-	<!-- <svelte:fragment slot="footer">
-    <Button on:click={() => alert('Handle "success"')}>I accept</Button>
-    <Button color="alternative">Decline</Button>
-  </svelte:fragment> -->
-</Modal>
+</Modal> -->

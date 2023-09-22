@@ -20,19 +20,13 @@
 		return moodLabels[moodScores.indexOf(nearestIndex)];
 	}
 
-	function isSingleDigit(number) {
-		number = Math.abs(number);
-		console.log("number", number)
-		return number >= -9 && number <= 9;
-	}
-
-	$: mood = yData.map((score) => getNearestMoodLabel(score));
-  $: mood.length != 1 ? showSymbol = false : showSymbol = true;
+	$: mood = yData?.map((score) => getNearestMoodLabel(score));
+  $: mood?.length != 1 ? showSymbol = false : showSymbol = true;
 
 	onMount(() => {
-		lineChart = echarts.init(document.getElementById(elementID));
+		lineChart = echarts.init(document?.getElementById(elementID));
 
-		lineChart.setOption({
+		lineChart?.setOption({
 			title: {
 				text: title,
 				itemGap: 12,

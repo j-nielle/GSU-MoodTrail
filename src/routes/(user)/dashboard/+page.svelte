@@ -1,6 +1,6 @@
 <script>
 	// @ts-nocheck
-	import _ from 'lodash';
+	import _, { entries } from 'lodash';
 	import dayjs from 'dayjs';
   import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
@@ -27,7 +27,7 @@
    } from '$lib/components/charts/index.js';
 	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
   import { CardInfo } from '$lib/components/elements/index.js'
-  import { moodLabels, reasonLabels } from "$lib/constants/index.js"
+  import { mood, reason } from "$lib/constants/index.js"
 
 	export let data;
 
@@ -110,7 +110,24 @@
 		});
 
     // horizontal mood bar chart
-		const moodCount = _.countBy(dataType, 'mood_label');
+		const moodCount = {};
+
+    dataType.forEach(item => {
+      const moodScore = item.mood_score;
+      let moodLabel = null;
+
+      for (const key in mood) {
+        if (mood[key] == moodScore) {
+          moodLabel = key;
+          break;
+        }
+      }
+
+      if (moodLabel) {
+        moodCount[moodLabel] = (moodCount[moodLabel] || 0) + 1;
+      }
+    })
+
     const sortedMoodCount = Object.fromEntries(Object.entries(moodCount).sort(([, a], [, b]) => a - b));
 
 		xDataMBC = _.keys(sortedMoodCount);
@@ -129,17 +146,21 @@
       todaysEntries = _.filter(
         dataType, (entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
       );   
+
       timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss'));
       todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score);
-      const todaysMoodLabels = _.map(todaysEntries, (entry) => entry.mood_label) || [];
-      const todaysReasonLabels = _.map(todaysEntries, (entry) => entry.reason_label) || [];
+
+      const todaysMoodLabels = todaysMoodScores.map(score => Object.keys(mood).find(key => mood[key] === parseInt(score)) || "-");
+      const todaysReasonScores = _.map(todaysEntries, (entry) => entry.reason_score) || [];
+      const todaysReasonLabels = todaysReasonScores.map(score => Object.keys(reason).find(key => reason[key] === score) || "-");
+      
       todayMostFreqMood = _.head(_(todaysMoodLabels).countBy().entries().maxBy(_.last));
       todayMostFreqReason = _.head(_(todaysReasonLabels).countBy().entries().maxBy(_.last));
     }
     else if (selectedLineChart === 'overall') {
       const groupedByDay = _.groupBy(dataType, (entry) =>
         dayjs(entry.created_at).format('YYYY-MM-DD')
-      );
+      ); // group each mood entries by day
 
       overallAverages = Object.values(groupedByDay).map(entries => {
         const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
@@ -147,15 +168,19 @@
         return averageMoodScore;
       });
 
-      overall = _.sortBy(_.keys(groupedByDay));
+      overall = _.sortBy(_.keys(groupedByDay)); // days
 
-      overallMostFreqMood = _.head(
-        _(groupedByDay).flatMap().countBy('mood_label').entries().maxBy(_.last)
+      const mostFreqMood = _.head(
+        _(groupedByDay).flatMap().countBy('mood_score').entries().maxBy(_.last)
       );
 
-      overallMostFreqReason = _.head(
-        _(groupedByDay).flatMap().countBy('reason_label').entries().maxBy(_.last)
+      overallMostFreqMood = mostFreqMood ? Object.keys(mood).find(key => mood[key] === parseInt(mostFreqMood[0])) : '-';
+
+      const mostFreqReason = _.head(
+        _(groupedByDay).flatMap().countBy('reason_score').entries().maxBy(_.last)
       );  
+
+      overallMostFreqReason = mostFreqReason ? Object.keys(reason).find(key => reason[key] === parseInt(mostFreqReason[0])) : '-';
     }
     else if(selectedLineChart === 'weekly'){
       const groupedByWeek = _.groupBy(dataType, (entry) =>
@@ -173,12 +198,17 @@
         return weekNumber;
       });
       
-      weeklyMostFreqMood = _.head(
-        _(groupedByWeek).flatMap().countBy('mood_label').entries().maxBy(_.last)
+      const mostFreqMood = _.head(
+        _(groupedByWeek).flatMap().countBy('mood_score').entries().maxBy(_.last)
       );
-      weeklyMostFreqReason = _.head(
-        _(groupedByWeek).flatMap().countBy('reason_label').entries().maxBy(_.last)
+
+      weeklyMostFreqMood = mostFreqMood ? Object.keys(mood).find(key => mood[key] === parseInt(mostFreqMood[0])) : '-';
+
+      const mostFreqReason = _.head(
+        _(groupedByWeek).flatMap().countBy('reason_score').entries().maxBy(_.last)
       );
+
+      weeklyMostFreqReason =  mostFreqMood ? Object.keys(reason).find(key => reason[key] === parseInt(mostFreqReason[0])) : '-';
     }
     else if(selectedLineChart === 'monthly'){
       const groupedByMonth = _.groupBy(dataType, (entry) =>
@@ -193,13 +223,17 @@
 
       monthly = _.sortBy(_.keys(groupedByMonth));
 
-      monthlyMostFreqMood = _.head(
-        _(groupedByMonth).flatMap().countBy('mood_label').entries().maxBy(_.last)
+      const mostFreqMood = _.head(
+        _(groupedByMonth).flatMap().countBy('mood_score').entries().maxBy(_.last)
       );
 
-      monthlyMostFreqReason = _.head(
-        _(groupedByMonth).flatMap().countBy('reason_label').entries().maxBy(_.last)
-      ) || '';
+      monthlyMostFreqMood = mostFreqMood ? Object.keys(mood).find(key => mood[key] === parseInt(mostFreqMood[0])) : '-';
+
+      const mostFreqReason = _.head(
+        _(groupedByMonth).flatMap().countBy('reason_score').entries().maxBy(_.last)
+      );
+
+      monthlyMostFreqReason = mostFreqReason ? Object.keys(reason).find(key => reason[key] === parseInt(mostFreqReason[0])) : '-';
     }
     else if(selectedLineChart === 'yearly'){
       const groupedByYear = _.groupBy(dataType, (entry) =>
@@ -214,13 +248,17 @@
 
       yearly = _.sortBy(_.keys(groupedByYear));
 
-      yearlyMostFreqMood = _.head(
-        _(groupedByYear).flatMap().countBy('mood_label').entries().maxBy(_.last)
+      const mostFreqMood = _.head(
+        _(groupedByYear).flatMap().countBy('mood_score').entries().maxBy(_.last)
       );
 
-      yearlyMostFreqReason = _.head(
-        _(groupedByYear).flatMap().countBy('reason_label').entries().maxBy(_.last)
+      yearlyMostFreqMood = mostFreqMood ? Object.keys(mood).find(key => mood[key] === parseInt(mostFreqMood[0])) : '-';
+
+      const mostFreqReason = _.head(
+        _(groupedByYear).flatMap().countBy('reason_score').entries().maxBy(_.last)
       );
+
+      yearlyMostFreqReason = mostFreqReason ? Object.keys(reason).find(key => reason[key] === parseInt(mostFreqReason[0])) : '-';
     }
 	}
 
@@ -290,18 +328,18 @@
     }
     else if(selectedBarChart === 'reason'){
       const reasonData = studentMoodData.reduce((acc, entry) => {
-        const { reason_label, mood_score } = entry;
-        const existingReason = acc.find(item => item.reason_label === reason_label);
+        const { reason_score, mood_score } = entry;
+        const existingReason = acc.find(item => item.reason_score === reason_score);
 
         if (existingReason) {
           existingReason.mood_scores.push(mood_score);
         } else {
-          acc.push({ reason_label, mood_scores: [mood_score] });
+          const reason_label = Object.keys(reason).find(key => reason[key] === reason_score);
+          acc.push({ reason_label, reason_score, mood_scores: [mood_score] });
         }
-
         return acc;
       }, []);
-
+      
       avgMoodByReason = reasonData.map(reason => {
         const moodScores = reason.mood_scores;
         
@@ -338,20 +376,23 @@
 		let maxConsecutiveDays = 0;
 
 		filteredStudents = studentMoodData.reduce(
-			(students, { student_id, mood_score, reason_label, created_at }) => {
-				if (!created_at || mood_score >= 0) {
-					return students;
-				}
-				const dateKey = new Date(created_at).toLocaleDateString();
+      (students, { student_id, mood_score, created_at, reason_score }) => {
+        if (!created_at || mood_score >= 0) {
+          return students;
+        }
+        const dateKey = new Date(created_at).toLocaleDateString();
 
-				const studentData = students.get(student_id) || new Map();
-				studentData.set(dateKey, {
-					moodScores: [...(studentData.get(dateKey)?.moodScores || []), mood_score],
-					reasonLabels: [...(studentData.get(dateKey)?.reasonLabels || []), reason_label]
-				});
-				return students.set(student_id, studentData);
-			}, new Map()
-		);
+        const studentData = students.get(student_id) || new Map();
+        const reason_label = Object.keys(reason).find(key => reason[key] === reason_score);
+
+        studentData.set(dateKey, {
+          moodScores: [...(studentData.get(dateKey)?.moodScores || []), mood_score],
+          reasonLabels: [...(studentData.get(dateKey)?.reasonLabels || []), reason_label]
+        });
+        return students.set(student_id, studentData);
+      },
+      new Map()
+    );
     
 		for (const [studentId, studentEntry] of filteredStudents) {
 			let consecutiveDays = 0;
@@ -419,24 +460,29 @@
     });
 
     const moodData = {};
-    for (const moodLabel of moodLabels) moodData[moodLabel] = Array(reasonLabels.length).fill(0);
-
-    for (const student of studentMoodData) {
-      const moodIndex = moodLabels.indexOf(student.mood_label);
-      const reasonIndex = reasonLabels.indexOf(student.reason_label);
-      if (moodIndex !== -1 && reasonIndex !== -1) moodData[student.mood_label][reasonIndex]++;
+    for (const moodLabel in mood) {
+      moodData[moodLabel] = Array(Object.keys(reason).length).fill(0);
     }
 
-    moodRadarData = moodLabels.map((moodLabel) => ({
-      value: reasonLabels.map((reasonLabel) => moodData[moodLabel][reasonLabels.indexOf(reasonLabel)]),
+    for (const student of studentMoodData) {
+      const moodLabel = Object.keys(mood).find(key => mood[key] == student.mood_score);
+      const reasonIndex = student.reason_score - 1;
+
+      if (moodLabel && reasonIndex >= 0) {
+        moodData[moodLabel][reasonIndex]++;
+      }
+    }
+
+    moodRadarData = Object.keys(mood).map((moodLabel) => ({
+      value: Object.keys(reason).map((reasonLabel) => moodData[moodLabel][reason[reasonLabel] - 1]),
       name: moodLabel,
     }));
 
-    const maxValues = reasonLabels.map((reasonLabel, reasonIndex) =>
-      Math.max(...moodRadarData.map((mood) => mood.value[reasonIndex]))
+    const maxValues = Object.keys(reason).map((reasonLabel) =>
+      Math.max(...moodRadarData.map((mood) => mood.value[reason[reasonLabel] - 1]))
     );
 
-    reasonRadarIndicator = reasonLabels.map((reasonLabel, reasonIndex) => ({
+    reasonRadarIndicator = Object.keys(reason).map((reasonLabel, reasonIndex) => ({
       name: reasonLabel,
       max: maxValues[reasonIndex] + 3,
     }));
@@ -473,7 +519,7 @@
 </svelte:head>
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-10">
-  <!-- Info Cards -->
+  
 	<div class="flex justify-between">
     <CardInfo title="" icon="" bind:data={current} />
     <CardInfo title="Latest Student:" icon="ProfileCardOutline" bind:data={recentStudent} />
@@ -520,8 +566,8 @@
 	</div>
 
 	<div class="flex flex-col space-y-3">
-    <!-- Horizontal Mood Bar Chart and Line Charts -->
 		<div class="flex space-x-4">
+
 			<div class="p-4 bg-white rounded-sm drop-shadow-md hover:ring-1">
         {#if yDataMBC.length === 0 && xDataMBC.length === 0}
           <div class="flex justify-center items-center" style="width:390px; height:350px;">
@@ -536,7 +582,7 @@
 				<div class="flex flex-col space-y-7">
             {#if dataType.length > 0}
             <div class="flex justify-between">
-                <!-- Buttons for Time Intervals -->
+                
                 <ButtonGroup>
                   <Button color={lcBtnColors.today} on:click={() => selectLineChart('today')}>Today</Button>
                   <Button color={lcBtnColors.weekly} on:click={() => selectLineChart('weekly')}>Weekly</Button>
@@ -545,13 +591,12 @@
                   <Button color={lcBtnColors.overall} on:click={() => selectLineChart('overall')}>Overall</Button>
                 </ButtonGroup>
 
-                <!-- Buttons for Data Type (Anon/Students) -->
                 <ButtonGroup>
                   <Button color={viewAnonData ? "dark" : "light"} on:click={() => viewAnonData = true}>Anonymous</Button>
                   <Button color={!viewAnonData ? "dark" : "light"} on:click={() => viewAnonData = false}>Students</Button>
                 </ButtonGroup>
             </div>
-              <!-- Line Charts for each time intervals -->
+            
               {#if selectedLineChart === 'today'}
                 <LineChart 
                 bind:xData={timestamps} 
@@ -587,7 +632,6 @@
 			</div>
 		</div>
 
-		<!-- Heatmap Chart and table for students w consistent low moods -->
 		<div class="flex space-x-4">
 			<div class="bg-white flex items-center rounded-sm drop-shadow-md p-4 hover:ring-1">
         {#if heatmapData.length > 0}
@@ -632,7 +676,7 @@
                 </TableBodyCell>
                 <TableBodyCell>{streak.startDate} - {streak.endDate}</TableBodyCell>
                 <TableBodyCell class="text-center">
-                  {moodLabels[Math.round(streak.moodScores.reduce((accum, elem) => accum + parseInt(elem), 0) / streak.moodScores.length) + 4]}
+                  {Object.keys(mood).find((key) => mood[key] === Math.round(streak.moodScores.reduce((accum, elem) => accum + parseInt(elem), 0) / streak.moodScores.length) + 4)}
                 </TableBodyCell>
                 <TableBodyCell class="text-center">
                   {streak.reasonLabels.reduce(
