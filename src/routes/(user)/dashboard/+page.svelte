@@ -98,7 +98,7 @@
 
   $: viewAnonData ? dataType = anonMoodData : dataType = studentMoodData;
 
-	$: if(dataType.length > 0){
+	$: if(dataType?.length > 0){
 		const groupedData = _.groupBy(dataType, (data) => {
 			const date = new Date(data.created_at);
 			return [date.getDay(), date.getHours()];
@@ -224,7 +224,7 @@
     }
 	}
 
-  $: if(studentMoodData.length > 0){
+  $: if(studentMoodData?.length > 0){
     if(selectedBarChart === 'course'){
       const courseData = studentMoodData.reduce((acc, entry) => {
         const existingCourse = acc.find(item => item.course === entry.course);

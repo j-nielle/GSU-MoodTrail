@@ -1,17 +1,16 @@
 <script>
   // @ts-nocheck
   import _ from 'lodash';  
-  import { enhance } from '$app/forms';
   import { onMount } from 'svelte';
 	import {
-    PaginationItem,
+    // PaginationItem,
     Badge, 
-    Input,
-    Card, 
-    Button, 
-    ButtonGroup, 
-    Label,
-    Select,
+    // Input,
+    // Card, 
+    // Button, 
+    // ButtonGroup, 
+    // Label,
+    // Select,
     Table,
 		TableBody,
 		TableBodyCell,
@@ -19,12 +18,13 @@
 		TableHead,
 		TableHeadCell,
 		Search, 
-    FloatingLabelInput, 
-    Helper
+    // FloatingLabelInput, 
+    // Helper
   } from 'flowbite-svelte';
-  import { roleColor, roles, buttonState } from '$lib/constants/index.js';
-  import { addNewUser, editUser } from '$lib/stores/index.js';
-  import { AddUser, EditUser } from '$lib/components/forms/index.js';
+  import { roleColor } from '$lib/constants/index.js';
+  // import { roleColor, roles, buttonState } from '$lib/constants/index.js';
+  // import { addNewUser, editUser } from '$lib/stores/index.js';
+  // import { AddUser, EditUser } from '$lib/components/forms/index.js';
 
 	export let data;
 
@@ -32,25 +32,10 @@
   let filteredItems;
 
   $: ({ supabase } = data);
+
   let usersData = data.users;
-
-  // const toggleRequestStatus = async (req) => {
-	// 	let isCompleted = req.iscompleted;
-
-	// 	try {
-	// 		const { data, error } = await supabase
-	// 			.from('RequestEntries')
-	// 			.update({ iscompleted: isCompleted })
-	// 			.eq('id', req.id)
-	// 			.select()
-	// 			.single();
-	// 	} catch (error) {
-	// 		console.log(error);
-	// 	}
-	// }
   
 	$: filteredItems = usersData.filter((req) => {
-    // "id", "email" "password", "name", "role"
     const nameMatch = req?.name?.toLowerCase().includes(searchTerm.toLowerCase());
     const emailMatch = req?.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const roleMatch = req?.role?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -75,17 +60,15 @@
 		};
 	});
 
-  function handleAddUser(){
-    editUser.update(() => false);
-    addNewUser.update(value  => !value);
-  }
+  // function handleAddUser(){
+  //   editUser.update(() => false);
+  //   addNewUser.update(value  => !value);
+  // }
 
-  function handleEditUser(){
-    addNewUser.update(() => false);
-    editUser.update(value  => !value);
-  }
-
-  $: console.log($addNewUser)
+  // function handleEditUser(){
+  //   addNewUser.update(() => false);
+  //   editUser.update(value  => !value);
+  // }
 </script>
 
 <svelte:head>
@@ -93,28 +76,27 @@
 </svelte:head>
 
 <div class="p-10 ring-1 bg-white w-fit shadow-md drop-shadow-md rounded z-10">
-  <div class="grid justify-between justify-items-end grid-cols-2">
-    <Search size="md" class="w-72" placeholder="Search by name, email, or role" bind:value={searchTerm} />
-    {#if !$addNewUser}
-      <Button size="sm" shadow color="purple" pill on:click={handleAddUser}>Add New User</Button>
-    {:else}
-      <Button size="sm" shadow color="red" pill on:click={handleAddUser}>Hide Form</Button>
-    {/if}
+  <div class="relative w-full flex items-center space-x-8">
+    <caption class="text-xl my-3 font-bold text-left w-max text-gray-900 dark:text-white dark:bg-gray-800">
+      List of Users
+    </caption>
+    <div>
+      <Search size="md" class="w-72" placeholder="Search by name, email, or role" bind:value={searchTerm} />
+      <!-- {#if !$addNewUser}
+        <Button size="sm" shadow color="purple" pill on:click={handleAddUser}>Add New User</Button>
+      {:else}
+        <Button size="sm" shadow color="red" pill on:click={handleAddUser}>Hide Form</Button>
+      {/if} -->
+    </div>
   </div>
   <div class='w-full mt-4'>
-    <caption class="text-xl mt-3 font-bold text-left w-max text-gray-900 dark:text-white dark:bg-gray-800 mb-6">
-      User Management
-      <p class="mt-1 mb-2 text-sm font-normal text-gray-500 dark:text-gray-400">
-        Blah blah blah
-      </p>
-    </caption>
     <Table divClass="text-left text-sm w-full text-gray-500 border border-zinc-300 dark:text-gray-400 max-h-72 overflow-y-auto">
       <TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky">
         <TableHeadCell>Name</TableHeadCell>
         <TableHeadCell>Email Address</TableHeadCell>
         <TableHeadCell>User Role</TableHeadCell>
-        <TableHeadCell></TableHeadCell>
-        <TableHeadCell></TableHeadCell>
+        <!-- <TableHeadCell></TableHeadCell>
+        <TableHeadCell></TableHeadCell> -->
       </TableHead>
       <TableBody tableBodyClass="divide-y bg-white">
         {#if filteredItems === undefined || filteredItems.length === 0}
@@ -122,8 +104,8 @@
             <TableBodyCell>No data</TableBodyCell>
             <TableBodyCell>No data</TableBodyCell>
             <TableBodyCell>No data</TableBodyCell>
-            <TableBodyCell></TableBodyCell>
-            <TableBodyCell></TableBodyCell>
+            <!-- <TableBodyCell></TableBodyCell>
+            <TableBodyCell></TableBodyCell> -->
           </TableBodyRow>
         {:else}
         {#each filteredItems as user}
@@ -133,12 +115,12 @@
             <TableBodyCell>  
               <Badge border rounded color={roleColor[user.role]}>{user.role}</Badge> 
             </TableBodyCell>
-            <TableBodyCell class="cursor-pointer text-center hover:underline text-blue-700">
+            <!-- <TableBodyCell class="cursor-pointer text-center hover:underline text-blue-700">
               <button on:click={handleEditUser} class="hover:underline">Edit User</button>
             </TableBodyCell>
             <TableBodyCell class="flex justify-center cursor-pointer ">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="red" class="bi bi-trash-fill" viewBox="0 0 16 16"> <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/> </svg>
-            </TableBodyCell>
+            </TableBodyCell> -->
           </TableBodyRow>
         {/each}
         {/if}
@@ -146,37 +128,6 @@
     </Table>
   </div>
 </div>
-{#if $addNewUser}
-  <AddUser />
-{/if}
 <!-- {#if $addNewUser}
-  <div transition:blur={{ amount: 5, duration: 200 }}>
-    <Card class="p-4 h-max space-y-5 rounded bg-white dark:bg-gray-800 self-start" size="lg" padding='xl'>
-      {#if message}
-        <p>{message}</p>
-      {/if}
-      <h3 class="font-bold text-slate-950 text-center text-xl">Create New User</h3>
-      <form class="space-y-5" action="?/newUser" method="POST" use:enhance>
-        <FloatingLabelInput size="small" style="outlined" id="addName" name="name" type="text" label="Name" />
-        <FloatingLabelInput size="small" style="outlined" id="addEmail" name="email" type="text" label="Email Address" required />
-        <FloatingLabelInput size="small" style="outlined" id="addPassword" name="password" type="password" label="Password" autocomplete required />
-        <input type="hidden" id="addRole" name="role" bind:value={addRole} />
-      </form>
-      <div class="space-y-3">
-        <p class="text-sm">Choose their role:</p>
-        <div class="flex flex-row space-x-2">
-          {#each roles as role}
-            <button on:click={() => addRole = role.label}>
-              <Badge class={addRole === role.label ? buttonState.active : buttonState.inactive} border rounded color={role.color}>{role.label}</Badge>
-            </button>
-          {/each}
-        </div>
-      </div>
-      <Button pill shadow type="submit" color="purple" class="w-full font-bold leading-relaxed">SAVE</Button>
-    </Card>
-  </div>
-{:else if $editUser}
-  <div transition:blur={{ amount: 5, duration: 200 }}>
-    <EditUser />
-  </div>
+  <AddUser />
 {/if} -->

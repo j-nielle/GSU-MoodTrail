@@ -49,14 +49,14 @@
 	<Sidebar class="w-fit">
     <SidebarWrapper class="bg-white drop-shadow-lg ring-1 h-fit w-32 flex p-3 justify-center">
       <SidebarGroup>
-        <SidebarItem class="text-sm"  label="Account" href="/dashboard/settings/account" activeClass={spanClass}
+        <SidebarItem class="text-sm rounded"  label="Account" href="/dashboard/settings/account" activeClass={spanClass}
           active={activeUrl === '/dashboard/settings/account'}>
           <svelte:fragment slot="icon">
             <UserEditOutline />
           </svelte:fragment>
         </SidebarItem>
         {#if session?.user.role === 'admin'}
-          <SidebarItem class="text-sm"  label="Users" href="/dashboard/settings/manage-users" activeClass={spanClass}
+          <SidebarItem class="text-sm rounded"  label="Users" href="/dashboard/settings/manage-users" activeClass={spanClass}
             active={activeUrl === '/dashboard/settings/manage-users'}>
             <svelte:fragment slot="icon">
               <DatabaseSolid />

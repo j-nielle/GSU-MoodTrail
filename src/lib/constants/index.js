@@ -26,15 +26,15 @@ export const reasonLabels = [
 export const reasonScores = [1,2,3,4,5,6];
 
 export const roleColor = {
-  ADMIN: "purple",
-  COUNSELOR: "pink",
-  STAFF: "dark"
+  admin: "purple",
+  counselor: "pink",
+  staff: "dark"
 }
 
 export const roles = [
-  { label: 'ADMIN', color: roleColor.ADMIN },
-  { label: 'COUNSELOR', color: roleColor.COUNSELOR },
-  { label: 'STAFF', color: roleColor.STAFF }
+  { label: 'admin', color: roleColor.admin },
+  { label: 'counselor', color: roleColor.counselor },
+  { label: 'staff', color: roleColor.staff }
 ];
 
 export const buttonState = {

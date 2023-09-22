@@ -7,14 +7,7 @@ export async function load({ locals: { supabase, getSession } }) {
 		throw redirect(303, '/login');
 	}
 
-	console.log(session.user.email)
-
-	const { data: user } = await supabase
-		.from("Users")
-		.select()
-		.eq('email', session.user.email)
-
-	console.log(user)
+	const { data: { user } } = await supabase.auth.getUser()
 
 	return {
 		user: user || [],
