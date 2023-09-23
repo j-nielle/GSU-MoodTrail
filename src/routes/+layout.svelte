@@ -53,11 +53,11 @@
 >
 	{#if session}
 		<NavBrand tabindex="-1" href="/dashboard" class="ml-3">
-			<img src="static/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit" />
+			<img src="/static/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit" />
 		</NavBrand>
 	{:else}
 		<NavBrand tabindex="-1" href="/" class="ml-3">
-			<img src="static/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit" />
+			<img src="/static/logo-no-background.svg" alt="Placeholder Logo" class="w-32 h-fit" />
 		</NavBrand>
 	{/if}
 
