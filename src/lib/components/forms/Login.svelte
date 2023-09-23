@@ -43,10 +43,9 @@
 			</Input>
 		</Label>
 		<Button type="submit" color="blue" class="w-full font-bold leading-relaxed">LOGIN</Button>
-		<div class="flex justify-between font-medium">
-			<!-- <Checkbox on:click={handleRememberMe}>Remember me</Checkbox> -->
+		<div class="self-center font-medium">
 			<a href="/reset-password" class="ml-auto text-sm text-red-500 hover:underline dark:text-slate-100">
-				Forgot password
+				Forgot password?
 			</a>
 		</div>
 	</form>
