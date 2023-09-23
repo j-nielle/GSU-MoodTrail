@@ -27,3 +27,8 @@ export async function load({ fetch, data, depends }) {
 
 	return { supabase, session };
 }
+
+/** @type {import('@sveltejs/adapter-vercel').Config} */
+export const config = {
+	runtime: 'nodejs18.x'
+};
