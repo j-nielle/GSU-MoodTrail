@@ -89,7 +89,7 @@
 				},(payload) => {
 					anonMoodData = _.cloneDeep([...anonMoodData, payload.new]);
 				}
-			).subscribe((status) => console.log('inside dashboard page', status));
+			).subscribe((status) => console.log('/dashboard', status));
 
 		return () => {
 			//clearInterval(timer);
@@ -188,8 +188,6 @@
 			);
 
 			overallMostFreqReason = Object.keys(reason).find((key) => reason[key] === parseInt(mostFreqReason[0]));
-
-			console.log(overallMostFreqReason)
 		} else if (selectedLineChart === 'weekly') {
 			const groupedByWeek = _.groupBy(dataType, (entry) =>
 				getWeekNumberString(dayjs(entry.created_at))
@@ -241,8 +239,6 @@
 			);
 
 			monthlyMostFreqReason = Object.keys(reason).find((key) => reason[key] == parseInt(mostFreqReason[0]));
-
-			console.log(monthlyMostFreqReason)
 		} else if (selectedLineChart === 'yearly') {
 			const groupedByYear = _.groupBy(dataType, (entry) => dayjs(entry.created_at).format('YYYY'));
 
@@ -265,8 +261,6 @@
 			);
 
 			yearlyMostFreqReason = Object.keys(reason).find((key) => reason[key] == parseInt(mostFreqReason[0]));
-
-			console.log(yearlyMostFreqReason)
 		}
 	}
 
@@ -372,32 +366,35 @@
 			reason: selectedBarChart === 'reason' ? 'dark' : 'light'
 		};
 
-		let filteredStudents = new Map();
-		let consecutiveDaysMap = new Map();
+		let filteredStudents = new Map(); // stores information about students and their mood data
+		let consecutiveDaysMap = new Map(); // stores information about consecutive low mood streaks
 		consistentLowMoods.set([]);
 
 		recentStudent = _.last(studentMoodData)['name']; // info card
 
 		// table of students w consistent low moods
-		let maxConsecutiveDays = 0;
+		let maxConsecutiveDays = 0; // to keep track of the maximum number of consecutive low mood days encountered
 
 		filteredStudents = studentMoodData.reduce(
 			(students, { student_id, mood_score, created_at, reason_score }) => {
-				if (!created_at || mood_score >= 0) {
-					return students;
+				if (!created_at || mood_score >= 0) { // if created_at is null or mood_score is not negative,
+					return students; // skip this entry
 				}
-				const dateKey = new Date(created_at).toLocaleDateString();
+				const dateKey = new Date(created_at).toLocaleDateString(); // for easy date comparison
 
-				const studentData = students.get(student_id) || new Map();
+				const studentData = students.get(student_id) || new Map(); // get the student's data or create a new one
+
+				// get the reason label from the reason score using reason object
 				const reason_label = Object.keys(reason).find((key) => reason[key] === reason_score);
 
+				// add the moods and reasons to the student's data based on the corresponding date
 				studentData.set(dateKey, {
 					moodScores: [...(studentData.get(dateKey)?.moodScores || []), mood_score],
 					reasonLabels: [...(studentData.get(dateKey)?.reasonLabels || []), reason_label]
 				});
-				return students.set(student_id, studentData);
-			},
-			new Map()
+
+				return students.set(student_id, studentData); // update the student's data
+			}, new Map()
 		);
 
 		for (const [studentId, studentEntry] of filteredStudents) {
@@ -405,28 +402,30 @@
 			let previousDate = null;
 			let currentStreakData = null;
 
+			// for each date of mood data for a student, calculate the consecutive low mood days
 			for (const [dateKey, moodData] of studentEntry) {
 				const currentDate = dayjs(dateKey);
 
+				// if the current date is the next day of the previous date, increment the consecutive days
 				if (previousDate === null || currentDate.diff(previousDate, 'day') === 1) {
 					consecutiveDays++;
-				} else {
+				} else { // else, reset the consecutive days to 1
 					consecutiveDays = 1;
 				}
 
+				// if the consecutive days is >= to 4, check if the previous date is the day before the current date
 				if (consecutiveDays >= 4) {
-					const lastRecord = (consecutiveDaysMap.get(studentId) || []).slice(-1)[0];
+					const lastRecord = (consecutiveDaysMap.get(studentId) || []).slice(-1)[0]; // get the last record of the student's streaks
 
-					if (
-						lastRecord &&
-						lastRecord.endDate === currentDate.subtract(1, 'day').format('M/D/YYYY')
-					) {
-						lastRecord.endDate = currentDate.format('M/D/YYYY');
-						lastRecord.moodScores.push(...moodData.moodScores);
-						lastRecord.reasonLabels.push(...moodData.reasonLabels);
-					} else {
-						maxConsecutiveDays = Math.max(maxConsecutiveDays, consecutiveDays);
+					// if the last record's end date is the day before the current date, update the last record
+					if (lastRecord && lastRecord.endDate === currentDate.subtract(1, 'day').format('M/D/YYYY')) {
+						lastRecord.endDate = currentDate.format('M/D/YYYY'); // update the end date
+						lastRecord.moodScores.push(...moodData.moodScores); // add the mood scores 
+						lastRecord.reasonLabels.push(...moodData.reasonLabels); // and reason labels
+					} else { // else, create a new record
+						maxConsecutiveDays = Math.max(maxConsecutiveDays, consecutiveDays); // update the maximum consecutive days
 
+						// create a new record with the start date, end date, mood scores, and reason labels
 						currentStreakData = {
 							startDate: currentDate.subtract(consecutiveDays - 1, 'day').format('M/D/YYYY'),
 							endDate: currentDate.format('M/D/YYYY'),
@@ -434,28 +433,33 @@
 							reasonLabels: []
 						};
 
+						// loop through the consecutive days and get the mood scores and reason labels
 						for (let i = 0; i < consecutiveDays; i++) {
-							const streakDate = currentDate
-								.subtract(consecutiveDays - 1 - i, 'day')
-								.format('M/D/YYYY');
+							// get the date of the streak
+							const streakDate = currentDate.subtract(consecutiveDays - 1 - i, 'day').format('M/D/YYYY');
+
+							// get the mood scores and reason labels of the streak date
 							const streakMoodData = studentEntry.get(streakDate);
 
+							// if there is mood data for the streak date, add the mood scores and reason labels to the current streak data
 							if (streakMoodData) {
 								currentStreakData.moodScores.push(...streakMoodData.moodScores);
 								currentStreakData.reasonLabels.push(...streakMoodData.reasonLabels);
 							}
 						}
 
+						// add the current streak data to the consecutive days map
 						consecutiveDaysMap.set(
 							studentId,
 							(consecutiveDaysMap.get(studentId) || []).concat(currentStreakData)
 						);
 					}
 				}
-				previousDate = currentDate;
+				previousDate = currentDate; // update the previous date
 			}
 		}
 
+		// update the consistent low moods store when the consecutive days map is updated
 		consecutiveDaysMap.forEach((streakData, studentId) => {
 			const studentStreaks = streakData.map((streak) => ({
 				startDate: streak.startDate,
@@ -467,11 +471,16 @@
 			consistentLowMoods.update((moods) => [...moods, { studentId, streaks: studentStreaks }]);
 		});
 
+
+		// for radar chart
 		const moodData = {};
+
+		// initialize the mood data object
 		for (const moodLabel in mood) {
 			moodData[moodLabel] = Array(Object.keys(reason).length).fill(0);
 		}
 
+		// loop through the student mood data and update the mood data object based on the mood and reason scores
 		for (const student of studentMoodData) {
 			const moodLabel = Object.keys(mood).find((key) => mood[key] == student.mood_score);
 			const reasonIndex = student.reason_score - 1;
@@ -520,6 +529,8 @@
 	function updateCurrent() {
 		current = dayjs();
 	}
+
+	$: console.log()
 </script>
 
 <svelte:head>
@@ -608,7 +619,7 @@
 	<div class="flex flex-col space-y-3">
 		<div class="flex space-x-4">
 			<div class="p-4 bg-white rounded-sm drop-shadow-md hover:ring-1">
-				{#if yDataMBC.length === 0 && xDataMBC.length === 0}
+				{#if dataType.length == 0}
 					<div class="flex justify-center items-center" style="width:390px; height:350px;">
 						<Spinner class="w-28 h-28" />
 					</div>
@@ -621,26 +632,23 @@
 				{/if}
 			</div>
 
-			<div
-				class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center p-4 hover:ring-1"
-			>
+			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center p-4 hover:ring-1">
 				<div class="flex flex-col space-y-7">
-					{#if dataType.length > 0}
 						<div class="flex justify-between">
 							<ButtonGroup>
-								<Button color={lcBtnColors.today} on:click={() => selectLineChart('today')}>
+								<Button disabled={dataType.length == 0} color={lcBtnColors.today} on:click={() => selectLineChart('today')}>
 									Today
 								</Button>
-								<Button color={lcBtnColors.weekly} on:click={() => selectLineChart('weekly')}>
+								<Button disabled={dataType.length == 0} color={lcBtnColors.weekly} on:click={() => selectLineChart('weekly')}>
 									Weekly
 								</Button>
-								<Button color={lcBtnColors.monthly} on:click={() => selectLineChart('monthly')}>
+								<Button disabled={dataType.length == 0} color={lcBtnColors.monthly} on:click={() => selectLineChart('monthly')}>
 									Monthly
 								</Button>
-								<Button color={lcBtnColors.yearly} on:click={() => selectLineChart('yearly')}>
+								<Button disabled={dataType.length == 0} color={lcBtnColors.yearly} on:click={() => selectLineChart('yearly')}>
 									Yearly
 								</Button>
-								<Button color={lcBtnColors.overall} on:click={() => selectLineChart('overall')}>
+								<Button disabled={dataType.length == 0} color={lcBtnColors.overall} on:click={() => selectLineChart('overall')}>
 									Overall
 								</Button>
 							</ButtonGroup>
@@ -658,40 +666,40 @@
 								</Button>
 							</ButtonGroup>
 						</div>
-
-						{#if selectedLineChart === 'today'}
-							<LineChart
-								bind:xData={timestamps}
-								bind:yData={todaysMoodScores}
-								elementID="dashboardTLC"
-								title="Today's Moods"
-								style="width:790px; height:280px;"
-							/>
-						{:else if selectedLineChart === 'overall'}
-							<LineChart
-								bind:xData={overall}
-								bind:yData={overallAverages}
-								elementID="dashboardDLC"
-								title="Average Mood Overall"
-								style="width:790px; height:280px;"
-							/>
-						{:else if selectedLineChart === 'weekly'}
-							<LineChart
-								bind:xData={weekly}
-								bind:yData={weeklyAverages}
-								elementID="dashboardWLC"
-								title="Average Mood Weekly"
-								style="width:790px; height:280px;"
-							/>
-						{:else if selectedLineChart === 'monthly'}
-							<LineChart
-								bind:xData={monthly}
-								bind:yData={monthlyAverages}
-								elementID="dashboardMLC"
-								title="Average Mood Monthly"
-								style="width:790px; height:280px;"
-							/>
-						{:else if selectedLineChart === 'yearly'}
+						{#if dataType.length > 0}
+							{#if selectedLineChart === 'today'}
+								<LineChart
+									bind:xData={timestamps}
+									bind:yData={todaysMoodScores}
+									elementID="dashboardTLC"
+									title="Today's Moods"
+									style="width:790px; height:280px;"
+								/>
+							{:else if selectedLineChart === 'overall'}
+								<LineChart
+									bind:xData={overall}
+									bind:yData={overallAverages}
+									elementID="dashboardDLC"
+									title="Average Mood Overall"
+									style="width:790px; height:280px;"
+								/>
+							{:else if selectedLineChart === 'weekly'}
+								<LineChart
+									bind:xData={weekly}
+									bind:yData={weeklyAverages}
+									elementID="dashboardWLC"
+									title="Average Mood Weekly"
+									style="width:790px; height:280px;"
+								/>
+							{:else if selectedLineChart === 'monthly'}
+								<LineChart
+									bind:xData={monthly}
+									bind:yData={monthlyAverages}
+									elementID="dashboardMLC"
+									title="Average Mood Monthly"
+									style="width:790px; height:280px;"
+								/>
+							{:else if selectedLineChart === 'yearly'}
 							<LineChart
 								bind:xData={yearly}
 								bind:yData={yearlyAverages}
@@ -711,7 +719,7 @@
 
 		<div class="flex space-x-4">
 			<div class="bg-white flex items-center rounded-sm drop-shadow-md p-4 hover:ring-1">
-				{#if heatmapData.length > 0}
+				{#if dataType.length > 0}
 					<HeatmapChart
 						title="Mood Occurrences by Day and Hour"
 						{heatmapData}
@@ -724,22 +732,14 @@
 				{/if}
 			</div>
 
-			<div
-				id="low-moods"
-				bind:this={tableRef}
-				class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1"
-			>
-				<caption
-					class="text-lg font-bold text-left w-max text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6"
-				>
+			<div id="low-moods" bind:this={tableRef} class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
+				<caption class="text-lg font-bold text-left w-max text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
 					Students with consistent low moods
-					<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-						By default, blah blah blah
+					<p class="mt-1 text-sm font-normal italic text-gray-500 dark:text-gray-400">
+						*These students have experienced consistent low moods for atleast 4 consecutive days.
 					</p>
 				</caption>
-				<Table
-					divClass="text-left text-sm text-gray-500 border border-zinc-300 dark:text-gray-400 max-h-72 overflow-y-auto"
-				>
+				<Table divClass="text-left text-sm text-gray-500 border border-zinc-300 dark:text-gray-400 max-h-72 overflow-y-auto">
 					<TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky">
 						<TableHeadCell>ID Number</TableHeadCell>
 						<TableHeadCell>Time Period</TableHeadCell>
@@ -769,14 +769,8 @@
 										</TableBodyCell>
 										<TableBodyCell>{streak.startDate} - {streak.endDate}</TableBodyCell>
 										<TableBodyCell class="text-center">
-											{Object.keys(mood).find(
-												(key) =>
-													mood[key] ===
-													Math.round(
-														streak.moodScores.reduce((accum, elem) => accum + parseInt(elem), 0) /
-															streak.moodScores.length
-													) +
-														4
+											{Object.keys(mood).find((key) => mood[key] === Math.round(
+												streak.moodScores.reduce((accum, elem) => accum + parseInt(elem), 0) / streak.moodScores.length) + 4
 											)}
 										</TableBodyCell>
 										<TableBodyCell class="text-center">
@@ -800,7 +794,7 @@
 			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 				<div class="flex flex-col">
 					{#if moodRadarData.length > 0}
-						<p class="text-xl font-bold self-start">Radar Chart (Test)</p>
+						<p class="text-lg font-bold self-center mb-3">Mood and Frequency of Related Reasons</p>
 						<RadarChart
 							bind:data={moodRadarData}
 							bind:indicator={reasonRadarIndicator}
@@ -818,7 +812,10 @@
 				<div class="flex flex-col">
 					{#if avgMoodByCourse.length > 0}
 						<div class="flex justify-between">
-							<p class="self-center text-xl font-bold ml-1">Bar Chart (Test)</p>
+							<div class="flex flex-col">
+								<p class="text-lg font-bold ml-1">Mood Averages</p>
+								<p class="ml-1 font-light text-sm">(including the negatives)</p>
+							</div>
 							<ButtonGroup class="mb-3">
 								<Button color={bcBtnColors.course} on:click={() => selectBarChart('course')}
 									>By Course</Button

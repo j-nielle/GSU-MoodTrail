@@ -48,7 +48,7 @@
 					requestsData = _.cloneDeep([payload.new, ...requestsData]);
 				}
 			)
-			.subscribe((status) => console.log(status));
+			.subscribe((status) => console.log('/dashboard/requests',status));
 
 		return () => {
 			requestsChannel.unsubscribe();

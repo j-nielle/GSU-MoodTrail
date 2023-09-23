@@ -34,7 +34,7 @@
 					}
 				}
 			)
-			.subscribe((status) => console.log('inside /dashboard/settings/+layout.svelte:', status));
+			.subscribe((status) => console.log('/dashboard/settings layout', status));
 
 		return () => {
 			toastChannelTwo.unsubscribe();

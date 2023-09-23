@@ -6,6 +6,7 @@
 
 	export let data;
 	export let elementID;
+	export let title;
 
 	let pieChart;
 
@@ -14,7 +15,7 @@
 
 		pieChart.setOption({
 			title: {
-				text: 'Test'
+				text: title
 			},
 			series: [
 				{

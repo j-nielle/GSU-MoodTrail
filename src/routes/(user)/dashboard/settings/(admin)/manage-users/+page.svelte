@@ -59,7 +59,7 @@
 					usersData = _.cloneDeep([payload.new, ...usersData]);
 				}
 			)
-			.subscribe((status) => console.log('inside /manage-users/+page.svelte:', status));
+			.subscribe((status) => console.log('settings/manage-users', status));
 
 		return () => {
 			usersChannel.unsubscribe();
