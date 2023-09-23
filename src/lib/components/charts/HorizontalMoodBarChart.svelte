@@ -2,11 +2,11 @@
 	// @ts-nocheck
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
-  import { moodColors } from '$lib/constants/index.js'
+	import { moodColors } from '$lib/constants/index.js';
 
 	export let xData;
 	export let yData;
-  export let elementID;
+	export let elementID;
 
 	let horizontalMoodBarChart;
 
@@ -20,36 +20,38 @@
 			yAxis: {
 				type: 'category',
 				data: xData,
-        axisLabel: {
-          fontSize: 10,
-          interval: 0, 
-          rotate: 40 
-        }
+				axisLabel: {
+					fontSize: 10,
+					interval: 0,
+					rotate: 40
+				}
 			},
 			xAxis: {
 				type: 'value',
-        axisLabel: {
-          fontSize: 10
-        }
+				axisLabel: {
+					fontSize: 10
+				}
 			},
-			series: [{
-        data: yData,
-        type: 'bar',
-        barMaxWidth: 15,
-        emphasis: {
-          focus: 'self'
-        },
-        itemStyle: {
-          color: function(params) {
-            return moodColors[params.name] || '#5470c6';
-          }
-        }
-      }],
+			series: [
+				{
+					data: yData,
+					type: 'bar',
+					barMaxWidth: 15,
+					emphasis: {
+						focus: 'self'
+					},
+					itemStyle: {
+						color: function (params) {
+							return moodColors[params.name] || '#5470c6';
+						}
+					}
+				}
+			],
 			tooltip: {
 				trigger: 'axis',
-        axisPointer: {
-          type: 'shadow'
-        }
+				axisPointer: {
+					type: 'shadow'
+				}
 			},
 			toolbox: {
 				show: true,
@@ -79,9 +81,11 @@
 			yAxis: {
 				data: xData
 			},
-			series: [{
-        data: yData
-      }]
+			series: [
+				{
+					data: yData
+				}
+			]
 		});
 	});
 </script>

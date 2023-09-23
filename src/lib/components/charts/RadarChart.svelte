@@ -70,14 +70,14 @@
 					data: data,
 					symbol: 'none',
 					areaStyle: {
-						opacity: 0.5,
+						opacity: 0.5
 					},
 					emphasis: {
-						focus: 'self',
+						focus: 'self'
 						//blurScope: 'global'
 					},
 					itemStyle: {
-            //opacity: 0.1,
+						//opacity: 0.1,
 						color: function (params) {
 							return moodColors[params.name] || '#5470c6';
 						}

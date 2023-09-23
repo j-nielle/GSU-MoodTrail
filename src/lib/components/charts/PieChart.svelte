@@ -2,10 +2,10 @@
 	// @ts-nocheck
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
-  import { moodColors } from '$lib/constants/index.js'
+	import { moodColors } from '$lib/constants/index.js';
 
 	export let data;
-  export let elementID;
+	export let elementID;
 
 	let pieChart;
 
@@ -16,22 +16,24 @@
 			title: {
 				text: 'Test'
 			},
-			series: [{
-        data: data,
-        type: 'pie',
-        radius: '50%',
-        emphasis: {
-          focus: 'self'
-        },
-        label: {
-          formatter: '{b}: {@2012} ({d}%)'
-        },
-        itemStyle: {
-          color: function(params) {
-            return moodColors[params.name] || '#5470c6';
-          }
-        }
-      }],
+			series: [
+				{
+					data: data,
+					type: 'pie',
+					radius: '50%',
+					emphasis: {
+						focus: 'self'
+					},
+					label: {
+						formatter: '{b}: {@2012} ({d}%)'
+					},
+					itemStyle: {
+						color: function (params) {
+							return moodColors[params.name] || '#5470c6';
+						}
+					}
+				}
+			],
 			tooltip: {
 				show: true,
 				trigger: 'item'
@@ -57,9 +59,11 @@
 
 	afterUpdate(() => {
 		pieChart.setOption({
-			series: [{
-        data: data
-      }]
+			series: [
+				{
+					data: data
+				}
+			]
 		});
 	});
 </script>

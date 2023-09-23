@@ -1,6 +1,6 @@
 <script>
-	import { Alert } from 'flowbite-svelte'
-	import Register from '$lib/components/forms/Register.svelte'
+	import { Alert } from 'flowbite-svelte';
+	import Register from '$lib/components/forms/Register.svelte';
 	export let form;
 </script>
 

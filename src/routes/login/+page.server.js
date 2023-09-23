@@ -14,7 +14,7 @@ export const actions = {
 		});
 
 		if (error) {
-			console.log(error.message,password,email);
+			console.log(error.message, password, email);
 
 			if (error.message === 'Email not confirmed') {
 				return fail(400, {

@@ -2,17 +2,17 @@ import { redirect, fail } from '@sveltejs/kit';
 import { AuthApiError } from '@supabase/supabase-js';
 
 /** @type {import('./$types').PageServerLoad} */
-export async function load({ url,locals: { supabase, getSession } }) {
+export async function load({ url, locals: { supabase, getSession } }) {
 	const session = await getSession();
 
 	if (!session) {
 		throw redirect(303, '/login');
 	}
 
-	const { data: users } = await supabase.from("Users").select()
+	const { data: users } = await supabase.from('Users').select();
 
 	return {
-    users: users || [],
+		users: users || [],
 		session: session
 	};
 }
@@ -41,7 +41,7 @@ export async function load({ url,locals: { supabase, getSession } }) {
 // 		}catch(error){
 // 			console.log(error)
 // 		}
-    
+
 // 		if (error) {
 // 			console.log(error);
 // 			if (error instanceof AuthApiError && error.status === 400) {

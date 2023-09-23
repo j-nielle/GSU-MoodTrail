@@ -8,18 +8,18 @@ export async function load({ locals: { supabase, getSession } }) {
 	}
 
 	const { data: studentMood } = await supabase
-  .from("StudentMoodEntries")
-  .select()
-  .order("created_at", { ascending: true });
+		.from('StudentMoodEntries')
+		.select()
+		.order('created_at', { ascending: true });
 
-  const { data: students } = await supabase
-  .from("Student")
-  .select()
-  .order("name", { ascending: true })
+	const { data: students } = await supabase
+		.from('Student')
+		.select()
+		.order('name', { ascending: true });
 
 	return {
 		studentMood: studentMood || [],
-    students: students || [],
+		students: students || [],
 		session: session
 	};
 }

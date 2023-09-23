@@ -145,13 +145,13 @@ export const actions = {
 
 		try {
 			const { data: prevStudentData, error } = await supabase
-			.from('Student')
-			.select('*')
-			.eq('id', editID)
-			.eq('name', editName)
-			.eq('year_level_id', editYearLevel)
-			.eq('course_id', editCourse);
-			console.log(error)
+				.from('Student')
+				.select('*')
+				.eq('id', editID)
+				.eq('name', editName)
+				.eq('year_level_id', editYearLevel)
+				.eq('course_id', editCourse);
+			console.log(error);
 			if (prevStudentData?.length > 0) {
 				errors.push({
 					errorInput: 'prevStudentData',
@@ -164,12 +164,12 @@ export const actions = {
 						id: editID,
 						name: editName,
 						year_level_id: editYearLevel,
-						course_id: editCourse,
+						course_id: editCourse
 					})
 					.eq('id', editID)
-					.select()
-				console.log(data,error)
-				if(error){
+					.select();
+				console.log(data, error);
+				if (error) {
 					errors.push({
 						errorInput: 'error',
 						error: error.message

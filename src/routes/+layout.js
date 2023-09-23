@@ -13,14 +13,17 @@ export async function load({ fetch, data, depends }) {
 		serverSession: data.session
 	});
 
-	const { data: { session }, error } = await supabase.auth.getSession();
+	const {
+		data: { session },
+		error
+	} = await supabase.auth.getSession();
 
-  if(error) {
-    console.log(error.message);
-    // if(error.message === 'Invalid Refresh Token: Already Used') {
-    //   return { supabase, session: null }
-    // }
-  }
+	if (error) {
+		console.log(error.message);
+		// if(error.message === 'Invalid Refresh Token: Already Used') {
+		//   return { supabase, session: null }
+		// }
+	}
 
 	return { supabase, session };
 }

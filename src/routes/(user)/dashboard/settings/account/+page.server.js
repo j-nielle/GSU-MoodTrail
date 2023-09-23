@@ -7,10 +7,12 @@ export async function load({ locals: { supabase, getSession } }) {
 		throw redirect(303, '/login');
 	}
 
-	const { data: { user } } = await supabase.auth.getUser()
+	const {
+		data: { user }
+	} = await supabase.auth.getUser();
 
 	return {
-		user: user || [],
+		user: user || []
 	};
 }
 
@@ -36,4 +38,4 @@ export const actions = {
 			error: ''
 		};
 	}
-}
+};

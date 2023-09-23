@@ -3,17 +3,17 @@
 	import { minBy } from 'lodash';
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
-  import { moodLabels, moodScores } from "$lib/constants/index.js"
+	import { moodLabels, moodScores } from '$lib/constants/index.js';
 
 	export let xData;
 	export let yData;
 	export let style;
-  export let title;
-  export let elementID;
+	export let title;
+	export let elementID;
 
 	let lineChart;
 	let mood;
-  let showSymbol = false;
+	let showSymbol = false;
 
 	function getNearestMoodLabel(score) {
 		const nearestIndex = minBy(moodScores, (moodScore) => Math.abs(moodScore - score));
@@ -21,7 +21,7 @@
 	}
 
 	$: mood = yData?.map((score) => getNearestMoodLabel(score));
-  $: mood?.length != 1 ? showSymbol = false : showSymbol = true;
+	$: mood?.length != 1 ? (showSymbol = false) : (showSymbol = true);
 
 	onMount(() => {
 		lineChart = echarts.init(document?.getElementById(elementID));
@@ -36,23 +36,27 @@
 					fontSize: 11
 				}
 			},
-			xAxis: [{
-				type: 'category',
-				data: xData,
-				axisLine: { onZero: false },
-        boundaryGap: false,
-			}],
-			yAxis: [{
-        splitLine: { show: true },
-				type: 'value',
-        boundaryGap: [0, '100%']
-      }],
+			xAxis: [
+				{
+					type: 'category',
+					data: xData,
+					axisLine: { onZero: false },
+					boundaryGap: false
+				}
+			],
+			yAxis: [
+				{
+					splitLine: { show: true },
+					type: 'value',
+					boundaryGap: [0, '100%']
+				}
+			],
 			series: [
 				{
 					data: yData,
 					type: 'line',
-          sampling: 'lttb',
-          showSymbol: showSymbol
+					sampling: 'lttb',
+					showSymbol: showSymbol
 				}
 			],
 			tooltip: {
@@ -60,19 +64,18 @@
 				trigger: 'axis',
 				formatter: (params) => {
 					const index = params[0].dataIndex;
-          const temp = xData[index];
-					
+					const temp = xData[index];
+
 					let moodScore;
-					yData[index].length < 3 ? moodScore = yData[index] : moodScore = yData[index].toFixed(2);
+					yData[index].length < 3
+						? (moodScore = yData[index])
+						: (moodScore = yData[index].toFixed(2));
 
 					const moodLabel = mood[index];
 					return `<span class="font-bold">[${temp}]</span> Mood: <span class="font-bold">${moodLabel}</span> (${moodScore})`;
 				}
 			},
-      dataZoom: [
-        { type: 'inside' },
-        { type: 'slider', height: 20 }
-      ],
+			dataZoom: [{ type: 'inside' }, { type: 'slider', height: 20 }],
 			toolbox: {
 				show: true,
 				feature: {
@@ -88,13 +91,11 @@
 		};
 	});
 
-	afterUpdate(() => {  
+	afterUpdate(() => {
 		lineChart.setOption({
 			xAxis: { data: xData },
-			series: [
-				{ data: yData }
-			]
-		}); 
+			series: [{ data: yData }]
+		});
 	});
 </script>
 

@@ -1,21 +1,20 @@
 <script>
 	// @ts-nocheck
-  import _ from 'lodash';
+	import _ from 'lodash';
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
 
-  export let title;
+	export let title;
 	export let heatmapData;
-  export let elementID;
+	export let elementID;
 
-  // Define the days and hours for the axis labels
-  var days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
-  var hours = Array.from({ length: 24 }, (_, i) => {
-    const hour = i % 12 === 0 ? 12 : i % 12;
-    const period = i < 12 ? 'AM' : 'PM';
-    return `${hour} ${period}`;
-  });
-
+	// Define the days and hours for the axis labels
+	var days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+	var hours = Array.from({ length: 24 }, (_, i) => {
+		const hour = i % 12 === 0 ? 12 : i % 12;
+		const period = i < 12 ? 'AM' : 'PM';
+		return `${hour} ${period}`;
+	});
 
 	let heatmapChart;
 
@@ -23,39 +22,41 @@
 		heatmapChart = echarts.init(document.getElementById(elementID));
 
 		heatmapChart.setOption({
-      tooltip: {
-        position: 'top',
-        formatter: function (params) {
-          return 'Total Moods: ' + params.value[2]
-        },
-      },
-			title: {
-				text: title,
+			tooltip: {
+				position: 'top',
+				formatter: function (params) {
+					return 'Total Moods: ' + params.value[2];
+				}
 			},
-      xAxis: {
-        type: 'category',
-        data: hours,
-        alignTicks: true,
-      },
-      yAxis: {
-        type: 'category',
-        data: days,
-      },
+			title: {
+				text: title
+			},
+			xAxis: {
+				type: 'category',
+				data: hours,
+				alignTicks: true
+			},
+			yAxis: {
+				type: 'category',
+				data: days
+			},
 			visualMap: {
 				min: 0,
 				max: 10,
 				realtime: true,
 				calculable: true,
 				left: 'center',
-				orient: 'horizontal',
+				orient: 'horizontal'
 			},
-			series: [{
-				type: 'heatmap',
-				data: heatmapData || [],
-				label: {
-					show: true
-				},
-			}],
+			series: [
+				{
+					type: 'heatmap',
+					data: heatmapData || [],
+					label: {
+						show: true
+					}
+				}
+			],
 			toolbox: {
 				show: true,
 				feature: {
@@ -63,13 +64,13 @@
 						show: true,
 						yAxisIndex: 'none'
 					},
-          
+
 					saveAsImage: {
 						show: true
 					}
 				}
 			}
-    });
+		});
 
 		return () => {
 			heatmapChart.dispose();
@@ -81,12 +82,14 @@
 			xAxis: {
 				data: hours
 			},
-      yAxis:{
-        data: days
-      },
-			series: [{
-        data: heatmapData
-      }]
+			yAxis: {
+				data: days
+			},
+			series: [
+				{
+					data: heatmapData
+				}
+			]
 		});
 	});
 </script>
