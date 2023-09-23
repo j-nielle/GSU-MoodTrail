@@ -4,10 +4,10 @@
 	import dayjs from 'dayjs';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import relativeTime from 'dayjs/plugin/relativeTime';
-	dayjs.extend(relativeTime);
+	// import relativeTime from 'dayjs/plugin/relativeTime';
+	// dayjs.extend(relativeTime);
 	import { onMount } from 'svelte';
-	import { ClockSolid } from 'flowbite-svelte-icons';
+	// import { ClockSolid } from 'flowbite-svelte-icons';
 	import {
 		P,
 		Badge,
@@ -16,9 +16,10 @@
 		Button,
 		ButtonGroup,
 		Select,
+		Avatar,
 		Modal,
 		Fileupload,
-		Label,
+		Label
 	} from 'flowbite-svelte';
 	import {
 		LineChart,
@@ -92,15 +93,15 @@
 	});
 
 	$: {
-			searchTerm = $page.url.searchParams.get('search') || '';
-			hasEntry = studentMoodData.find(student => student.student_id == searchTerm);
+		searchTerm = $page.url.searchParams.get('search') || '';
+		hasEntry = studentMoodData.find((student) => student.student_id == searchTerm);
 
-			if(hasEntry != undefined){
-				result = studentMoodData.filter((student) => student?.student_id?.toString() === searchTerm);
-			} else {
-				urlResult = students.filter((student) => student?.id?.toString() === searchTerm);
-			}
+		if (hasEntry != undefined) {
+			result = studentMoodData.filter((student) => student?.student_id?.toString() === searchTerm);
+		} else {
+			urlResult = students.filter((student) => student?.id?.toString() === searchTerm);
 		}
+	}
 
 	$: if (studentMoodData?.length > 0) {
 		college = _.uniq(studentMoodData.map((data) => data.college)).map((college) => ({
@@ -129,35 +130,35 @@
 			.map('student_id')
 			.uniq()
 			.map((studentId) => ({
-					value: studentId,
-					name: studentMoodData.find(student => student.student_id === studentId).name
+				value: studentId,
+				name: studentMoodData.find((student) => student.student_id === studentId).name
 			}))
 			.sort()
 			.value();
 	}
 
-	$: if(selectedStudent?.length != 0){
+	$: if (selectedStudent?.length != 0) {
 		result = studentMoodData.filter((student) => student?.student_id == selectedStudent);
 	}
 
-	$: if(result?.length > 0) {
+	$: if (result?.length > 0) {
 		const moodCount = {};
 
-    result.forEach(item => {
-      const moodScore = item.mood_score;
-      let moodLabel = null;
+		result.forEach((item) => {
+			const moodScore = item.mood_score;
+			let moodLabel = null;
 
-      for (const key in mood) {
-        if (mood[key] == moodScore) {
-          moodLabel = key;
-          break;
-        }
-      }
+			for (const key in mood) {
+				if (mood[key] == moodScore) {
+					moodLabel = key;
+					break;
+				}
+			}
 
-      if (moodLabel) {
-        moodCount[moodLabel] = (moodCount[moodLabel] || 0) + 1;
-      }
-    })
+			if (moodLabel) {
+				moodCount[moodLabel] = (moodCount[moodLabel] || 0) + 1;
+			}
+		});
 
 		const sortedMoodsArr = Object.keys(moodCount).sort((a, b) => moodCount[b] - moodCount[a]);
 		mostFrequentMood = sortedMoodsArr[0];
@@ -196,11 +197,15 @@
 				dayjs(entry.created_at).format('YYYY-MM-DD')
 			);
 
-			overallAverages = Object.values(groupedByDay).map((entries) => {
-				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
-				const averageMoodScore = totalMoodScore / entries.length;
-				return averageMoodScore;
-			}) || [];
+			overallAverages =
+				Object.values(groupedByDay).map((entries) => {
+					const totalMoodScore = entries.reduce(
+						(sum, entry) => sum + parseInt(entry.mood_score),
+						0
+					);
+					const averageMoodScore = totalMoodScore / entries.length;
+					return averageMoodScore;
+				}) || [];
 
 			overall = _.sortBy(_.keys(groupedByDay)) || [];
 		} else if (selectedLineChart === 'weekly') {
@@ -208,42 +213,55 @@
 				getWeekNumberString(dayjs(entry.created_at))
 			);
 
-			weeklyAverages = Object.values(groupedByWeek).map((entries) => {
-				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
-				const averageMoodScore = totalMoodScore / entries.length;
-				return averageMoodScore;
-			}) || [];
+			weeklyAverages =
+				Object.values(groupedByWeek).map((entries) => {
+					const totalMoodScore = entries.reduce(
+						(sum, entry) => sum + parseInt(entry.mood_score),
+						0
+					);
+					const averageMoodScore = totalMoodScore / entries.length;
+					return averageMoodScore;
+				}) || [];
 
-			weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
-				const weekNumber = parseInt(week.replace('Week ', ''));
-				return weekNumber;
-			}) || [];
+			weekly =
+				_.sortBy(_.keys(groupedByWeek), (week) => {
+					const weekNumber = parseInt(week.replace('Week ', ''));
+					return weekNumber;
+				}) || [];
 		} else if (selectedLineChart === 'monthly') {
 			const groupedByMonth = _.groupBy(result, (entry) =>
 				dayjs(entry.created_at).format('YYYY-MM')
 			);
 
-			monthlyAverages = Object.values(groupedByMonth).map((entries) => {
-				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
-				const averageMoodScore = totalMoodScore / entries.length;
-				return averageMoodScore;
-			}) || [];
+			monthlyAverages =
+				Object.values(groupedByMonth).map((entries) => {
+					const totalMoodScore = entries.reduce(
+						(sum, entry) => sum + parseInt(entry.mood_score),
+						0
+					);
+					const averageMoodScore = totalMoodScore / entries.length;
+					return averageMoodScore;
+				}) || [];
 
 			monthly = _.sortBy(_.keys(groupedByMonth)) || [];
 		} else if (selectedLineChart === 'yearly') {
 			const groupedByYear = _.groupBy(result, (entry) => dayjs(entry.created_at).format('YYYY'));
 
-			yearlyAverages = Object.values(groupedByYear).map((entries) => {
-				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
-				const averageMoodScore = totalMoodScore / entries.length;
-				return averageMoodScore;
-			}) || [];
+			yearlyAverages =
+				Object.values(groupedByYear).map((entries) => {
+					const totalMoodScore = entries.reduce(
+						(sum, entry) => sum + parseInt(entry.mood_score),
+						0
+					);
+					const averageMoodScore = totalMoodScore / entries.length;
+					return averageMoodScore;
+				}) || [];
 
 			yearly = _.sortBy(_.keys(groupedByYear)) || [];
 		}
 	}
 
-	$: console.log(urlResult[0])
+	$: console.log(urlResult[0]);
 
 	const getWeekNumberString = (date) => {
 		const firstDayOfYear = dayjs(date).startOf('year').day(1);
@@ -260,8 +278,8 @@
 	// 	console.log(entry)
 	// }
 
-	function handlePrint(entry, another){
-		window.print()
+	function handlePrint(entry, another) {
+		window.print();
 	}
 </script>
 
@@ -272,13 +290,19 @@
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3.5">
 	<div class="space-x-2 flex flex-row max-w-full justify-center">
 		{#if hasEntry}
-			<Select placeholder="College" class="font-normal w-max h-11 bg-white" items={college}
+			<Select
+				placeholder="College"
+				class="font-normal w-max h-11 bg-white"
+				items={college}
 				bind:value={selectedCollege}
 				on:change={(e) => {
 					selectedCollege = e.target.value;
 				}}
 			/>
-			<Select placeholder="Course" class="font-normal w-max h-11 bg-white" items={course}
+			<Select
+				placeholder="Course"
+				class="font-normal w-max h-11 bg-white"
+				items={course}
 				bind:value={selectedCourse}
 				on:change={(e) => {
 					selectedCourse = e.target.value;
@@ -315,7 +339,12 @@
 		{/if}
 		{#if !result || urlResult?.length > 0}
 			<div class="space-x-2">
-				<Button class="h-11 w-fit" size="sm" color="dark" on:click={() => goto('/dashboard/all-students')}>Back to Student List</Button>
+				<Button
+					class="h-11 w-fit"
+					size="sm"
+					color="dark"
+					on:click={() => goto('/dashboard/all-students')}>Back to Student List</Button
+				>
 			</div>
 		{/if}
 		{#if result?.length > 0 || urlResult?.length > 0}
@@ -330,33 +359,85 @@
 		{/if}
 	</div>
 
-	<div class="bg-white space-y-4 dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col">
+	<div
+		class="bg-white space-y-4 dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col"
+	>
 		<div class="flex space-x-6 justify-between">
 			<div class="flex flex-col p-5">
-				<P size="2xl" weight="bold" space="wider" class="mb-2 text-center">STUDENT INFORMATION</P>
-				<hr class="mb-5" />
 				{#if urlResult?.length > 0}
-					<P><strong>ID:</strong> {urlResult[0]?.id}</P>
-					<P><strong>Name:</strong> {urlResult[0]?.name}</P>
-					<div class="flex space-x-2">
-						<Badge large border class="w-fit mt-2">{urlResult[0]?.course_id}</Badge>
-						<Badge large border class="w-fit mt-2">{yearLvl[urlResult[0]?.year_level_id]}</Badge>
-					</div>
+					<Card class="max-w-full">
+						<div class="flex flex-row space-x-8">
+							<div class="self-start">
+								<Avatar size="lg" src="" border rounded />
+							</div>
+							<div class="flex flex-col">
+								<h5 class="text-xl font-medium text-zinc-800">{urlResult[0]?.name}</h5>
+								<span class="text-sm text-gray-500 dark:text-gray-400">{urlResult[0]?.id}</span>
+								<div class="flex mt-5 space-x-10">
+									<div class="flex flex-col">
+										<p class="text-sm font-semibold text-zinc-800">COURSE</p>
+										<p class="text-sm">{urlResult[0]?.course_id}</p>
+									</div>
+									<div class="flex flex-col">
+										<p class="text-sm font-semibold text-zinc-800">YEAR LEVEL</p>
+										<p class="text-sm">{yearLvl[urlResult[0]?.year_level_id]}</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</Card>
+					<p class="italic mt-4 text-sm">*This student have yet to have mood entries.</p>
 				{:else if result?.length > 0}
-					<P><strong>ID:</strong> {result[0].student_id}</P>
-					<P><strong>Name:</strong> {result[0].name}</P>
-					<P><strong>College:</strong> {result[0].college}</P>
-					<P><strong>Latest Mood:</strong> {Object.keys(mood).find((key) => mood[key] == result[result?.length - 1].mood_score)}</P>
-					<P><strong>Most Frequent Mood:</strong> {mostFrequentMood}</P>
-					<P><strong>Least Frequent Mood:</strong> {leastFrequentMood}</P>
-					<div class="flex space-x-2">
+					<Card class="max-w-full">
+						<div class="flex flex-row space-x-8">
+							<div class="self-start">
+								<Avatar size="lg" src="" border rounded />
+							</div>
+							<div class="flex flex-col">
+								<h5 class="text-xl font-medium text-zinc-800">{result[0]?.name}</h5>
+								<span class="text-sm text-gray-500 dark:text-gray-400">{result[0].student_id}</span>
+								<div class="flex mt-5">
+									<div class="flex flex-col">
+										<p class="text-sm font-semibold text-zinc-800">COLLEGE</p>
+										<p class="text-sm">{result[0]?.college}</p>
+									</div>
+								</div>
+								<div class="flex mt-5 space-x-10">
+									<div class="flex flex-col">
+										<p class="text-sm font-semibold text-zinc-800">COURSE</p>
+										<p class="text-sm">{result[0]?.course}</p>
+									</div>
+									<div class="flex flex-col">
+										<p class="text-sm font-semibold text-zinc-800">YEAR LEVEL</p>
+										<p class="text-sm">{yearLvl[parseInt(result[0].year_level)]}</p>
+									</div>
+								</div>
+								<div class="flex flex-col mt-5 space-y-3">
+									<div class="flex flex-col">
+										<p class="text-sm">
+											<span class="text-sm font-semibold text-zinc-800">Latest Mood:</span>
+											{Object.keys(mood).find((key) => mood[key] == result[result?.length - 1].mood_score)}
+											[{Object.keys(reason).find((key) => reason[key] == result[result?.length - 1].reason_score)}]
+										</p>
+										<p class="text-sm">
+											<span class="text-sm font-semibold text-zinc-800">Most Frequent:</span>
+											{mostFrequentMood}
+										</p>
+										<p class="text-sm">
+											<span class="text-sm font-semibold text-zinc-800">Least Frequent:</span>
+											{leastFrequentMood}
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</Card>
+					<!-- <div class="flex space-x-2">
 						<Badge large border class="w-fit mt-2">
 							<ClockSolid class="text-primary-800 dark:text-primary-400 w-fit h-2.5 mr-1.5" />
 							{dayjs(result[result.length - 1].created_at).fromNow()}
 						</Badge>
-						<Badge large border class="w-fit mt-2">{result[0].course}</Badge>
-						<Badge large border class="w-fit mt-2">{result[0].year_level}</Badge>
-					</div>
+					</div> -->
 				{:else}
 					<P>Student not found.</P>
 				{/if}
@@ -367,12 +448,14 @@
 					<div class="flex justify-end h-fit">
 						<ButtonGroup>
 							<Button color={lcBtnColors.today} on:click={() => toggleChart('today')}>Today</Button>
-							<Button color={lcBtnColors.weekly} on:click={() => toggleChart('weekly')}>Weekly</Button
+							<Button color={lcBtnColors.weekly} on:click={() => toggleChart('weekly')}
+								>Weekly</Button
 							>
 							<Button color={lcBtnColors.monthly} on:click={() => toggleChart('monthly')}
 								>Monthly</Button
 							>
-							<Button color={lcBtnColors.yearly} on:click={() => toggleChart('yearly')}>Yearly</Button
+							<Button color={lcBtnColors.yearly} on:click={() => toggleChart('yearly')}
+								>Yearly</Button
 							>
 							<Button color={lcBtnColors.overall} on:click={() => toggleChart('overall')}
 								>Overall</Button
@@ -385,7 +468,7 @@
 							bind:xData={timestamps}
 							bind:yData={todaysMoodScores}
 							elementID={'IndTLC'}
-							style="width:790px; height:320px;"
+							style="width:700px; height:320px;"
 							title="Today's Moods"
 						/>
 					{:else if selectedLineChart === 'overall'}
@@ -393,7 +476,7 @@
 							bind:xData={overall}
 							bind:yData={overallAverages}
 							elementID={'IndDLC'}
-							style="width:790px; height:320px;"
+							style="width:700px; height:320px;"
 							title="Average Mood Overall"
 						/>
 					{:else if selectedLineChart === 'weekly'}
@@ -401,7 +484,7 @@
 							bind:xData={weekly}
 							bind:yData={weeklyAverages}
 							elementID={'IndWLC'}
-							style="width:790px; height:320px;"
+							style="width:700px; height:320px;"
 							title="Average Mood Weekly"
 						/>
 					{:else if selectedLineChart === 'monthly'}
@@ -409,7 +492,7 @@
 							bind:xData={monthly}
 							bind:yData={monthlyAverages}
 							elementID={'IndMLC'}
-							style="width:790px; height:320px;"
+							style="width:700px; height:320px;"
 							title="Average Mood Monthly"
 						/>
 					{:else if selectedLineChart === 'yearly'}
@@ -417,7 +500,7 @@
 							bind:xData={yearly}
 							bind:yData={yearlyAverages}
 							elementID={'IndYLC'}
-							style="width:790px; height:320px;"
+							style="width:700px; height:320px;"
 							title="Average Mood Yearly"
 						/>
 					{/if}
