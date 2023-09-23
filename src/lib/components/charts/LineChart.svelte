@@ -3,7 +3,7 @@
 	import { minBy } from 'lodash';
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
-	import { moodLabels, moodScores } from '$lib/constants/index.js';
+	import { mood } from '$lib/constants/index.js';
 
 	export let xData;
 	export let yData;
@@ -12,16 +12,28 @@
 	export let elementID;
 
 	let lineChart;
-	let mood;
+	let currentMood;
 	let showSymbol = false;
 
 	function getNearestMoodLabel(score) {
-		const nearestIndex = minBy(moodScores, (moodScore) => Math.abs(moodScore - score));
-		return moodLabels[moodScores.indexOf(nearestIndex)];
+		let nearestLabel = null;
+		let nearestDifference = Infinity;
+
+		for (const label in mood) {
+			const moodScore = mood[label];
+			const difference = Math.abs(moodScore - score);
+
+			if (difference < nearestDifference) {
+				nearestLabel = label;
+				nearestDifference = difference;
+			}
+		}
+
+		return nearestLabel;
 	}
 
-	$: mood = yData?.map((score) => getNearestMoodLabel(score));
-	$: mood?.length != 1 ? (showSymbol = false) : (showSymbol = true);
+	$: currentMood = yData?.map((score) => getNearestMoodLabel(score));
+	$: currentMood?.length != 1 ? (showSymbol = false) : (showSymbol = true);
 
 	onMount(() => {
 		lineChart = echarts.init(document?.getElementById(elementID));
@@ -71,7 +83,7 @@
 						? (moodScore = yData[index])
 						: (moodScore = yData[index].toFixed(2));
 
-					const moodLabel = mood[index];
+					const moodLabel = currentMood[index];
 					return `<span class="font-bold">[${temp}]</span> Mood: <span class="font-bold">${moodLabel}</span> (${moodScore})`;
 				}
 			},

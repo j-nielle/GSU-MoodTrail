@@ -10,20 +10,6 @@ export const moodColors = {
 	Nervous: '#15605e'
 };
 
-export const moodLabels = [
-	'Sad',
-	'Annoyed',
-	'Nervous',
-	'Bored',
-	'Neutral',
-	'Calm',
-	'Relaxed',
-	'Happy',
-	'Excited'
-];
-
-export const moodScores = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
-
 export const mood = {
 	Sad: -4,
 	Annoyed: -3,
@@ -35,17 +21,6 @@ export const mood = {
 	Happy: 3,
 	Excited: 4
 };
-
-export const reasonLabels = [
-	'Family',
-	'School',
-	'Social Life',
-	'Financial Situation',
-	'Health',
-	'Unwilling to specify'
-];
-
-export const reasonScores = [1, 2, 3, 4, 5, 6];
 
 export const reason = {
 	Family: 1,

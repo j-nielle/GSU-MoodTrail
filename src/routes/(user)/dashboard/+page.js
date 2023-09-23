@@ -12,7 +12,7 @@ export async function load({ parent }) {
 		.select()
 		.order('created_at', { ascending: true });
 	const { data: anonMood } = await supabase
-		.from('AnonMoodEntries')
+		.from('AnonMood')
 		.select()
 		.order('created_at', { ascending: true });
 

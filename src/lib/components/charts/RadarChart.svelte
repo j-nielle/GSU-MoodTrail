@@ -2,7 +2,7 @@
 	// @ts-nocheck
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
-	import { moodLabels, moodColors } from '$lib/constants/index.js';
+	import { mood, moodColors } from '$lib/constants/index.js';
 
 	export let elementID;
 	export let style;
@@ -16,7 +16,7 @@
 
 		radarChart.setOption({
 			legend: {
-				data: moodLabels,
+				data: Object.keys(mood),
 				top: 20,
 				left: 0,
 				itemWidth: 13.5,

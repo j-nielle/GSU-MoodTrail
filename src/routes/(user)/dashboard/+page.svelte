@@ -1,6 +1,6 @@
 <script>
 	// @ts-nocheck
-	import _, { entries } from 'lodash';
+	import _ from 'lodash';
 	import dayjs from 'dayjs';
 	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
@@ -37,27 +37,17 @@
 
 	let todaysEntries = [];
 	let xDataMBC, yDataMBC;
-	let todayMostFreqMood = [],
-		todayMostFreqReason = [];
-	let overallMostFreqMood = [],
-		overallMostFreqReason = [];
-	let weeklyMostFreqMood = [],
-		weeklyMostFreqReason = [];
-	let monthlyMostFreqMood = [],
-		monthlyMostFreqReason = [];
-	let yearlyMostFreqMood = [],
-		yearlyMostFreqReason = [];
+	let todayMostFreqMood = '', todayMostFreqReason = '';
+	let overallMostFreqMood = '', overallMostFreqReason = '';
+	let weeklyMostFreqMood = '', weeklyMostFreqReason = '';
+	let monthlyMostFreqMood = '', monthlyMostFreqReason = '';
+	let yearlyMostFreqMood = '', yearlyMostFreqReason = '';
 
-	let overall = [],
-		overallAverages = [];
-	let weekly = [],
-		weeklyAverages = [];
-	let monthly = [],
-		monthlyAverages = [];
-	let yearly = [],
-		yearlyAverages = [];
-	let timestamps = [],
-		todaysMoodScores = [];
+	let overall = [], overallAverages = [];
+	let weekly = [], weeklyAverages = [];
+	let monthly = [], monthlyAverages = [];
+	let yearly = [], yearlyAverages = [];
+	let timestamps = [], todaysMoodScores = [];
 
 	let recentStudent;
 	let heatmapData;
@@ -84,29 +74,22 @@
 
 		const dashboardChannel = supabase
 			.channel('dashboard')
-			.on(
-				'postgres_changes',
-				{
+			.on('postgres_changes',{
 					event: 'INSERT',
 					schema: 'public',
 					table: 'StudentMoodEntries'
-				},
-				(payload) => {
+				},(payload) => {
 					studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
 				}
 			)
-			.on(
-				'postgres_changes',
-				{
+			.on('postgres_changes',{
 					event: 'INSERT',
 					schema: 'public',
-					table: 'AnonMoodEntries'
-				},
-				(payload) => {
+					table: 'AnonMood'
+				},(payload) => {
 					anonMoodData = _.cloneDeep([...anonMoodData, payload.new]);
 				}
-			)
-			.subscribe((status) => console.log('inside dashboard page', status));
+			).subscribe((status) => console.log('inside dashboard page', status));
 
 		return () => {
 			//clearInterval(timer);
@@ -176,7 +159,7 @@
 			);
 			const todaysReasonScores = _.map(todaysEntries, (entry) => entry.reason_score) || [];
 			const todaysReasonLabels = todaysReasonScores.map(
-				(score) => Object.keys(reason).find((key) => reason[key] === score) || '-'
+				(score) => Object.keys(reason).find((key) => reason[key] == score) || '-'
 			);
 
 			todayMostFreqMood = _.head(_(todaysMoodLabels).countBy().entries().maxBy(_.last));
@@ -198,17 +181,15 @@
 				_(groupedByDay).flatMap().countBy('mood_score').entries().maxBy(_.last)
 			);
 
-			overallMostFreqMood = mostFreqMood
-				? Object.keys(mood).find((key) => mood[key] === parseInt(mostFreqMood[0]))
-				: '-';
+			overallMostFreqMood = Object.keys(mood).find((key) => mood[key] == parseInt(mostFreqMood[0]));
 
 			const mostFreqReason = _.head(
 				_(groupedByDay).flatMap().countBy('reason_score').entries().maxBy(_.last)
 			);
 
-			overallMostFreqReason = mostFreqReason
-				? Object.keys(reason).find((key) => reason[key] === parseInt(mostFreqReason[0]))
-				: '-';
+			overallMostFreqReason = Object.keys(reason).find((key) => reason[key] === parseInt(mostFreqReason[0]));
+
+			console.log(overallMostFreqReason)
 		} else if (selectedLineChart === 'weekly') {
 			const groupedByWeek = _.groupBy(dataType, (entry) =>
 				getWeekNumberString(dayjs(entry.created_at))
@@ -229,17 +210,13 @@
 				_(groupedByWeek).flatMap().countBy('mood_score').entries().maxBy(_.last)
 			);
 
-			weeklyMostFreqMood = mostFreqMood
-				? Object.keys(mood).find((key) => mood[key] === parseInt(mostFreqMood[0]))
-				: '-';
+			weeklyMostFreqMood = Object.keys(mood).find((key) => mood[key] == parseInt(mostFreqMood[0]));
 
 			const mostFreqReason = _.head(
 				_(groupedByWeek).flatMap().countBy('reason_score').entries().maxBy(_.last)
 			);
 
-			weeklyMostFreqReason = mostFreqMood
-				? Object.keys(reason).find((key) => reason[key] === parseInt(mostFreqReason[0]))
-				: '-';
+			weeklyMostFreqReason = Object.keys(reason).find((key) => reason[key] == parseInt(mostFreqReason[0]));
 		} else if (selectedLineChart === 'monthly') {
 			const groupedByMonth = _.groupBy(dataType, (entry) =>
 				dayjs(entry.created_at).format('YYYY-MM')
@@ -257,17 +234,15 @@
 				_(groupedByMonth).flatMap().countBy('mood_score').entries().maxBy(_.last)
 			);
 
-			monthlyMostFreqMood = mostFreqMood
-				? Object.keys(mood).find((key) => mood[key] === parseInt(mostFreqMood[0]))
-				: '-';
+			monthlyMostFreqMood = Object.keys(mood).find((key) => mood[key] == parseInt(mostFreqMood[0]));
 
 			const mostFreqReason = _.head(
 				_(groupedByMonth).flatMap().countBy('reason_score').entries().maxBy(_.last)
 			);
 
-			monthlyMostFreqReason = mostFreqReason
-				? Object.keys(reason).find((key) => reason[key] === parseInt(mostFreqReason[0]))
-				: '-';
+			monthlyMostFreqReason = Object.keys(reason).find((key) => reason[key] == parseInt(mostFreqReason[0]));
+
+			console.log(monthlyMostFreqReason)
 		} else if (selectedLineChart === 'yearly') {
 			const groupedByYear = _.groupBy(dataType, (entry) => dayjs(entry.created_at).format('YYYY'));
 
@@ -283,17 +258,15 @@
 				_(groupedByYear).flatMap().countBy('mood_score').entries().maxBy(_.last)
 			);
 
-			yearlyMostFreqMood = mostFreqMood
-				? Object.keys(mood).find((key) => mood[key] === parseInt(mostFreqMood[0]))
-				: '-';
+			yearlyMostFreqMood = Object.keys(mood).find((key) => mood[key] == parseInt(mostFreqMood[0]));
 
 			const mostFreqReason = _.head(
 				_(groupedByYear).flatMap().countBy('reason_score').entries().maxBy(_.last)
 			);
 
-			yearlyMostFreqReason = mostFreqReason
-				? Object.keys(reason).find((key) => reason[key] === parseInt(mostFreqReason[0]))
-				: '-';
+			yearlyMostFreqReason = Object.keys(reason).find((key) => reason[key] == parseInt(mostFreqReason[0]));
+
+			console.log(yearlyMostFreqReason)
 		}
 	}
 
@@ -626,10 +599,8 @@
 				/>
 			</div>
 		{/if}
-		<Button
-			class="max-h-14 justify-center shadow-md flex-row items-center space-x-2"
-			on:click={() => window.print()}
-		>
+		<Button	class="max-h-14 justify-center shadow-md flex-row items-center space-x-2"
+			on:click={() => window.print()}>
 			<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
 		</Button>
 	</div>
@@ -657,32 +628,34 @@
 					{#if dataType.length > 0}
 						<div class="flex justify-between">
 							<ButtonGroup>
-								<Button color={lcBtnColors.today} on:click={() => selectLineChart('today')}
-									>Today</Button
-								>
-								<Button color={lcBtnColors.weekly} on:click={() => selectLineChart('weekly')}
-									>Weekly</Button
-								>
-								<Button color={lcBtnColors.monthly} on:click={() => selectLineChart('monthly')}
-									>Monthly</Button
-								>
-								<Button color={lcBtnColors.yearly} on:click={() => selectLineChart('yearly')}
-									>Yearly</Button
-								>
-								<Button color={lcBtnColors.overall} on:click={() => selectLineChart('overall')}
-									>Overall</Button
-								>
+								<Button color={lcBtnColors.today} on:click={() => selectLineChart('today')}>
+									Today
+								</Button>
+								<Button color={lcBtnColors.weekly} on:click={() => selectLineChart('weekly')}>
+									Weekly
+								</Button>
+								<Button color={lcBtnColors.monthly} on:click={() => selectLineChart('monthly')}>
+									Monthly
+								</Button>
+								<Button color={lcBtnColors.yearly} on:click={() => selectLineChart('yearly')}>
+									Yearly
+								</Button>
+								<Button color={lcBtnColors.overall} on:click={() => selectLineChart('overall')}>
+									Overall
+								</Button>
 							</ButtonGroup>
 
 							<ButtonGroup>
 								<Button
 									color={viewAnonData ? 'dark' : 'light'}
-									on:click={() => (viewAnonData = true)}>Anonymous</Button
-								>
+									on:click={() => (viewAnonData = true)}>
+									Anonymous
+								</Button>
 								<Button
 									color={!viewAnonData ? 'dark' : 'light'}
-									on:click={() => (viewAnonData = false)}>Students</Button
-								>
+									on:click={() => (viewAnonData = false)}>
+									Students
+								</Button>
 							</ButtonGroup>
 						</div>
 

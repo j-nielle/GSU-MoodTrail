@@ -3,7 +3,7 @@
 	import { minBy } from 'lodash';
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
-	import { moodScores, moodLabels } from '$lib/constants/index.js';
+	import { mood } from '$lib/constants/index.js';
 
 	export let xData;
 	export let yData;
@@ -11,14 +11,26 @@
 	export let style;
 
 	let negativeBarChart;
-	let mood;
+	let currentMood;
 
 	function getNearestMoodLabel(score) {
-		const nearestIndex = minBy(moodScores, (moodScore) => Math.abs(moodScore - score));
-		return moodLabels[moodScores.indexOf(nearestIndex)];
+		let nearestLabel = null;
+		let nearestDifference = Infinity;
+
+		for (const label in mood) {
+			const moodScore = mood[label];
+			const difference = Math.abs(moodScore - score);
+
+			if (difference < nearestDifference) {
+				nearestLabel = label;
+				nearestDifference = difference;
+			}
+		}
+
+		return nearestLabel;
 	}
 
-	$: mood = xData?.map((score) => getNearestMoodLabel(score));
+	$: currentMood = xData?.map((score) => getNearestMoodLabel(score));
 
 	onMount(() => {
 		negativeBarChart = echarts.init(document.getElementById(elementID));
@@ -39,7 +51,7 @@
 				formatter: (params) => {
 					const index = params[0].dataIndex;
 					const moodScore = xData[index].toFixed(2);
-					const moodLabel = mood[index];
+					const moodLabel = currentMood[index];
 					return `<span class="font-bold">[${moodScore}]</span> Mood: <span class="font-bold">${moodLabel}</span>`;
 				}
 			},
