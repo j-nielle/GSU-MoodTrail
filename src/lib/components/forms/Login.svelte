@@ -43,15 +43,10 @@
 			</Input>
 		</Label>
 		<Button type="submit" color="blue" class="w-full font-bold leading-relaxed">LOGIN</Button>
-		<div class="flex justify-between font-medium">
-			<!-- <Checkbox on:click={handleRememberMe}>Remember me</Checkbox> -->
-			<a href="/register" class="text-sm text-slate-500 hover:underline dark:text-slate-100"
-				>Not registered?</a
-			>
-			<a
-				href="/reset-password"
-				class="ml-auto text-sm text-red-500 hover:underline dark:text-slate-100">Forgot password</a
-			>
+		<div class="self-center font-medium">
+			<a href="/reset-password" class="ml-auto text-sm text-red-500 hover:underline dark:text-slate-100">
+				Forgot password?
+			</a>
 		</div>
 	</form>
 </Card>

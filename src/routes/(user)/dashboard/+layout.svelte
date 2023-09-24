@@ -31,7 +31,7 @@
 					}, 5000);
 				}
 			)
-			.subscribe((status) => console.log('inside dashboard layout', status));
+			.subscribe((status) => console.log('/dashboard layout', status));
 
 		const unsubscribe = consistentLowMoods.subscribe((updatedMoods) => {
 			updatedMoods.forEach((moodEntry) => {

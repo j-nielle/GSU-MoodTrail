@@ -26,42 +26,16 @@
 				}
 			},
 			radar: {
-				//shape: 'circle',
+				shape: 'circle',
 				indicator: indicator,
 				axisName: {
 					color: 'rgba(54, 54, 54, 1)'
-				},
-				axisTick: {
-					//show: true,
-				},
-				axisLabel: {
-					//show:true,
 				},
 				splitLine: {
 					show: true
 				},
 				axisNameGap: 10,
 				scale: true
-				// splitLine: {
-				//   lineStyle: {
-				//     color: [
-				//       'rgba(238, 197, 102, 0.1)',
-				//       'rgba(238, 197, 102, 0.2)',
-				//       'rgba(238, 197, 102, 0.4)',
-				//       'rgba(238, 197, 102, 0.6)',
-				//       'rgba(238, 197, 102, 0.8)',
-				//       'rgba(238, 197, 102, 1)'
-				//     ].reverse()
-				//   }
-				// },
-				// splitArea: {
-				//   show: false
-				// },
-				// axisLine: {
-				//   lineStyle: {
-				//     color: 'rgba(238, 197, 102, 0.5)'
-				//   }
-				// }
 			},
 			series: [
 				{
@@ -70,14 +44,12 @@
 					data: data,
 					symbol: 'none',
 					areaStyle: {
-						opacity: 0.5
+						opacity: 0.4
 					},
 					emphasis: {
 						focus: 'self'
-						//blurScope: 'global'
 					},
 					itemStyle: {
-						//opacity: 0.1,
 						color: function (params) {
 							return moodColors[params.name] || '#5470c6';
 						}

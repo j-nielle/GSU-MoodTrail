@@ -37,10 +37,7 @@
 
 	$: ({ supabase } = data);
 
-	let course;
-	let college;
-	let yearLevel;
-	let student;
+	let course,college,yearLevel,student;
 
 	let searchTerm = '';
 	let selectedCollege = '';
@@ -52,8 +49,7 @@
 	let urlResult = '';
 	let hasEntry;
 
-	let mostFrequentMood;
-	let leastFrequentMood;
+	let mostFrequentMood,leastFrequentMood;
 
 	let selectedLineChart = 'today';
 	let today = dayjs().format('YYYY-MM-DD');
@@ -65,30 +61,24 @@
 	let yearly, yearlyAverages;
 
 	let xDataMBC, yDataMBC;
-	let pieChartData;
+	let pieChartData,lcBtnColors = {};
 
-	let lcBtnColors = {};
-
-	let modalState = false;
+	// let modalState = false;
 
 	onMount(() => {
-		const dashboardChannel = supabase
+		const studentChartChannel = supabase
 			.channel('dashboard')
-			.on(
-				'postgres_changes',
-				{
+			.on('postgres_changes',{
 					event: 'INSERT',
 					schema: 'public',
 					table: 'StudentMoodEntries'
-				},
-				(payload) => {
+				},(payload) => {
 					studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
 				}
-			)
-			.subscribe((status) => console.log('/dashboard/student-chart/+page.svelte:', status));
+			).subscribe((status) => console.log('/dashboard/student-chart', status));
 
 		return () => {
-			dashboardChannel.unsubscribe();
+			studentChartChannel.unsubscribe();
 		};
 	});
 
@@ -261,8 +251,6 @@
 		}
 	}
 
-	$: console.log(urlResult[0]);
-
 	const getWeekNumberString = (date) => {
 		const firstDayOfYear = dayjs(date).startOf('year').day(1);
 		const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
@@ -278,18 +266,18 @@
 	// 	console.log(entry)
 	// }
 
-	function handlePrint(entry, another) {
+	function handlePrint() {
 		window.print();
 	}
 </script>
 
 <svelte:head>
-	<title>Student Chart</title>
+	<title>Student Mood Charts</title>
 </svelte:head>
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3.5">
 	<div class="space-x-2 flex flex-row max-w-full justify-center">
-		{#if hasEntry}
+		{#if studentMoodData?.length > 0 && urlResult?.length == 0}
 			<Select
 				placeholder="College"
 				class="font-normal w-max h-11 bg-white"
@@ -333,8 +321,7 @@
 					selectedCourse = '';
 					selectedYearLevel = '';
 					selectedLineChart = 'today';
-					goto('/dashboard/student-chart');
-				}}>Reset</Button
+				}}>Reset Filter</Button
 			>
 		{/if}
 		{#if !result || urlResult?.length > 0}
@@ -510,12 +497,7 @@
 
 		{#if result?.length > 0}
 			<div class="flex space-x-6 justify-between">
-				<PieChart bind:data={pieChartData} elementID={'studentPC'} />
-				<HorizontalMoodBarChart
-					bind:xData={xDataMBC}
-					bind:yData={yDataMBC}
-					elementID={'studentHMBC'}
-				/>
+				<PieChart title="Breakdown of Moods" bind:data={pieChartData} elementID={'studentPC'} />
 			</div>
 
 			<div class="flex space-x-6 justify-between">
