@@ -1,6 +1,5 @@
 <script>
 	// @ts-nocheck
-	import { minBy } from 'lodash';
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
 	import { mood } from '$lib/constants/index.js';

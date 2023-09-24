@@ -1,6 +1,6 @@
 <script>
 	// @ts-nocheck
-	import _, { forEach } from 'lodash';
+	import _ from 'lodash';
 	import dayjs from 'dayjs';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
