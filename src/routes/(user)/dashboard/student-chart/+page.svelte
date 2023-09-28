@@ -37,7 +37,7 @@
 
 	$: ({ supabase } = data);
 
-	let course,college,yearLevel,student;
+	let course = [], college = [], yearLevel = [], student = [];
 
 	let searchTerm = '';
 	let selectedCollege = '';
@@ -45,8 +45,8 @@
 	let selectedYearLevel = '';
 	let selectedStudent = '';
 
-	let result = '';
-	let urlResult = '';
+	let result = [];
+	let urlResult = [];
 	let hasEntry;
 
 	let mostFrequentMood,leastFrequentMood;
@@ -278,48 +278,40 @@
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3.5">
 	<div class="space-x-2 flex flex-row max-w-full justify-center">
 		{#if studentMoodData?.length > 0 && urlResult?.length == 0}
-			<Select
-				placeholder="College"
-				class="font-normal w-max h-11 bg-white"
-				items={college}
-				bind:value={selectedCollege}
+			<Select placeholder="College"	class="font-normal w-max h-11 bg-white" items={college} bind:value={selectedCollege}
 				on:change={(e) => {
+					selectedCourse = '';
+					selectedYearLevel = '';
+					selectedStudent = '';
 					selectedCollege = e.target.value;
 				}}
 			/>
-			<Select
-				placeholder="Course"
-				class="font-normal w-max h-11 bg-white"
-				items={course}
-				bind:value={selectedCourse}
+			<Select placeholder="Course" class="font-normal w-max h-11 bg-white"
+				items={course} bind:value={selectedCourse}
 				on:change={(e) => {
+					selectedYearLevel = '';
+					selectedStudent = '';
 					selectedCourse = e.target.value;
 				}}
 			/>
-			<Select
-				placeholder="Year Level"
-				class="font-normal w-max h-11 bg-white"
-				items={yearLevel}
-				bind:value={selectedYearLevel}
+			<Select placeholder="Year Level" class="font-normal w-max h-11 bg-white" items={yearLevel} bind:value={selectedYearLevel}
 				on:change={(e) => {
+					selectedStudent = '';
 					selectedYearLevel = e.target.value;
 				}}
 			/>
-			<Select
-				placeholder="Select a student"
-				class="font-normal w-max h-11 bg-white"
-				items={student}
-				bind:value={selectedStudent}
+			<Select placeholder="Select a student" class="font-normal w-max h-11 bg-white" items={student} bind:value={selectedStudent}
+				on:input={(e) => {
+					selectedStudent = e.target.value;
+				}}
 			/>
-			<Button
-				class="h-11 w-fit"
-				size="sm"
-				color="red"
+			<Button class="h-11 w-fit" size="sm" color="red"
 				on:click={() => {
 					searchTerm = '';
 					selectedCollege = '';
 					selectedCourse = '';
 					selectedYearLevel = '';
+					selectedStudent = '';
 					selectedLineChart = 'today';
 				}}>Reset Filter</Button
 			>
