@@ -48,9 +48,7 @@
 	let addStudentModal = false;
 	let editStudentModal = false;
 
-	let addAlert = false,
-		updateAlert = false,
-		deleteAlert = false;
+	let addAlert = false, updateAlert = false, deleteAlert = false;
 	let errors = [];
 
 	onMount(() => {
@@ -200,9 +198,7 @@
 
 	<div class="ml-4-6 ml-4 mb-7 mr-11">
 		<div class="flex justify-between ml-4">
-			<P
-				class="text-lg mt-3 font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6"
-			>
+			<P class="text-lg mt-3 font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
 				List of Students
 				<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
 					Click a [<span class="font-bold">Student's ID</span>] to view more about their student
