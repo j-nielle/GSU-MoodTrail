@@ -28,14 +28,14 @@ export const handle = async ({ event, resolve }) => {
 		}
 	}
 
-	const adminPath = '/dashboard/settings/manage-users';
+	const adminPath = '/settings/manage-users';
 	if (
 		event.url.pathname === adminPath ||
 		(event.url.pathname === adminPath && event.request.method === 'POST')
 	) {
 		const session = await event.locals.getSession();
 		if (session?.user.role != 'admin') {
-			throw redirect(303, '/dashboard/settings/account');
+			throw redirect(303, '/settings/account');
 		}
 	}
 

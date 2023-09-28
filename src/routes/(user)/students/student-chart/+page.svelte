@@ -75,7 +75,7 @@
 				},(payload) => {
 					studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
 				}
-			).subscribe((status) => console.log('/dashboard/student-chart', status));
+			).subscribe((status) => console.log('/students/student-chart', status));
 
 		return () => {
 			studentChartChannel.unsubscribe();
@@ -322,7 +322,7 @@
 					class="h-11 w-fit"
 					size="sm"
 					color="dark"
-					on:click={() => goto('/dashboard/all-students')}>Back to Student List</Button
+					on:click={() => goto('/students/all-students')}>Back to Student List</Button
 				>
 			</div>
 		{/if}

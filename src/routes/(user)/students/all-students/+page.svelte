@@ -166,17 +166,14 @@
 	{#if deleteAlert}
 		<Alert color="red" class="mx-8 mb-4">
 			<span class="font-medium">Student has been removed!</span>
-			Change a few things up and try submitting again.
 		</Alert>
 	{:else if addAlert}
 		<Alert color="green" class="mx-8 mb-4">
 			<span class="font-medium">New Student detected!</span>
-			Change a few things up and try submitting again.
 		</Alert>
 	{:else if updateAlert}
 		<Alert color="purple" class="mx-8 mb-4">
 			<span class="font-medium">Student data changes detected!</span>
-			Change a few things up and try submitting again.
 		</Alert>
 	{/if}
 	<div class="flex justify-between">
@@ -256,7 +253,7 @@
 							<TableBodyCell>
 								<a
 									class="hover:underline"
-									href="/dashboard/student-chart?search={student.id}"
+									href="/students/student-chart?search={student.id}"
 									rel="noopener noreferrer"
 								>
 									{student.id}

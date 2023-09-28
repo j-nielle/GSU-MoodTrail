@@ -761,7 +761,7 @@
 										<TableBodyCell>
 											<a
 												class="hover:underline"
-												href="/dashboard/student-chart?search={student.studentId}"
+												href="/students/student-chart?search={student.studentId}"
 												rel="noopener noreferrer"
 											>
 												{student.studentId}

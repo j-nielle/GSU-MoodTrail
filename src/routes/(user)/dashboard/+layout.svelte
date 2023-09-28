@@ -15,23 +15,18 @@
 	$: ({ supabase } = data);
 
 	onMount(() => {
-		const toastChannel = supabase
-			.channel('toast-requests')
-			.on(
-				'postgres_changes',
-				{
+		const toastChannel = supabase.channel('toast-requests')
+			.on('postgres_changes', {
 					event: 'INSERT',
 					schema: 'public',
 					table: 'RequestEntries'
-				},
-				(payload) => {
+				}, (payload) => {
 					newRequest.update(() => true);
 					setTimeout(() => {
 						newRequest.update(() => false);
 					}, 5000);
 				}
-			)
-			.subscribe((status) => console.log('/dashboard layout', status));
+			).subscribe((status) => console.log('/dashboard layout', status));
 
 		const unsubscribe = consistentLowMoods.subscribe((updatedMoods) => {
 			updatedMoods.forEach((moodEntry) => {
@@ -62,10 +57,6 @@
 			unsubscribe();
 		};
 	});
-
-	// $: if(activeUrl != '/dashboard') {
-	//   focusTable.update(()=>false)
-	// }
 
 	$: activeUrl = $page.url.pathname;
 </script>

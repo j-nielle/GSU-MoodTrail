@@ -26,11 +26,7 @@
 
 	$: ({ supabase, session } = data);
 
-	let sessionExpired = session === null;
-	let studentsMenu = [
-		{ name: 'List of Students', href: '/dashboard/all-students' },
-		{ name: 'Visualizations', href: '/dashboard/student-chart' }
-	];
+	//let sessionExpired = session === null;
 
 	onMount(() => {
 		const {
@@ -72,8 +68,8 @@
 				Dashboard
 			</NavLi>
 			<NavLi
-				href="/dashboard/requests"
-				active={activeUrl === '/dashboard/requests'}
+				href="/requests"
+				active={activeUrl === '/requests'}
 				activeClass="font-semibold text-blue-700"
 			>
 				Requests
@@ -84,8 +80,8 @@
 				/>
 			</NavLi>
 			<Dropdown triggeredBy="#student-menu" class="w-36 items-center z-20">
-				<DropdownItem href="/dashboard/all-students">List of Students</DropdownItem>
-				<DropdownItem href="/dashboard/student-chart">Info and Charts</DropdownItem>
+				<DropdownItem href="/students/all-students">List of Students</DropdownItem>
+				<DropdownItem href="/students/student-chart">Info and Charts</DropdownItem>
 			</Dropdown>
 		</NavUl>
 
@@ -109,7 +105,7 @@
 				<span class="block text-sm"> {session?.user?.user_metadata?.name ?? 'User'} </span>
 				<span class="block text-sm font-medium truncate"> {session?.user?.email} </span>
 			</DropdownHeader>
-			<DropdownItem class="cursor-pointer" href="/dashboard/settings/account">Settings</DropdownItem
+			<DropdownItem class="cursor-pointer" href="/settings/account">Settings</DropdownItem
 			>
 			<DropdownDivider />
 			<form method="POST" action="/logout">
