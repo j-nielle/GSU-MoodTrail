@@ -3,25 +3,33 @@
 	import { ProfileCardOutline, FaceLaughOutline, BrainOutline } from 'flowbite-svelte-icons';
 
 	export let title;
-	export let icon;
 	export let data;
-
-	const infoCardClass = 'max-h-10 justify-center flex-row items-center space-x-2';
+	export let purpose;
 </script>
 
-<Card class={infoCardClass}>
-	{#if icon === 'ProfileCardOutline'}
-		<ProfileCardOutline tabindex="-1" class="text-slate-900" />
-	{:else if icon === 'FaceLaughOutline'}
-		<FaceLaughOutline tabindex="-1" class="text-slate-900" />
-	{:else if icon === 'BrainOutline'}
-		<BrainOutline tabindex="-1" class="text-slate-900" />
-	{/if}
-	{#if title === '' && icon === ''}
+{#if purpose === 'time'}
+	<Card class='max-h-12 max-w-full justify-center flex-row items-center space-x-2'>
 		<Label class="text-slate-900 text-sm">{data ?? 'N/A'}</Label>
-	{:else}
-		<Label class="text-slate-900 text-sm"
-			>{title} <span class="font-bold cursor-pointer">{data ?? 'N/A'}</span></Label
-		>
-	{/if}
-</Card>
+	</Card>
+{:else if purpose === 'mood'}
+	<Card class='max-h-12 max-w-full justify-center flex-row items-center space-x-2'>
+		<FaceLaughOutline tabindex="-1" class="text-slate-900" />
+		<Label class="text-slate-900 text-sm">
+			{title} <span class="font-bold cursor-pointer">{data ?? 'N/A'}</span>
+		</Label>
+	</Card>
+{:else if purpose === 'reason'}
+	<Card class='max-h-12 max-w-full justify-center flex-row items-center space-x-2'>
+		<BrainOutline tabindex="-1" class="text-slate-900" />
+		<Label class="text-slate-900 text-sm">
+			{title} <span class="font-bold cursor-pointer">{data ?? 'N/A'}</span>
+		</Label>
+	</Card>
+{:else}
+	<Card class='max-h-12 max-w-full justify-center flex-row items-center space-x-2'>
+		<ProfileCardOutline tabindex="-1" class="text-slate-900" />
+		<Label class="text-slate-900 text-sm">
+			{title} <span class="font-bold cursor-pointer">{data ?? 'N/A'}</span>
+		</Label>
+	</Card>
+{/if}

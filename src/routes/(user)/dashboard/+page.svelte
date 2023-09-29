@@ -54,7 +54,7 @@
 	let selectedLineChart = 'today';
 	let selectedBarChart = 'course';
 
-	let current = dayjs().format('ddd MMMM D, YYYY h:mm:ss A');
+	let current = dayjs().format('ddd MMM D, YYYY h:mm A');
 	const interval = 1000;
 
 	let tableRef;
@@ -72,8 +72,7 @@
 	onMount(() => {
 		//const timer = setInterval(updateCurrent, interval);
 
-		const dashboardChannel = supabase
-			.channel('dashboard')
+		const dashboardChannel = supabase.channel('dashboard')
 			.on('postgres_changes',{
 					event: 'INSERT',
 					schema: 'public',
@@ -99,7 +98,7 @@
 
 	$: viewAnonData ? (dataType = anonMoodData) : (dataType = studentMoodData);
 
-	$: if (dataType?.length > 0) {
+	$: if (dataType) {
 		const groupedData = _.groupBy(dataType, (data) => {
 			const date = new Date(data.created_at);
 			return [date.getDay(), date.getHours()];
@@ -264,7 +263,7 @@
 		}
 	}
 
-	$: if (studentMoodData?.length > 0) {
+	$: if (studentMoodData) {
 		if (selectedBarChart === 'course') {
 			const courseData = studentMoodData.reduce((acc, entry) => {
 				const existingCourse = acc.find((item) => item.course === entry.course);
@@ -470,8 +469,6 @@
 
 			consistentLowMoods.update((moods) => [...moods, { studentId, streaks: studentStreaks }]);
 		});
-
-
 		// for radar chart
 		const moodData = {};
 
@@ -529,8 +526,6 @@
 	function updateCurrent() {
 		current = dayjs();
 	}
-
-	$: console.log($consistentLowMoods)
 </script>
 
 <svelte:head>
@@ -539,73 +534,65 @@
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-10">
 	<div class="flex justify-between">
-		<CardInfo title="" icon="" bind:data={current} />
-		<CardInfo title="Latest Student:" icon="ProfileCardOutline" bind:data={recentStudent} />
+		<CardInfo purpose="time" title="" icon="" bind:data={current} />
+		<CardInfo purpose="recentStudent" title="Latest Student:" bind:data={recentStudent} />
 
 		{#if selectedLineChart === 'today'}
-			<div transition:fly>
-				<CardInfo title="Today's Top Mood:" icon="FaceLaughOutline" bind:data={todayMostFreqMood} />
+			<div>
+				<CardInfo purpose="mood" title="Today's Mood:" bind:data={todayMostFreqMood} />
 			</div>
-			<div transition:fly>
-				<CardInfo title="Today's Top Reason:" icon="BrainOutline" bind:data={todayMostFreqReason} />
+			<div>
+				<CardInfo purpose="reason" title="Today's Reason:" bind:data={todayMostFreqReason} />
 			</div>
 		{:else if selectedLineChart === 'overall'}
-			<div transition:fly>
-				<CardInfo
-					title="Top Mood (Overall):"
-					icon="FaceLaughOutline"
+			<div>
+				<CardInfo purpose="mood"
+					title="Mood (Overall):"
 					bind:data={overallMostFreqMood}
 				/>
 			</div>
-			<div transition:fly>
-				<CardInfo
-					title="Top Reason (Overall):"
-					icon="BrainOutline"
+			<div>
+				<CardInfo purpose="reason"
+					title="Reason (Overall):"
 					bind:data={overallMostFreqReason}
 				/>
 			</div>
 		{:else if selectedLineChart === 'weekly'}
-			<div transition:fly>
-				<CardInfo
-					title="Top Mood (Weekly):"
-					icon="FaceLaughOutline"
+			<div>
+				<CardInfo purpose="mood"
+					title="Mood (Weekly):"
 					bind:data={weeklyMostFreqMood}
 				/>
 			</div>
-			<div transition:fly>
-				<CardInfo
-					title="Top Reason (Weekly):"
-					icon="BrainOutline"
+			<div>
+				<CardInfo purpose="reason"
+					title="Reason (Weekly):"
 					bind:data={weeklyMostFreqReason}
 				/>
 			</div>
 		{:else if selectedLineChart === 'monthly'}
-			<div transition:fly>
-				<CardInfo
-					title="Top Mood (Monthly):"
-					icon="FaceLaughOutline"
+			<div>
+				<CardInfo purpose="mood"
+					title="Mood (Monthly):"
 					bind:data={monthlyMostFreqMood}
 				/>
 			</div>
-			<div transition:fly>
-				<CardInfo
-					title="Top Reason (Monthly):"
-					icon="BrainOutline"
+			<div>
+				<CardInfo purpose="reason"
+					title="Reason (Monthly):"
 					bind:data={monthlyMostFreqReason}
 				/>
 			</div>
 		{:else if selectedLineChart === 'yearly'}
-			<div transition:fly>
-				<CardInfo
-					title="Top Mood (Yearly):"
-					icon="FaceLaughOutline"
+			<div>
+				<CardInfo purpose="mood"
+					title="Mood (Yearly):"
 					bind:data={yearlyMostFreqMood}
 				/>
 			</div>
-			<div transition:fly>
-				<CardInfo
-					title="Top Reason (Yearly):"
-					icon="BrainOutline"
+			<div>
+				<CardInfo purpose="reason"
+					title="Reason (Yearly):"
 					bind:data={yearlyMostFreqReason}
 				/>
 			</div>
@@ -724,6 +711,7 @@
 						title="Mood Occurrences by Day and Hour"
 						{heatmapData}
 						elementID="dashboardHM"
+						style="width:580px; height:350px;"
 					/>
 				{:else}
 					<div class="flex justify-center items-center" style="width:620px; height:350px;">
