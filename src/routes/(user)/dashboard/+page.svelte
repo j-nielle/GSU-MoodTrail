@@ -530,7 +530,7 @@
 		current = dayjs();
 	}
 
-	$: console.log()
+	$: console.log($consistentLowMoods)
 </script>
 
 <svelte:head>
@@ -732,11 +732,11 @@
 				{/if}
 			</div>
 
-			<!-- <div id="low-moods" bind:this={tableRef} class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
+			<div id="low-moods" bind:this={tableRef} class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
 				<caption class="text-lg font-bold text-left w-max text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
 					Students with consistent low moods
-					<p class="mt-1 text-sm font-normal italic text-gray-500 dark:text-gray-400">
-						*These students have experienced consistent low moods for atleast 4 consecutive days.
+					<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
+						These students have experienced consistent low moods for atleast 4 consecutive days.
 					</p>
 				</caption>
 				<Table divClass="text-left text-sm text-gray-500 border border-zinc-300 dark:text-gray-400 max-h-72 overflow-y-auto">
@@ -770,16 +770,33 @@
 										<TableBodyCell>{streak.startDate} - {streak.endDate}</TableBodyCell>
 										<TableBodyCell class="text-center">
 											{Object.keys(mood).find((key) => mood[key] === Math.round(
-												streak.moodScores.reduce((accum, elem) => accum + parseInt(elem), 0) / streak.moodScores.length) + 4
+												streak.moodScores.reduce((accum, elem) => accum + parseInt(elem), 0) / streak.moodScores.length)
 											)}
 										</TableBodyCell>
-										<TableBodyCell class="text-center">
-											{streak.reasonLabels.reduce((accum, elem, i, arr) =>
-												arr.filter((v) => v === accum).length >=
-												arr.filter((v) => v === elem).length
-													? accum
-													: elem
-											)}
+										<TableBodyCell>
+											{(() => { // Immediately Invoked Function Expression
+												const labelCounts = {};
+
+												// Iterate through each reason label in the streak
+												streak.reasonLabels.forEach((reasonLabel) => {
+													// Increment the count for the current reason label in labelCounts
+      										// If it doesn't exist in labelCounts yet, initialize it to 0 first
+													labelCounts[reasonLabel] = (labelCounts[reasonLabel] || 0) + 1;
+												});
+												
+												// Get the reason label with the highest count
+												const mostFrequentReason = Object.keys(labelCounts).reduce(
+													(a, b) => (labelCounts[a] > labelCounts[b] ? a : b),
+													null
+												);
+
+												// If there is a most frequent reason and it occurs more than once, return it
+												if (mostFrequentReason && labelCounts[mostFrequentReason] > 1) {
+													return mostFrequentReason;
+												} else {
+													return "Multiple Reasons*";
+												}
+											})()}
 										</TableBodyCell>
 									</TableBodyRow>
 								{/each}
@@ -787,7 +804,7 @@
 						{/if}
 					</TableBody>
 				</Table>
-			</div> -->
+			</div>
 		</div>
 
 		<div class="flex space-x-4">
