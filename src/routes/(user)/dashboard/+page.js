@@ -11,6 +11,7 @@ export async function load({ parent }) {
 		.from('StudentMoodEntries')
 		.select()
 		.order('created_at', { ascending: true });
+		
 	const { data: anonMood } = await supabase
 		.from('AnonMood')
 		.select()
