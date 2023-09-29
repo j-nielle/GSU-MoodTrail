@@ -732,7 +732,7 @@
 				{/if}
 			</div>
 
-			<div id="low-moods" bind:this={tableRef} class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
+			<!-- <div id="low-moods" bind:this={tableRef} class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
 				<caption class="text-lg font-bold text-left w-max text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
 					Students with consistent low moods
 					<p class="mt-1 text-sm font-normal italic text-gray-500 dark:text-gray-400">
@@ -787,7 +787,7 @@
 						{/if}
 					</TableBody>
 				</Table>
-			</div>
+			</div> -->
 		</div>
 
 		<div class="flex space-x-4">
