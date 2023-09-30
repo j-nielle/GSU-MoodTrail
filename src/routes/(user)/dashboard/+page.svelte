@@ -737,10 +737,10 @@
 							</ButtonGroup>
 
 							<ButtonGroup>
-								<Button color={viewAnonData ? 'dark' : 'light'} on:click={() => (viewAnonData = true)}>
+								<Button disabled={anonMoodData.length == 0} color={viewAnonData ? 'dark' : 'light'} on:click={() => (viewAnonData = true)}>
 									Anonymous
 								</Button>
-								<Button color={!viewAnonData ? 'dark' : 'light'} on:click={() => (viewAnonData = false)}>
+								<Button disabled={studentMoodData.length == 0} color={!viewAnonData ? 'dark' : 'light'} on:click={() => (viewAnonData = false)}>
 									Students
 								</Button>
 							</ButtonGroup>
