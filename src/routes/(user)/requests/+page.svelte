@@ -30,6 +30,8 @@
 	let limit = 5;
 	let maxPage, startIndex, endIndex, paginatedItems = {};
 
+	let incompleteOnly = false;
+
 	let requestsData = data.requests;
 
 	$: ({ supabase } = data);
@@ -49,22 +51,6 @@
 			requestsChannel.unsubscribe();
 		};
 	});
-
-	const toggleRequestStatus = async (req) => {
-		let isCompleted = req.iscompleted;
-
-		try {
-			const { data, error } = await supabase
-				.from('RequestEntries')
-				.update({ iscompleted: isCompleted })
-				.eq('id', req.id)
-				.select()
-				.single();
-			if(error) console.log(error)
-		} catch (error) {
-			console.log(error);
-		}
-	};
 
 	$: {
 		filteredItems = requestsData.filter((req) => {
@@ -102,6 +88,31 @@
 		paginatedItems = filteredItems?.slice(startIndex, endIndex);
 	}
 
+	$: {
+    if(incompleteOnly){
+        paginatedItems = filteredItems.filter(req => !req.iscompleted).slice(startIndex, endIndex);
+    } else {
+        paginatedItems = filteredItems.slice(startIndex, endIndex);
+    }
+	}
+
+
+	const toggleRequestStatus = async (req) => {
+		let isCompleted = req.iscompleted;
+
+		try {
+			const { data, error } = await supabase
+				.from('RequestEntries')
+				.update({ iscompleted: isCompleted })
+				.eq('id', req.id)
+				.select()
+				.single();
+			if(error) console.log(error)
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
 	function changePage(newPage) {
 		// If 'newPage' is within valid range (i.e., between 1 and 'maxPage'), then update 'page'.
 		if (newPage >= 1 && newPage <= maxPage) {
@@ -117,26 +128,21 @@
 <div class="bg-white">
 	<div class="flex justify-between">
 		<div class="flex items-center ml-8">
-			<Search
-				size="md"
-				class="w-80 mr-3"
-				placeholder="Search by request, phone, or status*"
-				bind:value={searchTerm}
-			/>
-			<Button
-				class="h-10 p-4 w-fit focus:ring-0"
-				color="red"
-				on:click={() => {
-					searchTerm = '';
-					dateFilter = '';
-				}}>Reset</Button
-			>
+			<Search size="md" class="w-80 mr-3 h-11" placeholder="Search by request, phone, or status*" bind:value={searchTerm} />
+			<div class="flex flex-row justify-start w-full space-x-2">
+				<Checkbox class="cursor-pointer mr-0" bind:value={incompleteOnly} on:change={() => incompleteOnly = !incompleteOnly} />
+				<P class="text-sm font-normal text-gray-500 dark:text-gray-400">Show Incomplete Requests Only</P>
+			</div>
 		</div>
-		<div>
-			<Input type="date" class="w-auto h-auto m-4 mr-8 mt-5" bind:value={dateFilter} />
+		<div class="flex items-center mr-8"> 
+			<Input type="date" class="w-auto h-11 m-4 mt-5" bind:value={dateFilter} />
+			<Button class="h-11 mt-1 p-4 w-fit focus:ring-0" color="red" on:click={() => { searchTerm = ''; dateFilter = ''; }}>
+				Reset
+			</Button>
 		</div>
 	</div>
-	<div class="ml-4-6 ml-4 mb-7 mr-11">
+
+	<div class="ml-4 mb-7 mr-11">
 		<div class="flex justify-between ml-4">
 			<P class="text-lg mt-3 font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
 				Help Requests from the Kiosk
