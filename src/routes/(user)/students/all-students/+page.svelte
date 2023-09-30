@@ -52,17 +52,12 @@
 	let errors = [];
 
 	onMount(() => {
-		const studentsDataChannel = supabase
-			.channel('schema-db-changes')
-			.on(
-				'postgres_changes',
-				{
+		const studentsDataChannel = supabase.channel('studentsDataChannel')
+			.on('postgres_changes', {
 					event: '*',
 					schema: 'public',
 					table: 'Student'
-				},
-				(payload) => {
-					console.log(payload.eventType);
+				}, (payload) => {
 					if (payload.eventType === 'INSERT') {
 						addAlert = true;
 
@@ -102,8 +97,7 @@
 						studentsData = updatedStudentsData;
 					}
 				}
-			)
-			.subscribe((status) => console.log($page.url.pathname, status));
+			).subscribe((status) => console.log($page.url.pathname, status));
 
 		return () => {
 			studentsDataChannel.unsubscribe();
@@ -115,17 +109,25 @@
 			const idMatch = req.id.toString().includes(searchTerm);
 			const nameMatch = req.name.toLowerCase().includes(searchTerm.toLowerCase());
 			const courseMatch = req.course_id.toLowerCase().includes(searchTerm.toLowerCase());
-			const yearLevelMatch = req.year_level_id
-				.toString()
-				.toLowerCase()
-				.includes(searchTerm.toLowerCase());
+			const yearLevelMatch = req.year_level_id.toString().toLowerCase().includes(searchTerm.toLowerCase());
 
 			return searchTerm !== '' ? idMatch || nameMatch || courseMatch || yearLevelMatch : true;
 		});
 
-		startIndex = (currentPage - 1) * limit;
-		endIndex = startIndex + limit;
-		maxPage = Math.ceil(filteredItems?.length / limit);
+		startIndex = (currentPage - 1) * limit; // Calculate the starting index for the current page.
+		endIndex = startIndex + limit; // Calculate the ending index for the current page.
+		maxPage = Math.ceil(filteredItems?.length / limit); // Calculate the maximum number of pages.
+		
+		// If the current page number exceeds the maximum number of pages
+		if (currentPage > maxPage) {
+			currentPage = 1; // set the current page to be the last page.
+
+			// recalculate the starting and ending indices for the last page
+			startIndex = (currentPage - 1) * limit;
+			endIndex = startIndex + limit;
+		}
+
+		// Get only those items from 'filteredItems' that belong to the current page.
 		paginatedItems = filteredItems?.slice(startIndex, endIndex);
 	}
 
