@@ -14,8 +14,6 @@ export const actions = {
 		});
 
 		if (error) {
-			console.log(error.message, password, email);
-
 			if (error.message === 'Email not confirmed') {
 				return fail(400, {
 					error: 'Email not confirmed'
@@ -26,7 +24,7 @@ export const actions = {
 				});
 			}
 			return fail(500, {
-				error: 'Server error. Try again later.'
+				error: error.message
 			});
 		}
 
