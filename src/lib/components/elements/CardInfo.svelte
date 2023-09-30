@@ -8,7 +8,7 @@
 </script>
 
 {#if purpose === 'time'}
-	<Card class='max-h-12 max-w-full justify-center flex-row items-center space-x-2'>
+	<Card class='max-h-12 max-w-xs justify-center flex-row items-center space-x-2'>
 		<Label class="text-slate-900 text-sm">{data ?? 'N/A'}</Label>
 	</Card>
 {:else if purpose === 'mood'}

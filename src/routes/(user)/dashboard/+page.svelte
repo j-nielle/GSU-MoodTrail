@@ -70,7 +70,7 @@
 	$: ({ supabase } = data);
 
 	onMount(() => {
-		//const timer = setInterval(updateCurrent, interval);
+		const timer = setInterval(updateCurrent, interval);
 
 		const dashboardChannel = supabase.channel('dashboard')
 			.on('postgres_changes',{
@@ -96,7 +96,7 @@
 			).subscribe((status) => console.log('/dashboard', status));
 
 		return () => {
-			//clearInterval(timer);
+			clearInterval(timer);
 			dashboardChannel.unsubscribe();
 		};
 	});
@@ -620,7 +620,7 @@
 	};
 
 	function updateCurrent() {
-		current = dayjs();
+		current = dayjs().format('MMM D, YYYY hh:mm:ss A');
 	}
 </script>
 
