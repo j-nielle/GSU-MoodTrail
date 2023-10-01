@@ -14,6 +14,7 @@ export const actions = {
 		});
 
 		if (error) {
+			console.log(error.stack)
 			if (error.message === 'Email not confirmed') {
 				return fail(400, {
 					error: 'Email not confirmed'
