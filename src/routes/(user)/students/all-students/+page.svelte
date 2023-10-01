@@ -58,6 +58,7 @@
 					schema: 'public',
 					table: 'Student'
 				}, (payload) => {
+					console.log(payload.eventType)
 					if (payload.eventType === 'INSERT') {
 						addAlert = true;
 
@@ -285,9 +286,4 @@
 </div>
 
 <AddStudent bind:open={addStudentModal} bind:handler={form} bind:items={selectCourse} />
-<EditStudent
-	bind:open={editStudentModal}
-	bind:handler={form}
-	bind:items={selectCourse}
-	student={rowToUpdate}
-/>
+<EditStudent bind:open={editStudentModal} bind:handler={form} bind:items={selectCourse} student={rowToUpdate} />
