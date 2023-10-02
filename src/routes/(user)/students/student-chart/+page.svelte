@@ -1,5 +1,6 @@
 <script>
 	// @ts-nocheck
+	import { enhance } from '$app/forms';
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
 	import { goto } from '$app/navigation';
@@ -10,28 +11,28 @@
 	// import { ClockSolid } from 'flowbite-svelte-icons';
 	import {
 		P,
-		Badge,
+		//Badge,
 		Card,
-		Search,
 		Button,
 		ButtonGroup,
 		Select,
 		Avatar,
-		Modal,
-		Fileupload,
-		Label
+		Modal
 	} from 'flowbite-svelte';
 	import {
 		LineChart,
-		HorizontalMoodBarChart,
+		//HorizontalMoodBarChart,
 		PieChart,
-		RadarChart,
-		HeatmapChart
+		//RadarChart,
+		//HeatmapChart
 	} from '$lib/components/charts/index.js';
 	import { PrintSolid } from 'flowbite-svelte-icons';
 	import { yearLvl, mood, reason } from '$lib/constants/index.js';
+	import { InputHelper } from '$lib/components/elements/index.js';
 
 	export let data;
+	export let form;
+
 	let studentMoodData = data.studentMood;
 	let students = data.students;
 
@@ -63,12 +64,18 @@
 	let xDataMBC, yDataMBC;
 	let pieChartData,lcBtnColors = {};
 
-	// let modalState = false;
+	let newMoodEntry = false;
+
+	const divClass = "bg-white space-y-4 dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col";
+
+	const moodChoices = Object.keys(mood).map(key => ({ value: mood[key], name: key }));
+	const reasonChoices = Object.keys(reason).map(key => ({ value: reason[key], name: key }));
+
+	let currentStudentID;
 
 	onMount(() => {
-		const studentChartChannel = supabase
-			.channel('dashboard')
-			.on('postgres_changes',{
+		const studentChartChannel = supabase.channel('studentChartChannel')
+			.on('postgres_changes', {
 					event: 'INSERT',
 					schema: 'public',
 					table: 'StudentMoodEntries'
@@ -87,9 +94,13 @@
 		hasEntry = studentMoodData.find((student) => student.student_id == searchTerm);
 
 		if (hasEntry != undefined) {
+			urlResult = []
 			result = studentMoodData.filter((student) => student?.student_id?.toString() === searchTerm);
-		} else {
+			currentStudentID = result[0].student_id;
+		} else if (hasEntry == undefined){
+			result = []
 			urlResult = students.filter((student) => student?.id?.toString() === searchTerm);
+			currentStudentID = urlResult[0].id;
 		}
 	}
 
@@ -261,11 +272,6 @@
 		selectedLineChart = chart;
 	}
 
-	// function handleNewEntry(entry){
-	// 	modalState = true;
-	// 	console.log(entry)
-	// }
-
 	function handlePrint() {
 		window.print();
 	}
@@ -276,6 +282,12 @@
 </svelte:head>
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3.5">
+	{#if form?.success}
+		<InputHelper color="green" msg="Mood entry added succesfully!" />
+	{:else if form?.error}
+		<InputHelper color="red" msg={form?.error} />
+	{/if}
+
 	<div class="space-x-2 flex flex-row max-w-full justify-center">
 		{#if studentMoodData?.length > 0 && urlResult?.length == 0}
 			<Select placeholder="College"	class="font-normal w-max h-11 bg-white" items={college} bind:value={selectedCollege}
@@ -318,19 +330,23 @@
 		{/if}
 		{#if !result || urlResult?.length > 0}
 			<div class="space-x-2">
-				<Button
-					class="h-11 w-fit"
-					size="sm"
-					color="dark"
-					on:click={() => goto('/students/all-students')}>Back to Student List</Button
-				>
+				<Button class="h-11 w-fit" size="sm" color="dark" on:click={() => goto('/students/all-students')}>
+					Back to Student List
+				</Button>
+				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
+					Add New Mood Entry
+				</Button>
+				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint}>
+					<span class="mr-3">Print</span>
+					<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
+				</Button>
 			</div>
-		{/if}
-		{#if result?.length > 0 || urlResult?.length > 0}
+		{:else if result?.length > 0 || !urlResult}
 			<div class="space-x-2">
-				<!-- <Button class="h-11 w-fit" size="sm" color="purple"
-				on:click={handleNewEntry(result)}>New Mood Entry</Button> -->
-				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint(result, urlResult)}>
+				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
+					Add New Mood Entry
+				</Button>
+				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint}>
 					<span class="mr-3">Print</span>
 					<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
 				</Button>
@@ -338,12 +354,10 @@
 		{/if}
 	</div>
 
-	<div
-		class="bg-white space-y-4 dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col"
-	>
+	<div class={divClass}>
 		<div class="flex space-x-6 justify-between">
 			<div class="flex flex-col p-5">
-				{#if urlResult?.length > 0}
+				{#if urlResult?.length > 0 || !result}
 					<Card class="max-w-full">
 						<div class="flex flex-row space-x-8">
 							<div class="self-start">
@@ -366,7 +380,7 @@
 						</div>
 					</Card>
 					<p class="italic mt-4 text-sm">*This student have yet to have mood entries.</p>
-				{:else if result?.length > 0}
+				{:else if result?.length > 0 || !urlResult}
 					<Card class="max-w-full">
 						<div class="flex flex-row space-x-8">
 							<div class="self-start">
@@ -499,7 +513,18 @@
 	</div>
 </div>
 
-<!-- <Modal title="Terms of Service" bind:open={modalState} autoclose>
-	<Label class="space-y-2 mb-2" >Testing
-	</Label>
-</Modal> -->
+<Modal title="Add New Mood Entry" size="xs" bind:open={newMoodEntry} class="w-full">
+	<form class="flex flex-col" method="POST" action="?/addMoodEntry" use:enhance>
+		<p class="text-sm mb-3"><strong>Student ID:</strong> {currentStudentID}</p>
+		<input type="hidden" id="studentID" name="studentID" bind:value={currentStudentID} />
+
+		<div class="flex flex-row space-x-3">
+			<Select size="sm" class="my-2" items={moodChoices} placeholder="Select Mood" name="addMood" 
+				required />
+			<Select size="sm" class="my-2" items={reasonChoices} placeholder="Select Reason" name="addReason" 
+				required />
+		</div>
+
+		<Button type="submit" class="w-full mt-3">SAVE MOOD ENTRY</Button>
+	</form>
+</Modal>
