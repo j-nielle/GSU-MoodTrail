@@ -151,7 +151,7 @@
 		</div>
 	{/if}
 	{#if newLowMoodData}
-		{#if activeUrl == '/dashboard' || activeUrl == '/students/student-chart' || activeUrl == '/settings/account' || activeUrl == '/settings/manage-users'}
+		{#if activeUrl == '/dashboard' || activeUrl == '/students/student-chart'}
 			<div class="px-4 pt-4 bg-zinc-50">
 				<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900">
 					<BellRingSolid tabindex="-1" class="text-red-700" />

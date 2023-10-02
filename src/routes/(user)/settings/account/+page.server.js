@@ -10,8 +10,15 @@ export async function load({ locals: { supabase, getSession } }) {
 		throw redirect(303, '/login');
 	}
 
-	const { data: { user } } = await supabase.auth.getUser();
-	
+	const { data: { user }, error } = await supabase.auth.getUser();
+
+	if (error) {
+		console.log(error);
+		return{
+			error: error.message
+		};
+	}
+
 	return {
 		user: user || []
 	};
