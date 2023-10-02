@@ -86,6 +86,8 @@
 			unsubscribe();
 		}
 	});
+
+	$: console.log(session?.user)
 </script>
 
 <Navbar class="!p-4 drop-shadow-sm w-full mx-auto relative" {navDivClass}>
@@ -117,14 +119,11 @@
 		</NavUl>
 
 		<label for="avatar-menu">
-			<Avatar class={avatarClass} data-name={session?.user?.user_metadata?.name ?? 'User'}
-				id="avatar-menu" alt="User Profile Pic" border>
-				{session?.user?.user_metadata?.name ?? 'User'}
-			</Avatar>
+			<Avatar class={avatarClass} id="avatar-menu" alt="User Profile Pic" border />
 		</label>
 		<Dropdown class={dropdownClass} placement="left" triggeredBy="#avatar-menu" {containerClass}>
 			<DropdownHeader>
-				<span class="block text-sm"> {session?.user?.user_metadata?.name ?? 'User'} </span>
+				<span class="block text-sm"> {session?.user?.role.toUpperCase()} </span>
 				<span class="block text-sm font-medium truncate"> {session?.user?.email} </span>
 			</DropdownHeader>
 			<DropdownItem class="cursor-pointer" href="/settings/account">Settings</DropdownItem
