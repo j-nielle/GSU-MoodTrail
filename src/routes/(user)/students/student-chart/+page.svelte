@@ -41,14 +41,15 @@
 
 	let course = [], college = [], yearLevel = [], student = [];
 
+	let searchURL = $page?.url?.searchParams?.get('search') || '';
 	let searchTerm = '';
 	let selectedCollege = '';
 	let selectedCourse = '';
 	let selectedYearLevel = '';
 	let selectedStudent = '';
 
-	let result = [];
-	let urlResult = [];
+	let result = {};
+	let urlResult = {};
 	let hasEntry;
 
 	let mostFrequentMood,leastFrequentMood;
@@ -90,28 +91,26 @@
 		};
 	});
 
-	$: {
-		searchTerm = $page?.url?.searchParams?.get('search') || '';
+	$:if(searchURL !== ''){
+		searchTerm = $page?.url?.searchParams?.get('search');
+		if (selectedStudent) {
+			searchTerm = selectedStudent
+		}
 		hasEntry = studentMoodData?.find((student) => student.student_id == searchTerm);
-
+		console.log(hasEntry)
 		if (hasEntry) {
-			result = studentMoodData?.filter((student) => student?.student_id?.toString() === searchTerm);
-		} else if (hasEntry === undefined){
-			urlResult = students?.filter((student) => student?.id?.toString() === searchTerm);
-		}
-	}
-
-	$: {
-		if(urlResult?.length > 0 && result?.length === 0){
-			result = [];
-			currentStudentID = urlResult[0]?.id;
-		}else if(result?.length > 0 && urlResult?.length === 0){
-			urlResult = [];
+			urlResult = {};
+			result = studentMoodData?.filter((student) => student?.student_id == searchTerm);
 			currentStudentID = result[0]?.student_id;
+		} else if (hasEntry === undefined){
+			result = {};
+			urlResult = students?.filter((student) => student?.id == searchTerm);
+			currentStudentID = urlResult[0]?.id;
 		}
 	}
 
-	$: console.log(urlResult?.length, result?.length, currentStudentID)
+	$: console.log(urlResult?.length, result?.length)
+	$: console.log(currentStudentID, searchTerm)
 
 	$: if (studentMoodData?.length > 0) {
 		college = _.uniq(studentMoodData.map((data) => data.college)).map((college) => ({
@@ -145,10 +144,7 @@
 			}))
 			.sort()
 			.value();
-	}
-
-	$: if (selectedStudent?.length != 0) {
-		result = studentMoodData.filter((student) => student?.student_id == selectedStudent);
+		console.log(college, course, yearLevel, student)
 	}
 
 	$: if (result?.length > 0) {
@@ -313,8 +309,20 @@
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3.5">
 	<div class="space-x-2 flex flex-row max-w-full justify-center">
-		
-		{#if studentMoodData?.length > 0 && urlResult?.length == 0}
+		{#if urlResult?.length > 0}
+			<div class="space-x-2">
+				<Button class="h-11 w-fit" size="sm" color="dark" on:click={() => goto('/students/all-students')}>
+					Back to Student List
+				</Button>
+				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
+					New Mood Entry
+				</Button>
+				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint}>
+					<span class="mr-3">Print</span>
+					<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
+				</Button>
+			</div>
+		{:else if result?.length > 0}
 			<Select placeholder="College"	class="font-normal w-max h-11 bg-white" items={college} bind:value={selectedCollege}
 				on:change={(e) => {
 					selectedCourse = '';
@@ -352,21 +360,6 @@
 					selectedLineChart = 'today';
 				}}>Reset</Button
 			>
-		{/if}
-		{#if !result || urlResult?.length > 0}
-			<div class="space-x-2">
-				<Button class="h-11 w-fit" size="sm" color="dark" on:click={() => goto('/students/all-students')}>
-					Back to Student List
-				</Button>
-				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
-					New Mood Entry
-				</Button>
-				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint}>
-					<span class="mr-3">Print</span>
-					<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
-				</Button>
-			</div>
-		{:else if result?.length > 0 || !urlResult}
 			<div class="space-x-2">
 				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
 					New Mood Entry
@@ -387,7 +380,7 @@
 				{:else if form?.error}
 					<Alert color="red" class="mb-2"><span class="font-medium">{form?.error}</span></Alert>
 				{/if}
-				{#if urlResult?.length > 0 || !result}
+				{#if urlResult?.length > 0}
 					<Card class="max-w-full">
 						<div class="flex flex-row space-x-8">
 							<div class="self-start">
@@ -410,7 +403,7 @@
 						</div>
 					</Card>
 					<p class="italic mt-4 text-sm">*This student have yet to have mood entries.</p>
-				{:else if result?.length > 0 || !urlResult}
+				{:else if result?.length > 0}
 					<Card class="max-w-full">
 						<div class="flex flex-row space-x-8">
 							<div class="self-start">
@@ -555,6 +548,6 @@
 				required />
 		</div>
 
-		<Button type="submit" class="w-full mt-3">SAVE MOOD ENTRY</Button>
+		<Button type="submit" class="w-full mt-3" on:click={() => newMoodEntry = false}>SAVE MOOD ENTRY</Button>
 	</form>
 </Modal>
