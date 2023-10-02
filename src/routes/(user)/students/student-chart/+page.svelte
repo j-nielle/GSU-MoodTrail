@@ -17,7 +17,8 @@
 		ButtonGroup,
 		Select,
 		Avatar,
-		Modal
+		Modal,
+		Alert
 	} from 'flowbite-svelte';
 	import {
 		LineChart,
@@ -90,20 +91,27 @@
 	});
 
 	$: {
-		searchTerm = $page.url.searchParams.get('search') || '';
-		hasEntry = studentMoodData.find((student) => student.student_id == searchTerm);
+		searchTerm = $page?.url?.searchParams?.get('search') || '';
+		hasEntry = studentMoodData?.find((student) => student.student_id == searchTerm);
 
-		if (hasEntry != undefined) {
-			urlResult = []
-			result = studentMoodData.filter((student) => student?.student_id?.toString() === searchTerm);
-			currentStudentID = result[0].student_id;
-
-		} else if (hasEntry == undefined){
-			result = []
-			urlResult = students.filter((student) => student?.id?.toString() === searchTerm);
-			currentStudentID = urlResult[0].id;
+		if (hasEntry) {
+			result = studentMoodData?.filter((student) => student?.student_id?.toString() === searchTerm);
+		} else if (hasEntry === undefined){
+			urlResult = students?.filter((student) => student?.id?.toString() === searchTerm);
 		}
 	}
+
+	$: {
+		if(urlResult?.length > 0 && result?.length === 0){
+			result = [];
+			currentStudentID = urlResult[0]?.id;
+		}else if(result?.length > 0 && urlResult?.length === 0){
+			urlResult = [];
+			currentStudentID = result[0]?.student_id;
+		}
+	}
+
+	$: console.log(urlResult?.length, result?.length, currentStudentID)
 
 	$: if (studentMoodData?.length > 0) {
 		college = _.uniq(studentMoodData.map((data) => data.college)).map((college) => ({
@@ -304,13 +312,8 @@
 </svelte:head>
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3.5">
-	{#if form?.success}
-		<InputHelper color="green" msg="Mood entry added succesfully!" />
-	{:else if form?.error}
-		<InputHelper color="red" msg={form?.error} />
-	{/if}
-
 	<div class="space-x-2 flex flex-row max-w-full justify-center">
+		
 		{#if studentMoodData?.length > 0 && urlResult?.length == 0}
 			<Select placeholder="College"	class="font-normal w-max h-11 bg-white" items={college} bind:value={selectedCollege}
 				on:change={(e) => {
@@ -347,7 +350,7 @@
 					selectedYearLevel = '';
 					selectedStudent = '';
 					selectedLineChart = 'today';
-				}}>Reset Filter</Button
+				}}>Reset</Button
 			>
 		{/if}
 		{#if !result || urlResult?.length > 0}
@@ -356,7 +359,7 @@
 					Back to Student List
 				</Button>
 				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
-					Add New Mood Entry
+					New Mood Entry
 				</Button>
 				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint}>
 					<span class="mr-3">Print</span>
@@ -366,7 +369,7 @@
 		{:else if result?.length > 0 || !urlResult}
 			<div class="space-x-2">
 				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
-					Add New Mood Entry
+					New Mood Entry
 				</Button>
 				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint}>
 					<span class="mr-3">Print</span>
@@ -375,10 +378,15 @@
 			</div>
 		{/if}
 	</div>
-
+	
 	<div class={divClass}>
 		<div class="flex space-x-6 justify-between">
 			<div class="flex flex-col p-5">
+				{#if form?.success}
+					<Alert color="green" class="mb-2"><span class="font-medium">Mood entry added succesfully!</span></Alert>
+				{:else if form?.error}
+					<Alert color="red" class="mb-2"><span class="font-medium">{form?.error}</span></Alert>
+				{/if}
 				{#if urlResult?.length > 0 || !result}
 					<Card class="max-w-full">
 						<div class="flex flex-row space-x-8">

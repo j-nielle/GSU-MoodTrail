@@ -35,22 +35,25 @@ export const actions = {
 
 		try {
 			const { error } = await supabase
-			.from('StudentMood')
-			.insert([
-				{ student_id: studentID, mood_id: addMood, reason_id: addReason },
-			])
-			.select()
+				.from('StudentMood')
+				.insert([
+					{ student_id: studentID, mood_id: addMood, reason_id: addReason },
+				])
+				.select()
 			if(error){
+				console.log(error.message)
 				return{
 					success: false,
 					error: error.message
 				}
 			}else{
 				return{
-					success: true
+					success: true,
+					error: ''
 				}
 			}
 		} catch (error) {
+			console.log(error)
 			return{
 				success: false,
 				error: error
