@@ -91,7 +91,7 @@
 		};
 	});
 
-	$:if(searchURL !== ''){
+	$: {
 		searchTerm = $page?.url?.searchParams?.get('search');
 		if (selectedStudent) {
 			searchTerm = selectedStudent
@@ -322,7 +322,7 @@
 					<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
 				</Button>
 			</div>
-		{:else if result?.length > 0}
+		{:else if studentMoodData?.length > 0}
 			<Select placeholder="College"	class="font-normal w-max h-11 bg-white" items={college} bind:value={selectedCollege}
 				on:change={(e) => {
 					selectedCourse = '';
@@ -361,9 +361,11 @@
 				}}>Reset</Button
 			>
 			<div class="space-x-2">
-				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
-					New Mood Entry
-				</Button>
+				{#if selectedStudent || currentStudentID}
+					<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
+						New Mood Entry
+					</Button>
+				{/if}
 				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint}>
 					<span class="mr-3">Print</span>
 					<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
