@@ -41,8 +41,6 @@ export const actions = {
 		const email = formData?.get('addEmail');
 		const password = formData?.get('addPassword');
 
-		// soon: form and error handling ...
-
 		try {
 			const { data, error } = await adminAuthClient.createUser({
 				email: email,
@@ -51,16 +49,27 @@ export const actions = {
 				role: role,
 				email_confirm: true
 			});
-			console.log(data, error);
+			console.log("insert",data);
 			if (error) {
-				console.log(error);
+				return fail(400, {
+					error: error.message,
+					success: false
+				});
+			}else{
+				return {
+					success: true,
+					error: ''
+				}
 			}
 		} catch (error) {
-			console.log(error);
+			return fail(400, {
+				error: error.message,
+				success: false
+			});
 		}
 	},
 
-	editUser: async ({ request, locals: { supabase } }) => {
+	editUser: async ({ request }) => {
 		const supabaseAdminClient = createClient(PUBLIC_SUPABASE_URL, SECRET_SERVICE_ROLE_KEY, {
 			auth: {
 				autoRefreshToken: false,
@@ -72,72 +81,43 @@ export const actions = {
 
 		const formData = await request.formData();
 		const userID = formData?.get('userID');
-		const userPass = formData?.get('userPass');
 		const newUsername = formData?.get('editUsername');
 		const newRole = formData?.get('editRole');
 		const newEmail = formData?.get('editEmail');
-
-		console.log(formData);
-
+		console.log(userID)
 		try {
 			const { data, error } = await adminAuthClient.getUserById(userID);
 			console.log(error);
-			if (
-				data?.user.email === newEmail &&
-				data?.user.role === newRole &&
-				data?.user.user_metadata.name === newUsername
-			) {
-				// return {
-				// 	updateSuccessInAuthUsers: false,
-				// 	error: error.message
-				// }
+			if (error) {
+				return fail(400, {
+					error: error.message,
+					success: false
+				});
 			} else {
 				const { data, error } = await adminAuthClient.updateUserById(userID, {
 					email: newEmail,
 					user_metadata: { username: newUsername, role: newRole },
 					role: newRole
 				});
+				console.log("update", data)
 				if (error) {
-					console.log(error.message);
-				} else {
-					const { data: existingUser, error } = await supabase
-						.from('Users')
-						.select('*')
-						.eq('id', userID)
-						.eq('username', newUsername)
-						.eq('email', newEmail)
-						.eq('password', userPass)
-						.eq('role', newRole);
-					if (error) {
-						console.log(error);
-						// return {
-						// 	updateSuccessInPublicUsers: false,
-						// 	error: error.message
-						// }
-					} else {
-						const { data, error } = await supabase
-							.from('Users')
-							.update({
-								username: newUsername,
-								password: userPass,
-								email: newEmail,
-								role: newRole
-							})
-							.eq('id', userID)
-							.select();
-						if (error) { console.log(error) }
-						return {
-							updateSuccess: true
-						};
+					return fail(400, {
+						error: error.message,
+						success: false
+					});
+				}else{
+					return {
+						success: true,
+						error: ''
 					}
 				}
 			}
 		} catch (error) {
 			console.log(error);
-			return {
-				overallUpdateSuccess: false,
-				error: error.message
-			};
+			return fail(400, {
+				error: error.message,
+				success: false
+			});
 		}
 	},
 
@@ -156,20 +136,24 @@ export const actions = {
 
 		try {
 			const { data, error } = await adminAuthClient.deleteUser(userID);
-			console.log(data);
+			console.log("delete",data);
 			if (error) {
 				console.log(error);
-				return {
-					removalSuccess: false,
-					error: error.message
-				};
+				return fail(400, {
+					error: error.message,
+					success: false
+				});
 			} else {
 				return {
-					removalSuccess: true
+					success: true,
+					error: ''
 				};
 			}
 		} catch (error) {
-			console.log(error);
+			return fail(400, {
+				error: error.message,
+				success: false
+			});
 		}
 	}
 };

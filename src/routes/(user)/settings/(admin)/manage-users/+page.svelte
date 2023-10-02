@@ -1,11 +1,12 @@
 <script>
 	// @ts-nocheck
 	import _ from 'lodash';
+	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
 	import {
-		// PaginationItem,
+		Modal,
 		Badge,
-		// Input,
+		Alert,
 		// Card,
 		Button,
 		// ButtonGroup,
@@ -23,7 +24,7 @@
 	} from 'flowbite-svelte';
 	import { roleColor } from '$lib/constants/index.js';
 	import { addNewUser, editUser } from '$lib/stores/index.js';
-	import { AddUser, EditUser, RemoveUser } from '$lib/components/forms/index.js';
+	import { AddUser, EditUser } from '$lib/components/forms/index.js';
 	import { ChevronLeftSolid, ChevronRightSolid, TrashBinSolid, EditOutline } from 'flowbite-svelte-icons';
 
 	export let data;
@@ -42,7 +43,7 @@
 	let divClass = "text-left text-sm w-full text-gray-500 border border-zinc-300 dark:text-gray-400";
 
 	let userToUpdate;
-	let userToDelete;
+	let userToDelete, userID;
 	let removeUserModal = false;
 	addNewUser.set(false);
 	editUser.set(false);
@@ -126,6 +127,10 @@
 		removeUserModal = false;
 	}
 
+	$: if(userToDelete){
+    userID = userToDelete[0]?.id;
+  }
+
 	function handleAddUser(){
 	  editUser.update(() => false);
 	  addNewUser.update(()  => true);
@@ -139,8 +144,8 @@
 	}
 
 	async function handleRemoveUser(userID) {
-		userToDelete = usersData.filter((user) => user.id == userID);
 		removeUserModal = true;
+		userToDelete = usersData.filter((user) => user.id == userID);
 	}
 
 	function changePage(newPage) {
@@ -155,6 +160,19 @@
 </svelte:head>
 
 <div class="p-10 ring-1 bg-white w-fit shadow-md drop-shadow-md rounded z-10">
+	{#if form?.success}
+			<div class="mb-4">
+				<Alert color="green" class="text-center p-2">
+					<span class="font-medium">Operation successful!</span>
+				</Alert>
+			</div>
+	{:else if form?.error}
+			<div class="mb-4">
+				<Alert color="red" class="text-center">
+					<span class="font-medium">{form?.error}.</span> Please try again later.
+				</Alert>
+			</div>
+	{/if}
 	<div class="relative w-full flex items-center space-x-8">
 		<caption class="text-xl my-3 font-bold text-left w-max text-gray-900 dark:text-white dark:bg-gray-800">
 			List of Users
@@ -173,7 +191,7 @@
 		</div>
 	</div>
 
-	<div class="w-full mt-6">
+	<div class="w-full mt-4">
 		<Table {divClass} >
 			<TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky">
 				<TableHeadCell>Username</TableHeadCell>
@@ -241,5 +259,11 @@
 	<EditUser user={userToUpdate} />
 {/if}
 
+<Modal title="Confirm Delete User?" bind:open={removeUserModal} size="xs" class="max-w-xs">
+	<form class="flex flex-col" method="POST" action="?/removeUser" use:enhance>
 
-<RemoveUser bind:open={removeUserModal} bind:handler={form} bind:userToDelete={userToDelete} />
+    <input type="hidden" id="userID" name="userID" bind:value={userID} />
+
+		<Button type="submit" color="red" class="w-full mt-3" on:click={() => removeUserModal = false}>CONFIRM DELETE</Button>
+	</form>
+</Modal>
