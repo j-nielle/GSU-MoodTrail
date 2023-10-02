@@ -97,6 +97,7 @@
 			urlResult = []
 			result = studentMoodData.filter((student) => student?.student_id?.toString() === searchTerm);
 			currentStudentID = result[0].student_id;
+
 		} else if (hasEntry == undefined){
 			result = []
 			urlResult = students.filter((student) => student?.id?.toString() === searchTerm);
@@ -162,8 +163,29 @@
 		});
 
 		const sortedMoodsArr = Object.keys(moodCount).sort((a, b) => moodCount[b] - moodCount[a]);
-		mostFrequentMood = sortedMoodsArr[0];
-		leastFrequentMood = sortedMoodsArr.slice(-1)[0];
+		
+		// Get the counts of each mood
+		const counts = Object.values(moodCount);
+
+		// Check if all moods are equally frequent
+		if (counts.every(count => count === counts[0])) {
+				mostFrequentMood = 'Equal mood frequency';
+				leastFrequentMood = 'Equal mood frequency';
+		} else {
+				// Get the mood(s) with the maximum count
+				const maxCount = Math.max(...counts);
+				const mostFrequentMoods = sortedMoodsArr.filter(mood => moodCount[mood] === maxCount);
+
+				// If there's a tie for the most frequent mood, set mostFrequentMood to 'Tie'
+				mostFrequentMood = mostFrequentMoods.length > 1 ? 'A tie.' : mostFrequentMoods[0];
+
+				// Get the mood(s) with the minimum count
+				const minCount = Math.min(...counts);
+				const leastFrequentMoods = sortedMoodsArr.filter(mood => moodCount[mood] === minCount);
+
+				// If there's a tie for the least frequent mood, set leastFrequentMood to 'Tie'
+				leastFrequentMood = leastFrequentMoods.length > 1 ? 'A tie.' : leastFrequentMoods[0];
+		}
 
 		// pie chart
 		const sortedMoodObj = Object.fromEntries(
@@ -364,7 +386,7 @@
 								<Avatar size="lg" src="" border rounded />
 							</div>
 							<div class="flex flex-col">
-								<h5 class="text-xl font-medium text-zinc-800">{urlResult[0]?.name}</h5>
+								<h5 class="text-xl font-medium text-zinc-800 max-w-sm">{urlResult[0]?.name}</h5>
 								<span class="text-sm text-gray-500 dark:text-gray-400">{urlResult[0]?.id}</span>
 								<div class="flex mt-5 space-x-10">
 									<div class="flex flex-col">
@@ -387,7 +409,7 @@
 								<Avatar size="lg" src="" border rounded />
 							</div>
 							<div class="flex flex-col">
-								<h5 class="text-xl font-medium text-zinc-800">{result[0]?.name}</h5>
+								<h5 class="text-xl font-medium text-zinc-800 max-w-sm">{result[0]?.name}</h5>
 								<span class="text-sm text-gray-500 dark:text-gray-400">{result[0].student_id}</span>
 								<div class="flex mt-5">
 									<div class="flex flex-col">
