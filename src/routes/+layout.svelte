@@ -86,8 +86,6 @@
 			unsubscribe();
 		}
 	});
-
-	$: console.log(session?.user)
 </script>
 
 <Navbar class="!p-4 drop-shadow-sm w-full mx-auto relative" {navDivClass}>
@@ -139,10 +137,10 @@
 		</div>
 	{/if}
 </Navbar>
-
+<!-- activeUrl -->
 <main>
 	{#if $newRequest}
-		<div class="px-4 pt-4">
+		<div class="px-4 pt-4 bg-zinc-50">
 			<Alert class="bg-blue-100 text-blue-900 flex justify-between items-center content-center">
 				<BellRingSolid tabindex="-1" class="text-blue-700" />
 				<div>
@@ -153,24 +151,45 @@
 		</div>
 	{/if}
 	{#if newLowMoodData}
-		<div class="px-4 pt-4">
-			<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900">
-				<BellRingSolid tabindex="-1" class="text-red-700" />
-				<div class="text-center">
-					{#if activeUrl != '/dashboard'}
-						To view the list of students experiencing consistent low moods for atleast 4 consecutive
-						days, please navigate to <span class="font-semibold">dashboard</span>.
-					{:else}
-						Click 
-						<span role="button" tabindex="0" class="font-bold hover:underline" on:click={() => focusTable.update(() => true)} on:keypress={() => focusTable.update(() => true)}>
-							here
-						</span> to view the list of students experiencing consistent low moods for atleast 4 consecutive
-						days.
-					{/if}
-				</div>
-				<CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700 focus:outline-none" on:click={() => (newLowMoodData = false)} />
-			</Alert>
-		</div>
+		{#if activeUrl == '/dashboard' || activeUrl == '/students/student-chart' || activeUrl == '/settings/account' || activeUrl == '/settings/manage-users'}
+			<div class="px-4 pt-4 bg-zinc-50">
+				<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900">
+					<BellRingSolid tabindex="-1" class="text-red-700" />
+					<div class="text-center">
+						{#if activeUrl != '/dashboard'}
+							To view the list of students experiencing consistent low moods for atleast 4 consecutive
+							days, please navigate to <span class="font-semibold">dashboard</span>.
+						{:else}
+							Click 
+							<span role="button" tabindex="0" class="font-bold hover:underline" on:click={() => focusTable.update(() => true)} on:keypress={() => focusTable.update(() => true)}>
+								here
+							</span> to view the list of students experiencing consistent low moods for atleast 4 consecutive
+							days.
+						{/if}
+					</div>
+					<CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700 focus:outline-none" on:click={() => (newLowMoodData = false)} />
+				</Alert>
+			</div>
+		{:else}
+			<div class="px-4 pt-4">
+				<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900">
+					<BellRingSolid tabindex="-1" class="text-red-700" />
+					<div class="text-center">
+						{#if activeUrl != '/dashboard'}
+							To view the list of students experiencing consistent low moods for atleast 4 consecutive
+							days, please navigate to <span class="font-semibold">dashboard</span>.
+						{:else}
+							Click 
+							<span role="button" tabindex="0" class="font-bold hover:underline" on:click={() => focusTable.update(() => true)} on:keypress={() => focusTable.update(() => true)}>
+								here
+							</span> to view the list of students experiencing consistent low moods for atleast 4 consecutive
+							days.
+						{/if}
+					</div>
+					<CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700 focus:outline-none" on:click={() => (newLowMoodData = false)} />
+				</Alert>
+			</div>
+		{/if}
 	{/if}
 	<slot />
 </main>
