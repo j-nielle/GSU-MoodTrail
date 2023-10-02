@@ -800,7 +800,7 @@
 			<div class="bg-white flex items-center rounded-sm drop-shadow-md p-4 hover:ring-1">
 				{#if dataType.length > 0}
 					<HeatmapChart
-						title="Mood Occurrences by Day and Hour"
+						title="Mood Frequency by Day and Hour"
 						{heatmapData}
 						elementID="dashboardHM"
 						style="width:580px; height:350px;"
