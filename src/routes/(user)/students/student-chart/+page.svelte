@@ -109,9 +109,6 @@
 		}
 	}
 
-	$: console.log(urlResult?.length, result?.length)
-	$: console.log(currentStudentID, searchTerm)
-
 	$: if (studentMoodData?.length > 0) {
 		college = _.uniq(studentMoodData.map((data) => data.college)).map((college) => ({
 			value: college,
@@ -465,19 +462,21 @@
 				<div class="flex flex-col">
 					<div class="flex justify-end h-fit">
 						<ButtonGroup>
-							<Button color={lcBtnColors.today} on:click={() => toggleChart('today')}>Today</Button>
-							<Button color={lcBtnColors.weekly} on:click={() => toggleChart('weekly')}
-								>Weekly</Button
-							>
-							<Button color={lcBtnColors.monthly} on:click={() => toggleChart('monthly')}
-								>Monthly</Button
-							>
-							<Button color={lcBtnColors.yearly} on:click={() => toggleChart('yearly')}
-								>Yearly</Button
-							>
-							<Button color={lcBtnColors.overall} on:click={() => toggleChart('overall')}
-								>Overall</Button
-							>
+							<Button color={lcBtnColors.today} on:click={() => toggleChart('today')}>
+								Today
+							</Button>
+							<Button color={lcBtnColors.weekly} on:click={() => toggleChart('weekly')}>
+								Weekly
+							</Button>
+							<Button color={lcBtnColors.monthly} on:click={() => toggleChart('monthly')}>
+								Monthly
+							</Button>
+							<Button color={lcBtnColors.yearly} on:click={() => toggleChart('yearly')}>
+								Yearly
+							</Button>
+							<Button color={lcBtnColors.overall} on:click={() => toggleChart('overall')}>
+								Overall
+							</Button>
 						</ButtonGroup>
 					</div>
 

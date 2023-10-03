@@ -34,12 +34,13 @@ export const actions = {
 		const addReason = formData?.get('addReason');
 
 		try {
-			const { error } = await supabase
+			const { data, error } = await supabase
 				.from('StudentMood')
 				.insert([
 					{ student_id: studentID, mood_id: addMood, reason_id: addReason },
 				])
 				.select()
+
 			if(error){
 				console.log(error.message)
 				return{
