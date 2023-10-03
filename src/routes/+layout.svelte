@@ -59,23 +59,33 @@
 				}
 			).subscribe((status) => console.log(activeUrl,status));
 
+		// checks if there’s any new data in the consistentLowMoods store
+		// note: only runs when url is /dashboard since that is where the consistentLowMoods store is updated
 		const unsubscribe = consistentLowMoods.subscribe((updatedMoods) => {
 			updatedMoods.forEach((moodEntry) => {
 				const studentId = moodEntry.studentId;
 				const streaksLength = moodEntry.streaks.length;
 
+				// checks if the studentId is already in the students array
+				// if not, add the studentId to the array
 				if (!students.includes(studentId)) {
 					students.push(studentId);
 				}
 
+				// checks if there’s already an entry for this student in the consistentStreaksInfo Map 
+				// (which maps from studentId to an object containing streaksLength)
 				if (consistentStreaksInfo.has(studentId)) {
+
+					// if there is, check if the streaksLength has changed since the last time
 					if (streaksLength !== consistentStreaksInfo.get(studentId).streaksLength) {
+						// if it has, set newLowMoodData to true
 						newLowMoodData = true;
 					}
 				} else {
+					// if student is not present in the Map, set newLowMoodData to true (since this is new data).
 					newLowMoodData = true;
 				}
-
+				// updates/create the entry for this student in the Map with the new streaksLength
 				consistentStreaksInfo.set(studentId, { streaksLength });
 			});
 		});
@@ -137,7 +147,7 @@
 		</div>
 	{/if}
 </Navbar>
-<!-- activeUrl -->
+
 <main>
 	{#if $newRequest}
 		<div class="px-4 pt-4 bg-zinc-50">
