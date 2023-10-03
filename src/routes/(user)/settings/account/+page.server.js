@@ -46,7 +46,7 @@ export const actions = {
 			console.log(data)
 			return {
 				success: true,
-				error: ''
+				error: false
 			};
 		}
 	},
@@ -97,7 +97,7 @@ export const actions = {
 				}else{
 					return {
 						success: true,
-						error: ''
+						error: false
 					}
 				}
 			}
@@ -127,7 +127,7 @@ export const actions = {
 			console.log(data)
 			return {
 				success: true,
-				error: ''
+				error: false
 			};
 		}
 	},

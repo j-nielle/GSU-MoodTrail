@@ -49,7 +49,7 @@ export const actions = {
 			}else{
 				return{
 					success: true,
-					error: ''
+					error: false
 				}
 			}
 		} catch (error) {

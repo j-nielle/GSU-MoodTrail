@@ -58,7 +58,7 @@ export const actions = {
 			}else{
 				return {
 					success: true,
-					error: ''
+					error: false
 				}
 			}
 		} catch (error) {
@@ -108,7 +108,7 @@ export const actions = {
 				}else{
 					return {
 						success: true,
-						error: ''
+						error: false
 					}
 				}
 			}
@@ -146,7 +146,7 @@ export const actions = {
 			} else {
 				return {
 					success: true,
-					error: ''
+					error: false
 				};
 			}
 		} catch (error) {
