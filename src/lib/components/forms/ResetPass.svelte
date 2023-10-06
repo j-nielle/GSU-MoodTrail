@@ -9,13 +9,10 @@
 	size="lg"
 	padding="lg"
 >
-	<form class="flex flex-col space-y-3" action="?/requestPassReset" method="POST" use:enhance>
-		<h3 class="text-xl text-center font-bold text-gray-900 dark:text-white mb-3">
-			Forgot Password?
-		</h3>
+	<form class="flex flex-col space-y-4 w-fit" action="?/requestPassReset" method="POST" use:enhance>
 		<Label class="space-y-2 font-normal">
-			<span>Enter the email associated with your account</span>
-			<Input type="email" name="email" class="font-normal" placeholder="name@company.com" required>
+			<span>Enter email associated with your account</span>
+			<Input type="email" name="email" class="font-normal" placeholder="name@gmail.com" required>
 				<svelte:fragment slot="left">
 					<EnvelopeSolid tabindex="-1" size="xs" class="ml-1" />
 				</svelte:fragment>

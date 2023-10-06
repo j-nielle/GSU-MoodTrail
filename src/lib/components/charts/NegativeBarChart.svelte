@@ -20,6 +20,12 @@
 					fontSize: 11
 				}
 			},
+			tooltip: {
+				trigger: 'axis',
+				axisPointer: {
+					type: 'shadow'
+				}
+			},
 			xAxis: {
 				type: 'value',
 				position: 'bottom',
@@ -40,10 +46,10 @@
 			series: [
 				{
 					type: 'bar',
-					stack: 'Total',
 					label: {
 						show: true,
-						formatter: '{b}'
+						formatter: '{b}',
+						borderWidth: 0
 					},
 					emphasis: {
 						focus: 'self'

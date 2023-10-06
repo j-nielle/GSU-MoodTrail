@@ -1,5 +1,6 @@
 <script>
 	// @ts-nocheck
+	import { enhance } from '$app/forms';
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
 	import { goto } from '$app/navigation';
@@ -10,28 +11,29 @@
 	// import { ClockSolid } from 'flowbite-svelte-icons';
 	import {
 		P,
-		Badge,
+		//Badge,
 		Card,
-		Search,
 		Button,
 		ButtonGroup,
 		Select,
 		Avatar,
 		Modal,
-		Fileupload,
-		Label
+		Alert
 	} from 'flowbite-svelte';
 	import {
 		LineChart,
-		HorizontalMoodBarChart,
+		//HorizontalMoodBarChart,
 		PieChart,
-		RadarChart,
-		HeatmapChart
+		//RadarChart,
+		//HeatmapChart
 	} from '$lib/components/charts/index.js';
 	import { PrintSolid } from 'flowbite-svelte-icons';
 	import { yearLvl, mood, reason } from '$lib/constants/index.js';
+	import { InputHelper } from '$lib/components/elements/index.js';
 
 	export let data;
+	export let form;
+
 	let studentMoodData = data.studentMood;
 	let students = data.students;
 
@@ -39,14 +41,15 @@
 
 	let course = [], college = [], yearLevel = [], student = [];
 
+	let searchURL = $page?.url?.searchParams?.get('search') || '';
 	let searchTerm = '';
 	let selectedCollege = '';
 	let selectedCourse = '';
 	let selectedYearLevel = '';
 	let selectedStudent = '';
 
-	let result = [];
-	let urlResult = [];
+	let result = {};
+	let urlResult = {};
 	let hasEntry;
 
 	let mostFrequentMood,leastFrequentMood;
@@ -63,12 +66,18 @@
 	let xDataMBC, yDataMBC;
 	let pieChartData,lcBtnColors = {};
 
-	// let modalState = false;
+	let newMoodEntry = false;
+
+	const divClass = "bg-white space-y-4 dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col";
+
+	const moodChoices = Object.keys(mood).map(key => ({ value: mood[key], name: key }));
+	const reasonChoices = Object.keys(reason).map(key => ({ value: reason[key], name: key }));
+
+	let currentStudentID;
 
 	onMount(() => {
-		const studentChartChannel = supabase
-			.channel('dashboard')
-			.on('postgres_changes',{
+		const studentChartChannel = supabase.channel('studentChartChannel')
+			.on('postgres_changes', {
 					event: 'INSERT',
 					schema: 'public',
 					table: 'StudentMoodEntries'
@@ -83,13 +92,20 @@
 	});
 
 	$: {
-		searchTerm = $page.url.searchParams.get('search') || '';
-		hasEntry = studentMoodData.find((student) => student.student_id == searchTerm);
-
-		if (hasEntry != undefined) {
-			result = studentMoodData.filter((student) => student?.student_id?.toString() === searchTerm);
-		} else {
-			urlResult = students.filter((student) => student?.id?.toString() === searchTerm);
+		searchTerm = $page?.url?.searchParams?.get('search');
+		if (selectedStudent) {
+			searchTerm = selectedStudent
+		}
+		hasEntry = studentMoodData?.find((student) => student.student_id == searchTerm);
+		console.log(hasEntry)
+		if (hasEntry) {
+			urlResult = {};
+			result = studentMoodData?.filter((student) => student?.student_id == searchTerm);
+			currentStudentID = result[0]?.student_id;
+		} else if (hasEntry === undefined){
+			result = {};
+			urlResult = students?.filter((student) => student?.id == searchTerm);
+			currentStudentID = urlResult[0]?.id;
 		}
 	}
 
@@ -125,10 +141,7 @@
 			}))
 			.sort()
 			.value();
-	}
-
-	$: if (selectedStudent?.length != 0) {
-		result = studentMoodData.filter((student) => student?.student_id == selectedStudent);
+		console.log(college, course, yearLevel, student)
 	}
 
 	$: if (result?.length > 0) {
@@ -151,8 +164,29 @@
 		});
 
 		const sortedMoodsArr = Object.keys(moodCount).sort((a, b) => moodCount[b] - moodCount[a]);
-		mostFrequentMood = sortedMoodsArr[0];
-		leastFrequentMood = sortedMoodsArr.slice(-1)[0];
+		
+		// Get the counts of each mood
+		const counts = Object.values(moodCount);
+
+		// Check if all moods are equally frequent
+		if (counts.every(count => count === counts[0])) {
+				mostFrequentMood = 'Equal mood frequency';
+				leastFrequentMood = 'Equal mood frequency';
+		} else {
+				// Get the mood(s) with the maximum count
+				const maxCount = Math.max(...counts);
+				const mostFrequentMoods = sortedMoodsArr.filter(mood => moodCount[mood] === maxCount);
+
+				// If there's a tie for the most frequent mood, set mostFrequentMood to 'Tie'
+				mostFrequentMood = mostFrequentMoods.length > 1 ? 'A tie.' : mostFrequentMoods[0];
+
+				// Get the mood(s) with the minimum count
+				const minCount = Math.min(...counts);
+				const leastFrequentMoods = sortedMoodsArr.filter(mood => moodCount[mood] === minCount);
+
+				// If there's a tie for the least frequent mood, set leastFrequentMood to 'Tie'
+				leastFrequentMood = leastFrequentMoods.length > 1 ? 'A tie.' : leastFrequentMoods[0];
+		}
 
 		// pie chart
 		const sortedMoodObj = Object.fromEntries(
@@ -261,11 +295,6 @@
 		selectedLineChart = chart;
 	}
 
-	// function handleNewEntry(entry){
-	// 	modalState = true;
-	// 	console.log(entry)
-	// }
-
 	function handlePrint() {
 		window.print();
 	}
@@ -277,7 +306,20 @@
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3.5">
 	<div class="space-x-2 flex flex-row max-w-full justify-center">
-		{#if studentMoodData?.length > 0 && urlResult?.length == 0}
+		{#if urlResult?.length > 0}
+			<div class="space-x-2">
+				<Button class="h-11 w-fit" size="sm" color="dark" on:click={() => goto('/students/all-students')}>
+					Back to Student List
+				</Button>
+				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
+					New Mood Entry
+				</Button>
+				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint}>
+					<span class="mr-3">Print</span>
+					<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
+				</Button>
+			</div>
+		{:else if studentMoodData?.length > 0}
 			<Select placeholder="College"	class="font-normal w-max h-11 bg-white" items={college} bind:value={selectedCollege}
 				on:change={(e) => {
 					selectedCourse = '';
@@ -313,36 +355,30 @@
 					selectedYearLevel = '';
 					selectedStudent = '';
 					selectedLineChart = 'today';
-				}}>Reset Filter</Button
+				}}>Reset</Button
 			>
-		{/if}
-		{#if !result || urlResult?.length > 0}
 			<div class="space-x-2">
-				<Button
-					class="h-11 w-fit"
-					size="sm"
-					color="dark"
-					on:click={() => goto('/students/all-students')}>Back to Student List</Button
-				>
-			</div>
-		{/if}
-		{#if result?.length > 0 || urlResult?.length > 0}
-			<div class="space-x-2">
-				<!-- <Button class="h-11 w-fit" size="sm" color="purple"
-				on:click={handleNewEntry(result)}>New Mood Entry</Button> -->
-				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint(result, urlResult)}>
+				{#if selectedStudent || currentStudentID}
+					<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
+						New Mood Entry
+					</Button>
+				{/if}
+				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint}>
 					<span class="mr-3">Print</span>
 					<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
 				</Button>
 			</div>
 		{/if}
 	</div>
-
-	<div
-		class="bg-white space-y-4 dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col"
-	>
+	
+	<div class={divClass}>
 		<div class="flex space-x-6 justify-between">
 			<div class="flex flex-col p-5">
+				{#if form?.success}
+					<Alert color="green" class="mb-2"><span class="font-medium">Mood entry added succesfully!</span></Alert>
+				{:else if form?.error}
+					<Alert color="red" class="mb-2"><span class="font-medium">{form?.error}</span></Alert>
+				{/if}
 				{#if urlResult?.length > 0}
 					<Card class="max-w-full">
 						<div class="flex flex-row space-x-8">
@@ -350,7 +386,7 @@
 								<Avatar size="lg" src="" border rounded />
 							</div>
 							<div class="flex flex-col">
-								<h5 class="text-xl font-medium text-zinc-800">{urlResult[0]?.name}</h5>
+								<h5 class="text-xl font-medium text-zinc-800 max-w-sm">{urlResult[0]?.name}</h5>
 								<span class="text-sm text-gray-500 dark:text-gray-400">{urlResult[0]?.id}</span>
 								<div class="flex mt-5 space-x-10">
 									<div class="flex flex-col">
@@ -373,7 +409,7 @@
 								<Avatar size="lg" src="" border rounded />
 							</div>
 							<div class="flex flex-col">
-								<h5 class="text-xl font-medium text-zinc-800">{result[0]?.name}</h5>
+								<h5 class="text-xl font-medium text-zinc-800 max-w-sm">{result[0]?.name}</h5>
 								<span class="text-sm text-gray-500 dark:text-gray-400">{result[0].student_id}</span>
 								<div class="flex mt-5">
 									<div class="flex flex-col">
@@ -426,19 +462,21 @@
 				<div class="flex flex-col">
 					<div class="flex justify-end h-fit">
 						<ButtonGroup>
-							<Button color={lcBtnColors.today} on:click={() => toggleChart('today')}>Today</Button>
-							<Button color={lcBtnColors.weekly} on:click={() => toggleChart('weekly')}
-								>Weekly</Button
-							>
-							<Button color={lcBtnColors.monthly} on:click={() => toggleChart('monthly')}
-								>Monthly</Button
-							>
-							<Button color={lcBtnColors.yearly} on:click={() => toggleChart('yearly')}
-								>Yearly</Button
-							>
-							<Button color={lcBtnColors.overall} on:click={() => toggleChart('overall')}
-								>Overall</Button
-							>
+							<Button color={lcBtnColors.today} on:click={() => toggleChart('today')}>
+								Today
+							</Button>
+							<Button color={lcBtnColors.weekly} on:click={() => toggleChart('weekly')}>
+								Weekly
+							</Button>
+							<Button color={lcBtnColors.monthly} on:click={() => toggleChart('monthly')}>
+								Monthly
+							</Button>
+							<Button color={lcBtnColors.yearly} on:click={() => toggleChart('yearly')}>
+								Yearly
+							</Button>
+							<Button color={lcBtnColors.overall} on:click={() => toggleChart('overall')}>
+								Overall
+							</Button>
 						</ButtonGroup>
 					</div>
 
@@ -499,7 +537,18 @@
 	</div>
 </div>
 
-<!-- <Modal title="Terms of Service" bind:open={modalState} autoclose>
-	<Label class="space-y-2 mb-2" >Testing
-	</Label>
-</Modal> -->
+<Modal title="Add New Mood Entry" size="xs" bind:open={newMoodEntry} class="w-full">
+	<form class="flex flex-col" method="POST" action="?/addMoodEntry" use:enhance>
+		<p class="text-sm mb-3"><strong>Student ID:</strong> {currentStudentID}</p>
+		<input type="hidden" id="studentID" name="studentID" bind:value={currentStudentID} />
+
+		<div class="flex flex-row space-x-3">
+			<Select size="sm" class="my-2" items={moodChoices} placeholder="Select Mood" name="addMood" 
+				required />
+			<Select size="sm" class="my-2" items={reasonChoices} placeholder="Select Reason" name="addReason" 
+				required />
+		</div>
+
+		<Button type="submit" class="w-full mt-3" on:click={() => newMoodEntry = false}>SAVE MOOD ENTRY</Button>
+	</form>
+</Modal>

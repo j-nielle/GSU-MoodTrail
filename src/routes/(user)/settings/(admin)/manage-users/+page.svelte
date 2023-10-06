@@ -1,11 +1,12 @@
 <script>
 	// @ts-nocheck
 	import _ from 'lodash';
+	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
 	import {
-		// PaginationItem,
+		Modal,
 		Badge,
-		// Input,
+		Alert,
 		// Card,
 		Button,
 		// ButtonGroup,
@@ -24,9 +25,10 @@
 	import { roleColor } from '$lib/constants/index.js';
 	import { addNewUser, editUser } from '$lib/stores/index.js';
 	import { AddUser, EditUser } from '$lib/components/forms/index.js';
-	import { ChevronLeftSolid, ChevronRightSolid } from 'flowbite-svelte-icons';
+	import { ChevronLeftSolid, ChevronRightSolid, TrashBinSolid, EditOutline } from 'flowbite-svelte-icons';
 
 	export let data;
+	export let form;
 
 	$: ({ supabase } = data);
 
@@ -38,19 +40,52 @@
 	let limit = 5;
 	let maxPage, startIndex, endIndex, paginatedItems;
 
-	let divClass = "text-left text-sm w-full text-gray-500 border border-zinc-300 dark:text-gray-400"
+	let divClass = "text-left text-sm w-full text-gray-500 border border-zinc-300 dark:text-gray-400";
+
+	let userToUpdate;
+	let userToDelete, userID;
+	let removeUserModal = false;
+	addNewUser.set(false);
+	editUser.set(false);
 
 	onMount(() => {
 		const usersChannel = supabase.channel('usersChannel')
 			.on('postgres_changes', {
 					event: '*',
-					schema: 'auth',
-					table: 'users'
+					schema: 'public',
+					table: 'Users'
 				}, (payload) => {
 					console.log(payload.eventType)
-					if (payload.eventType == 'INSERT') {
-						usersData = _.cloneDeep([payload.new, ...usersData])//.sort((a, b) => a.name.localeCompare(b.name));
-						console.log("new data",usersData)
+					if (payload.eventType === 'INSERT') {
+						usersData = _.cloneDeep([payload.new, ...usersData]).sort((a, b) => a.username.localeCompare(b.username));
+						console.log(usersData)
+					}else if (payload.eventType === 'UPDATE') {
+						// updateAlert = true;
+
+						// setTimeout(() => {
+						// 	updateAlert = false;
+						// }, 2000);
+
+						// payload.new returns updated row, payload.old returns property "id" of updated row
+						const updatedIndex = usersData.findIndex((user) => user.id === payload.old.id);
+
+						if (updatedIndex !== -1) {
+							usersData[updatedIndex] = payload.new;
+						}
+
+						usersData = _.cloneDeep(usersData).sort((a, b) => a.username.localeCompare(b.username));
+					} else if (payload.eventType === 'DELETE') {
+						// deleteAlert = true;
+
+						// setTimeout(() => {
+						// 	deleteAlert = false;
+						// }, 2000);
+
+						// payload.old returns property "id" of deleted row
+						const updatedUsersData = usersData.filter(
+							(user) => user.id !== payload.old.id
+						);
+						usersData = updatedUsersData;
 					}
 				}
 			).subscribe((status) => console.log('/settings/manage-users', status));
@@ -62,12 +97,12 @@
 
 	$: if(usersData){
 		filteredItems = usersData.filter((req) => {
-			const nameMatch = req?.user_metadata.name?.toLowerCase().includes(searchTerm.toLowerCase());
+			const usernameMatch = req?.username?.toLowerCase().includes(searchTerm.toLowerCase());
 			const emailMatch = req?.email?.toLowerCase().includes(searchTerm.toLowerCase());
 			const roleMatch = req?.role?.toLowerCase().includes(searchTerm.toLowerCase());
 
 			return searchTerm !== '' // if
-				? nameMatch || emailMatch || roleMatch
+				? usernameMatch || emailMatch || roleMatch
 				: true; // else
 		});
 
@@ -88,14 +123,29 @@
 		paginatedItems = filteredItems?.slice(startIndex, endIndex);
 	}
 
-	function handleAddUser(){
-	  editUser.update(() => false);
-	  addNewUser.update(value  => !value);
+	$: if(form?.removalSuccess){
+		removeUserModal = false;
 	}
 
-	function handleEditUser(){
+	$: if(userToDelete){
+    userID = userToDelete[0]?.id;
+  }
+
+	function handleAddUser(){
+	  editUser.update(() => false);
+	  addNewUser.update(()  => true);
+	}
+
+	function handleEditUser(email){
+		userToUpdate = usersData.filter((user) => user.email == email);
+
 	  addNewUser.update(() => false);
-	  editUser.update(value  => !value);
+	  editUser.update(()  => true);
+	}
+
+	async function handleRemoveUser(userID) {
+		removeUserModal = true;
+		userToDelete = usersData.filter((user) => user.id == userID);
 	}
 
 	function changePage(newPage) {
@@ -103,8 +153,6 @@
 			currentPage = newPage;
 		}
 	}
-
-	$: console.log("current data:",usersData)
 </script>
 
 <svelte:head>
@@ -112,6 +160,19 @@
 </svelte:head>
 
 <div class="p-10 ring-1 bg-white w-fit shadow-md drop-shadow-md rounded z-10">
+	{#if form?.success}
+			<div class="mb-4">
+				<Alert color="green" class="text-center p-2">
+					<span class="font-medium">Operation successful!</span>
+				</Alert>
+			</div>
+	{:else if form?.error}
+			<div class="mb-4">
+				<Alert color="red" class="text-center">
+					<span class="font-medium">{form?.error}.</span> Please try again later.
+				</Alert>
+			</div>
+	{/if}
 	<div class="relative w-full flex items-center space-x-8">
 		<caption class="text-xl my-3 font-bold text-left w-max text-gray-900 dark:text-white dark:bg-gray-800">
 			List of Users
@@ -130,10 +191,10 @@
 		</div>
 	</div>
 
-	<div class="w-full mt-6">
+	<div class="w-full mt-4">
 		<Table {divClass} >
 			<TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky">
-				<TableHeadCell>Name</TableHeadCell>
+				<TableHeadCell>Username</TableHeadCell>
 				<TableHeadCell>Email Address</TableHeadCell>
 				<TableHeadCell>User Role</TableHeadCell>
 				<TableHeadCell></TableHeadCell>
@@ -151,16 +212,26 @@
 				{:else}
 					{#each paginatedItems as user}
 						<TableBodyRow class="z-10">
-							<TableBodyCell>{user.user_metadata.name ?? 'N/A'}</TableBodyCell>
+							<TableBodyCell>{user.username}</TableBodyCell>
 							<TableBodyCell>{user.email}</TableBodyCell>
 							<TableBodyCell>
 								<Badge border rounded color={roleColor[user.role]}>{user.role}</Badge>
 							</TableBodyCell>
 							<TableBodyCell class="cursor-pointer text-center hover:underline text-blue-700">
-              <button on:click={handleEditUser} class="hover:underline">Edit User</button>
+								<div class="flex justify-center cursor-pointer">
+									<EditOutline
+										class="text-purple-600 focus:outline-none hover:text-green-700"
+										on:click={handleEditUser(user.email)}
+									/>
+								</div>
             </TableBodyCell>
             <TableBodyCell class="flex justify-center cursor-pointer ">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="red" class="bi bi-trash-fill" viewBox="0 0 16 16"> <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/> </svg>
+							<div class="flex justify-center cursor-pointer">
+								<TrashBinSolid
+									class="text-red-600 focus:outline-none hover:text-red-700"
+									on:click={handleRemoveUser(user.id)}
+								/>
+							</div>
             </TableBodyCell>
 						</TableBodyRow>
 					{/each}
@@ -184,4 +255,15 @@
 </div>
 {#if $addNewUser}
   <AddUser />
+{:else if $editUser}
+	<EditUser user={userToUpdate} />
 {/if}
+
+<Modal title="Confirm Delete User?" bind:open={removeUserModal} size="xs" class="max-w-xs">
+	<form class="flex flex-col" method="POST" action="?/removeUser" use:enhance>
+
+    <input type="hidden" id="userID" name="userID" bind:value={userID} />
+
+		<Button type="submit" color="red" class="w-full mt-3" on:click={() => removeUserModal = false}>CONFIRM DELETE</Button>
+	</form>
+</Modal>

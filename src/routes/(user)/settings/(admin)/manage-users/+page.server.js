@@ -1,6 +1,6 @@
+// @ts-nocheck
 import { redirect, fail } from '@sveltejs/kit';
-import { AuthApiError } from '@supabase/supabase-js';
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 import { SECRET_SERVICE_ROLE_KEY } from '$env/static/private';
 
@@ -12,19 +12,11 @@ export async function load({ url, locals: { supabase, getSession } }) {
 		throw redirect(303, '/login');
 	}
 
-	// const { data: users } = await supabase.from('Users').select();
-	const supabaseAdminClient = createClient(PUBLIC_SUPABASE_URL, SECRET_SERVICE_ROLE_KEY, {
-		auth: {
-			autoRefreshToken: false,
-			persistSession: false
-		}
-	})
+	const { data: users } = await supabase
+		.from('Users')
+		.select()
+		.order('username', { ascending: true });
 
-	const adminAuthClient = supabaseAdminClient.auth.admin;
-
-	
-	const { data: { users }, error } = await adminAuthClient.listUsers()
-	console.log(users)
 	return {
 		users: users || [],
 		session: session
@@ -34,82 +26,134 @@ export async function load({ url, locals: { supabase, getSession } }) {
 /** @type {import('./$types').Actions} */
 export const actions = {
 	newUser: async ({ request }) => {
-
 		const supabaseAdminClient = createClient(PUBLIC_SUPABASE_URL, SECRET_SERVICE_ROLE_KEY, {
 			auth: {
 				autoRefreshToken: false,
 				persistSession: false
 			}
-		})
-	
+		});
+
 		const adminAuthClient = supabaseAdminClient.auth.admin;
 
-		
-const { data: { users }, error } = await adminAuthClient.listUsers()
-    const formData = await request.formData();
-    const name = formData?.get('addName');
+		const formData = await request.formData();
+		const username = formData?.get('addName') || 'User';
 		const role = formData?.get('addRole');
 		const email = formData?.get('addEmail');
 		const password = formData?.get('addPassword');
-
-		console.log(formData)
 
 		try {
 			const { data, error } = await adminAuthClient.createUser({
 				email: email,
 				password: password,
-				user_metadata: { name: name },
+				user_metadata: { username: username, role: role },
 				role: role,
 				email_confirm: true
-			})
-			console.log(data)
-			if(error){
-				console.log(error)
+			});
+			console.log("insert",data);
+			if (error) {
+				return fail(400, {
+					error: error.message,
+					success: false
+				});
+			}else{
+				return {
+					success: true,
+					error: false
+				}
 			}
 		} catch (error) {
-			console.log(error)
+			return fail(400, {
+				error: error.message,
+				success: false
+			});
 		}
-		
-		// const { data, error } = await supabaseAdminClient.auth.admin.deleteUser(
-		// 	'715ed5db-f090-4b8c-a067-640ecee36aa0'
-		// )
+	},
 
-		
-		// const { data: user, error } = await supabaseAdminClient.auth.admin.updateUserById(
-		// 	'6aa5d0d4-2a9f-4483-b6c8-0cf4c6c98ac4',
-		// 	{ user_metadata: { hello: 'world' } }
-		// )
+	editUser: async ({ request }) => {
+		const supabaseAdminClient = createClient(PUBLIC_SUPABASE_URL, SECRET_SERVICE_ROLE_KEY, {
+			auth: {
+				autoRefreshToken: false,
+				persistSession: false
+			}
+		});
 
-		// try{
-		// 	const { data,error } = await supabase.auth.signUp({
-		// 		email,
-		// 		password,
-		// 		options: {
-		// 			data: {
-		// 				name: name,
-		// 				role: role
-		// 			},
-		// 		}
-		// 	});
-		// 	console.log(data,error)
-		// }catch(error){
-		// 	console.log(error)
-		// }
+		const adminAuthClient = supabaseAdminClient.auth.admin;
 
-		// if (error) {
-		// 	console.log(error);
-		// 	if (error instanceof AuthApiError && error.status === 400) {
-		// 		return fail(400, {
-		// 			message: 'Invalid email or password',
-		// 			success: false
-		// 		});
-		// 	}
-		// 	return fail(500, { message: 'Server error. Try again later.', success: false, email });
-		// }
+		const formData = await request.formData();
+		const userID = formData?.get('userID');
+		const newUsername = formData?.get('editUsername');
+		const newRole = formData?.get('editRole');
+		const newEmail = formData?.get('editEmail');
+		console.log(userID)
+		try {
+			const { data, error } = await adminAuthClient.getUserById(userID);
+			console.log(error);
+			if (error) {
+				return fail(400, {
+					error: error.message,
+					success: false
+				});
+			} else {
+				const { data, error } = await adminAuthClient.updateUserById(userID, {
+					email: newEmail,
+					user_metadata: { username: newUsername, role: newRole },
+					role: newRole
+				});
+				console.log("update", data)
+				if (error) {
+					return fail(400, {
+						error: error.message,
+						success: false
+					});
+				}else{
+					return {
+						success: true,
+						error: false
+					}
+				}
+			}
+		} catch (error) {
+			console.log(error);
+			return fail(400, {
+				error: error.message,
+				success: false
+			});
+		}
+	},
 
-		// return {
-		// 	success: true,
-		// 	//email: 'Email will be sent shortly for to verify your account.'
-		// };
+	removeUser: async ({ request }) => {
+		const supabaseAdminClient = createClient(PUBLIC_SUPABASE_URL, SECRET_SERVICE_ROLE_KEY, {
+			auth: {
+				autoRefreshToken: false,
+				persistSession: false
+			}
+		});
+
+		const adminAuthClient = supabaseAdminClient.auth.admin;
+
+		const formData = await request.formData();
+		const userID = formData?.get('userID');
+
+		try {
+			const { data, error } = await adminAuthClient.deleteUser(userID);
+			console.log("delete",data);
+			if (error) {
+				console.log(error);
+				return fail(400, {
+					error: error.message,
+					success: false
+				});
+			} else {
+				return {
+					success: true,
+					error: false
+				};
+			}
+		} catch (error) {
+			return fail(400, {
+				error: error.message,
+				success: false
+			});
+		}
 	}
 };

@@ -1,60 +1,25 @@
 <script>
-	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { 
-		Toast, 
 		Sidebar, 
 		SidebarGroup, 
 		SidebarItem, 
 		SidebarWrapper } from 'flowbite-svelte';
-	import { newRequest } from '$lib/stores/index.js';
 	import {
-		BellRingSolid,
 		DatabaseSolid,
 		UserEditOutline,
 	} from 'flowbite-svelte-icons';
 
 	export let data;
 
-	$: ({ supabase, session } = data);
-
-	onMount(() => {
-		const toastChannelTwo = supabase.channel('toast-requests-2')
-			.on('postgres_changes', {
-					event: 'INSERT',
-					schema: 'public',
-					table: 'RequestEntries'
-				}, (payload) => {
-					if (payload.new) {
-						newRequest.update(() => true);
-						setTimeout(() => {
-							newRequest.set(false);
-						}, 8000);
-					}
-				}
-			).subscribe((status) => console.log('/settings layout', status));
-
-		return () => {
-			toastChannelTwo.unsubscribe();
-		};
-	});
+	$: ({ session } = data);
 
 	let activeClass = 'flex items-center p-2 text-base text-white bg-blue-600 rounded-lg hover:bg-blue-700';
-	let contentClass = 'flex space-x-4 divide-x divide-gray-200 dark:divide-gray-700 items-center'
 
 	$: activeUrl = $page.url.pathname;
 </script>
 
-{#if $newRequest}
-	<Toast position="top-right" simple {contentClass}>
-		<span tabindex="-1"><BellRingSolid /></span>
-		<div class="pl-4">
-			<span class="font-bold text-blue-700">(NEW)</span> Help request received!
-		</div>
-	</Toast>
-{/if}
-
-<div class="p-4 bg-zinc-50 flex space-x-3 overflow-x-hidden">
+<div class="p-4 flex space-x-3 overflow-x-hidden">
 	<Sidebar class="w-fit">
 		<SidebarWrapper class="bg-white drop-shadow-lg ring-1 h-fit w-32 flex p-3 justify-center">
 			<SidebarGroup>

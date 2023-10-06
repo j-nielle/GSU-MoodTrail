@@ -15,7 +15,7 @@
 
 		horizontalMoodBarChart.setOption({
 			title: {
-				text: 'Overall Mood Counts'
+				text: 'Overall Mood Frequency'
 			},
 			yAxis: {
 				type: 'category',

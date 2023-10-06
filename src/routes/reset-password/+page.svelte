@@ -10,17 +10,13 @@
 </svelte:head>
 
 {#if form?.success}
-	<div class="p-8">
-		<Alert color="green">
-			<span class="font-medium">Request sent succesfully! Please check your inbox.</span>
-		</Alert>
-	</div>
+	<Alert color="green" class="text-center">
+		<span class="font-medium">Request sent succesfully! Please check your inbox.</span>
+	</Alert>
 {:else if form?.error}
-	<div class="p-8">
-		<Alert color="red">
-			<span class="font-medium">Oops! Something went wrong...</span> Please try again later.
-		</Alert>
-	</div>
+	<Alert color="red" class="text-center">
+		<span class="font-medium">{form?.error}</span> Please try again later.
+	</Alert>
 {/if}
 
 <div class="flex justify-center mt-5">

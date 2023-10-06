@@ -58,6 +58,7 @@
 					schema: 'public',
 					table: 'Student'
 				}, (payload) => {
+					console.log(payload.eventType)
 					if (payload.eventType === 'INSERT') {
 						addAlert = true;
 
@@ -109,7 +110,7 @@
 			const idMatch = req.id.toString().includes(searchTerm);
 			const nameMatch = req.name.toLowerCase().includes(searchTerm.toLowerCase());
 			const courseMatch = req.course_id.toLowerCase().includes(searchTerm.toLowerCase());
-			const yearLevelMatch = req.year_level_id.toString().toLowerCase().includes(searchTerm.toLowerCase());
+			const yearLevelMatch = yearLvl[req.year_level_id].toLowerCase().includes(searchTerm.toLowerCase());
 
 			return searchTerm !== '' ? idMatch || nameMatch || courseMatch || yearLevelMatch : true;
 		});
@@ -130,6 +131,7 @@
 		// Get only those items from 'filteredItems' that belong to the current page.
 		paginatedItems = filteredItems?.slice(startIndex, endIndex);
 	}
+	$: console.log(studentsData)
 
 	$: if (form?.errors) {
 		errors = form?.errors;
@@ -285,9 +287,4 @@
 </div>
 
 <AddStudent bind:open={addStudentModal} bind:handler={form} bind:items={selectCourse} />
-<EditStudent
-	bind:open={editStudentModal}
-	bind:handler={form}
-	bind:items={selectCourse}
-	student={rowToUpdate}
-/>
+<EditStudent bind:open={editStudentModal} bind:handler={form} bind:items={selectCourse} student={rowToUpdate} />

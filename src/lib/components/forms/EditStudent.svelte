@@ -124,7 +124,7 @@
 				<label class="text-sm" for={`editYrLvl_${key}`}>
 					<input type="radio" name="editYrLvl" value={key} id={`editYrLvl_${key}`} required />
 					{yearLvl[key]}
-				</label>
+				</label> 
 			{/each}
 		</div>
 

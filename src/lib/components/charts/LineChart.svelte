@@ -34,6 +34,14 @@
 	$: currentMood = yData?.map((score) => getNearestMoodLabel(score));
 	$: currentMood?.length != 1 ? (showSymbol = false) : (showSymbol = true);
 
+	$: {
+			if(xData?.length == 0 || yData?.length == 0){
+				lineChart?.showLoading();
+			}else {
+				lineChart?.hideLoading();
+			}
+		}
+
 	onMount(() => {
 		lineChart = echarts.init(document?.getElementById(elementID));
 

@@ -2,20 +2,22 @@
 	// @ts-nocheck
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
-	import { fly } from 'svelte/transition';
+	import { ProfileCardOutline, FaceLaughOutline, BrainOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import {
 		Card,
 		Button,
 		ButtonGroup,
 		Spinner,
-		Select,
+		//Select,
 		Table,
 		TableBody,
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell
+		TableHeadCell, 
+		Tooltip,
+		Label
 	} from 'flowbite-svelte';
 	import { PrintSolid } from 'flowbite-svelte-icons';
 	import {
@@ -629,7 +631,7 @@
 </svelte:head>
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-10">
-	<div class="flex justify-between">
+	<!-- <div class="flex justify-between">
 		<CardInfo purpose="time" title="" bind:data={current} />
 		<CardInfo purpose="recentStudent" title="Latest Student:" bind:data={recentStudent} />
 
@@ -697,11 +699,11 @@
 			on:click={() => window.print()}>
 			<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
 		</Button>
-	</div>
+	</div> -->
 
 	<div class="flex flex-col space-y-3">
 		<div class="flex space-x-4">
-			<div class="p-4 bg-white rounded-sm drop-shadow-md hover:ring-1">
+			<!-- <div class="p-4 bg-white rounded-sm drop-shadow-md hover:ring-1">
 				{#if dataType.length == 0}
 					<div class="flex justify-center items-center" style="width:390px; height:350px;">
 						<Spinner class="w-28 h-28" />
@@ -713,7 +715,7 @@
 						elementID="dashboardHMBC"
 					/>
 				{/if}
-			</div>
+			</div> -->
 
 			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center p-4 hover:ring-1">
 				<div class="flex flex-col space-y-7">
@@ -745,7 +747,7 @@
 								</Button>
 							</ButtonGroup>
 						</div>
-						{#if dataType.length > 0}
+			<!--  {#if dataType.length > 0}
 							{#if selectedLineChart === 'today'}
 								<LineChart
 									bind:xData={timestamps}
@@ -791,7 +793,7 @@
 						<div class="flex justify-center items-center" style="width:790px; height:280px;">
 							<Spinner class="w-28 h-28" />
 						</div>
-					{/if}
+					{/if} -->
 				</div>
 			</div>
 		</div>
@@ -800,7 +802,7 @@
 			<div class="bg-white flex items-center rounded-sm drop-shadow-md p-4 hover:ring-1">
 				{#if dataType.length > 0}
 					<HeatmapChart
-						title="Mood Occurrences by Day and Hour"
+						title="Mood Frequency by Day and Hour"
 						{heatmapData}
 						elementID="dashboardHM"
 						style="width:580px; height:350px;"
@@ -812,7 +814,7 @@
 				{/if}
 			</div>
 
-			<div id="low-moods" bind:this={tableRef} class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
+			<!-- <div id="low-moods" bind:this={tableRef} class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
 				<caption class="text-lg font-bold text-left w-max text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
 					Table of Students with Consistent Low moods
 					<p class="mt-2 text-sm font-normal text-gray-500 dark:text-gray-400">
@@ -888,7 +890,7 @@
 						{/if}
 					</TableBody>
 				</Table>
-			</div>
+			</div> -->
 		</div>
 
 		<div class="flex space-x-4">
