@@ -29,7 +29,7 @@
 	} from '$lib/components/charts/index.js';
 	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
 	import { CardInfo } from '$lib/components/elements/index.js';
-	import { mood, reason } from '$lib/constants/index.js';
+	import { mood, reason, yearLvl } from '$lib/constants/index.js';
 
 	export let data;
 
@@ -340,11 +340,62 @@
 			yearlyMostFreqMood = Object.keys(mood).find((key) => mood[key] == parseInt(moodValue[0]));
 			yearlyMostFreqReason = Object.keys(reason).find((key) => reason[key] == parseInt(reasonValue[0]));
 		}
-	}
 
-	$: {
+		// for radar chart
+		const moodData = {};
+
+		for (const entry of dataType) {
+			// Find the mood label corresponding to the student's mood score
+			const moodLabel = Object.keys(mood).find((key) => mood[key] == entry.mood_score);
+			
+			if (moodLabel) { // if mood is found
+				// initialize the moodData with the mood label (key) and an array of 0s (value)
+				moodData[moodLabel] = Array(Object.keys(reason).length).fill(0); 
+			}
+		}
+
+		// Loop through the student mood data and update the mood data object based on the mood and reason scores
+		for (const entry of dataType) {
+			const moodLabel = Object.keys(mood).find((key) => mood[key] == entry.mood_score);
+
+			// Calculate the index for the reason score (subtracting 1 to match array indices)
+			const reasonIndex = entry.reason_score - 1;
+
+			// If a mood label exists and the reason index is valid (non-negative)
+			// increment the corresponding moodData entry
+			if (moodLabel && reasonIndex >= 0) {
+				moodData[moodLabel][reasonIndex]++;
+			}
+		}
+
+		// Prepare data in a format suitable for a radar chart
+		moodRadarData = Object.keys(moodData).map((moodLabel) => ({
+
+			// Map mood data to an array of values, representing number of occurences for each reason under each mood
+			value: Object.keys(reason).map((reasonLabel) => moodData[moodLabel][reason[reasonLabel] - 1]),
+			name: moodLabel
+		}));
+
+		const maxValues = Object.keys(reason).map((reasonLabel) =>
+			Math.max(...moodRadarData?.map((mood) => mood.value[reason[reasonLabel] - 1]))
+		);
+
+		// Map over the keys of the 'reason' object. For each key (which we're calling 'reasonLabel'), 
+		// we're also getting its index in the array of keys (which we're calling 'reasonIndex').
+		reasonRadarIndicator = Object.keys(reason).map((reasonLabel, reasonIndex) => {
+				// Get the maximum value for this reason from the 'maxValues' array.
+				let maxValue = maxValues[reasonIndex];
+				// Round up the maximum value to the nearest multiple of 10. This gives ECharts more room to generate readable ticks.
+				let roundedMax = Math.ceil(maxValue / 10) * 10;
+				// Return an object for this reason. The object includes the name of the reason and the rounded maximum value.
+				return {
+						name: reasonLabel,
+						max: roundedMax
+				};
+		});
+
 		if (selectedBarChart === 'course') {
-			const courseData = studentMoodData?.reduce((acc, entry) => {
+			const courseData = dataType?.reduce((acc, entry) => {
 				const existingCourse = acc.find((item) => item.course === entry.course);
 
 				if (existingCourse) {
@@ -374,9 +425,9 @@
 
 			courseYData = courseData?.map((course) => course.course);
 		} else if (selectedBarChart === 'year_level') {
-			const yearLevelData = studentMoodData?.reduce((acc, entry) => {
+			const yearLevelData = dataType?.reduce((acc, entry) => {
 				const yearLevel = acc.find((item) => item.yearLevel === entry.year_level);
-
+				
 				if (yearLevel) {
 					yearLevel.mood_scores.push(entry.mood_score);
 				} else {
@@ -385,7 +436,7 @@
 
 				return acc;
 			}, []);
-
+			
 			avgMoodByYearLvl = yearLevelData?.map((yearLevel) => {
 				const moodScores = yearLevel.mood_scores;
 
@@ -403,9 +454,16 @@
 				}
 			});
 
-			yearLvlYData = yearLevelData?.map((yearLevel) => yearLevel.yearLevel.replace(' Level', ''));
+			yearLvlYData = yearLevelData?.map((yearLevel) => {
+				if (typeof yearLevel.yearLevel === 'number') {
+					return yearLvl[yearLevel.yearLevel];
+				}
+				else {
+					return yearLevel.yearLevel.replace(' Level', '');
+				}
+			});
 		} else if (selectedBarChart === 'reason') {
-			const reasonData = studentMoodData?.reduce((acc, entry) => {
+			const reasonData = dataType?.reduce((acc, entry) => {
 				const { reason_score, mood_score } = entry;
 				const existingReason = acc.find((item) => item.reason_score === reason_score);
 
@@ -554,50 +612,6 @@
 
 			consistentLowMoods?.update((moods) => [...moods, { studentId, streaks: studentStreaks }]);
 		});
-
-		// for radar chart
-		const moodData = {};
-
-		for (const student of studentMoodData) {
-			// Find the mood label corresponding to the student's mood score
-			const moodLabel = Object.keys(mood).find((key) => mood[key] == student.mood_score);
-			
-			if (moodLabel) { // if mood is found
-				// initialize the moodData with the mood label (key) and an array of 0s (value)
-				moodData[moodLabel] = Array(Object.keys(reason).length).fill(0); 
-			}
-		}
-
-		// Loop through the student mood data and update the mood data object based on the mood and reason scores
-		for (const student of studentMoodData) {
-			const moodLabel = Object.keys(mood).find((key) => mood[key] == student.mood_score);
-
-			// Calculate the index for the reason score (subtracting 1 to match array indices)
-			const reasonIndex = student.reason_score - 1;
-
-			// If a mood label exists and the reason index is valid (non-negative)
-			// increment the corresponding moodData entry
-			if (moodLabel && reasonIndex >= 0) {
-				moodData[moodLabel][reasonIndex]++;
-			}
-		}
-
-		// Prepare data in a format suitable for a radar chart
-		moodRadarData = Object.keys(moodData).map((moodLabel) => ({
-
-			// Map mood data to an array of values, representing number of occurences for each reason under each mood
-			value: Object.keys(reason).map((reasonLabel) => moodData[moodLabel][reason[reasonLabel] - 1]),
-			name: moodLabel
-		}));
-
-		const maxValues = Object.keys(reason).map((reasonLabel) =>
-			Math.max(...moodRadarData?.map((mood) => mood.value[reason[reasonLabel] - 1]))
-		);
-
-		reasonRadarIndicator = Object.keys(reason).map((reasonLabel, reasonIndex) => ({
-			name: reasonLabel,
-			max: maxValues[reasonIndex] + 3
-		}));
 	}
 
 	$: if ($focusTable) {
@@ -631,7 +645,7 @@
 </svelte:head>
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-10">
-	<!-- <div class="flex justify-between">
+	<div class="flex justify-between">
 		<CardInfo purpose="time" title="" bind:data={current} />
 		<CardInfo purpose="recentStudent" title="Latest Student:" bind:data={recentStudent} />
 
@@ -699,12 +713,12 @@
 			on:click={() => window.print()}>
 			<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
 		</Button>
-	</div> -->
+	</div>
 
 	<div class="flex flex-col space-y-3">
 		<div class="flex space-x-4">
-			<!-- <div class="p-4 bg-white rounded-sm drop-shadow-md hover:ring-1">
-				{#if dataType.length == 0}
+			<div class="p-4 bg-white rounded-sm drop-shadow-md hover:ring-1">
+				{#if dataType?.length == 0}
 					<div class="flex justify-center items-center" style="width:390px; height:350px;">
 						<Spinner class="w-28 h-28" />
 					</div>
@@ -715,7 +729,7 @@
 						elementID="dashboardHMBC"
 					/>
 				{/if}
-			</div> -->
+			</div>
 
 			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center p-4 hover:ring-1">
 				<div class="flex flex-col space-y-7">
@@ -747,8 +761,8 @@
 								</Button>
 							</ButtonGroup>
 						</div>
-			<!--  {#if dataType.length > 0}
-							{#if selectedLineChart === 'today'}
+			 		{#if dataType?.length > 0}
+						{#if selectedLineChart === 'today'}
 								<LineChart
 									bind:xData={timestamps}
 									bind:yData={todaysMoodScores}
@@ -756,7 +770,7 @@
 									title="Today's Moods"
 									style="width:790px; height:280px;"
 								/>
-							{:else if selectedLineChart === 'overall'}
+						{:else if selectedLineChart === 'overall'}
 								<LineChart
 									bind:xData={overall}
 									bind:yData={overallAverages}
@@ -764,7 +778,7 @@
 									title="Average Mood Overall"
 									style="width:790px; height:280px;"
 								/>
-							{:else if selectedLineChart === 'weekly'}
+						{:else if selectedLineChart === 'weekly'}
 								<LineChart
 									bind:xData={weekly}
 									bind:yData={weeklyAverages}
@@ -772,7 +786,7 @@
 									title="Average Mood Weekly"
 									style="width:790px; height:280px;"
 								/>
-							{:else if selectedLineChart === 'monthly'}
+						{:else if selectedLineChart === 'monthly'}
 								<LineChart
 									bind:xData={monthly}
 									bind:yData={monthlyAverages}
@@ -780,20 +794,20 @@
 									title="Average Mood Monthly"
 									style="width:790px; height:280px;"
 								/>
-							{:else if selectedLineChart === 'yearly'}
-							<LineChart
-								bind:xData={yearly}
-								bind:yData={yearlyAverages}
-								elementID="dashboardYLC"
-								title="Average Mood Yearly"
-								style="width:790px; height:280px;"
-							/>
+						{:else if selectedLineChart === 'yearly'}
+								<LineChart
+									bind:xData={yearly}
+									bind:yData={yearlyAverages}
+									elementID="dashboardYLC"
+									title="Average Mood Yearly"
+									style="width:790px; height:280px;"
+								/>
 						{/if}
 					{:else}
 						<div class="flex justify-center items-center" style="width:790px; height:280px;">
 							<Spinner class="w-28 h-28" />
 						</div>
-					{/if} -->
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -814,7 +828,7 @@
 				{/if}
 			</div>
 
-			<!-- <div id="low-moods" bind:this={tableRef} class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
+			<div id="low-moods" bind:this={tableRef} class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
 				<caption class="text-lg font-bold text-left w-max text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
 					Table of Students with Consistent Low moods
 					<p class="mt-2 text-sm font-normal text-gray-500 dark:text-gray-400">
@@ -890,13 +904,13 @@
 						{/if}
 					</TableBody>
 				</Table>
-			</div> -->
+			</div>
 		</div>
 
 		<div class="flex space-x-4">
 			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 				<div class="flex flex-col">
-					{#if moodRadarData.length > 0}
+					{#if dataType?.length > 0}
 						<p class="text-lg font-bold self-center mb-3">Mood and Frequency of Related Reasons</p>
 						<RadarChart
 							bind:data={moodRadarData}
@@ -913,7 +927,7 @@
 			</div>
 			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 				<div class="flex flex-col">
-					{#if avgMoodByCourse.length > 0}
+					{#if dataType?.length > 0}
 						<div class="flex justify-between">
 							<div class="flex flex-col">
 								<p class="text-lg font-bold ml-1">Mood Averages</p>

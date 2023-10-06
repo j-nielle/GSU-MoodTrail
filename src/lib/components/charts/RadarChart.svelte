@@ -11,12 +11,14 @@
 
 	let radarChart;
 
+	$: console.log(data.map((item) => item.name))
+
 	onMount(() => {
 		radarChart = echarts.init(document.getElementById(elementID));
 
 		radarChart.setOption({
 			legend: {
-				data: Object.keys(mood),
+				data: data?.map((item) => item.name),
 				top: 20,
 				left: 0,
 				itemWidth: 13.5,
@@ -76,6 +78,9 @@
 
 	afterUpdate(() => {
 		radarChart.setOption({
+			legend: {
+				data: data?.map((item) => item.name)
+			},
 			series: [
 				{
 					data: data
