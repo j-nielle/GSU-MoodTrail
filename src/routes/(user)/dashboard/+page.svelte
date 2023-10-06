@@ -2,7 +2,6 @@
 	// @ts-nocheck
 	import _ from 'lodash';
 	import dayjs from 'dayjs';
-	import { ProfileCardOutline, FaceLaughOutline, BrainOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import {
 		Card,
@@ -15,9 +14,7 @@
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell, 
-		Tooltip,
-		Label
+		TableHeadCell
 	} from 'flowbite-svelte';
 	import { PrintSolid } from 'flowbite-svelte-icons';
 	import {
@@ -53,7 +50,7 @@
 
 	let recentStudent;
 	let heatmapData;
-	let selectedLineChart = 'today';
+	let selectedLineChart = 'today', lineChartTitle = '';
 	let selectedBarChart = 'course';
 
 	let current = dayjs().format('ddd MMM D, YYYY h:mm A');
@@ -152,6 +149,7 @@
 		};
 
 		if (selectedLineChart === 'today') {
+			lineChartTitle = "Today's Moods";
 			todaysEntries = _.filter(dataType,
 				(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
 			);
@@ -170,6 +168,7 @@
 			todayMostFreqMood = _.head(_(todaysMoodLabels).countBy().entries().maxBy(_.last));
 			todayMostFreqReason = _.head(_(todaysReasonLabels).countBy().entries().maxBy(_.last));
 		} else if (selectedLineChart === 'overall') {
+			lineChartTitle = 'Average Moods (Overall)';
 			const groupedByDay = _.groupBy(dataType, (entry) =>
 				dayjs(entry.created_at).format('YYYY-MM-DD')
 			); // group each mood entries by day
@@ -213,6 +212,7 @@
 			overallMostFreqMood = Object.keys(mood).find((key) => mood[key] == parseInt(moodValue[0]));
 			overallMostFreqReason = Object.keys(reason).find((key) => reason[key] === parseInt(reasonValue[0]));
 		} else if (selectedLineChart === 'weekly') {
+			lineChartTitle = 'Average Moods (Weekly)';
 			const groupedByWeek = _.groupBy(dataType, (entry) =>
 				getWeekNumberString(dayjs(entry.created_at))
 			);
@@ -256,6 +256,7 @@
 			weeklyMostFreqMood = Object.keys(mood).find((key) => mood[key] == parseInt(moodValue[0]));
 			weeklyMostFreqReason = Object.keys(reason).find((key) => reason[key] == parseInt(reasonValue[0]));
 		} else if (selectedLineChart === 'monthly') {
+			lineChartTitle = 'Average Moods (Monthly)';
 			const groupedByMonth = _.groupBy(dataType, (entry) =>
 				dayjs(entry.created_at).format('YYYY-MM')
 			);
@@ -299,6 +300,7 @@
 			monthlyMostFreqMood = Object.keys(mood).find((key) => mood[key] == parseInt(moodValue[0]));
 			monthlyMostFreqReason = Object.keys(reason).find((key) => reason[key] == parseInt(reasonValue[0]));
 		} else if (selectedLineChart === 'yearly') {
+			lineChartTitle = 'Average Moods (Yearly)';
 			const groupedByYear = _.groupBy(dataType, (entry) => dayjs(entry.created_at).format('YYYY'));
 
 			yearlyAverages = Object.values(groupedByYear).map((entries) => {
@@ -370,7 +372,6 @@
 
 		// Prepare data in a format suitable for a radar chart
 		moodRadarData = Object.keys(moodData).map((moodLabel) => ({
-
 			// Map mood data to an array of values, representing number of occurences for each reason under each mood
 			value: Object.keys(reason).map((reasonLabel) => moodData[moodLabel][reason[reasonLabel] - 1]),
 			name: moodLabel
@@ -644,6 +645,17 @@
 	<title>Dashboard</title>
 </svelte:head>
 
+<div class="bg-slate-800 p-4 rounded-full w-1/4 fixed right-4 bottom-4 z-20">
+	<div class="flex justify-center items-center">
+		<label class="relative inline-flex items-center cursor-pointer">
+			<input type="checkbox" bind:checked={viewAnonData} class="sr-only peer" disabled={anonMoodData.length == 0 && studentMoodData.length == 0}>
+			<div class="w-11 h-6 bg-blue-600 peer-focus:outline-none peer-focus:ring-1 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600"></div>
+			
+		</label>
+		<span class="ml-3 text-sm font-bold text-white">Current View:</span><span class="ml-1 text-sm text-white">{viewAnonData ? 'Anonymous Data' : 'Students Data'}</span>
+	</div>
+</div>
+
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-10">
 	<div class="flex justify-between">
 		<CardInfo purpose="time" title="" bind:data={current} />
@@ -732,8 +744,8 @@
 			</div>
 
 			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center p-4 hover:ring-1">
-				<div class="flex flex-col space-y-7">
-						<div class="flex justify-between">
+				<div class="flex flex-col space-y-4">
+						<div class="flex justify-between items-center">
 							<ButtonGroup>
 								<Button disabled={dataType.length == 0} color={lcBtnColors.today} on:click={() => selectLineChart('today')}>
 									Today
@@ -751,15 +763,7 @@
 									Overall
 								</Button>
 							</ButtonGroup>
-
-							<ButtonGroup>
-								<Button disabled={anonMoodData.length == 0} color={viewAnonData ? 'dark' : 'light'} on:click={() => (viewAnonData = true)}>
-									Anonymous
-								</Button>
-								<Button disabled={studentMoodData.length == 0} color={!viewAnonData ? 'dark' : 'light'} on:click={() => (viewAnonData = false)}>
-									Students
-								</Button>
-							</ButtonGroup>
+							<p class="text-xl text-black font-semibold">{lineChartTitle}</p>
 						</div>
 			 		{#if dataType?.length > 0}
 						{#if selectedLineChart === 'today'}
@@ -767,7 +771,6 @@
 									bind:xData={timestamps}
 									bind:yData={todaysMoodScores}
 									elementID="dashboardTLC"
-									title="Today's Moods"
 									style="width:790px; height:280px;"
 								/>
 						{:else if selectedLineChart === 'overall'}
@@ -775,7 +778,6 @@
 									bind:xData={overall}
 									bind:yData={overallAverages}
 									elementID="dashboardDLC"
-									title="Average Mood Overall"
 									style="width:790px; height:280px;"
 								/>
 						{:else if selectedLineChart === 'weekly'}
@@ -783,7 +785,6 @@
 									bind:xData={weekly}
 									bind:yData={weeklyAverages}
 									elementID="dashboardWLC"
-									title="Average Mood Weekly"
 									style="width:790px; height:280px;"
 								/>
 						{:else if selectedLineChart === 'monthly'}
@@ -791,7 +792,6 @@
 									bind:xData={monthly}
 									bind:yData={monthlyAverages}
 									elementID="dashboardMLC"
-									title="Average Mood Monthly"
 									style="width:790px; height:280px;"
 								/>
 						{:else if selectedLineChart === 'yearly'}
@@ -799,7 +799,6 @@
 									bind:xData={yearly}
 									bind:yData={yearlyAverages}
 									elementID="dashboardYLC"
-									title="Average Mood Yearly"
 									style="width:790px; height:280px;"
 								/>
 						{/if}

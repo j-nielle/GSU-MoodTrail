@@ -11,8 +11,6 @@
 
 	let radarChart;
 
-	$: console.log(data.map((item) => item.name))
-
 	onMount(() => {
 		radarChart = echarts.init(document.getElementById(elementID));
 

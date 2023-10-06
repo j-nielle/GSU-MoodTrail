@@ -7,7 +7,6 @@
 	export let xData;
 	export let yData;
 	export let style;
-	export let title;
 	export let elementID;
 
 	let lineChart;
@@ -47,8 +46,6 @@
 
 		lineChart?.setOption({
 			title: {
-				text: title,
-				itemGap: 12,
 				subtext:
 					'Sad (-4), Annoyed (-3), Nervous (-2), Bored (-1), Neutral (0), Calm (1), Relaxed (2), Happy (3), Excited (4)',
 				subtextStyle: {
