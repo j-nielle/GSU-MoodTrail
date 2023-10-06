@@ -1,11 +1,13 @@
 <script>
-	import { Card, Label } from 'flowbite-svelte';
+	import { Card, Label, Tooltip } from 'flowbite-svelte';
 	import { ProfileCardOutline, FaceLaughOutline, BrainOutline } from 'flowbite-svelte-icons';
 
 	export let title;
 	export let data;
 	export let purpose;
 </script>
+
+<Tooltip triggeredBy="#tooltip-recentStudent">Latest student who entered their mood data.</Tooltip>
 
 {#if purpose === 'time'}
 	<Card class='max-h-12 max-w-xs justify-center flex-row items-center space-x-2'>
@@ -26,7 +28,7 @@
 		</Label>
 	</Card>
 {:else}
-	<Card class='max-h-12 max-w-full justify-center flex-row items-center space-x-2'>
+	<Card id="tooltip-recentStudent" class='max-h-12 max-w-full justify-center flex-row items-center space-x-2'>
 		<ProfileCardOutline tabindex="-1" class="text-slate-900" />
 		<Label class="text-slate-900 text-sm">
 			{title} <span class="font-bold cursor-pointer">{data ?? 'N/A'}</span>
