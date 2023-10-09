@@ -143,7 +143,7 @@
 		</Dropdown>
 	{:else}
 		<div class="flex space-x-4">
-			<Button href="/login" color="purple" class="mr-3">Login</Button>
+			<Button href="/login" color="purple" class="mr-3 font-semibold tracking-wide">LOGIN</Button>
 		</div>
 	{/if}
 </Navbar>

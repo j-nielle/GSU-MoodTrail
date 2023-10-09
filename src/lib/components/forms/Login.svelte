@@ -29,7 +29,7 @@
 				</svelte:fragment>
 			</Input>
 		</Label>
-		<Button type="submit" color="blue" class={loginBtnClass}>LOGIN</Button>
+		<Button type="submit" color="purple" class={loginBtnClass}>LOGIN</Button>
 		<div class="self-center font-medium">
 			<a href="/reset-password" class="ml-auto text-sm text-red-700 hover:underline dark:text-slate-100">
 				Forgot password?

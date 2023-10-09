@@ -9,10 +9,8 @@
 	<title>Login</title>
 </svelte:head>
 
-{#if form?.error === 'Email not confirmed'}
-	<Alert color="red">Oops! You entered unverified email. Please try again later.</Alert>
-{:else if form?.error === 'Invalid credentials.'}
-	<Alert color="red">Oops! You entered invalid credentials. Please try again later.</Alert>
+{#if form?.error}
+	<Alert color="red">Oops! {form?.error}</Alert>
 {/if}
 
 <div class="flex justify-center mt-5">
