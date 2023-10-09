@@ -150,19 +150,31 @@
 
 <main>
 	{#if $newRequest}
-		<div class="px-4 pt-4 bg-zinc-50">
-			<Alert class="bg-blue-100 text-blue-900 flex justify-between items-center content-center">
-				<BellRingSolid tabindex="-1" class="text-blue-700" />
-				<div>
-					<span class="font-bold text-blue-700">(NEW)</span> Help request received!
-				</div>
-				<CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-blue-500 hover:text-blue-700 focus:outline-none" on:click={() => newRequest.update(() => false)} />
-			</Alert>
-		</div>
+		{#if activeUrl == '/dashboard'}
+			<div class="px-4 pt-4 bg-zinc-100">
+				<Alert class="bg-blue-100 text-blue-900 flex justify-between items-center content-center">
+					<BellRingSolid tabindex="-1" class="text-blue-700" />
+					<div>
+						<span class="font-bold text-blue-700">(NEW)</span> Help request received!
+					</div>
+					<CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-blue-500 hover:text-blue-700 focus:outline-none" on:click={() => newRequest.update(() => false)} />
+				</Alert>
+			</div>
+		{:else}
+			<div class="px-4 pt-4">
+				<Alert class="bg-blue-100 text-blue-900 flex justify-between items-center content-center">
+					<BellRingSolid tabindex="-1" class="text-blue-700" />
+					<div>
+						<span class="font-bold text-blue-700">(NEW)</span> Help request received!
+					</div>
+					<CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-blue-500 hover:text-blue-700 focus:outline-none" on:click={() => newRequest.update(() => false)} />
+				</Alert>
+			</div>
+		{/if}
 	{/if}
 	{#if newLowMoodData}
-		{#if activeUrl == '/dashboard' || activeUrl == '/students/student-chart'}
-			<div class="px-4 pt-4 bg-zinc-50">
+		{#if activeUrl == '/dashboard'}
+			<div class="px-4 pt-4 bg-zinc-100">
 				<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900">
 					<BellRingSolid tabindex="-1" class="text-red-700" />
 					<div class="text-center">

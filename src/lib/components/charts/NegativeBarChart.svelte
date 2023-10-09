@@ -57,7 +57,6 @@
 			series: [
 				{
 					type: 'bar',
-					barMaxWidth: 60,
 					label: {
 						show: true,
 						formatter: '{b}',
@@ -67,7 +66,7 @@
 						focus: 'self'
 					},
 					itemStyle: {
-						color: '#111827'
+						color: '#1a56db'
 					},
 					data: xData
 				}

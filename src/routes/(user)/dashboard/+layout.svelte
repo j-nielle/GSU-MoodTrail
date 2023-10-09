@@ -1,3 +1,3 @@
-<div class="bg-zinc-50 items-center">
+<div class="bg-zinc-100 items-center">
 	<slot />
 </div>

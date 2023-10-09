@@ -304,7 +304,7 @@
 	<title>Student Mood Charts</title>
 </svelte:head>
 
-<div class="bg-zinc-50 p-4 flex flex-col space-y-3.5">
+<div class="p-4 flex flex-col space-y-3.5">
 	<div class="space-x-2 flex flex-row max-w-full justify-center">
 		{#if urlResult?.length > 0}
 			<div class="space-x-2">

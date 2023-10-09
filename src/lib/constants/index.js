@@ -1,15 +1,20 @@
 export const moodColors = {
-	Calm: '#4dc0a1',
-	Excited: '#01d801',
-	Relaxed: '#84d883',
-	Annoyed: '#ff6100',
-	Neutral: '#4eceff',
-	Bored: '#fee101',
-	Sad: '#fd0100',
-	Happy: '#53db53',
-	Nervous: '#ffa200'
+	Sad: "#115f9a",
+	Annoyed: "#1984c5",
+	Nervous: "#22a7f0",
+	Bored: "#48b5c4",
+	Neutral: "#76c68f",
+	Calm: "#a6d75b",
+	Relaxed: "#c9e52f",
+	Happy: "#d0ee11",
+	Excited: "#d0f400"
 };
-
+// blues
+// ["#0000b3", "#0010d9", "#0020ff", "#0040ff", "#0060ff", "#0080ff", "#009fff", "#00bfff", "#00ffff"]
+// blue to red
+// ["#1984c5", "#22a7f0", "#63bff0", "#a7d5ed", "#e2e2e2", "#e1a692", "#de6e56", "#e14b31", "#c23728"]
+// pink foam
+// ["#54bebe", "#76c8c8", "#98d1d1", "#badbdb", "#dedad2", "#e4bcad", "#df979e", "#d7658b", "#c80064"]
 export const mood = {
 	Sad: -4,
 	Annoyed: -3,

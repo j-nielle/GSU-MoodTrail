@@ -506,9 +506,9 @@
 		};
 
 		bcBtnColors = {
-			course: selectedBarChart === 'course' ? 'dark' : 'light',
-			year_level: selectedBarChart === 'year_level' ? 'dark' : 'light',
-			reason: selectedBarChart === 'reason' ? 'dark' : 'light'
+			course: selectedBarChart === 'course' ? 'blue' : 'light',
+			year_level: selectedBarChart === 'year_level' ? 'blue' : 'light',
+			reason: selectedBarChart === 'reason' ? 'blue' : 'light'
 		};
 	}
 
@@ -653,20 +653,25 @@
 	<title>Dashboard</title>
 </svelte:head>
 
+<!-- Tooltip Section -->
+<Tooltip placement = 'left' class="z-20" triggeredBy="#toggleData">Toggle between student and anonymous data.</Tooltip>
+<Tooltip  class="z-20" triggeredBy="#printTooltip">Print Charts (Custom)</Tooltip> <!-- soon -->
+
+<!-- Student/Anonymous Floating Toggle Button -->
 {#if dataType?.length > 0}
-	<div class="flex justify-evenly space-x-2 bg-slate-900 p-2 rounded-full w-fit fixed right-4 bottom-4 z-20">
+	<div id="toggleData" class="flex justify-evenly space-x-2 bg-slate-900 p-2 rounded-full w-fit fixed right-4 bottom-4 z-20">
 		<button class={ !viewAnonData ? toggleBtnClass.active : toggleBtnClass.inactive } 
 			on:click={() => viewAnonData = false}>
-			<p class={ !viewAnonData ? 'text-white font-semibold' : 'text-slate-500' }>STUDENT</p>
+			<p class={ !viewAnonData ? 'text-white font-semibold tracking-widest' : 'text-slate-500 tracking-widest' }>STUDENT</p>
 		</button>
 		<button class={ viewAnonData? toggleBtnClass.active : toggleBtnClass.inactive } 
 			on:click={() => viewAnonData = true}>
-			<p class={ viewAnonData ? 'text-white font-semibold' : 'text-slate-500' }>ANONYMOUS</p>
+			<p class={ viewAnonData ? 'text-white font-semibold tracking-widest' : 'text-slate-500 tracking-widest' }>ANONYMOUS</p>
 		</button>
 	</div>
 {/if}
 
-<div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-10">
+<div class="bg-zinc-100 p-4 flex flex-col space-y-3 z-10">
 	<!-- Info Card Section -->
 	<div class="flex justify-between">
 		<CardInfo purpose="time" title="" bind:data={current} />
@@ -732,7 +737,7 @@
 				/>
 			</div>
 		{/if}
-		<Button	class="max-h-14 justify-center shadow-md flex-row items-center space-x-2"
+		<Button id="printTooltip"	class="max-h-14 justify-center shadow-md flex-row items-center space-x-2"
 			on:click={() => window.print()}>
 			<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
 		</Button>

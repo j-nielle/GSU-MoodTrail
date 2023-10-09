@@ -31,25 +31,35 @@
 					return 'Total Moods: ' + params.value[2];
 				}
 			},
+			grid: {
+				height: '55%',
+			},
 			title: {
 				text: title
 			},
 			xAxis: {
 				type: 'category',
 				data: hours,
-				alignTicks: true
+				alignTicks: true,
+				splitArea: {
+					show: true
+				}
 			},
 			yAxis: {
 				type: 'category',
-				data: days
+				data: days,
+				splitArea: {
+					show: true
+				}
 			},
 			visualMap: {
 				min: 0,
 				max: 10,
 				realtime: true,
 				calculable: true,
+				orient: 'horizontal',
 				left: 'center',
-				orient: 'horizontal'
+				bottom: '0'
 			},
 			series: [
 				{
@@ -57,6 +67,12 @@
 					data: heatmapData || [],
 					label: {
 						show: true
+					},
+					emphasis: {
+						itemStyle: {
+							shadowBlur: 10,
+							shadowColor: 'rgba(0, 0, 0, 0.5)'
+						}
 					}
 				}
 			],
