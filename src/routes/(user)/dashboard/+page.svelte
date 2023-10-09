@@ -4,7 +4,7 @@
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
 	import {
-		Card,
+		//Card,
 		Button,
 		ButtonGroup,
 		Spinner,
@@ -14,9 +14,10 @@
 		TableBodyCell,
 		TableBodyRow,
 		TableHead,
-		TableHeadCell
+		TableHeadCell, 
+		Tooltip
 	} from 'flowbite-svelte';
-	import { PrintSolid } from 'flowbite-svelte-icons';
+	import { InfoCircleSolid, PrintSolid } from 'flowbite-svelte-icons';
 	import {
 		RadarChart,
 		LineChart,
@@ -36,6 +37,9 @@
 
 	let todaysEntries = [];
 	let xDataMBC, yDataMBC;
+	let heatmapData;
+
+	let recentStudent;
 	let todayMostFreqMood = '', todayMostFreqReason = '';
 	let overallMostFreqMood = '', overallMostFreqReason = '';
 	let weeklyMostFreqMood = '', weeklyMostFreqReason = '';
@@ -47,9 +51,7 @@
 	let monthly = [], monthlyAverages = [];
 	let yearly = [], yearlyAverages = [];
 	let timestamps = [], todaysMoodScores = [];
-
-	let recentStudent;
-	let heatmapData;
+	
 	let selectedLineChart = 'today', lineChartTitle = '';
 	let selectedBarChart = 'course';
 
@@ -58,8 +60,14 @@
 	
 	let tableRef;
 	let viewAnonData = false;
+
 	let lcBtnColors = {};
 	let bcBtnColors = {};
+
+	let toggleBtnClass = {
+		inactive: "text-center font-medium inline-flex items-center justify-center px-3 py-2 text-xs text-white rounded-full",
+		active: "text-center font-medium focus:outline-none inline-flex items-center justify-center px-3 py-2 text-xs text-white bg-primary-700 hover:bg-primary-800 dark:bg-primary-600 dark:hover:bg-primary-700 focus:ring-primary-300 dark:focus:ring-primary-800 rounded-full"
+	}
 
 	let moodRadarData, reasonRadarIndicator;
 
@@ -140,14 +148,6 @@
 		yDataMBC = _.values(sortedMoodCount);
 
 		// line charts
-		lcBtnColors = {
-			today: selectedLineChart === 'today' ? 'blue' : 'light',
-			overall: selectedLineChart === 'overall' ? 'blue' : 'light',
-			weekly: selectedLineChart === 'weekly' ? 'blue' : 'light',
-			monthly: selectedLineChart === 'monthly' ? 'blue' : 'light',
-			yearly: selectedLineChart === 'yearly' ? 'blue' : 'light'
-		};
-
 		if (selectedLineChart === 'today') {
 			lineChartTitle = "Today's Moods";
 			todaysEntries = _.filter(dataType,
@@ -497,6 +497,14 @@
 			reasonYData = reasonData?.map((reason) => reason.reason_label);
 		}
 
+		lcBtnColors = {
+			today: selectedLineChart === 'today' ? 'blue' : 'light',
+			overall: selectedLineChart === 'overall' ? 'blue' : 'light',
+			weekly: selectedLineChart === 'weekly' ? 'blue' : 'light',
+			monthly: selectedLineChart === 'monthly' ? 'blue' : 'light',
+			yearly: selectedLineChart === 'yearly' ? 'blue' : 'light'
+		};
+
 		bcBtnColors = {
 			course: selectedBarChart === 'course' ? 'dark' : 'light',
 			year_level: selectedBarChart === 'year_level' ? 'dark' : 'light',
@@ -645,18 +653,21 @@
 	<title>Dashboard</title>
 </svelte:head>
 
-<div class="bg-slate-800 p-4 rounded-full w-1/4 fixed right-4 bottom-4 z-20">
-	<div class="flex justify-center items-center">
-		<label class="relative inline-flex items-center cursor-pointer">
-			<input type="checkbox" bind:checked={viewAnonData} class="sr-only peer" disabled={anonMoodData.length == 0 && studentMoodData.length == 0}>
-			<div class="w-11 h-6 bg-blue-600 peer-focus:outline-none peer-focus:ring-1 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600"></div>
-			
-		</label>
-		<span class="ml-3 text-sm font-bold text-white">Current View:</span><span class="ml-1 text-sm text-white">{viewAnonData ? 'Anonymous Data' : 'Students Data'}</span>
+{#if dataType?.length > 0}
+	<div class="flex justify-evenly space-x-2 bg-slate-900 p-2 rounded-full w-fit fixed right-4 bottom-4 z-20">
+		<button class={ !viewAnonData ? toggleBtnClass.active : toggleBtnClass.inactive } 
+			on:click={() => viewAnonData = false}>
+			<p class={ !viewAnonData ? 'text-white font-semibold' : 'text-slate-500' }>STUDENT</p>
+		</button>
+		<button class={ viewAnonData? toggleBtnClass.active : toggleBtnClass.inactive } 
+			on:click={() => viewAnonData = true}>
+			<p class={ viewAnonData ? 'text-white font-semibold' : 'text-slate-500' }>ANONYMOUS</p>
+		</button>
 	</div>
-</div>
+{/if}
 
 <div class="bg-zinc-50 p-4 flex flex-col space-y-3 z-10">
+	<!-- Info Card Section -->
 	<div class="flex justify-between">
 		<CardInfo purpose="time" title="" bind:data={current} />
 		<CardInfo purpose="recentStudent" title="Latest Student:" bind:data={recentStudent} />
@@ -727,11 +738,12 @@
 		</Button>
 	</div>
 
-	<div class="flex flex-col space-y-3">
+	<div class="flex flex-col space-y-3 w-full">
 		<div class="flex space-x-4">
-			<div class="p-4 bg-white rounded-sm drop-shadow-md hover:ring-1">
+			<!-- Overall Mood Frequency Bar Chart -->
+			<div class="p-3 bg-white rounded-sm drop-shadow-md hover:ring-1 self-center flex justify-center items-center pt-5 pl-4">
 				{#if dataType?.length == 0}
-					<div class="flex justify-center items-center" style="width:390px; height:350px;">
+					<div class="flex justify-center items-center" style="width:520px; height:400px;">
 						<Spinner class="w-28 h-28" />
 					</div>
 				{:else}
@@ -739,13 +751,16 @@
 						bind:xData={xDataMBC}
 						bind:yData={yDataMBC}
 						elementID="dashboardHMBC"
+						style="width:520px; height:400px;"
 					/>
 				{/if}
 			</div>
 
-			<div class="flex w-full bg-white rounded-sm drop-shadow-md items-center justify-center p-4 hover:ring-1">
+			<!-- Line Chart -->
+			<div class="flex w-screen bg-white rounded-sm drop-shadow-md items-center justify-center hover:ring-1">
 				<div class="flex flex-col space-y-4">
 						<div class="flex justify-between items-center">
+							<p class="text-xl text-black font-bold">{lineChartTitle}</p>
 							<ButtonGroup>
 								<Button disabled={dataType.length == 0} color={lcBtnColors.today} on:click={() => selectLineChart('today')}>
 									Today
@@ -763,7 +778,6 @@
 									Overall
 								</Button>
 							</ButtonGroup>
-							<p class="text-xl text-black font-semibold">{lineChartTitle}</p>
 						</div>
 			 		{#if dataType?.length > 0}
 						{#if selectedLineChart === 'today'}
@@ -771,39 +785,39 @@
 									bind:xData={timestamps}
 									bind:yData={todaysMoodScores}
 									elementID="dashboardTLC"
-									style="width:790px; height:280px;"
+									style="width:690px; height:330px;"
 								/>
 						{:else if selectedLineChart === 'overall'}
 								<LineChart
 									bind:xData={overall}
 									bind:yData={overallAverages}
 									elementID="dashboardDLC"
-									style="width:790px; height:280px;"
+									style="width:690px; height:330px;"
 								/>
 						{:else if selectedLineChart === 'weekly'}
 								<LineChart
 									bind:xData={weekly}
 									bind:yData={weeklyAverages}
 									elementID="dashboardWLC"
-									style="width:790px; height:280px;"
+									style="width:690px; height:330px;"
 								/>
 						{:else if selectedLineChart === 'monthly'}
 								<LineChart
 									bind:xData={monthly}
 									bind:yData={monthlyAverages}
 									elementID="dashboardMLC"
-									style="width:790px; height:280px;"
+									style="width:690px; height:330px;"
 								/>
 						{:else if selectedLineChart === 'yearly'}
 								<LineChart
 									bind:xData={yearly}
 									bind:yData={yearlyAverages}
 									elementID="dashboardYLC"
-									style="width:790px; height:280px;"
+									style="width:690px; height:330px;"
 								/>
 						{/if}
 					{:else}
-						<div class="flex justify-center items-center" style="width:790px; height:280px;">
+						<div class="flex justify-center items-center" style="width:690px; height:330px;">
 							<Spinner class="w-28 h-28" />
 						</div>
 					{/if}
@@ -812,23 +826,24 @@
 		</div>
 
 		<div class="flex space-x-4">
-			<div class="bg-white flex items-center rounded-sm drop-shadow-md p-4 hover:ring-1">
+			<!-- Heatmap -->
+			<div class="bg-white flex flex-col rounded-sm drop-shadow-md p-4 hover:ring-1">
 				{#if dataType.length > 0}
-					<HeatmapChart
+					<HeatmapChart {heatmapData}
 						title="Mood Frequency by Day and Hour"
-						{heatmapData}
 						elementID="dashboardHM"
 						style="width:580px; height:350px;"
 					/>
 				{:else}
-					<div class="flex justify-center items-center" style="width:620px; height:350px;">
+					<div class="flex justify-center items-center" style="width:580px; height:350px;">
 						<Spinner class="w-28 h-28" />
 					</div>
 				{/if}
 			</div>
 
+			<!-- Students with Consistent Low Moods Table -->
 			<div id="low-moods" bind:this={tableRef} class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
-				<caption class="text-lg font-bold text-left w-max text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
+				<caption class="text-lg font-bold text-left w-max text-black bg-white dark:text-white dark:bg-gray-800 mb-6">
 					Table of Students with Consistent Low moods
 					<p class="mt-2 text-sm font-normal text-gray-500 dark:text-gray-400">
 						These students have experienced consistent low moods for atleast 4 consecutive days.
@@ -908,13 +923,14 @@
 
 		<div class="flex space-x-4">
 			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+				<!-- Radar Chart -->
 				<div class="flex flex-col">
 					{#if dataType?.length > 0}
-						<p class="text-lg font-bold self-center mb-3">Mood and Frequency of Related Reasons</p>
+						<p class="text-lg self-center font-bold mb-3">Mood and Frequency of Related Reasons</p>
 						<RadarChart
 							bind:data={moodRadarData}
 							bind:indicator={reasonRadarIndicator}
-							elementID="testRadar"
+							elementID="moodReasonRadar"
 							style="width:616px; height:450px;"
 						/>
 					{:else}
@@ -925,6 +941,7 @@
 				</div>
 			</div>
 			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+				<!-- Mood Averages Bar Chart -->
 				<div class="flex flex-col">
 					{#if dataType?.length > 0}
 						<div class="flex justify-between">

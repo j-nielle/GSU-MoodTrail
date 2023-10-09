@@ -7,6 +7,7 @@
 	export let xData;
 	export let yData;
 	export let elementID;
+	export let style;
 
 	let horizontalMoodBarChart;
 
@@ -22,8 +23,7 @@
 				data: xData,
 				axisLabel: {
 					fontSize: 10,
-					interval: 0,
-					rotate: 40
+					interval: 0
 				}
 			},
 			xAxis: {
@@ -36,7 +36,7 @@
 				{
 					data: yData,
 					type: 'bar',
-					barMaxWidth: 15,
+					barMaxWidth: 20,
 					emphasis: {
 						focus: 'self'
 					},
@@ -90,4 +90,4 @@
 	});
 </script>
 
-<div id={elementID} style="width:420px; height:350px;" />
+<div id={elementID} {style} />

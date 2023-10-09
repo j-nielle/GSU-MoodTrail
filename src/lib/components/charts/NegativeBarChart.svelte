@@ -2,6 +2,8 @@
 	// @ts-nocheck
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
+	import { mood, getNearestMoodLabel } from '$lib/constants/index.js';
+
 	export let xData;
 	export let yData;
 	export let elementID;
@@ -24,6 +26,15 @@
 				trigger: 'axis',
 				axisPointer: {
 					type: 'shadow'
+				},
+				formatter: (params) => {
+					const value = params[0].value;
+
+					let moodScore;
+					value?.length < 3 ? (moodScore = value) : (moodScore = value.toFixed(2));
+					const currentMood = getNearestMoodLabel(value, mood);
+					
+					return `Average Mood: <strong>${currentMood}</strong>`;
 				}
 			},
 			xAxis: {
@@ -46,6 +57,7 @@
 			series: [
 				{
 					type: 'bar',
+					barMaxWidth: 60,
 					label: {
 						show: true,
 						formatter: '{b}',

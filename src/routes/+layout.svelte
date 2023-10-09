@@ -30,7 +30,7 @@
 	const activeClass = "font-semibold text-blue-700"
 	const chevronClass = "w-3 h-3 ml-2 text-primary-800 dark:text-white inline focus:outline-0"
 	const avatarClass = "cursor-pointer fixed mr-3"
-	const dropdownClass = "z-40 relative"
+	const dropdownClass = "z-20 relative"
 	const containerClass = "z-50 drop-shadow-lg w-fit mt-8"
 	const dropdownItemClass = "py-2 text-sm font-medium cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600"
 

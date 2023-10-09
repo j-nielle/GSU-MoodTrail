@@ -2,7 +2,7 @@
 	// @ts-nocheck
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
-	import { mood } from '$lib/constants/index.js';
+	import { mood, getNearestMoodLabel } from '$lib/constants/index.js';
 
 	export let xData;
 	export let yData;
@@ -13,24 +13,7 @@
 	let currentMood;
 	let showSymbol = false;
 
-	function getNearestMoodLabel(score) {
-		let nearestLabel = null;
-		let nearestDifference = Infinity;
-
-		for (const label in mood) {
-			const moodScore = mood[label];
-			const difference = Math.abs(moodScore - score);
-
-			if (difference < nearestDifference) {
-				nearestLabel = label;
-				nearestDifference = difference;
-			}
-		}
-
-		return nearestLabel;
-	}
-
-	$: currentMood = yData?.map((score) => getNearestMoodLabel(score));
+	$: currentMood = yData?.map((score) => getNearestMoodLabel(score, mood));
 	$: currentMood?.length != 1 ? (showSymbol = false) : (showSymbol = true);
 
 	$: {
@@ -79,13 +62,12 @@
 				show: true,
 				trigger: 'axis',
 				formatter: (params) => {
-					const index = params[0].dataIndex;
-					const temp = xData[index];
+					const index = params[0].dataIndex; // index of the x-axis which is basically the date
+					const temp = xData[index]; // the date itself
 
 					let moodScore;
-					yData[index].length < 3
-						? (moodScore = yData[index])
-						: (moodScore = yData[index].toFixed(2));
+					// for rounding off the mood score
+					yData[index].length < 3 ? (moodScore = yData[index]) : (moodScore = yData[index].toFixed(2));
 
 					const moodLabel = currentMood[index];
 					return `<span class="font-bold">[${temp}]</span> Mood: <span class="font-bold">${moodLabel}</span> (${moodScore})`;

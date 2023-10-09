@@ -11,6 +11,8 @@
 
 	// Define the days and hours for the axis labels
 	var days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+
+	// creates an array of hours from 1-12 and appends AM or PM
 	var hours = Array.from({ length: 24 }, (_, i) => {
 		const hour = i % 12 === 0 ? 12 : i % 12;
 		const period = i < 12 ? 'AM' : 'PM';
@@ -20,12 +22,12 @@
 	let heatmapChart;
 
 	onMount(() => {
-		heatmapChart = echarts.init(document.getElementById(elementID));
+		heatmapChart = echarts?.init(document.getElementById(elementID));
 
-		heatmapChart.setOption({
+		heatmapChart?.setOption({
 			tooltip: {
 				position: 'top',
-				formatter: function (params) {
+				formatter: (params) => {
 					return 'Total Moods: ' + params.value[2];
 				}
 			},
@@ -65,7 +67,6 @@
 						show: true,
 						yAxisIndex: 'none'
 					},
-
 					saveAsImage: {
 						show: true
 					}
@@ -74,12 +75,12 @@
 		});
 
 		return () => {
-			heatmapChart.dispose();
+			heatmapChart?.dispose();
 		};
 	});
 
 	afterUpdate(() => {
-		heatmapChart.setOption({
+		heatmapChart?.setOption({
 			xAxis: {
 				data: hours
 			},

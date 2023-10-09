@@ -1,13 +1,13 @@
 export const moodColors = {
-	Calm: '#6574cd',
-	Excited: '#f6993f',
-	Relaxed: '#f66d9b',
-	Annoyed: '#e3342f',
-	Neutral: '#6d757c',
-	Bored: '#4dc0b5',
-	Sad: '#3490dc',
-	Happy: '#ffed4a',
-	Nervous: '#15605e'
+	Calm: '#4dc0a1',
+	Excited: '#01d801',
+	Relaxed: '#84d883',
+	Annoyed: '#ff6100',
+	Neutral: '#4eceff',
+	Bored: '#fee101',
+	Sad: '#fd0100',
+	Happy: '#53db53',
+	Nervous: '#ffa200'
 };
 
 export const mood = {
@@ -54,3 +54,20 @@ export const yearLvl = {
 	3: '3rd Year',
 	4: '4th Year'
 };
+
+export function getNearestMoodLabel(score, mood) {
+	let nearestLabel = null;
+	let nearestDifference = Infinity;
+
+	for (const label in mood) {
+		const moodScore = mood[label];
+		const difference = Math.abs(moodScore - score);
+
+		if (difference < nearestDifference) {
+			nearestLabel = label;
+			nearestDifference = difference;
+		}
+	}
+
+	return nearestLabel;
+}

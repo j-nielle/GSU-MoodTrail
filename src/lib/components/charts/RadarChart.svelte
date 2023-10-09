@@ -14,7 +14,7 @@
 	onMount(() => {
 		radarChart = echarts.init(document.getElementById(elementID));
 
-		radarChart.setOption({
+		radarChart?.setOption({
 			legend: {
 				data: data?.map((item) => item.name),
 				top: 20,
@@ -70,12 +70,12 @@
 		});
 
 		return () => {
-			radarChart.dispose();
+			radarChart?.dispose();
 		};
 	});
 
 	afterUpdate(() => {
-		radarChart.setOption({
+		radarChart?.setOption({
 			legend: {
 				data: data?.map((item) => item.name)
 			},
