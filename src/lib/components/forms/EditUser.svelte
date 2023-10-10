@@ -1,17 +1,17 @@
 <script>
 	// @ts-nocheck
-	import { blur } from 'svelte/transition';
 	import { enhance } from '$app/forms';
-	import { Card, Button, Badge, FloatingLabelInput, Helper } from 'flowbite-svelte';
+	import { Card, Button, Badge, FloatingLabelInput } from 'flowbite-svelte';
 	import { roles, buttonState, roleColor } from '$lib/constants/index.js';
+	import { editUser } from '$lib/stores/index.js';
 
 	export let user;
-	//export let handler;
 
 	let editRole = '';
 	let userID, prevUsername, prevEmail, userPass, prevRole;
 
-	const cardClass = "p-4 h-max space-y-5 rounded bg-white dark:bg-gray-800 self-start";
+	const cardClass = "p-4 h-max w-max space-y-5 rounded bg-white dark:bg-gray-800 self-start";
+	const btnClass = "w-full font-bold leading-relaxed"
 	let color;
 
 	$: if (user){
@@ -25,7 +25,7 @@
 	}
 </script>
 
-<div transition:blur={{ amount: 5, duration: 150 }}>
+{#if $editUser}
 	<Card class={cardClass} size="lg" padding="xl">
 		<h3 class="font-bold text-slate-950 text-center text-xl">Edit User</h3>
 		<form class="space-y-5" action="?/editUser" method="POST" use:enhance>
@@ -61,9 +61,10 @@
 					{/each}
 				</div>
 			</div>
-			<Button pill shadow type="submit" class="w-full font-bold leading-relaxed">
-				CONFIRM CHANGES
-			</Button>
+			<div class="flex space-x-3 justify-between">
+				<Button size="sm" pill shadow type="submit" color="purple" class={btnClass}>CONFIRM</Button>
+				<Button size="sm" pill shadow color="red" class={btnClass} on:click={() =>  editUser.update(() => false)}>CANCEL</Button>
+			</div>
 		</form>
 	</Card>
-</div>
+{/if}

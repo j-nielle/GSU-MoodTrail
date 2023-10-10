@@ -60,12 +60,6 @@
 						usersData = _.cloneDeep([payload.new, ...usersData]).sort((a, b) => a.username.localeCompare(b.username));
 						console.log(usersData)
 					}else if (payload.eventType === 'UPDATE') {
-						// updateAlert = true;
-
-						// setTimeout(() => {
-						// 	updateAlert = false;
-						// }, 2000);
-
 						// payload.new returns updated row, payload.old returns property "id" of updated row
 						const updatedIndex = usersData.findIndex((user) => user.id === payload.old.id);
 
@@ -75,12 +69,6 @@
 
 						usersData = _.cloneDeep(usersData).sort((a, b) => a.username.localeCompare(b.username));
 					} else if (payload.eventType === 'DELETE') {
-						// deleteAlert = true;
-
-						// setTimeout(() => {
-						// 	deleteAlert = false;
-						// }, 2000);
-
 						// payload.old returns property "id" of deleted row
 						const updatedUsersData = usersData.filter(
 							(user) => user.id !== payload.old.id
@@ -123,24 +111,22 @@
 		paginatedItems = filteredItems?.slice(startIndex, endIndex);
 	}
 
-	$: if(form?.removalSuccess){
-		removeUserModal = false;
-	}
-
 	$: if(userToDelete){
     userID = userToDelete[0]?.id;
   }
 
+	$: console.log($addNewUser, $editUser)
+
 	function handleAddUser(){
-	  editUser.update(() => false);
-	  addNewUser.update(()  => true);
+		editUser.update(() => false);
+		addNewUser.update(()  => true);
 	}
 
 	function handleEditUser(email){
-		userToUpdate = usersData.filter((user) => user.email == email);
+		addNewUser.update(() => false);
+		editUser.update(()  => true);
 
-	  addNewUser.update(() => false);
-	  editUser.update(()  => true);
+		userToUpdate = usersData.filter((user) => user.email == email);
 	}
 
 	async function handleRemoveUser(userID) {
@@ -159,39 +145,34 @@
 	<title>Manage Users</title>
 </svelte:head>
 
-<div class="p-10 ring-1 bg-white w-fit shadow-md drop-shadow-md rounded z-10">
+<div class="p-10 ring-1 max-h-fit max-w-fit h-min w-max bg-white shadow-md drop-shadow-md rounded z-10">
 	{#if form?.success}
-			<div class="mb-4">
+			<div class="mb-4 text-center">
 				<Alert color="green" class="text-center p-2">
 					<span class="font-medium">Operation successful!</span>
 				</Alert>
 			</div>
 	{:else if form?.error}
-			<div class="mb-4">
+			<div class="mb-4 text-center">
 				<Alert color="red" class="text-center">
-					<span class="font-medium">{form?.error}.</span> Please try again later.
+					<span class="font-medium">{form?.error}</span>
 				</Alert>
 			</div>
 	{/if}
-	<div class="relative w-full flex items-center space-x-8">
-		<caption class="text-xl my-3 font-bold text-left w-max text-gray-900 dark:text-white dark:bg-gray-800">
-			List of Users
-		</caption>
+	<div class="relative w-full flex items-center space-x-8 justify-between">
 		<div>
 			<Search size="md" class="w-72" placeholder="Search by name, email, or role"
 				bind:value={searchTerm}
 			/>
 		</div>
 		<div class="ml-4">
-			{#if !$addNewUser}
-			<Button size="sm" shadow color="purple" pill on:click={handleAddUser}>Add New User</Button>
-			{:else}
-				<Button size="sm" shadow color="red" pill on:click={handleAddUser}>Hide Form</Button>
-			{/if}
+			<Button size="sm" shadow color="purple" pill on:click={handleAddUser}>Add User</Button>
 		</div>
 	</div>
-
-	<div class="w-full mt-4">
+	<caption class="text-xl mb-3 mt-6 font-bold text-left w-max text-gray-900 dark:text-white dark:bg-gray-800">
+		List of Users
+	</caption>
+	<div class="w-full">
 		<Table {divClass} >
 			<TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky">
 				<TableHeadCell>Username</TableHeadCell>
@@ -254,9 +235,13 @@
 	</div>
 </div>
 {#if $addNewUser}
-  <AddUser />
-{:else if $editUser}
-	<EditUser user={userToUpdate} />
+  <div>
+		<AddUser />
+	</div>
+{:else}
+	<div>
+		<EditUser user={userToUpdate} />
+	</div>
 {/if}
 
 <Modal title="Confirm Delete User?" bind:open={removeUserModal} size="xs" class="max-w-xs">

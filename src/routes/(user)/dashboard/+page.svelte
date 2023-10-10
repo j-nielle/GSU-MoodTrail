@@ -655,7 +655,7 @@
 
 <!-- Tooltip Section -->
 <Tooltip placement = 'left' class="z-20" triggeredBy="#toggleData">Toggle between student and anonymous data.</Tooltip>
-<Tooltip  class="z-20" triggeredBy="#printTooltip">Print Charts (Custom)</Tooltip> <!-- soon -->
+<Tooltip  class="z-20" triggeredBy="#printTooltip">Print Charts (SOON)</Tooltip> <!-- soon -->
 
 <!-- Student/Anonymous Floating Toggle Button -->
 {#if dataType?.length > 0}

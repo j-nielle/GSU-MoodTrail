@@ -26,14 +26,14 @@
 				<SidebarItem class="text-sm rounded" label="Account" href="/settings/account" {activeClass}
 					active={activeUrl === '/settings/account'}>
 					<svelte:fragment slot="icon">
-						<UserEditOutline />
+						<UserEditOutline class="focus:outline-0" />
 					</svelte:fragment>
 				</SidebarItem>
 				{#if session?.user.role === 'admin'}
 					<SidebarItem class="text-sm rounded" label="Users" href="/settings/manage-users" {activeClass}
 						active={activeUrl === '/settings/manage-users'}>
 						<svelte:fragment slot="icon">
-							<DatabaseSolid />
+							<DatabaseSolid class="focus:outline-0" />
 						</svelte:fragment>
 					</SidebarItem>
 				{/if}
