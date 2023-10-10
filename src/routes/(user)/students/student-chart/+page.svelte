@@ -97,7 +97,7 @@
 			searchTerm = selectedStudent
 		}
 		hasEntry = studentMoodData?.find((student) => student.student_id == searchTerm);
-		console.log(hasEntry)
+		
 		if (hasEntry) {
 			urlResult = {};
 			result = studentMoodData?.filter((student) => student?.student_id == searchTerm);
@@ -141,7 +141,6 @@
 			}))
 			.sort()
 			.value();
-		console.log(college, course, yearLevel, student)
 	}
 
 	$: if (result?.length > 0) {

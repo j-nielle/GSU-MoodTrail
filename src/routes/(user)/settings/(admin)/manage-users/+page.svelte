@@ -58,7 +58,6 @@
 					console.log(payload.eventType)
 					if (payload.eventType === 'INSERT') {
 						usersData = _.cloneDeep([payload.new, ...usersData]).sort((a, b) => a.username.localeCompare(b.username));
-						console.log(usersData)
 					}else if (payload.eventType === 'UPDATE') {
 						// payload.new returns updated row, payload.old returns property "id" of updated row
 						const updatedIndex = usersData.findIndex((user) => user.id === payload.old.id);
@@ -115,7 +114,7 @@
     userID = userToDelete[0]?.id;
   }
 
-	$: console.log($addNewUser, $editUser)
+	//$: console.log($addNewUser, $editUser)
 
 	function handleAddUser(){
 		editUser.update(() => false);

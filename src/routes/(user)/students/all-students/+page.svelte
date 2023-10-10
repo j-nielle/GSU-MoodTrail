@@ -131,7 +131,6 @@
 		// Get only those items from 'filteredItems' that belong to the current page.
 		paginatedItems = filteredItems?.slice(startIndex, endIndex);
 	}
-	$: console.log(studentsData)
 
 	$: if (form?.errors) {
 		errors = form?.errors;
