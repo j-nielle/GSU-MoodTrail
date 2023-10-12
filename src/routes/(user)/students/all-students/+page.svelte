@@ -66,8 +66,8 @@
 							addAlert = false;
 						}, 2000);
 
-						studentsData = _.cloneDeep([payload.new, ...studentsData]).sort((a, b) =>
-							a.name.localeCompare(b.name)
+						studentsData = _.cloneDeep([payload.new, ...studentsData]).sort((currentElem, nextElem) =>
+							currentElem.name.localeCompare(nextElem.name)
 						);
 					} else if (payload.eventType === 'UPDATE') {
 						updateAlert = true;
@@ -83,7 +83,9 @@
 							studentsData[updatedIndex] = payload.new;
 						}
 
-						studentsData = _.cloneDeep(studentsData).sort((a, b) => a.name.localeCompare(b.name));
+						studentsData = _.cloneDeep(studentsData).sort((currentElem, nextElem) =>
+							currentElem.name.localeCompare(nextElem.name)
+						);
 					} else if (payload.eventType === 'DELETE') {
 						deleteAlert = true;
 

@@ -57,7 +57,8 @@
 				}, (payload) => {
 					console.log(payload.eventType)
 					if (payload.eventType === 'INSERT') {
-						usersData = _.cloneDeep([payload.new, ...usersData]).sort((a, b) => a.username.localeCompare(b.username));
+						usersData = _.cloneDeep([payload.new, ...usersData])
+						.sort((currentElem, nextElem) => currentElem.username.localeCompare(nextElem.username));
 					}else if (payload.eventType === 'UPDATE') {
 						// payload.new returns updated row, payload.old returns property "id" of updated row
 						const updatedIndex = usersData.findIndex((user) => user.id === payload.old.id);
@@ -66,7 +67,8 @@
 							usersData[updatedIndex] = payload.new;
 						}
 
-						usersData = _.cloneDeep(usersData).sort((a, b) => a.username.localeCompare(b.username));
+						usersData = _.cloneDeep(usersData)
+						.sort((currentElem, nextElem) => currentElem.username.localeCompare(nextElem.username));
 					} else if (payload.eventType === 'DELETE') {
 						// payload.old returns property "id" of deleted row
 						const updatedUsersData = usersData.filter(

@@ -162,7 +162,8 @@
 			}
 		});
 
-		const sortedMoodsArr = Object.keys(moodCount).sort((a, b) => moodCount[b] - moodCount[a]);
+		const sortedMoodsArr = Object.keys(moodCount)
+			.sort((currElem, nxtElem) => moodCount[nextElem] - moodCount[currElem]);
 		
 		// Get the counts of each mood
 		const counts = Object.values(moodCount);
@@ -189,7 +190,7 @@
 
 		// pie chart
 		const sortedMoodObj = Object.fromEntries(
-			Object.entries(moodCount).sort(([, a], [, b]) => a - b)
+			Object.entries(moodCount).sort(([, currElem], [, nextElem]) => currElem - nextElem)
 		);
 		xDataMBC = _.keys(sortedMoodObj);
 		yDataMBC = _.values(sortedMoodObj);

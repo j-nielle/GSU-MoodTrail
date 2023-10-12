@@ -17,13 +17,17 @@
 		TableHeadCell, 
 		Tooltip
 	} from 'flowbite-svelte';
-	import { InfoCircleSolid, PrintSolid } from 'flowbite-svelte-icons';
+	import { 
+		//InfoCircleSolid, 
+		PrintSolid 
+	} from 'flowbite-svelte-icons';
 	import {
 		RadarChart,
 		LineChart,
 		HorizontalMoodBarChart,
 		HeatmapChart,
-		NegativeBarChart
+		NegativeBarChart,
+		Histogram
 	} from '$lib/components/charts/index.js';
 	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
 	import { CardInfo } from '$lib/components/elements/index.js';
@@ -33,7 +37,7 @@
 
 	let studentMoodData = data.studentMood;
 	let anonMoodData = data.anonMood;
-	let dataType = [];
+	let dataType = {};
 
 	let todaysEntries = [];
 	let xDataMBC, yDataMBC;
@@ -74,22 +78,24 @@
 	let courseYData, yearLvlYData, reasonYData;
 	let avgMoodByCourse, avgMoodByYearLvl, avgMoodByReason;
 
+	let loginHours = [], bins = {}, median = 0;
+
 	$: ({ supabase } = data);
 
-	onMount(() => {
+	onMount(async () => {
 		const timer = setInterval(updateCurrent, interval);
 
-		const dashboardChannel = supabase.channel('dashboard')
+		const dashboardChannel = await supabase.channel('dashboard')
 			.on('postgres_changes',{
 					event: 'INSERT',
 					schema: 'public',
 					table: 'StudentMoodEntries'
 				},(payload) => {
 					studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
-					studentMoodData.sort((a, b) => {
-						const dateA = new Date(a.created_at);
-						const dateB = new Date(b.created_at);
-						return dateA - dateB;
+					studentMoodData.sort((currentElem, nextElem) => {
+						const currentDate = new Date(currentElem.created_at);
+						const nextDate = new Date(nextElem.created_at);
+						return currentDate - nextDate;
 					});
 				}
 			)
@@ -201,12 +207,12 @@
 
 			// array of the most frequent mood_score [0] and its number of occurences [1]
 			const moodValue = Object.entries(mostFreqMood)
-				.sort((a, b) => b[1] - a[1])
+				.sort((currentElem, nextElem) => nextElem[1] - currentElem[1])
 				.shift();
 
 			// array of the most frequent reason_score [0] and its number of occurences [1]
 			const reasonValue = Object.entries(mostFreqReason)
-				.sort((a, b) => b[1] - a[1])
+				.sort((currentElem, nextElem) => nextElem[1] - currentElem[1])
 				.shift();
 			
 			overallMostFreqMood = Object.keys(mood).find((key) => mood[key] == parseInt(moodValue[0]));
@@ -245,12 +251,12 @@
 
 			// array of the most frequent mood_score [0] and its number of occurences [1]
 			const moodValue = Object.entries(mostFreqMood)
-				.sort((a, b) => b[1] - a[1])
+				.sort((currentElem, nextElem) => nextElem[1] - currentElem[1])
 				.shift();
 
 			// array of the most frequent reason_score [0] and its number of occurences [1]
 			const reasonValue = Object.entries(mostFreqReason)
-				.sort((a, b) => b[1] - a[1])
+				.sort((currentElem, nextElem) => nextElem[1] - currentElem[1])
 				.shift();
 
 			weeklyMostFreqMood = Object.keys(mood).find((key) => mood[key] == parseInt(moodValue[0]));
@@ -289,12 +295,12 @@
 
 			// array of the most frequent mood_score [0] and its number of occurences [1]
 			const moodValue = Object.entries(mostFreqMood)
-				.sort((a, b) => b[1] - a[1])
+				.sort((currentElem, nextElem) => nextElem[1] - currentElem[1])
 				.shift();
 
 			// array of the most frequent reason_score [0] and its number of occurences [1]
 			const reasonValue = Object.entries(mostFreqReason)
-				.sort((a, b) => b[1] - a[1])
+				.sort((currentElem, nextElem) => nextElem[1] - currentElem[1])
 				.shift();
 
 			monthlyMostFreqMood = Object.keys(mood).find((key) => mood[key] == parseInt(moodValue[0]));
@@ -331,12 +337,12 @@
 
 			// array of the most frequent mood_score [0] and its number of occurences [1]
 			const moodValue = Object.entries(mostFreqMood)
-				.sort((a, b) => b[1] - a[1])
+				.sort((currentElem, nextElem) => nextElem[1] - currentElem[1])
 				.shift();
 
 			// array of the most frequent reason_score [0] and its number of occurences [1]
 			const reasonValue = Object.entries(mostFreqReason)
-				.sort((a, b) => b[1] - a[1])
+				.sort((currentElem, nextElem) => nextElem[1] - currentElem[1])
 				.shift();
 
 			yearlyMostFreqMood = Object.keys(mood).find((key) => mood[key] == parseInt(moodValue[0]));
@@ -655,7 +661,7 @@
 
 <!-- Tooltip Section -->
 <Tooltip placement = 'left' class="z-20" triggeredBy="#toggleData">Toggle between student and anonymous data.</Tooltip>
-<Tooltip  class="z-20" triggeredBy="#printTooltip">Print Charts (SOON)</Tooltip> <!-- soon -->
+<!-- <Tooltip  class="z-20" triggeredBy="#jumpToTooltip">Go To</Tooltip> Jump to certain sections -->
 
 <!-- Student/Anonymous Floating Toggle Button -->
 {#if dataType?.length > 0}
@@ -737,10 +743,7 @@
 				/>
 			</div>
 		{/if}
-		<Button id="printTooltip"	class="max-h-14 justify-center shadow-md flex-row items-center space-x-2"
-			on:click={() => window.print()}>
-			<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
-		</Button>
+		<!-- (soon: jump to modal) -->
 	</div>
 
 	<div class="flex flex-col space-y-3 w-full">
@@ -996,6 +999,18 @@
 						</div>
 					{/if}
 				</div>
+			</div>
+		</div>
+
+		<div class="flex space-x-4">
+			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+				{#if dataType?.length > 0}
+					<Histogram data={studentMoodData} elementID="HrsHistogram" style="width:500px; height:250px;" />
+				{:else}
+					<div class="flex justify-center items-center" style="width:500px; height:250px;">
+						<Spinner class="w-28 h-28" />
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>

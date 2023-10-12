@@ -19,7 +19,7 @@
 	<title>Account Settings</title>
 </svelte:head>
 
-<div class="flex space-x-4">
+<div class="flex space-x-4 ring-1 rounded-lg">
 	<Card padding="sm" class="max-w-full">
 		{#if form?.success}
 			<div class="mb-4">
@@ -54,8 +54,9 @@
 			</div>
 		</div>
 	</Card>
+</div>
 
-	{#if changePass}
+{#if changePass}
 		<Card class="sm:p-8  ring-1 rounded h-fit">
 			<form class="flex flex-col space-y-5" action="?/resetPassword" method="POST" use:enhance>
 				<p class="">New Password:</p>
@@ -70,8 +71,7 @@
 				</div>
 			</form>
 		</Card>
-	{/if}
-	{#if changeUsername}
+{:else if changeUsername}
 		<Card class="sm:p-8  ring-1 rounded h-fit">
 			<form class="flex flex-col space-y-5" action="?/resetUsername" method="POST" use:enhance>
 				<p class="">New Username:</p>
@@ -86,8 +86,7 @@
 				</div>
 			</form>
 		</Card>
-	{/if}
-	{#if changeEmail}
+{:else if changeEmail}
 		<Card class="sm:p-8  ring-1 rounded h-fit">
 			<form class="flex flex-col space-y-5" action="?/resetEmail" method="POST" use:enhance>
 				<p class="">New Email:</p>
@@ -104,4 +103,3 @@
 			</form>
 		</Card>
 	{/if}
-</div>
