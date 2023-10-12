@@ -47,9 +47,16 @@
 				{
 					splitLine: { show: true },
 					type: 'value',
-					boundaryGap: [0, '100%']
+					boundaryGap: [0, '100%'],
+					nameRotate: 90,
+					name: "Mood Score",
+					nameLocation: "middle",
+					nameGap: 40
 				}
 			],
+			textStyle: {
+				fontFamily: "Inter"
+			},
 			series: [
 				{
 					data: yData,
@@ -78,6 +85,9 @@
 				show: true,
 				feature: {
 					dataZoom: { show: true, yAxisIndex: 'none' },
+          restore: {
+            show: true
+          },
 					dataView: { show: true, readOnly: false },
 					saveAsImage: { show: true }
 				}

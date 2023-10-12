@@ -17,10 +17,16 @@
 		negativeBarChart.setOption({
 			title: {
 				subtext:
-					'Sad (-4), Annoyed (-3), Nervous (-2), Bored (-1), Neutral (0), Calm (1), Relaxed (2), Happy (3), Excited (4)',
+					'Sad (-4), Annoyed (-3), Nervous (-2), Bored (-1), Neutral (0), \nCalm (1), Relaxed (2), Happy (3), Excited (4)',
 				subtextStyle: {
 					fontSize: 11
-				}
+				},
+        textStyle:{
+          color: '#000000'
+        }
+			},
+			textStyle: {
+				fontFamily: "Inter"
 			},
 			tooltip: {
 				trigger: 'axis',
@@ -34,10 +40,13 @@
 					value?.length < 3 ? (moodScore = value) : (moodScore = value.toFixed(2));
 					const currentMood = getNearestMoodLabel(value, mood);
 					
-					return `Average Mood: <strong>${currentMood}</strong>`;
+					return `Average Mood: <strong>${currentMood}</strong> [${moodScore}]`;
 				}
 			},
 			xAxis: {
+				name: "Mood Score",
+				nameLocation: "middle",
+        nameGap: 35,
 				type: 'value',
 				position: 'bottom',
 				splitLine: {
@@ -70,7 +79,22 @@
 					},
 					data: xData
 				}
-			]
+			],
+			toolbox: {
+				show: true,
+				feature: {
+					dataZoom: {
+						show: true,
+            yAxisIndex: true
+					},
+          restore: {
+            show: true
+          },
+					saveAsImage: {
+						show: true
+					}
+				}
+			}
 		});
 
 		return () => {

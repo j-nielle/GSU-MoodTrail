@@ -8,7 +8,10 @@
 	// import relativeTime from 'dayjs/plugin/relativeTime';
 	// dayjs.extend(relativeTime);
 	import { onMount } from 'svelte';
-	// import { ClockSolid } from 'flowbite-svelte-icons';
+	import {
+		//ClockSolid,
+		RocketOutline,
+	} from 'flowbite-svelte-icons';
 	import {
 		P,
 		//Badge,
@@ -22,7 +25,7 @@
 	} from 'flowbite-svelte';
 	import {
 		LineChart,
-		//HorizontalMoodBarChart,
+		SimpleBarChart,
 		PieChart,
 		//RadarChart,
 		//HeatmapChart
@@ -64,7 +67,9 @@
 	let yearly, yearlyAverages;
 
 	let xDataMBC, yDataMBC;
-	let pieChartData,lcBtnColors = {};
+	let xDataSBC, yDataSBC;
+	let selectedReasonMarkType = 'average', sbcMarkType = '', sbcBtnColors = {};
+	let pieChartData, lcBtnColors = {};
 
 	let newMoodEntry = false;
 
@@ -145,6 +150,7 @@
 
 	$: if (result?.length > 0) {
 		const moodCount = {};
+		const reasonCount = {};
 
 		result.forEach((item) => {
 			const moodScore = item.mood_score;
@@ -162,26 +168,42 @@
 			}
 		});
 
-		const sortedMoodsArr = Object.keys(moodCount)
-			.sort((currElem, nxtElem) => moodCount[nextElem] - moodCount[currElem]);
-		
-		// Get the counts of each mood
-		const counts = Object.values(moodCount);
+		result.forEach((item) => {
+			const reasonScore = item.reason_score;
+			let reasonLabel = null;
 
+			for (const key in reason) {
+				if (reason[key] == reasonScore) {
+					reasonLabel = key;
+					break;
+				}
+			}
+
+			if (reasonLabel) {
+				reasonCount[reasonLabel] = (reasonCount[reasonLabel] || 0) + 1;
+			}
+		});
+
+		const sortedMoodsArr = Object.keys(moodCount)
+			.sort((currElem, nxtElem) => moodCount[nxtElem] - moodCount[currElem]);
+		
+		// Get the m_counts of each mood
+		const m_counts = Object.values(moodCount);
+		
 		// Check if all moods are equally frequent
-		if (counts.every(count => count === counts[0])) {
+		if (m_counts.every(count => count === m_counts[0])) {
 				mostFrequentMood = 'Equal mood frequency';
 				leastFrequentMood = 'Equal mood frequency';
 		} else {
 				// Get the mood(s) with the maximum count
-				const maxCount = Math.max(...counts);
+				const maxCount = Math.max(...m_counts);
 				const mostFrequentMoods = sortedMoodsArr.filter(mood => moodCount[mood] === maxCount);
 
 				// If there's a tie for the most frequent mood, set mostFrequentMood to 'Tie'
 				mostFrequentMood = mostFrequentMoods.length > 1 ? 'A tie.' : mostFrequentMoods[0];
 
 				// Get the mood(s) with the minimum count
-				const minCount = Math.min(...counts);
+				const minCount = Math.min(...m_counts);
 				const leastFrequentMoods = sortedMoodsArr.filter(mood => moodCount[mood] === minCount);
 
 				// If there's a tie for the least frequent mood, set leastFrequentMood to 'Tie'
@@ -192,6 +214,7 @@
 		const sortedMoodObj = Object.fromEntries(
 			Object.entries(moodCount).sort(([, currElem], [, nextElem]) => currElem - nextElem)
 		);
+
 		xDataMBC = _.keys(sortedMoodObj);
 		yDataMBC = _.values(sortedMoodObj);
 
@@ -201,6 +224,13 @@
 				name: label
 			};
 		});
+
+		const sortedReasonObj = Object.fromEntries(
+			Object.entries(reasonCount).sort(([, currElem], [, nextElem]) => currElem - nextElem)
+		);
+
+		xDataSBC = _.keys(sortedReasonObj);
+		yDataSBC = _.values(sortedReasonObj);
 
 		lcBtnColors = {
 			today: selectedLineChart === 'today' ? 'blue' : 'light',
@@ -283,6 +313,16 @@
 
 			yearly = _.sortBy(_.keys(groupedByYear)) || [];
 		}
+
+		sbcBtnColors = {
+			min: selectedReasonMarkType === 'min' ? 'blue' : 'light',
+			max: selectedReasonMarkType === 'max' ? 'blue' : 'light',
+			average: selectedReasonMarkType === 'average' ? 'blue' : 'light'
+		};
+
+		if(selectedReasonMarkType === 'average') { sbcMarkType = 'average' }
+		else if(selectedReasonMarkType === 'min') { sbcMarkType = 'min' }
+		else if(selectedReasonMarkType === 'max') { sbcMarkType = 'max' }
 	}
 
 	const getWeekNumberString = (date) => {
@@ -293,6 +333,10 @@
 
 	function toggleChart(chart) {
 		selectedLineChart = chart;
+	}
+
+	function selectReasonMarkType(reasonMarkType) {
+		selectedReasonMarkType = reasonMarkType;
 	}
 
 	function handlePrint() {
@@ -486,7 +530,6 @@
 							bind:yData={todaysMoodScores}
 							elementID={'IndTLC'}
 							style="width:700px; height:320px;"
-							title="Today's Moods"
 						/>
 					{:else if selectedLineChart === 'overall'}
 						<LineChart
@@ -494,7 +537,6 @@
 							bind:yData={overallAverages}
 							elementID={'IndDLC'}
 							style="width:700px; height:320px;"
-							title="Average Mood Overall"
 						/>
 					{:else if selectedLineChart === 'weekly'}
 						<LineChart
@@ -502,7 +544,6 @@
 							bind:yData={weeklyAverages}
 							elementID={'IndWLC'}
 							style="width:700px; height:320px;"
-							title="Average Mood Weekly"
 						/>
 					{:else if selectedLineChart === 'monthly'}
 						<LineChart
@@ -510,7 +551,6 @@
 							bind:yData={monthlyAverages}
 							elementID={'IndMLC'}
 							style="width:700px; height:320px;"
-							title="Average Mood Monthly"
 						/>
 					{:else if selectedLineChart === 'yearly'}
 						<LineChart
@@ -518,22 +558,60 @@
 							bind:yData={yearlyAverages}
 							elementID={'IndYLC'}
 							style="width:700px; height:320px;"
-							title="Average Mood Yearly"
 						/>
 					{/if}
 				</div>
 			{/if}
 		</div>
 
-		{#if result?.length > 0}
+		<div class="flex flex-row space-x-3 justify-between">
+			{#if result?.length > 0}
 			<div class="flex space-x-6 justify-between">
 				<PieChart title="Breakdown of Moods" bind:data={pieChartData} elementID={'studentPC'} />
 			</div>
 
-			<div class="flex space-x-6 justify-between">
-				<Card>Add new chart here like scatter clustering or whatever...</Card>
+			<div class="flex space-x-6">
+				<div class="flex flex-col">
+					{#if result?.length > 0}
+					<div class="flex justify-between">
+						<div class="flex flex-col">
+							<p class="text-lg font-bold ml-1">Associated Reason Frequency</p>
+						</div>
+						<ButtonGroup class="mb-3">
+							<Button color={sbcBtnColors.average} 
+								on:click={() => selectReasonMarkType('average')}>
+								Average
+							</Button>
+							<Button color={sbcBtnColors.max}
+								on:click={() => selectReasonMarkType('max')}>
+								Max
+							</Button>
+							<Button color={sbcBtnColors.min} 
+								on:click={() => selectReasonMarkType('min')}>
+								Min
+							</Button>
+						</ButtonGroup>
+					</div>
+					<div class="mt-3 items-center">
+						<SimpleBarChart
+							xData={xDataSBC}
+							yData={yDataSBC}
+							title=""
+							markType={sbcMarkType}
+							elementID="reasonSBC"
+							style="width:645px; height:320px;"
+						/>
+					</div>
+					{:else}
+						<div class="flex flex-col justify-center items-center space-y-5" style="width:645px; height:320px;">
+							<RocketOutline class="h-20 w-20" />
+							<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
+						</div>
+					{/if}
+				</div>
 			</div>
 		{/if}
+		</div>
 	</div>
 </div>
 

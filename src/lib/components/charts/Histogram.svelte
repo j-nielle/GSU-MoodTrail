@@ -11,11 +11,24 @@
 
 	let histogramChart;
   let transformedData;
+  let median;
 
   $: transformedData = data?.map(function (item) {
     // returns an array with x as the login hour and y as the mood score
     return [new Date(item.created_at).getHours(), item.mood_score];
   });
+
+  $: {
+    let values = data?.map(item => item.mood_score);
+    let sortedValues = values?.sort((currentElem, nextElem) => currentElem - nextElem);
+    let middleIndex = Math.floor(sortedValues?.length / 2);
+
+    if (sortedValues.length % 2 === 0) {
+      median = (sortedValues[middleIndex - 1] + sortedValues[middleIndex]) / 2;
+    } else {
+      median = sortedValues[middleIndex];
+    }
+  }
 
 	onMount(() => {
     echarts.registerTransform(ecStat.transform.histogram);
@@ -25,6 +38,12 @@
 			tooltip: {
 				position: 'top'
 			},
+      title: {
+        text: "Mood Login Hours (in 24-hour format)",
+        textStyle:{
+          color: '#000000'
+        }
+      },
 			dataset: [
         {
           source: transformedData
@@ -36,12 +55,30 @@
           }
         }
       ],
-      tooltip: {},
-      xAxis: { name: "Login\nHour", type: 'category', scale: true },
-      yAxis: { name: "Mood\nFrequency" },
+      tooltip: {
+        
+      },
+      xAxis: { 
+        name: "Hour", 
+        type: 'category', 
+        scale: true,
+				axisLabel: {
+					fontSize: 10,
+    			interval: 0 
+				} 
+      },
+      yAxis: { 
+        name: "Frequency",
+        nameRotate: 90,
+        nameLocation: "middle",
+        nameGap: 35
+      },
+			textStyle: {
+				fontFamily: "Inter"
+			},
       series: [ // each bar in the histogram represents a range of login hours
         { // height of the bar corresponds to the frequency of moods observed within that range
-          name: 'mood',
+          name: 'Moods',
           type: 'bar', 
           barWidth: '99.3%',
           label: {
@@ -54,7 +91,7 @@
           // 1 means that this series will use the second dataset in the array (since indexing starts at 0).
           datasetIndex: 1,
           itemStyle: {
-            color: '#115f9a'
+            color: '#1a56db'
           }
         }
       ],
@@ -64,7 +101,11 @@
 				feature: {
 					dataZoom: {
 						show: true,
+            yAxisIndex: true
 					},
+          restore: {
+            show: true
+          },
 					saveAsImage: {
 						show: true
 					}

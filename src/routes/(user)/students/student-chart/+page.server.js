@@ -42,7 +42,7 @@ export const actions = {
 				.select()
 
 			if(error){
-				console.log(error.message)
+				console.log(error)
 				return{
 					success: false,
 					error: error.message

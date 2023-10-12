@@ -15,7 +15,13 @@
 
 		pieChart.setOption({
 			title: {
-				text: title
+				text: title,
+        textStyle:{
+          color: '#000000'
+        }
+			},
+			textStyle: {
+				fontFamily: "Inter"
 			},
 			series: [
 				{

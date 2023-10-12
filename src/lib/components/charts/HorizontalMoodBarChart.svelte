@@ -16,7 +16,10 @@
 
 		horizontalMoodBarChart.setOption({
 			title: {
-				text: 'Overall Mood Frequency'
+				text: 'Mood Frequency',
+        textStyle:{
+          color: '#000000'
+        }
 			},
 			yAxis: {
 				type: 'category',
@@ -28,6 +31,10 @@
 			},
 			xAxis: {
 				type: 'value',
+				name: "Frequency",
+        nameRotate: 0,
+        nameLocation: "center",
+        nameGap: 35,
 				axisLabel: {
 					fontSize: 10
 				}
@@ -47,6 +54,9 @@
 					}
 				}
 			],
+			textStyle: {
+				fontFamily: "Inter"
+			},
 			tooltip: {
 				trigger: 'axis',
 				axisPointer: {

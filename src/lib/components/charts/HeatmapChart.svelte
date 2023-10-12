@@ -31,11 +31,17 @@
 					return 'Total Moods: ' + params.value[2];
 				}
 			},
+			textStyle: {
+				fontFamily: "Inter"
+			},
 			grid: {
 				height: '55%',
 			},
 			title: {
-				text: title
+				text: title,
+        textStyle:{
+          color: '#000000'
+        }
 			},
 			xAxis: {
 				type: 'category',
