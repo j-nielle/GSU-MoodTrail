@@ -145,7 +145,6 @@
 	});
 
 	$: viewAnonData ? (dataType = anonMoodData) : (dataType = studentMoodData);
-	$: reasonType = selectedReason;
 
 	$: if (dataType) {
 		const groupedData = _.groupBy(dataType, (data) => {
