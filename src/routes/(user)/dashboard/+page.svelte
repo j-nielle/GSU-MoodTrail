@@ -14,10 +14,13 @@
 		TableBodyRow,
 		TableHead,
 		TableHeadCell,
-		Tooltip
+		Tooltip, 
+		Modal, 
+		Radio
 	} from 'flowbite-svelte';
 	import {
-		RocketOutline,
+		RocketOutline, 
+		ForwardSolid, ArrowLeftToBracketOutline
 	} from 'flowbite-svelte-icons';
 	import {
 		RadarChart,
@@ -75,7 +78,6 @@
 	let current = dayjs().format('ddd MMM D, YYYY h:mm A');
 	const interval = 1000;
 
-	let tableRef;
 	let viewAnonData = false;
 
 	let lcBtnColors = {};
@@ -110,6 +112,14 @@
 	}));
 
 	let selectedReason = '';
+
+	let jumpToModalState = false;
+
+	let tableRef, overallMoodRef, lineChartRef, 
+	moodFreqRef, reasonFreqRef, moodReasonRef, 
+	moodAvgRef, moodHrsRef, reasonCalendarRef;
+
+	let jumpTo = 'first';
 
 	$: ({ supabase } = data);
 
@@ -712,10 +722,10 @@
 		});
 	}
 
-	$: if ($focusTable) {
-		if (tableRef) {
-			window.scrollTo(0, tableRef.offsetTop);
-			focusTable.set(false);
+	$: if(typeof window !== 'undefined'){
+		if (tableRef && $focusTable) {
+			window?.scrollTo(0, tableRef?.offsetTop);
+			focusTable?.update((value) => value = false);
 		}
 	}
 
@@ -740,6 +750,14 @@
 	function updateCurrent() {
 		current = dayjs().format('MMM D, YYYY hh:mm:ss A');
 	}
+
+	function scrollIntoView({ target }) {
+    const el = document.getElementById(target.getAttribute('id'));
+    if (!el) return;
+    el.scrollIntoView({
+      behavior: 'smooth'
+    });
+  }
 </script>
 
 <svelte:head>
@@ -752,7 +770,7 @@
 
 <!-- Student/Anonymous Floating Toggle Button -->
 {#if studentMoodData?.length > 0 || anonMoodData?.length > 0}
-	<div id="toggleData" class="flex justify-evenly space-x-2 bg-slate-900 p-3 rounded-full w-fit fixed right-4 bottom-4 z-20">
+	<div id="toggleData" class="flex justify-evenly space-x-2 bg-slate-900 p-2 rounded-full w-fit fixed right-4 bottom-4 z-20">
 		<button class={!viewAnonData ? toggleBtnClass.active : toggleBtnClass.inactive}
 			on:click={() => (viewAnonData = false)}>
 			<p class={!viewAnonData ? 'text-white font-semibold tracking-widest' : 'text-slate-500 tracking-widest'}>
@@ -811,12 +829,15 @@
 			</div>
 		{/if}
 		<!-- (soon: jump to modal) -->
+		<Button shadow on:click={() => jumpToModalState = true}>
+			<ForwardSolid class="mr-2 focus:outline-none" />Jump to
+		</Button>
 	</div>
 
 	<div class="flex flex-col space-y-3 w-full">
 		<div class="flex space-x-4">
 			<!-- Overall Mood Frequency Bar Chart -->
-			<div class="p-3 bg-white rounded-sm drop-shadow-md hover:ring-1 self-center flex justify-center items-center pt-5 pl-4">
+			<div id="overallMoodFreqHBC" bind:this={overallMoodRef} class="p-3 bg-white rounded-sm drop-shadow-md hover:ring-1 self-center flex justify-center items-center pt-5 pl-4">
 				{#if dataType?.length == 0}
 					<div class="flex flex-col justify-center items-center space-y-5" style="width:520px; height:400px;">
 						<RocketOutline class="h-20 w-20" />
@@ -824,16 +845,17 @@
 					</div>
 				{:else}
 					<HorizontalMoodBarChart
+						title="Overall Mood Frequency"
 						bind:xData={xDataMBC}
 						bind:yData={yDataMBC}
-						elementID="dashboardHMBC"
+						elementID="dashboardHBC"
 						style="width:520px; height:400px;"
 					/>
 				{/if}
 			</div>
 
 			<!-- Line Chart -->
-			<div class="flex w-screen bg-white rounded-sm drop-shadow-md items-center justify-center hover:ring-1">
+			<div id="lineChartMood" bind:this={lineChartRef} class="flex w-screen bg-white rounded-sm drop-shadow-md items-center justify-center hover:ring-1">
 				<div class="flex flex-col space-y-4">
 					<div class="flex justify-between items-center">
 						<p class="text-xl text-black font-bold">{lineChartTitle}</p>
@@ -919,7 +941,7 @@
 
 		<div class="flex space-x-4">
 			<!-- Heatmap -->
-			<div class="bg-white flex flex-col rounded-sm drop-shadow-md p-4 hover:ring-1">
+			<div id="moodFreqHeatmap" bind:this={moodFreqRef} class="bg-white flex flex-col rounded-sm drop-shadow-md p-4 hover:ring-1">
 				{#if dataType.length > 0}
 					<HeatmapChart
 						{heatmapData}
@@ -936,7 +958,7 @@
 			</div>
 
 			<!-- Reason Simple Bar Chart -->
-			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+			<div id="reasonFreqBC" bind:this={reasonFreqRef} class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 				<div class="flex flex-col">
 					{#if dataType?.length > 0}
 					<div class="flex justify-between">
@@ -981,7 +1003,7 @@
 		<div class="flex space-x-4">
 			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 				<!-- Radar Chart -->
-				<div class="flex flex-col">
+				<div id="moodReasonRadarChart" bind:this={moodReasonRef} class="flex flex-col">
 					{#if dataType?.length > 0}
 						<p class="text-lg self-center font-bold mb-3">Mood and Frequency of Related Reasons</p>
 						<RadarChart
@@ -1000,7 +1022,7 @@
 			</div>
 			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 				<!-- Mood Averages Bar Chart -->
-				<div class="flex flex-col">
+				<div id="moodAvgCourseYrReason" bind:this={moodAvgRef} class="flex flex-col">
 					{#if dataType?.length > 0}
 						<div class="flex justify-between">
 							<div class="flex flex-col">
@@ -1057,7 +1079,7 @@
 
 		<div class="flex space-x-4">
 			<!-- Histogram Chart -->
-			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+			<div id="moodLoginHrsHistogram" bind:this={moodHrsRef} class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 				{#if dataType?.length > 0}
 					<Histogram data={dataType} elementID="HrsHistogram" style="width:510px; height:370px;" />
 				{:else}
@@ -1153,7 +1175,8 @@
 			</div>
 		</div>
 
-		<div class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+		<!-- Calendar Chart -->
+		<div id="reasonCalendar" bind:this={reasonCalendarRef} class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 			<div class="flex flex-col">
 				<div class="flex flex-row justify-between mt-4 space-y-3">
 					<div class="flex flex-col">
@@ -1174,3 +1197,62 @@
 		</div>
 	</div>
 </div>
+
+<Modal class="flex relative max-w-fit w-full max-h-full" title="Jump to specific section" bind:open={jumpToModalState} autoclose>
+	<div class="flex flex-col gap-3">
+		<a href="#overallMoodFreqHBC" on:click={scrollIntoView}>
+			<div class="flex gap-3 items-center">
+				<ArrowLeftToBracketOutline /> 
+				Overall Mood Frequency Chart
+			</div>
+		</a>
+		<a href="#lineChartMood" on:click={scrollIntoView}>
+			<div class="flex gap-3 items-center">
+				<ArrowLeftToBracketOutline /> 
+				Mood Line Chart
+			</div>
+		</a>
+		<a href="#moodFreqHeatmap" on:click={scrollIntoView}>
+			<div class="flex gap-3 items-center">
+				<ArrowLeftToBracketOutline /> 
+				Mood Frequency by Day and Hour Chart
+			</div>
+		</a>
+		<a href="#reasonFreqBC" on:click={scrollIntoView}>
+			<div class="flex gap-3 items-center">
+				<ArrowLeftToBracketOutline /> 
+				Associated Reason Frequency Chart
+			</div>
+		</a>
+		<a href="#moodReasonRadarChart" on:click={scrollIntoView}>
+			<div class="flex gap-3 items-center">
+				<ArrowLeftToBracketOutline /> 
+				Mood and Frequency of Related Reasons Chart
+			</div>
+		</a>
+		<a href="#moodAvgCourseYrReason" on:click={scrollIntoView}>
+			<div class="flex gap-3 items-center">
+				<ArrowLeftToBracketOutline /> 
+				Mood Averages (including the negatives)
+			</div>
+		</a>
+		<a href="#moodLoginHrsHistogram" on:click={scrollIntoView}>
+			<div class="flex gap-3 items-center">
+				<ArrowLeftToBracketOutline /> 
+				Mood Login Hours (in 24-hour format)
+			</div>
+		</a>
+		<a href="#low-moods" on:click={scrollIntoView}>
+			<div class="flex gap-3 items-center">
+				<ArrowLeftToBracketOutline /> 
+				Table of Students with Consistent Low Moods
+			</div>
+		</a>
+		<a href="#reasonCalendar" on:click={scrollIntoView}>
+			<div class="flex gap-3 items-center">
+				<ArrowLeftToBracketOutline /> 
+				Associated Reason Calendar
+			</div>
+		</a>
+	</div>
+</Modal>
