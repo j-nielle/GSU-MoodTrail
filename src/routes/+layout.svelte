@@ -26,13 +26,13 @@
 	$: ({ supabase, session } = data);
 	$: activeUrl = $page.url.pathname;
 
-	const navDivClass = "mx-auto flex justify-between items-center w-full !z-50"
+	const navDivClass = "relative mx-auto flex justify-between items-center w-full z-20"
 	const activeClass = "font-semibold text-blue-700"
 	const chevronClass = "w-3 h-3 ml-2 text-primary-800 dark:text-white inline focus:outline-0"
 	const avatarClass = "cursor-pointer fixed mr-3"
-	const dropdownClass = "z-20 relative"
-	const containerClass = "z-20 drop-shadow-lg w-fit mt-8"
-	const dropdownItemClass = "py-2 text-sm font-medium cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600"
+	const dropdownClass = "relative z-30"
+	const containerClass = "relative z-30 drop-shadow-lg w-fit mt-8"
+	const dropdownItemClass = "relative z-30 py-2 text-sm font-medium cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600"
 
 	let newLowMoodData = false;
 	let consistentStreaksInfo = new Map();
@@ -120,7 +120,7 @@
 			<NavLi id="student-menu" class="cursor-pointer">
 				Students<ChevronDownOutline class={chevronClass} />
 			</NavLi>
-			<Dropdown triggeredBy="#student-menu" class="w-36 items-center z-20">
+			<Dropdown triggeredBy="#student-menu" dropdownClass="w-36 items-center relative z-20">
 				<DropdownItem href="/students/all-students">List of Students</DropdownItem>
 				<DropdownItem href="/students/student-chart">Info and Charts</DropdownItem>
 			</Dropdown>
@@ -129,13 +129,12 @@
 		<label for="avatar-menu">
 			<Avatar class={avatarClass} id="avatar-menu" alt="User Profile Pic" border />
 		</label>
-		<Dropdown class={dropdownClass} placement="left" triggeredBy="#avatar-menu" {containerClass}>
+		<Dropdown dropdownClass="relative z-50" placement="left" triggeredBy="#avatar-menu" {containerClass}>
 			<DropdownHeader>
 				<span class="block text-sm"> {session?.user?.role.toUpperCase()} </span>
 				<span class="block text-sm font-medium truncate"> {session?.user?.email} </span>
 			</DropdownHeader>
-			<DropdownItem class="cursor-pointer" href="/settings/account">Settings</DropdownItem
-			>
+			<DropdownItem class="cursor-pointer" href="/settings/account">Settings</DropdownItem>
 			<DropdownDivider />
 			<form method="POST" action="/logout">
 				<DropdownItem type="submit" class={dropdownItemClass}>Logout</DropdownItem>

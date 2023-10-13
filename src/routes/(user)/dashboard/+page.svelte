@@ -786,7 +786,7 @@
 	</div>
 {/if}
 
-<div class="bg-zinc-100 p-4 flex flex-col space-y-3 z-10">
+<div class="bg-zinc-100 p-4 flex flex-col space-y-3">
 	<!-- Info Card Section -->
 	<div class="flex justify-between">
 		<CardInfo purpose="time" title="" bind:data={current} />
@@ -1109,7 +1109,7 @@
 					</TableHead>
 					<TableBody tableBodyClass="divide-y bg-white">
 						{#if $consistentLowMoods === undefined || $consistentLowMoods.length === 0}
-							<TableBodyRow class="border border-zinc-300 z-10 text-center">
+							<TableBodyRow class="border border-zinc-300 text-center">
 								<TableBodyCell>No data</TableBodyCell>
 								<TableBodyCell>No data</TableBodyCell>
 								<TableBodyCell>No data</TableBodyCell>
@@ -1118,7 +1118,7 @@
 						{:else}
 							{#each $consistentLowMoods as student}
 								{#each student.streaks as streak}
-									<TableBodyRow class="z-10">
+									<TableBodyRow>
 										<TableBodyCell class="text-center">
 											<a class="hover:underline" href="/students/student-chart?search={student.studentId}"
 												rel="noopener noreferrer">

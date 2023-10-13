@@ -146,7 +146,7 @@
 	<title>Manage Users</title>
 </svelte:head>
 
-<div class="p-10 ring-1 max-h-fit max-w-fit h-min w-max bg-white shadow-md drop-shadow-md rounded z-10">
+<div class="p-10 ring-1 max-h-fit max-w-fit h-min w-max bg-white shadow-md drop-shadow-md rounded relative -z-10">
 	{#if form?.success}
 			<div class="mb-4 text-center">
 				<Alert color="green" class="text-center p-2">
@@ -184,7 +184,7 @@
 			</TableHead>
 			<TableBody tableBodyClass="divide-y bg-white">
 				{#if paginatedItems === undefined || paginatedItems?.length === 0}
-					<TableBodyRow class="border border-zinc-300 z-10">
+					<TableBodyRow class="border border-zinc-300">
 						<TableBodyCell>No data</TableBodyCell>
 						<TableBodyCell>No data</TableBodyCell>
 						<TableBodyCell>No data</TableBodyCell>
@@ -193,7 +193,7 @@
 					</TableBodyRow>
 				{:else}
 					{#each paginatedItems as user}
-						<TableBodyRow class="z-10">
+						<TableBodyRow>
 							<TableBodyCell>{user.username}</TableBodyCell>
 							<TableBodyCell>{user.email}</TableBodyCell>
 							<TableBodyCell>

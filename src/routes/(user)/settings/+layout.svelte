@@ -19,7 +19,7 @@
 	$: activeUrl = $page.url.pathname;
 </script>
 
-<div class="p-4 flex space-x-3 overflow-x-hidden">
+<div class="p-4 flex space-x-3 overflow-x-hidden z-10">
 	<Sidebar class="w-fit">
 		<SidebarWrapper class="bg-white drop-shadow-lg ring-1 h-fit w-32 flex p-3 justify-center">
 			<SidebarGroup>
