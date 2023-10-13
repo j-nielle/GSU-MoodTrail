@@ -7,8 +7,7 @@
 		//Card,
 		Button,
 		ButtonGroup,
-		Spinner,
-		//Select,
+		Select,
 		Table,
 		TableBody,
 		TableBodyCell,
@@ -27,7 +26,8 @@
 		HeatmapChart,
 		NegativeBarChart,
 		Histogram,
-		SimpleBarChart
+		SimpleBarChart,
+		CalendarChart,
 	} from '$lib/components/charts/index.js';
 	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
 	import { CardInfo } from '$lib/components/elements/index.js';
@@ -37,6 +37,8 @@
 
 	let studentMoodData = data.studentMood;
 	let anonMoodData = data.anonMood;
+	let reasonTypes = data.reasonTypes;
+
 	let dataType = {};
 
 	let todaysEntries = [];
@@ -102,21 +104,24 @@
 
 	let selectedReasonMarkType = 'average', sbcMarkType = '';
 
+	let uniqueReasons = reasonTypes?.map(reasonType => ({
+		value: reasonType.id,
+		name: reasonType.reason_label
+	}));
+
+	let selectedReason = '';
+
 	$: ({ supabase } = data);
 
 	onMount(async () => {
 		const timer = setInterval(updateCurrent, interval);
 
-		const dashboardChannel = await supabase
-			.channel('dashboard')
-			.on(
-				'postgres_changes',
-				{
+		const dashboardChannel = await supabase.channel('dashboard')
+			.on('postgres_changes', {
 					event: 'INSERT',
 					schema: 'public',
 					table: 'StudentMoodEntries'
-				},
-				(payload) => {
+				}, (payload) => {
 					studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
 					studentMoodData.sort((currentElem, nextElem) => {
 						const currentDate = new Date(currentElem.created_at);
@@ -124,19 +129,14 @@
 						return currentDate - nextDate;
 					});
 				}
-			)
-			.on(
-				'postgres_changes',
-				{
+			).on('postgres_changes', {
 					event: 'INSERT',
 					schema: 'public',
 					table: 'AnonMood'
-				},
-				(payload) => {
+				}, (payload) => {
 					anonMoodData = _.cloneDeep([...anonMoodData, payload.new]);
 				}
-			)
-			.subscribe((status) => console.log('/dashboard', status));
+			).subscribe((status) => console.log('/dashboard', status));
 
 		return () => {
 			clearInterval(timer);
@@ -145,6 +145,7 @@
 	});
 
 	$: viewAnonData ? (dataType = anonMoodData) : (dataType = studentMoodData);
+	$: reasonType = selectedReason;
 
 	$: if (dataType) {
 		const groupedData = _.groupBy(dataType, (data) => {
@@ -390,10 +391,10 @@
 
 			// object that stores number of occurences (value) for each recorded reason_score (key)
 			const mostFreqReason = Object.entries(groupedByYear)
-				.flatMap(([_, entries]) => entries)
+				.flatMap(([_, entries]) => entries) // get the entries from groupedByWeek object into a single array
 				.reduce((reasonCounts, entry) => {
 					const reason = entry.reason_score;
-					reasonCounts[reason] = (reasonCounts[reason] || 0) + 1;
+					reasonCounts[reason] = (reasonCounts[reason] || 0) + 1; // 0 if mood is not yet in moodCounts, else increment by 1
 					return reasonCounts;
 				}, {});
 
@@ -1098,11 +1099,8 @@
 								{#each student.streaks as streak}
 									<TableBodyRow class="z-10">
 										<TableBodyCell class="text-center">
-											<a
-												class="hover:underline"
-												href="/students/student-chart?search={student.studentId}"
-												rel="noopener noreferrer"
-											>
+											<a class="hover:underline" href="/students/student-chart?search={student.studentId}"
+												rel="noopener noreferrer">
 												{student.studentId}
 											</a>
 										</TableBodyCell>
@@ -1110,14 +1108,16 @@
 											{streak.startDate} - {streak.endDate}
 										</TableBodyCell>
 										<TableBodyCell class="text-center">
-											{Object.keys(mood).find(
-												(key) =>
-													mood[key] ===
-													Math.round(
-														streak.moodScores.reduce((accum, elem) => accum + parseInt(elem), 0) /
+											{
+												Object.keys(mood).find(
+													(key) =>
+														mood[key] ===
+														Math.round(
+															streak.moodScores.reduce((accum, elem) => accum + parseInt(elem), 0) /
 															streak.moodScores.length
 													)
-											)}
+												)
+											}
 										</TableBodyCell>
 										<TableBodyCell class="text-center">
 											{(() => {
@@ -1151,6 +1151,26 @@
 						{/if}
 					</TableBody>
 				</Table>
+			</div>
+		</div>
+
+		<div class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+			<div class="flex flex-col">
+				<div class="flex flex-row justify-between mt-4 space-y-3">
+					<div class="flex flex-col">
+						<p class="text-lg font-bold self-center">Associated Reason Calendar</p>
+						<p class="text-xs">(Please select a reason.)</p>
+					</div>
+					<Select placeholder="Filter by reason" class="font-normal w-max h-11 bg-white" items={uniqueReasons} bind:value={selectedReason} />
+				</div>
+				<div class="items-center">
+					<CalendarChart 
+						data={dataType} 
+						reasonType={selectedReason}
+						elementID="testests" 
+						style="width:1160px;height:250px"
+					/>
+				</div>
 			</div>
 		</div>
 	</div>

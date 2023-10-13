@@ -369,7 +369,6 @@
 					selectedCourse = '';
 					selectedYearLevel = '';
 					selectedStudent = '';
-					selectedCollege = e.target.value;
 				}}
 			/>
 			<Select placeholder="Course" class="font-normal w-max h-11 bg-white"
@@ -377,20 +376,14 @@
 				on:change={(e) => {
 					selectedYearLevel = '';
 					selectedStudent = '';
-					selectedCourse = e.target.value;
 				}}
 			/>
 			<Select placeholder="Year Level" class="font-normal w-max h-11 bg-white" items={yearLevel} bind:value={selectedYearLevel}
 				on:change={(e) => {
 					selectedStudent = '';
-					selectedYearLevel = e.target.value;
 				}}
 			/>
-			<Select placeholder="Select a student" class="font-normal w-max h-11 bg-white" items={student} bind:value={selectedStudent}
-				on:input={(e) => {
-					selectedStudent = e.target.value;
-				}}
-			/>
+			<Select placeholder="Select a student" class="font-normal w-max h-11 bg-white" items={student} bind:value={selectedStudent} />
 			<Button class="h-11 w-fit" size="sm" color="red"
 				on:click={() => {
 					searchTerm = '';

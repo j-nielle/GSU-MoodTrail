@@ -65,10 +65,10 @@
 							color: '#000'
 						},
 						data: [{
-							type: currMType || 'average',
+							type: currMType,
 						}],
 						silent: true
-					},
+					}
 				}
 			],
 			textStyle: {

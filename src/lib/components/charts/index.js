@@ -8,3 +8,4 @@ export { default as Histogram } from '$lib/components/charts/Histogram.svelte';
 export { default as RadarChart } from '$lib/components/charts/RadarChart.svelte';
 export { default as NegativeBarChart } from '$lib/components/charts/NegativeBarChart.svelte';
 export { default as SimpleBarChart } from '$lib/components/charts/SimpleBarChart.svelte';
+export { default as CalendarChart } from '$lib/components/charts/CalendarChart.svelte';

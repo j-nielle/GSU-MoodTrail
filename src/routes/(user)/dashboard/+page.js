@@ -17,9 +17,15 @@ export async function load({ parent }) {
 		.select()
 		.order('created_at', { ascending: true });
 
+	const { data: reasonTypes } = await supabase
+		.from('Reason')
+		.select()
+		.order('id', { ascending: true });
+		
 	return {
 		studentMood: studentMood || [],
 		anonMood: anonMood || [],
+		reasonTypes: reasonTypes || [],
 		session: session
 	};
 }
