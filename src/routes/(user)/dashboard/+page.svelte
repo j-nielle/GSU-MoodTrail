@@ -742,7 +742,7 @@
 	}
 
 	const getWeekNumberString = (date) => {
-		const firstDayOfYear = dayjs(date).startOf('year').day(1);
+		const firstDayOfYear = dayjs(date).startOf('year').day(0);
 		const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
 		return `Week ${weekDiff}`;
 	};
