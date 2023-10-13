@@ -19,8 +19,9 @@
 			title: {
 				text: title,
         textStyle:{
-          color: '#000000'
-        }
+          color: '#000000',
+					fontSize: 20,
+        },
 			},
 			yAxis: {
 				type: 'category',

@@ -26,21 +26,21 @@
 
 {#if purpose === 'time'}
 	<Card class='max-h-12 w-xs justify-center flex-row items-center space-x-2'>
-		<p class="font-semibold text-red-700">{month.toUpperCase()} {day}, {year}</p>
-		<p class="text-slate-900">{time.slice(0,-2)}<span class="font-semibold">{time.slice(-2)}</span></p>
+		<p class="font-semibold text-red-700 text-sm">{month.toUpperCase()} {day}, {year}</p>
+		<p class="text-slate-900 text-sm">{time.slice(0,-2)}<span class="font-semibold">{time.slice(-2)}</span></p>
 	</Card>
 {:else if purpose === 'mood'}
 	<Card class='max-h-12 max-w-full justify-center flex-row items-center space-x-2'>
 		<FaceLaughOutline tabindex="-1" class="text-slate-900" />
 		<p class="text-slate-900 text-sm">
-			{title} <span class="font-bold cursor-pointer">{data ?? 'N/A'}</span>
+			{title} <span class="font-semibold">{data ?? 'N/A'}</span>
 		</p>
 	</Card>
 {:else if purpose === 'reason'}
 	<Card class='max-h-12 max-w-full justify-center flex-row items-center space-x-2'>
 		<BrainOutline tabindex="-1" class="text-slate-900" />
 		<p class="text-slate-900 text-sm">
-			{title} <span class="font-bold cursor-pointer">{data ?? 'N/A'}</span>
+			{title} <span class="font-semibold">{data ?? 'N/A'}</span>
 		</p>
 	</Card>
 {:else}

@@ -75,7 +75,7 @@
 		lineChartTitle = '';
 	let selectedNHBarChart = 'course';
 
-	let current = dayjs().format('ddd MMM D, YYYY h:mm A');
+	let current = dayjs().format('MMM D, YYYY hh:mm:ss A');
 	const interval = 1000;
 
 	let viewAnonData = false;
@@ -786,7 +786,7 @@
 
 <div class="bg-zinc-100 p-4 flex flex-col space-y-3">
 	<!-- Info Card Section -->
-	<div class="flex justify-between">
+	<div class="flex justify-between w-full">
 		<CardInfo purpose="time" title="" bind:data={current} />
 		<CardInfo purpose="recentStudent" title="Recent Student:" bind:data={recentStudent} />
 
@@ -827,7 +827,7 @@
 			</div>
 		{/if}
 		<!-- (soon: jump to modal) -->
-		<Button shadow on:click={() => jumpToModalState = true}>
+		<Button class="w-fit" shadow on:click={() => jumpToModalState = true}>
 			<ForwardSolid class="mr-2 focus:outline-none" />Jump to
 		</Button>
 	</div>

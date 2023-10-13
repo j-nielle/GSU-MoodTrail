@@ -95,7 +95,7 @@
           }
         }
       ],
-      dataZoom: [{ type: 'inside' }, { type: 'slider', height: 20 }],
+      dataZoom: [{ type: 'slider', height: 20 }],
 			toolbox: {
 				show: true,
 				feature: {

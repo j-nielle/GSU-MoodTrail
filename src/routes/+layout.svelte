@@ -30,9 +30,8 @@
 	const activeClass = "font-semibold text-blue-700"
 	const chevronClass = "w-3 h-3 ml-2 text-primary-800 dark:text-white inline focus:outline-0"
 	const avatarClass = "cursor-pointer fixed mr-3"
-	const dropdownClass = "relative z-30"
 	const containerClass = "relative z-30 drop-shadow-lg w-fit mt-8"
-	const dropdownItemClass = "relative z-30 py-2 text-sm font-medium cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600"
+	const dropdownItemClass = "relative z-50 py-2 text-sm font-semibold text-red-600 cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600"
 
 	let newLowMoodData = false;
 	let consistentStreaksInfo = new Map();
@@ -129,15 +128,11 @@
 		<label for="avatar-menu">
 			<Avatar class={avatarClass} id="avatar-menu" alt="User Profile Pic" border />
 		</label>
-		<Dropdown dropdownClass="relative z-50" placement="left" triggeredBy="#avatar-menu" {containerClass}>
-			<DropdownHeader>
-				<span class="block text-sm"> {session?.user?.role.toUpperCase()} </span>
-				<span class="block text-sm font-medium truncate"> {session?.user?.email} </span>
-			</DropdownHeader>
-			<DropdownItem class="cursor-pointer" href="/settings/account">Settings</DropdownItem>
+		<Dropdown class="relative z-50" placement="left" triggeredBy="#avatar-menu" {containerClass}>
+			<DropdownItem class="cursor-pointer" href="/settings/account">SETTINGS</DropdownItem>
 			<DropdownDivider />
 			<form method="POST" action="/logout">
-				<DropdownItem type="submit" class={dropdownItemClass}>Logout</DropdownItem>
+				<DropdownItem type="submit" class={dropdownItemClass}>LOGOUT</DropdownItem>
 			</form>
 		</Dropdown>
 	{:else}
