@@ -1204,55 +1204,55 @@
 	<div class="flex flex-col gap-3">
 		<a href="#overallMoodFreqHBC" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline /> 
+				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
 				Overall Mood Frequency Chart
 			</div>
 		</a>
 		<a href="#lineChartMood" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline /> 
+				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
 				Mood Line Chart
 			</div>
 		</a>
 		<a href="#moodFreqHeatmap" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline /> 
+				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
 				Mood Frequency by Day and Hour Chart
 			</div>
 		</a>
 		<a href="#reasonFreqBC" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline /> 
+				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
 				Associated Reason Frequency Chart
 			</div>
 		</a>
 		<a href="#moodReasonRadarChart" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline /> 
+				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
 				Mood and Frequency of Related Reasons Chart
 			</div>
 		</a>
 		<a href="#moodAvgCourseYrReason" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline /> 
+				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
 				Mood Averages (including the negatives)
 			</div>
 		</a>
 		<a href="#moodLoginHrsHistogram" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline /> 
+				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
 				Mood Login Hours (in 24-hour format)
 			</div>
 		</a>
 		<a href="#low-moods" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline /> 
+				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
 				Table of Students with Consistent Low Moods
 			</div>
 		</a>
 		<a href="#reasonCalendar" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline /> 
+				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
 				Associated Reason Calendar
 			</div>
 		</a>
