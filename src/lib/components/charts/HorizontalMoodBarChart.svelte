@@ -8,6 +8,7 @@
 	export let yData;
 	export let elementID;
 	export let style;
+	export let title;
 
 	let horizontalMoodBarChart;
 
@@ -16,7 +17,7 @@
 
 		horizontalMoodBarChart.setOption({
 			title: {
-				text: 'Mood Frequency',
+				text: title,
         textStyle:{
           color: '#000000'
         }
