@@ -765,8 +765,10 @@
 </svelte:head>
 
 <!-- Tooltip Section -->
-<Tooltip placement="left" class="z-20" triggeredBy="#toggleData">Toggle between student and anonymous data</Tooltip>
-<!-- <Tooltip  class="z-20" triggeredBy="#jumpToTooltip">Go To</Tooltip> Jump to certain sections -->
+<!-- fixed: unexpected scroll behavior during hover events -->
+<Tooltip placement="left" class="fixed z-20 overflow-hidden" triggeredBy="#toggleData" on:hover={(e) => e.preventDefault()}>
+	Toggle between student and anonymous data
+</Tooltip>
 
 <!-- Student/Anonymous Floating Toggle Button -->
 {#if studentMoodData?.length > 0 || anonMoodData?.length > 0}
@@ -837,7 +839,7 @@
 	<div class="flex flex-col space-y-3 w-full">
 		<div class="flex space-x-4">
 			<!-- Overall Mood Frequency Bar Chart -->
-			<div id="overallMoodFreqHBC" bind:this={overallMoodRef} class="p-3 bg-white rounded-sm drop-shadow-md hover:ring-1 self-center flex justify-center items-center pt-5 pl-4">
+			<div id="overallMoodFreqHBC" class="p-3 bg-white rounded-sm drop-shadow-md hover:ring-1 self-center flex justify-center items-center pt-5 pl-4">
 				{#if dataType?.length == 0}
 					<div class="flex flex-col justify-center items-center space-y-5" style="width:520px; height:400px;">
 						<RocketOutline class="h-20 w-20" />
@@ -855,7 +857,7 @@
 			</div>
 
 			<!-- Line Chart -->
-			<div id="lineChartMood" bind:this={lineChartRef} class="flex w-screen bg-white rounded-sm drop-shadow-md items-center justify-center hover:ring-1">
+			<div id="lineChartMood" class="flex w-screen bg-white rounded-sm drop-shadow-md items-center justify-center hover:ring-1">
 				<div class="flex flex-col space-y-4">
 					<div class="flex justify-between items-center">
 						<p class="text-xl text-black font-bold">{lineChartTitle}</p>
@@ -941,7 +943,7 @@
 
 		<div class="flex space-x-4">
 			<!-- Heatmap -->
-			<div id="moodFreqHeatmap" bind:this={moodFreqRef} class="bg-white flex flex-col rounded-sm drop-shadow-md p-4 hover:ring-1">
+			<div id="moodFreqHeatmap" class="bg-white flex flex-col rounded-sm drop-shadow-md p-4 hover:ring-1">
 				{#if dataType.length > 0}
 					<HeatmapChart
 						{heatmapData}
@@ -958,7 +960,7 @@
 			</div>
 
 			<!-- Reason Simple Bar Chart -->
-			<div id="reasonFreqBC" bind:this={reasonFreqRef} class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+			<div id="reasonFreqBC" class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 				<div class="flex flex-col">
 					{#if dataType?.length > 0}
 					<div class="flex justify-between">
@@ -1003,7 +1005,7 @@
 		<div class="flex space-x-4">
 			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 				<!-- Radar Chart -->
-				<div id="moodReasonRadarChart" bind:this={moodReasonRef} class="flex flex-col">
+				<div id="moodReasonRadarChart" class="flex flex-col">
 					{#if dataType?.length > 0}
 						<p class="text-lg self-center font-bold mb-3">Mood and Frequency of Related Reasons</p>
 						<RadarChart
@@ -1022,7 +1024,7 @@
 			</div>
 			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 				<!-- Mood Averages Bar Chart -->
-				<div id="moodAvgCourseYrReason" bind:this={moodAvgRef} class="flex flex-col">
+				<div id="moodAvgCourseYrReason" class="flex flex-col">
 					{#if dataType?.length > 0}
 						<div class="flex justify-between">
 							<div class="flex flex-col">
@@ -1079,7 +1081,7 @@
 
 		<div class="flex space-x-4">
 			<!-- Histogram Chart -->
-			<div id="moodLoginHrsHistogram" bind:this={moodHrsRef} class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+			<div id="moodLoginHrsHistogram" class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 				{#if dataType?.length > 0}
 					<Histogram data={dataType} elementID="HrsHistogram" style="width:510px; height:370px;" />
 				{:else}
@@ -1176,7 +1178,7 @@
 		</div>
 
 		<!-- Calendar Chart -->
-		<div id="reasonCalendar" bind:this={reasonCalendarRef} class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+		<div id="reasonCalendar" class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 			<div class="flex flex-col">
 				<div class="flex flex-row justify-between mt-4 space-y-3">
 					<div class="flex flex-col">
