@@ -27,7 +27,7 @@
 	$: activeUrl = $page.url.pathname;
 
 	const navDivClass = "relative mx-auto flex justify-between items-center w-full z-20"
-	const activeClass = "font-semibold text-blue-700"
+	const activeClass = "text-blue-700"
 	const chevronClass = "w-3 h-3 ml-2 text-primary-800 dark:text-white inline focus:outline-0"
 	const avatarClass = "cursor-pointer fixed mr-3"
 	const containerClass = "relative z-30 drop-shadow-lg w-fit mt-8"
