@@ -115,11 +115,7 @@
 
 	let jumpToModalState = false;
 
-	let tableRef, overallMoodRef, lineChartRef, 
-	moodFreqRef, reasonFreqRef, moodReasonRef, 
-	moodAvgRef, moodHrsRef, reasonCalendarRef;
-
-	let jumpTo = 'first';
+	let tableRef;
 
 	$: ({ supabase } = data);
 
@@ -603,7 +599,7 @@
 	}
 
 	$: if (studentMoodData) {
-		recentStudent = studentMoodData?.slice(-1)[0]?.name; // info card
+		recentStudent = studentMoodData?.slice(-1)[0]?.student_id; // info card
 
 		// table of students w consistent low moods
 		let filteredStudents = new Map();
@@ -792,7 +788,7 @@
 	<!-- Info Card Section -->
 	<div class="flex justify-between">
 		<CardInfo purpose="time" title="" bind:data={current} />
-		<CardInfo purpose="recentStudent" title="Latest Student:" bind:data={recentStudent} />
+		<CardInfo purpose="recentStudent" title="Recent Student:" bind:data={recentStudent} />
 
 		{#if selectedLineChart === 'today'}
 			<div>
