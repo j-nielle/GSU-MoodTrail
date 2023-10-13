@@ -752,9 +752,9 @@
 	}
 
 	function scrollIntoView({ target }) {
-    const el = document.getElementById(target.getAttribute('id'));
-    if (!el) return;
-    el.scrollIntoView({
+    const element = document.getElementById(target.getAttribute('id'));
+    if (!element) return;
+    element.scrollIntoView({
       behavior: 'smooth'
     });
   }
