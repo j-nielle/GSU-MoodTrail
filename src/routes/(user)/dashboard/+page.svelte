@@ -1328,7 +1328,13 @@
 		<a href="#reasonCalendar" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
 				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
-				Associated Reason Calendar
+				# of Mood Entries per Weekday
+			</div>
+		</a>
+		<a href="#2Charts" on:click={scrollIntoView}>
+			<div class="flex gap-3 items-center">
+				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
+				Selected Mood Bar Charts
 			</div>
 		</a>
 	</div>
