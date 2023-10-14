@@ -32,7 +32,6 @@
 	} from '$lib/components/charts/index.js';
 	import { PrintSolid } from 'flowbite-svelte-icons';
 	import { yearLvl, mood, reason, moodChoices, reasonChoices } from '$lib/constants/index.js';
-	import { InputHelper } from '$lib/components/elements/index.js';
 
 	export let data;
 	export let form;
@@ -336,8 +335,8 @@
 		selectedReasonMarkType = reasonMarkType;
 	}
 
-	function handlePrint() {
-		window.print();
+	function handleExport() {
+		//window.print();
 	}
 </script>
 
@@ -354,10 +353,6 @@
 				</Button>
 				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
 					New Mood Entry
-				</Button>
-				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint}>
-					<span class="mr-3">Print</span>
-					<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
 				</Button>
 			</div>
 		{:else if studentMoodData?.length > 0}
@@ -397,8 +392,8 @@
 						New Mood Entry
 					</Button>
 				{/if}
-				<Button class="h-11 shadow-md p-4 items-center" on:click={handlePrint}>
-					<span class="mr-3">Print</span>
+				<Button class="h-11 shadow-md p-4 items-center" on:click={handleExport}>
+					<span class="mr-3">Export Data</span>
 					<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
 				</Button>
 			</div>
