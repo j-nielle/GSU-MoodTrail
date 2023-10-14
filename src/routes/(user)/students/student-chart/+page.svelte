@@ -31,7 +31,7 @@
 		//HeatmapChart
 	} from '$lib/components/charts/index.js';
 	import { PrintSolid } from 'flowbite-svelte-icons';
-	import { yearLvl, mood, reason } from '$lib/constants/index.js';
+	import { yearLvl, mood, reason, moodChoices, reasonChoices } from '$lib/constants/index.js';
 	import { InputHelper } from '$lib/components/elements/index.js';
 
 	export let data;
@@ -74,9 +74,6 @@
 	let newMoodEntry = false;
 
 	const divClass = "bg-white space-y-4 dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col";
-
-	const moodChoices = Object.keys(mood).map(key => ({ value: mood[key], name: key }));
-	const reasonChoices = Object.keys(reason).map(key => ({ value: reason[key], name: key }));
 
 	let currentStudentID;
 

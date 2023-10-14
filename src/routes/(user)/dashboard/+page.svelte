@@ -34,7 +34,7 @@
 	} from '$lib/components/charts/index.js';
 	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
 	import { CardInfo } from '$lib/components/elements/index.js';
-	import { mood, reason, yearLvl } from '$lib/constants/index.js';
+	import { mood, reason, yearLvl, moodChoices, reasonChoices } from '$lib/constants/index.js';
 
 	export let data;
 
@@ -104,21 +104,9 @@
 		yDataSBC = [];
 
 	let selectedReasonMarkType = 'average', sbcMarkType = '';
-
-	let reasons = Object.entries(reason).map(([name, value]) => ({
-    value: value,
-    name: name
-	}));
-
-	let moods = Object.entries(mood).map(([name, value]) => ({
-			value: value,
-			name: name
-	}));
-
 	let selectedReason = '';
 
 	let jumpToModalState = false;
-
 	let tableRef;
 
 	let selectedMoodScore;
@@ -1219,13 +1207,13 @@
 						<p class="text-lg font-bold self-center">Associated Reason Calendar</p>
 						<p class="text-xs">(Please select a reason.)</p>
 					</div>
-					<Select placeholder="Filter by reason" class="font-normal w-max h-11 bg-white" items={reasons} bind:value={selectedReason} />
+					<Select placeholder="Filter by reason" class="font-normal w-max h-11 bg-white" items={reasonChoices} bind:value={selectedReason} />
 				</div>
 				<div class="items-center">
 					<CalendarChart 
 						data={dataType} 
 						reasonType={selectedReason}
-						elementID="testests" 
+						elementID="reasonCalendarChart" 
 						style="width:1160px;height:250px"
 					/>
 				</div>
@@ -1237,7 +1225,7 @@
 			<div class="flex flex-col w-full">
 				{#if dataType?.length > 0}
 				<div class="flex flex-row justify-center mt-2 mb-6 space-y-3">
-					<Select placeholder="Select a mood" class="font-normal w-max h-11 bg-white" items={moods} bind:value={selectedMoodScore} />
+					<Select placeholder="Select a mood" class="font-normal w-max h-11 bg-white" items={moodChoices} bind:value={selectedMoodScore} />
 				</div>
 				<div class="flex space-x-3 justify-between mx-4">
 					<!-- # of Mood Entries per Weekday -->

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 export const moodColors = {
 	Sad: "#115f9a",
 	Annoyed: "#1984c5",
@@ -27,6 +29,8 @@ export const mood = {
 	Excited: 4
 };
 
+export const moodChoices = Object.keys(mood).map(key => ({ value: mood[key], name: key }));
+
 export const reason = {
 	Family: 1,
 	School: 2,
@@ -35,6 +39,8 @@ export const reason = {
 	Health: 5,
 	'Unwilling to specify': 6
 };
+
+export const reasonChoices = Object.keys(reason).map(key => ({ value: reason[key], name: key }));
 
 export const roleColor = {
 	admin: 'purple',
