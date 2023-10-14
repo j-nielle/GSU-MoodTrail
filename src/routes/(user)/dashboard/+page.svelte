@@ -802,13 +802,13 @@
 
 <!-- Tooltip Section -->
 <!-- fixed: unexpected scroll behavior during hover events -->
-<Tooltip placement="left" class="fixed z-20 overflow-hidden" triggeredBy="#toggleData" on:hover={(e) => e.preventDefault()}>
+<Tooltip placement="left" class="fixed z-20 overflow-hidden" triggeredBy="#switchData" on:hover={(e) => e.preventDefault()}>
 	Toggle between student and anonymous data
 </Tooltip>
 
 <!-- Student/Anonymous Floating Toggle Button -->
 {#if studentMoodData?.length > 0 || anonMoodData?.length > 0}
-	<div id="toggleData" class="flex justify-evenly space-x-2 bg-slate-900 p-2 rounded-full w-fit fixed right-4 bottom-4 z-20">
+	<div id="switchData" class="flex justify-evenly space-x-2 bg-slate-900 p-2 rounded-full w-fit fixed right-4 bottom-4 z-20">
 		<button class={!viewAnonData ? toggleBtnClass.active : toggleBtnClass.inactive}
 			on:click={() => (viewAnonData = false)}>
 			<p class={!viewAnonData ? 'text-white font-semibold tracking-widest' : 'text-slate-500 tracking-widest'}>
