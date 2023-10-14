@@ -8,6 +8,7 @@
   export let data;
 	export let elementID;
 	export let style;
+  export let title;
 
 	let histogramChart;
   let transformedData;
@@ -39,7 +40,7 @@
 				position: 'top'
 			},
       title: {
-        text: "Mood Login Hours (in 24-hour format)",
+        text: title,
         textStyle:{
           color: '#000000'
         }

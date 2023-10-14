@@ -887,7 +887,7 @@
 			<div id="lineChartMood" class="flex w-screen bg-white rounded-sm drop-shadow-md items-center justify-center hover:ring-1">
 				<div class="flex flex-col space-y-4">
 					<div class="flex justify-between items-center">
-						<p class="text-xl text-black font-bold">{lineChartTitle}</p>
+						<p class="text-xl text-black font-semibold">{lineChartTitle}</p>
 						<ButtonGroup>
 							<Button
 								disabled={dataType.length == 0}
@@ -1039,7 +1039,7 @@
 				<!-- Radar Chart -->
 				<div id="moodReasonRadarChart" class="flex flex-col">
 					{#if dataType?.length > 0}
-						<p class="text-lg self-center font-bold mb-3">Mood and Frequency of Related Reasons</p>
+						<p class="text-lg self-center font-semibold mb-3">Mood and Frequency of Related Reasons</p>
 						<RadarChart
 							bind:data={moodRadarData}
 							bind:indicator={reasonRadarIndicator}
@@ -1060,7 +1060,7 @@
 					{#if dataType?.length > 0}
 						<div class="flex justify-between">
 							<div class="flex flex-col">
-								<p class="text-lg font-bold ml-1">Mood Averages</p>
+								<p class="text-lg font-semibold ml-1">Mood Averages</p>
 								<p class="ml-1 font-light text-sm">(including the negatives)</p>
 							</div>
 							<ButtonGroup class="mb-3">
@@ -1115,7 +1115,10 @@
 			<!-- Histogram Chart -->
 			<div id="moodLoginHrsHistogram" class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 				{#if dataType?.length > 0}
-					<Histogram data={dataType} elementID="HrsHistogram" style="width:510px; height:370px;" />
+					<Histogram data={dataType} title="Mood Login Hours (in 24-hour format)"
+						elementID="HrsHistogram" 
+						style="width:510px; height:370px;"
+					/>
 				{:else}
 					<div class="flex flex-col justify-center items-center space-y-5" style="width:510px; height:370px;">
 						<RocketOutline class="h-20 w-20" />
@@ -1125,16 +1128,15 @@
 			</div>
 			<!-- Students with Consistent Low Moods Table -->
 			<div id="low-moods" bind:this={tableRef} class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
-				<caption class="text-lg font-bold text-left w-max text-black bg-white dark:text-white dark:bg-gray-800 mb-6">
-					Table of Students with Consistent Low moods
+				<caption class="text-lg mx-3 font-semibold text-left w-max text-black bg-white dark:text-white dark:bg-gray-800 mb-6">
 					<p class="mt-3 text-sm font-normal text-gray-500 dark:text-gray-400">
-						These students have experienced consistent low moods for atleast 4 consecutive days.
+						These students have experienced consistent low moods for <span class="font-semibold">atleast 4 consecutive days.</span>
 					</p>
 					<p class="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400">
-						*No common reason found.
+						*No prevailing reason found.
 					</p>
 				</caption>
-				<Table divClass="text-left text-sm text-gray-500 border border-zinc-300 dark:text-gray-400 max-h-56 overflow-y-auto">
+				<Table divClass="text-left mx-3 text-sm text-gray-500 border border-zinc-300 dark:text-gray-400 max-h-56 overflow-y-auto">
 					<TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky text-center">
 						<TableHeadCell>ID Number</TableHeadCell>
 						<TableHeadCell>Time Period</TableHeadCell>
@@ -1214,8 +1216,8 @@
 			<div class="flex flex-col">
 				<div class="flex flex-row justify-between mt-4 space-y-3">
 					<div class="flex flex-col justify-start items-center">
-						<p class="text-lg font-bold self-center">Mood-Reason Calendar</p>
-						<p class="text-xs">(Please select a mood and a reason.)</p>
+						<p class="text-lg font-semibold self-start">Mood-Reason Calendar</p>
+						<p class="text-xs">(Please select a mood and the associated reason.)</p>
 					</div>
 					<div class="flex flex-row justify-end space-x-3">
 						<Select placeholder="Mood" class="font-normal w-max h-11 bg-white" items={moodChoices} bind:value={selectedMoodCalendar} />
