@@ -9,30 +9,39 @@
 	export let elementID;
 	export let style;
 	export let reasonType;
+	export let moodType;
 
-	let getCalendarData;
-
-	$: getCalendarData = (dataType) => {
+	function getCalendarData(dataType){
 		const final = [];
 		const dataMap = new Map(); // this is to group the data by date
 
 		for (let i = 0; i < dataType.length; i++) {
 			const date = +echarts?.time.parse(dataType[i]?.created_at);
 			const formattedDate = echarts?.time.format(date, '{yyyy}-{MM}-{dd}', false);
-			const score = dataType[i].reason_score;
-			if (!reasonType) { return; }
-      else if (score == reasonType) {
-        if (dataMap.has(formattedDate)) {
-          dataMap.set(formattedDate, dataMap.get(formattedDate) + 1);
-        } else {
-          dataMap.set(formattedDate, 1);
-        }
-      }
+			const reasonScore = dataType[i]?.reason_score;
+			const moodScore = dataType[i]?.mood_score;
+
+			if (reasonType && reasonScore == reasonType) {
+				if (dataMap.has(formattedDate)) {
+					dataMap.set(formattedDate, dataMap.get(formattedDate) + 1);
+				} else {
+					dataMap.set(formattedDate, 1);
+				}
+			}
+
+			if (moodType && moodScore == moodType) {
+				if (dataMap.has(formattedDate)) {
+					dataMap.set(formattedDate, dataMap.get(formattedDate) + 1);
+				} else {
+					dataMap.set(formattedDate, 1);
+				}
+			}
 		}
+
 		for (const [date, count] of dataMap.entries()) {
-			final.push([date, count]); // push the date and count to the final array (e.g [2021-01-01, 1])
+			final.push([date, count]);
 		}
-		console.log(final)
+
 		return final;
 	}
 

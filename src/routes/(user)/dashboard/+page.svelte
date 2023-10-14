@@ -16,7 +16,7 @@
 		TableHeadCell,
 		Tooltip, 
 		Modal, 
-		Radio
+		Checkbox
 	} from 'flowbite-svelte';
 	import {
 		RocketOutline, 
@@ -104,7 +104,7 @@
 		yDataSBC = [];
 
 	let selectedReasonMarkType = 'average', sbcMarkType = '';
-	let selectedReason = '';
+	let selectedReasonCalendar = '', selectedMoodCalendar = '';
 
 	let jumpToModalState = false;
 	let tableRef;
@@ -113,6 +113,8 @@
 	const days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
 	let xMoodWeek = [], yMoodWeekEntry = [];
 	let yReasonPercentage = [], xReason = [];
+
+	let lowMoodsOnly = false;
 
 	$: ({ supabase } = data);
 
@@ -151,8 +153,11 @@
 
 	$: if (dataType) {
 		// for heatmap
+		let filteredDataType = lowMoodsOnly ? 
+			dataType?.filter(data => data.mood_score >= -4 && data.mood_score <= -1) : dataType;
+		
 		// e.g { '0,1': [ { id: ... }, { id: ... } ], '3,14': [ { id: ... } ] }
-		const groupedData = _.groupBy(dataType, (data) => {
+		const groupedData = _.groupBy(filteredDataType, (data) => {
 			const date = new Date(data.created_at);
 
 			// getDay() returns 0 for Sunday, 1 for Monday, etc. (0-6)
@@ -600,8 +605,6 @@
 		if(selectedReasonMarkType === 'average') { sbcMarkType = 'average' }
 		else if(selectedReasonMarkType === 'min') { sbcMarkType = 'min' }
 		else if(selectedReasonMarkType === 'max') { sbcMarkType = 'max' }
-
-		
 	}
 
 	$: {
@@ -969,9 +972,16 @@
 			<!-- Heatmap -->
 			<div id="moodFreqHeatmap" class="bg-white flex flex-col rounded-sm drop-shadow-md p-4 hover:ring-1">
 				{#if dataType.length > 0}
+					<div class="flex justify-between my-2">
+						<p class="self-center text-lg ml-4 font-semibold">Mood Frequency by Day and Hour</p>
+						<div class="flex items-center justify-end mr-1.5 space-x-2">
+							<Checkbox class="cursor-pointer mr-0" bind:value={lowMoodsOnly} on:change={() => lowMoodsOnly = !lowMoodsOnly} />
+							<p class="text-sm font-normal text-gray-500 dark:text-gray-400">Low Moods Only</p>
+						</div>
+					</div>
 					<HeatmapChart
 						{heatmapData}
-						title="Mood Frequency by Day and Hour"
+						title=""
 						elementID="dashboardHM"
 						style="width:580px; height:360px;"
 					/>
@@ -1200,20 +1210,43 @@
 		</div>
 
 		<!-- Calendar Chart -->
-		<div id="reasonCalendar" class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+		<div id="associatedReasonCalendar" class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 			<div class="flex flex-col">
 				<div class="flex flex-row justify-between mt-4 space-y-3">
 					<div class="flex flex-col">
 						<p class="text-lg font-bold self-center">Associated Reason Calendar</p>
 						<p class="text-xs">(Please select a reason.)</p>
 					</div>
-					<Select placeholder="Filter by reason" class="font-normal w-max h-11 bg-white" items={reasonChoices} bind:value={selectedReason} />
+					<Select placeholder="Filter by reason" class="font-normal w-max h-11 bg-white" items={reasonChoices} bind:value={selectedReasonCalendar} />
 				</div>
 				<div class="items-center">
 					<CalendarChart 
 						data={dataType} 
-						reasonType={selectedReason}
+						bind:reasonType={selectedReasonCalendar}
+						moodType=''
 						elementID="reasonCalendarChart" 
+						style="width:1160px;height:250px"
+					/>
+				</div>
+			</div>
+		</div>
+
+		<!-- Calendar Chart -->
+		<div id="associatedMoodCalendar" class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+			<div class="flex flex-col">
+				<div class="flex flex-row justify-between mt-4 space-y-3">
+					<div class="flex flex-col">
+						<p class="text-lg font-bold self-center">Mood Calendar</p>
+						<p class="text-xs">(Please select a mood.)</p>
+					</div>
+					<Select placeholder="Filter by mood" class="font-normal w-max h-11 bg-white" items={moodChoices} bind:value={selectedMoodCalendar} />
+				</div>
+				<div class="items-center">
+					<CalendarChart 
+						data={dataType} 
+						reasonType=''
+						bind:moodType={selectedMoodCalendar}
+						elementID="moodCalendarChart" 
 						style="width:1160px;height:250px"
 					/>
 				</div>
@@ -1313,7 +1346,7 @@
 				Table of Students with Consistent Low Moods
 			</div>
 		</a>
-		<a href="#reasonCalendar" on:click={scrollIntoView}>
+		<a href="#associatedReasonCalendar" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
 				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
 				# of Mood Entries per Weekday
