@@ -5,7 +5,6 @@
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
 
-	//export let title;
 	export let data;
 	export let elementID;
 	export let style;
@@ -40,7 +39,7 @@
 	let calendarChart;
 
 	onMount(() => {
-		calendarChart = echarts?.init(document.getElementById(elementID));
+		calendarChart = echarts?.init(document?.getElementById(elementID));
 
 		calendarChart?.setOption({
 			tooltip: {

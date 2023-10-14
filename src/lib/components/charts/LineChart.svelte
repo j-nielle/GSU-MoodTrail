@@ -69,12 +69,12 @@
 				show: true,
 				trigger: 'axis',
 				formatter: (params) => {
-					const index = params[0].dataIndex; // index of the x-axis which is basically the date
+					const index = params[0]?.dataIndex; // index of the x-axis which is basically the date
 					const temp = xData[index]; // the date itself
 
 					let moodScore;
 					// for rounding off the mood score
-					yData[index].length < 3 ? (moodScore = yData[index]) : (moodScore = yData[index].toFixed(2));
+					yData[index].length < 3 ? (moodScore = yData[index]) : (moodScore = yData[index]?.toFixed(2));
 
 					const moodLabel = currentMood[index];
 					return `<span class="font-bold">[${temp}]</span> Mood: <span class="font-bold">${moodLabel}</span> (${moodScore})`;

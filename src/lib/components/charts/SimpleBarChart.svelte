@@ -5,29 +5,43 @@
 	import { moodColors } from '$lib/constants/index.js';
 
 	export let xData;
+	export let xType;
+	export let xName;
 	export let yData;
+	export let yType;
+	export let yName;
 	export let elementID;
 	export let style;
 	export let title;
 	export let markType;
+	export let fontSize;
 
 	let simpleBarChart, currMType;
 
 	$: currMType = markType;
 
+	$: {
+			if(xData?.length == 0 || yData?.length == 0){
+				simpleBarChart?.showLoading();
+			}else {
+				simpleBarChart?.hideLoading();
+			}
+		}
+
 	onMount(() => {
-		simpleBarChart = echarts?.init(document.getElementById(elementID));
+		simpleBarChart = echarts?.init(document?.getElementById(elementID));
 
 		simpleBarChart?.setOption({
 			title: {
 				text: title,
 				textStyle: {
-					color: '#000000'
+					color: '#000000',
+					fontSize: fontSize,
 				}
 			},
 			yAxis: {
-				type: 'value',
-				name: 'Frequency',
+				type: yType,
+				name: yName,
 				nameRotate: 90,
 				nameLocation: 'center',
 				nameGap: 35,
@@ -36,9 +50,9 @@
 				}
 			},
 			xAxis: {
-				type: 'category',
+				type: xType,
 				data: xData,
-				name: 'Reason',
+				name: xName,
 				nameRotate: 0,
 				nameLocation: 'center',
 				nameGap: 35,

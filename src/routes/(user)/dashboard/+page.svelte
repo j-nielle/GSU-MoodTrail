@@ -40,7 +40,6 @@
 
 	let studentMoodData = data.studentMood;
 	let anonMoodData = data.anonMood;
-	let reasonTypes = data.reasonTypes;
 
 	let dataType = {};
 
@@ -106,9 +105,14 @@
 
 	let selectedReasonMarkType = 'average', sbcMarkType = '';
 
-	let uniqueReasons = reasonTypes?.map(reasonType => ({
-		value: reasonType.id,
-		name: reasonType.reason_label
+	let reasons = Object.entries(reason).map(([name, value]) => ({
+    value: value,
+    name: name
+	}));
+
+	let moods = Object.entries(mood).map(([name, value]) => ({
+			value: value,
+			name: name
 	}));
 
 	let selectedReason = '';
@@ -116,6 +120,11 @@
 	let jumpToModalState = false;
 
 	let tableRef;
+
+	let selectedMoodScore;
+	const days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+	let xMoodWeek = [], yMoodWeekEntry = [];
+	let yReasonPercentage = [], xReason = [];
 
 	$: ({ supabase } = data);
 
@@ -153,12 +162,19 @@
 	$: viewAnonData ? (dataType = anonMoodData) : (dataType = studentMoodData);
 
 	$: if (dataType) {
+		// for heatmap
+		// e.g { '0,1': [ { id: ... }, { id: ... } ], '3,14': [ { id: ... } ] }
 		const groupedData = _.groupBy(dataType, (data) => {
 			const date = new Date(data.created_at);
+
+			// getDay() returns 0 for Sunday, 1 for Monday, etc. (0-6)
+			// getHours() returns the hour (0-23)
 			return [date.getDay(), date.getHours()];
 		});
 
+		// e.g [ [ 14, 2, 4 ], [ ... ] ] -> [ [ hour, weekday, mood occurences ] ]
 		heatmapData = _.flatMap(groupedData, (data, key) => {
+			// data = [ { id: ... } ], key = '0,1'
 			const [day, hour] = key.split(',');
 			return [[parseInt(hour), parseInt(day), data.length || '-']];
 		});
@@ -596,6 +612,30 @@
 		if(selectedReasonMarkType === 'average') { sbcMarkType = 'average' }
 		else if(selectedReasonMarkType === 'min') { sbcMarkType = 'min' }
 		else if(selectedReasonMarkType === 'max') { sbcMarkType = 'max' }
+
+		
+	}
+
+	$: {
+		let filteredSelectedMoodData = dataType?.filter(data => data.mood_score == selectedMoodScore);
+
+		const groupedData = _.groupBy(filteredSelectedMoodData, (data) => {
+			const date = new Date(data.created_at);
+			return date.getDay();
+		});
+
+		const entriesByWeekday = _.mapValues(groupedData, data => data.length);
+		xMoodWeek = _.keys(entriesByWeekday).map(dayNumber => days[dayNumber]);
+		yMoodWeekEntry = _.values(entriesByWeekday);
+
+		const reasonCounts = _.countBy(filteredSelectedMoodData, 'reason_score');
+
+		const reasonPercentages = _.mapValues(reasonCounts, count => (count / filteredSelectedMoodData.length) * 100);
+
+		yReasonPercentage = _.values(reasonPercentages);
+		xReason = Object.keys(reasonPercentages).map(key => {
+			return Object.keys(reason).find(label => reason[label] == key);
+		});
 	}
 
 	$: if (studentMoodData) {
@@ -959,10 +999,7 @@
 			<div id="reasonFreqBC" class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 				<div class="flex flex-col">
 					{#if dataType?.length > 0}
-					<div class="flex justify-between">
-						<div class="flex flex-col">
-							<p class="text-lg font-bold ml-1">Associated Reason Frequency</p>
-						</div>
+					<div class="flex justify-end">
 						<ButtonGroup class="mb-3">
 							<Button color={sbcBtnColors.average} 
 								on:click={() => selectReasonMarkType('average')}>
@@ -980,16 +1017,17 @@
 					</div>
 					<div class="mt-3 items-center">
 						<SimpleBarChart
-							xData={xDataSBC}
-							yData={yDataSBC}
-							title=""
+							xData={xDataSBC} xType="category" xName="Reason"
+							yData={yDataSBC} yType="value" yName="Frequency"
+							title="          Associated Reason Frequency"
+							fontSize="18"
 							markType={sbcMarkType}
 							elementID="reasonSBC"
-							style="width:645px; height:320px;"
+							style="width:650px; height:300px;"
 						/>
 					</div>
 					{:else}
-						<div class="flex flex-col justify-center items-center space-y-5" style="width:645px; height:320px;">
+						<div class="flex flex-col justify-center items-center space-y-5" style="width:650px; height:300px;">
 							<RocketOutline class="h-20 w-20" />
 							<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
 						</div>
@@ -1181,7 +1219,7 @@
 						<p class="text-lg font-bold self-center">Associated Reason Calendar</p>
 						<p class="text-xs">(Please select a reason.)</p>
 					</div>
-					<Select placeholder="Filter by reason" class="font-normal w-max h-11 bg-white" items={uniqueReasons} bind:value={selectedReason} />
+					<Select placeholder="Filter by reason" class="font-normal w-max h-11 bg-white" items={reasons} bind:value={selectedReason} />
 				</div>
 				<div class="items-center">
 					<CalendarChart 
@@ -1191,6 +1229,47 @@
 						style="width:1160px;height:250px"
 					/>
 				</div>
+			</div>
+		</div>
+
+		<!-- 2 Charts (# of Mood Entries per Weekday & % of Reasons of the Selected Mood) -->
+		<div id="2Charts" class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+			<div class="flex flex-col w-full">
+				{#if dataType?.length > 0}
+				<div class="flex flex-row justify-center mt-2 mb-6 space-y-3">
+					<Select placeholder="Select a mood" class="font-normal w-max h-11 bg-white" items={moods} bind:value={selectedMoodScore} />
+				</div>
+				<div class="flex space-x-3 justify-between mx-4">
+					<!-- # of Mood Entries per Weekday -->
+					<div class="items-center">
+						<SimpleBarChart
+							xData={xMoodWeek} xType="category" xName="Day"
+							yData={yMoodWeekEntry} yType="value" yName="Frequency"
+							title="         # of Mood Entries per Weekday"
+							markType="average"
+							elementID="moodWeekDayEntries" fontSize="16"
+							style="width:545px; height:320px;"
+						/>
+					</div>
+
+					<!-- % of Reasons of the Selected Mood -->
+					<div class="items-center">
+						<SimpleBarChart
+							yData={yReasonPercentage} yType="value" yName="Percentage"
+							xData={xReason} xType="category" xName="Reason"
+							title="         % of Reasons of the Selected Mood"
+							markType="average"
+							elementID="percentageReason" fontSize="16"
+							style="width:590px; height:320px;"
+						/>
+					</div>
+				</div>
+				{:else}
+					<div class="flex flex-col justify-center items-center w-full space-y-5">
+						<RocketOutline class="h-20 w-20" />
+						<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>
