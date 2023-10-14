@@ -1210,41 +1210,22 @@
 		</div>
 
 		<!-- Calendar Chart -->
-		<div id="associatedReasonCalendar" class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+		<div id="moodCalendar" class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
 			<div class="flex flex-col">
 				<div class="flex flex-row justify-between mt-4 space-y-3">
-					<div class="flex flex-col">
-						<p class="text-lg font-bold self-center">Associated Reason Calendar</p>
-						<p class="text-xs">(Please select a reason.)</p>
+					<div class="flex flex-col justify-start items-center">
+						<p class="text-lg font-bold self-center">Mood-Reason Calendar</p>
+						<p class="text-xs">(Please select a mood and a reason.)</p>
 					</div>
-					<Select placeholder="Filter by reason" class="font-normal w-max h-11 bg-white" items={reasonChoices} bind:value={selectedReasonCalendar} />
+					<div class="flex flex-row justify-end space-x-3">
+						<Select placeholder="Mood" class="font-normal w-max h-11 bg-white" items={moodChoices} bind:value={selectedMoodCalendar} />
+						<Select placeholder="Associated Reason" class="font-normal w-max h-11 bg-white" items={reasonChoices} bind:value={selectedReasonCalendar} />
+					</div>
 				</div>
 				<div class="items-center">
 					<CalendarChart 
 						data={dataType} 
-						bind:reasonType={selectedReasonCalendar}
-						moodType=''
-						elementID="reasonCalendarChart" 
-						style="width:1160px;height:250px"
-					/>
-				</div>
-			</div>
-		</div>
-
-		<!-- Calendar Chart -->
-		<div id="associatedMoodCalendar" class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
-			<div class="flex flex-col">
-				<div class="flex flex-row justify-between mt-4 space-y-3">
-					<div class="flex flex-col">
-						<p class="text-lg font-bold self-center">Mood Calendar</p>
-						<p class="text-xs">(Please select a mood.)</p>
-					</div>
-					<Select placeholder="Filter by mood" class="font-normal w-max h-11 bg-white" items={moodChoices} bind:value={selectedMoodCalendar} />
-				</div>
-				<div class="items-center">
-					<CalendarChart 
-						data={dataType} 
-						reasonType=''
+						bind:reasonType={selectedReasonCalendar} 
 						bind:moodType={selectedMoodCalendar}
 						elementID="moodCalendarChart" 
 						style="width:1160px;height:250px"
@@ -1346,10 +1327,10 @@
 				Table of Students with Consistent Low Moods
 			</div>
 		</a>
-		<a href="#associatedReasonCalendar" on:click={scrollIntoView}>
+		<a href="#moodCalendar" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
 				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
-				# of Mood Entries per Weekday
+				Mood Calendar
 			</div>
 		</a>
 		<a href="#2Charts" on:click={scrollIntoView}>

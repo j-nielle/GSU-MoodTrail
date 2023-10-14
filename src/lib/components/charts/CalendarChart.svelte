@@ -21,15 +21,7 @@
 			const reasonScore = dataType[i]?.reason_score;
 			const moodScore = dataType[i]?.mood_score;
 
-			if (reasonType && reasonScore == reasonType) {
-				if (dataMap.has(formattedDate)) {
-					dataMap.set(formattedDate, dataMap.get(formattedDate) + 1);
-				} else {
-					dataMap.set(formattedDate, 1);
-				}
-			}
-
-			if (moodType && moodScore == moodType) {
+			if (reasonType && moodType && reasonScore == reasonType && moodScore == moodType) {
 				if (dataMap.has(formattedDate)) {
 					dataMap.set(formattedDate, dataMap.get(formattedDate) + 1);
 				} else {
@@ -54,7 +46,7 @@
 			tooltip: {
 				position: 'top',
 				formatter: (params) => {
-					return '[' + params.value[0] + ']' + ' Total Reasons: ' + params.value[1];
+					return '[' + params.value[0] + ']' + ' Total: ' + params.value[1];
 				}
 			},
 			textStyle: {
