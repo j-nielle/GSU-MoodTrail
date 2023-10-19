@@ -9,12 +9,14 @@
 	// dayjs.extend(relativeTime);
 	import { onMount } from 'svelte';
 	import {
-		//ClockSolid,
+		PrintSolid, 
+		DownloadSolid, 
 		RocketOutline,
 	} from 'flowbite-svelte-icons';
 	import {
 		P,
-		//Badge,
+		SpeedDial, 
+		SpeedDialButton,
 		Card,
 		Button,
 		ButtonGroup,
@@ -30,7 +32,6 @@
 		//RadarChart,
 		//HeatmapChart
 	} from '$lib/components/charts/index.js';
-	import { PrintSolid } from 'flowbite-svelte-icons';
 	import { yearLvl, mood, reason, moodChoices, reasonChoices } from '$lib/constants/index.js';
 
 	export let data;
@@ -42,8 +43,6 @@
 	$: ({ supabase } = data);
 
 	let course = [], college = [], yearLevel = [], student = [];
-
-	let searchURL = $page?.url?.searchParams?.get('search') || '';
 	let searchTerm = '';
 	let selectedCollege = '';
 	let selectedCourse = '';
@@ -129,9 +128,9 @@
 			.map('year_level')
 			.uniq()
 			.sort()
-			.map((yearLevel) => ({ value: yearLevel, name: yearLevel }))
+			.map((yearLevel) => ({ value: yearLevel, name: yearLevel.replace(' Level', '') }))
 			.value();
-
+			
 		student = _.chain(studentMoodData)
 			.filter({ college: selectedCollege, course: selectedCourse, year_level: selectedYearLevel })
 			.map('student_id')
@@ -345,14 +344,14 @@
 </svelte:head>
 
 <div class="p-4 flex flex-col space-y-3.5">
-	<div class="space-x-2 flex flex-row max-w-full justify-center">
+	<div class="flex flex-row max-w-full justify-center gap-2">
 		{#if urlResult?.length > 0}
 			<div class="space-x-2">
 				<Button class="h-11 w-fit" size="sm" color="dark" on:click={() => goto('/students/all-students')}>
 					Back to Student List
 				</Button>
 				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
-					New Mood Entry
+					Add Mood Entry
 				</Button>
 			</div>
 		{:else if studentMoodData?.length > 0}
@@ -375,7 +374,7 @@
 					selectedStudent = '';
 				}}
 			/>
-			<Select placeholder="Select a student" class="font-normal w-max h-11 bg-white" items={student} bind:value={selectedStudent} />
+			<Select placeholder="Student" class="font-normal w-max h-11 bg-white" items={student} bind:value={selectedStudent} />
 			<Button class="h-11 w-fit" size="sm" color="red"
 				on:click={() => {
 					searchTerm = '';
@@ -386,17 +385,14 @@
 					selectedLineChart = 'today';
 				}}>Reset</Button
 			>
-			<div class="space-x-2">
-				{#if selectedStudent || currentStudentID}
-					<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
-						New Mood Entry
-					</Button>
-				{/if}
-				<Button class="h-11 shadow-md p-4 items-center" on:click={handleExport}>
-					<span class="mr-3">Export Data</span>
-					<PrintSolid tabindex="-1" class="text-white focus:outline-none" />
+			{#if selectedStudent || currentStudentID}
+				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
+					Add Mood Entry
 				</Button>
-			</div>
+			{/if}
+			<Button class="h-11 shadow-md p-4 items-center" on:click={handleExport}>
+				<DownloadSolid tabindex="-1" class="text-white focus:outline-none" />
+			</Button>
 		{/if}
 	</div>
 	
