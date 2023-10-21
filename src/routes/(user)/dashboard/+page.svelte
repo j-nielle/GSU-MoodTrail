@@ -119,7 +119,7 @@
 	$: ({ supabase } = data);
 
 	onMount(async () => {
-		const timer = setInterval(updateCurrent, interval);
+		const timer = setInterval(updateTime, interval);
 
 		const dashboardChannel = await supabase.channel('dashboard')
 			.on('postgres_changes', {
@@ -774,7 +774,7 @@
 		return `Week ${weekDiff}`;
 	};
 
-	function updateCurrent() {
+	function updateTime() {
 		current = dayjs().format('MMM D, YYYY hh:mm:ss A');
 	}
 
@@ -793,7 +793,7 @@
 
 <!-- Tooltip Section -->
 <!-- fixed: unexpected scroll behavior during hover events -->
-<Tooltip placement="left" class="fixed z-20 overflow-hidden" triggeredBy="#switchData" on:hover={(e) => e.preventDefault()}>
+<Tooltip placement="left" class="fixed z-50 overflow-hidden" triggeredBy="#switchData" on:hover={(e) => e.preventDefault()}>
 	Toggle between student and anonymous data
 </Tooltip>
 

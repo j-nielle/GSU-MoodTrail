@@ -22,11 +22,11 @@
 	}
 </script>
 
-<Tooltip triggeredBy="#tooltip-recentStudent">Latest student who entered their mood data.</Tooltip>
+<Tooltip triggeredBy="#tooltip-recentStudent" class="z-50 relative">Most recent student who entered their mood entry.</Tooltip>
 
 {#if purpose === 'time'}
 	<Card class='max-h-12 w-xs justify-center flex-row items-center space-x-2'>
-		<p class="font-semibold text-red-700 text-sm">{month.toUpperCase()} {day}, {year}</p>
+		<p class="font-bold text-red-700 text-sm tracking-wide">{month.toUpperCase()} {day}, {year}</p>
 		<p class="text-slate-900 text-sm">{time.slice(0,-2)}<span class="font-semibold">{time.slice(-2)}</span></p>
 	</Card>
 {:else if purpose === 'mood'}
@@ -48,7 +48,7 @@
 		<ProfileCardOutline tabindex="-1" class="text-slate-900" />
 		<p class="text-slate-900 text-sm">
 			{title} 
-			<a class="font-semibold cursor-pointer" href="/students/student-chart?search={data}" rel="noopener noreferrer">
+			<a class="font-semibold hover:text-blue-700 hover:underline cursor-pointer tracking-wide" href="/students/student-chart?search={data}" rel="noopener noreferrer">
 				{data ?? 'N/A'}
 			</a>
 		</p>
