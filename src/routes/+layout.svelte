@@ -19,14 +19,14 @@
 	} from 'flowbite-svelte';
 	import { ChevronDownOutline, BellRingSolid, CloseSolid } from 'flowbite-svelte-icons';
 	import { consistentLowMoods, focusTable, newRequest } from '$lib/stores/index.js';
-	import placeholderLogo from '$lib/img/logo-no-background.svg';
+	import { logoOg, moodTrailOG } from '$lib/img/index.js';
 
 	export let data;
 
 	$: ({ supabase, session } = data);
 	$: activeUrl = $page.url.pathname;
 
-	const navDivClass = "relative mx-auto flex justify-between items-center w-full z-20"
+	const navDivClass = "flex justify-between items-center relative z-20"
 	const activeClass = "text-blue-700 font-semibold"
 	const chevronClass = "w-3 h-3 ml-2 text-primary-800 dark:text-white inline focus:outline-0"
 	const avatarClass = "cursor-pointer fixed mr-3"
@@ -97,14 +97,14 @@
 	});
 </script>
 
-<Navbar class="!p-4 drop-shadow-sm w-full mx-auto relative" {navDivClass}>
+<Navbar class="!py-3 drop-shadow-sm w-full mx-5 relative z-20" {navDivClass}>
 	{#if session}
-		<NavBrand tabindex="-1" href="/dashboard" class="ml-3">
-			<img src={placeholderLogo} alt="Placeholder Logo" class="w-32 h-fit" />
+		<NavBrand tabindex="-1" href="/dashboard">
+			<img src={moodTrailOG} alt="Placeholder Logo" class="w-32 h-fit" />
 		</NavBrand>
 	{:else}
-		<NavBrand tabindex="-1" href="/" class="ml-3">
-			<img src={placeholderLogo} alt="Placeholder Logo" class="w-32 h-fit" />
+		<NavBrand tabindex="-1" href="/">
+			<img src={moodTrailOG} alt="Placeholder Logo" class="w-32 h-fit" />
 		</NavBrand>
 	{/if}
 
