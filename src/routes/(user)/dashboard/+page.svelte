@@ -226,6 +226,8 @@
 		// line charts
 		if (selectedLineChart === 'today') {
 			lineChartTitle = "Today's Moods";
+
+			// 
 			todaysEntries = _.filter(
 				dataType,
 				(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
@@ -605,17 +607,15 @@
 		if(selectedReasonMarkType === 'average') { sbcMarkType = 'average' }
 		else if(selectedReasonMarkType === 'min') { sbcMarkType = 'min' }
 		else if(selectedReasonMarkType === 'max') { sbcMarkType = 'max' }
-	}
 
-	$: {
 		let filteredSelectedMoodData = dataType?.filter(data => data.mood_score == selectedMoodScore);
 
-		const groupedData = _.groupBy(filteredSelectedMoodData, (data) => {
+		const groupedDays = _.groupBy(filteredSelectedMoodData, (data) => {
 			const date = new Date(data.created_at);
 			return date.getDay();
 		});
 
-		const entriesByWeekday = _.mapValues(groupedData, data => data.length);
+		const entriesByWeekday = _.mapValues(groupedDays, data => data.length);
 		xMoodWeek = _.keys(entriesByWeekday).map(dayNumber => days[dayNumber]);
 		yMoodWeekEntry = _.values(entriesByWeekday);
 
@@ -630,13 +630,15 @@
 	}
 
 	$: if (studentMoodData) {
-		recentStudent = studentMoodData?.slice(-1)[0]?.student_id; // info card
+		recentStudent = studentMoodData?.slice(-1)[0]?.student_id; // for an info card
 
-		// table of students w consistent low moods
+		// for table of students w consistent low moods
 		let filteredStudents = new Map();
 		let consecutiveDaysMap = new Map();
 		consistentLowMoods.set([]);
-		let maxConsecutiveDays = 0; // to keep track of the maximum number of consecutive low mood days encountered
+
+		// keep track of the maximum number of consecutive low mood days encountered
+		let maxConsecutiveDays = 0; 
 
 		filteredStudents = studentMoodData?.reduce(
 			(students, { student_id, mood_score, created_at, reason_score }) => {
@@ -651,7 +653,8 @@
 					day: '2-digit'
 				}); // MM/DD/YYYY
 
-				const studentData = students.get(student_id) || new Map(); // get the student's data or create a new one
+				// get the student's data or create a new map()
+				const studentData = students.get(student_id) || new Map(); 
 
 				// get the reason label from the reason score using reason object
 				const reason_label = Object.keys(reason).find((key) => reason[key] === reason_score);
@@ -668,15 +671,22 @@
 		);
 
 		for (const [studentId, studentEntry] of filteredStudents) {
-			let consecutiveDays = 0;
-			let previousDate = null;
-			let currentStreakData = null;
+			// variable to be used for tracking consecutive low mood days
+			let consecutiveDays = 0; 
 
-			// for each date of mood data for a student, calculate the consecutive low mood days
+			// variable to be used for checking if the current date is the next day of the previous date
+			let previousDate = null; 
+
+			// variable to be used for storing the current streak data
+			let currentStreakData = null; 
+
+			// for each date of mood data for a student, 
+			// calculate the consecutive low mood days
 			for (const [dateKey, moodData] of studentEntry) {
 				const currentDate = dayjs(dateKey);
 
-				// if the current date is the next day of the previous date, increment the consecutive days
+				// if the current date is the next day of the previous date, 
+				// then increment the consecutive days
 				if (previousDate === null || currentDate.diff(previousDate, 'day') === 1) {
 					consecutiveDays++;
 				} else {
@@ -684,11 +694,15 @@
 					consecutiveDays = 1;
 				}
 
-				// if the consecutive days is >= to 4, check if the previous date is the day before the current date
+				// if the consecutive days is >= to 4, 
+				// then check if the previous date is the day before the current date
 				if (consecutiveDays >= 4) {
-					const lastRecord = (consecutiveDaysMap?.get(studentId) || []).slice(-1)[0]; // get the last record of the student's streaks
+					// get the last record of the student's streaks 
+					// which is the last element of the array
+					const lastRecord = (consecutiveDaysMap?.get(studentId) || []).slice(-1)[0]; 
 
-					// if the last record's end date is the day before the current date, update the last record
+					// if the last record's end date is the day before the current date, 
+					// then update the last record
 					if (
 						lastRecord &&
 						lastRecord.endDate === currentDate.subtract(1, 'day').format('MM/DD/YYYY')
@@ -696,9 +710,10 @@
 						lastRecord.endDate = currentDate.format('MM/DD/YYYY'); // update the end date
 						lastRecord.moodScores.push(...moodData.moodScores); // add the mood scores
 						lastRecord.reasonLabels.push(...moodData.reasonLabels); // and reason labels
-					} else {
-						// else, create a new record
-						maxConsecutiveDays = Math.max(maxConsecutiveDays, consecutiveDays); // update the maximum consecutive days
+					} else { // else, create a new record
+
+						// update the maximum consecutive days
+						maxConsecutiveDays = Math.max(maxConsecutiveDays, consecutiveDays); 
 
 						// create a new record with the start date, end date, mood scores, and reason labels
 						currentStreakData = {
@@ -718,9 +733,10 @@
 							// get the mood scores and reason labels of the streak date
 							const streakMoodData = studentEntry.get(streakDate);
 
-							// if there is mood data for the streak date, add the mood scores and reason labels to the current streak data
+							// if there is mood data for the streak date, 
+							// then add the mood scores and reason labels to the current streak data
 							if (streakMoodData) {
-								currentStreakData.moodScores.push(...streakMoodData.moodScores);
+								currentStreakData.moodScores.push(...streakMoodData.moodScores); 
 								currentStreakData.reasonLabels.push(...streakMoodData.reasonLabels);
 							}
 						}
@@ -745,10 +761,19 @@
 				reasonLabels: streak.reasonLabels
 			}));
 
+			// `moods` is the current value of the store
+			// add a new entry for a student’s streaks to the consistentLowMoods store.
 			consistentLowMoods?.update((moods) => [...moods, { studentId, streaks: studentStreaks }]);
 		});
 	}
 
+	/**
+	 * This reactive statement checks if the 'tableRef' is defined and if 'focusTable' is true.
+	 * If both conditions are true, it scrolls the window to the top offset of 'tableRef' and sets 'focusTable' to false.
+	 * This is typically used to automatically scroll the user to a table after clicking `here` sa low moods notification.
+	 * The check for 'window' ensures this code only runs in the browser where 'window' is defined, 
+	 * not during server-side rendering.
+	 */	
 	$: if(typeof window !== 'undefined'){
 		if (tableRef && $focusTable) {
 			window?.scrollTo(0, tableRef?.offsetTop);
@@ -756,33 +781,63 @@
 		}
 	}
 
-	function selectLineChart(lineChart) {
+	/**
+	 * View selected line chart (Today/Weekly/Monthly/Yearly/Overall).
+	 * @param {string} lineChart - The line chart selected by the user.
+	 */
+	 function selectLineChart(lineChart) {
 		selectedLineChart = lineChart;
 	}
 
+	/**
+	 * View selected bar chart for **Mood Averages Chart** (Course/Year Level/Reason).
+	 * @param {string} barChart - The bar chart selected by the user.
+	 */
 	function selectNHBarChart(barChart) {
 		selectedNHBarChart = barChart;
 	}
 
+	/**
+	 * View selected reason mark type for **Associated Reason Frequency Chart** (Average/Min/Max).
+	 * @param {string} reasonMarkType - The reason mark type selected by the user.
+	 */
 	function selectReasonMarkType(reasonMarkType) {
 		selectedReasonMarkType = reasonMarkType;
 	}
 
+	/**
+	 * Returns a string representing the week number of a given date within its year.
+	 * The week number is calculated as the number of weeks between the first day of the year and the given date.
+	 * @param {dayjs} date - The date to get the week number for.
+	 * @returns {string} A string in the format 'Week X', where X is the week number.
+	 */
 	const getWeekNumberString = (date) => {
-		const firstDayOfYear = dayjs(date).startOf('year').day(0);
-		const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
+		const firstDayOfYear = dayjs(date).startOf('year').day(0); // get the first day of the year
+
+		// get the number of weeks between the first day of the year and the given date and add 1
+		// to get the week number
+		const weekDiff = date.diff(firstDayOfYear, 'week') + 1; 
 		return `Week ${weekDiff}`;
 	};
 
+	/**
+	 * Updates the `current` variable with the current date and time.
+	 * The date and time are formatted as 'MMM D, YYYY hh:mm:ss A' using **dayjs** library.
+	*/
 	function updateTime() {
 		current = dayjs().format('MMM D, YYYY hh:mm:ss A');
 	}
 
+	/**
+	 * Handles the click event on an element to smoothly scroll to a target element.
+	 * @param {MouseEvent} event
+	 * The target of this event is expected to have an 'id' attribute that corresponds to the id of the target element to scroll to.
+	*/
 	function scrollIntoView({ target }) {
-    const element = document.getElementById(target.getAttribute('id'));
-    if (!element) return;
-    element.scrollIntoView({
-      behavior: 'smooth'
+    const targetElement = document.getElementById(target.getAttribute('id'));
+    if (!targetElement) return;
+			targetElement.scrollIntoView({
+      	behavior: 'smooth'
     });
   }
 </script>
@@ -1281,6 +1336,11 @@
 
 <Modal class="flex relative max-w-fit w-full max-h-full" title="Jump to specific section" bind:open={jumpToModalState} autoclose>
 	<div class="flex flex-col gap-3">
+		<!-- 
+			The `href` attribute in this case is just used to provide a fallback for 
+			browsers that don’t support JavaScript or in case JavaScript fails to load. 
+			So even without JS, clicking the link will still take you to the right section of the page. 
+		-->
 		<a href="#overallMoodFreqHBC" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
 				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
