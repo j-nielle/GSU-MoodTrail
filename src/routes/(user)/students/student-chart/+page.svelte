@@ -32,7 +32,9 @@
 		//RadarChart,
 		//HeatmapChart
 	} from '$lib/components/charts/index.js';
-	import { yearLvl, mood, reason, moodChoices, reasonChoices } from '$lib/constants/index.js';
+	import { yearLvl, mood, reason, moodChoices, reasonChoices } from '$lib/constants/index.js'; 
+	import * as FileSaver from "file-saver";
+  import * as XLSX from "xlsx";
 
 	export let data;
 	export let form;
@@ -334,8 +336,54 @@
 		selectedReasonMarkType = reasonMarkType;
 	}
 
-	function handleExport() {
-		//window.print();
+	async function handleExport() {
+		const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  	const fileExtension = ".xlsx";
+		const fileName = result[0].student_id + "_MoodEntries";
+
+		let keys = Object.keys(result[0]);
+		keys[keys.indexOf('mood_score')] = 'mood'; // replace mood_score with mood
+		keys[keys.indexOf('reason_score')] = 'reason'; // replace reason_score with reason
+		keys.splice(keys.indexOf('created_at'), 1, 'date', 'time'); // replace created_at with date and time
+
+		let values = result?.map(obj => {
+			let newObj = {...obj};
+			newObj.mood = Object.keys(mood).find(key => mood[key] === Number(obj.mood_score));
+			newObj.reason = Object.keys(reason).find(key => reason[key] === Number(obj.reason_score));
+			
+			let createdAt = new Date(obj.created_at);
+			newObj.date = createdAt.toISOString().split('T')[0];
+			newObj.time = createdAt.toTimeString().split(' ')[0];
+			
+			delete newObj.created_at;
+			delete newObj.mood_score;
+			delete newObj.reason_score;
+
+			// Initialize an empty object for the new object
+			let orderedObj = {};
+
+			// Iterate over each key in the keys array
+			for (let key of keys) {
+				// Add each key-value pair to the new object
+				orderedObj[key] = newObj[key];
+			}
+
+			// Now orderedObj is the new object with properties ordered as in keys
+			newObj = orderedObj;
+
+			return Object.values(newObj);
+		});
+
+		let data = [keys, ...values];
+		
+		const workSheet = XLSX.utils.aoa_to_sheet(data);
+    const workBook = {
+      Sheets: { data: workSheet, cols: [] },
+      SheetNames: ["data"],
+    };
+    const excelBuffer = await XLSX.write(workBook, { bookType: "xlsx", type: "array" });
+    const fileData = new Blob([excelBuffer], { type: fileType });
+    await FileSaver.saveAs(fileData, fileName + fileExtension);
 	}
 </script>
 
