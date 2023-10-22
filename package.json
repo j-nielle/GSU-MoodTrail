@@ -43,10 +43,12 @@
 		"dotenv": "^16.3.1",
 		"echarts": "^5.4.3",
 		"echarts-stat": "^1.2.0",
+		"file-saver": "^2.0.5",
 		"flowbite": "^1.7.0",
 		"flowbite-svelte": "^0.40.1",
 		"flowbite-svelte-icons": "^0.2.6",
 		"lodash": "^4.17.21",
-		"tailwind-merge": "^1.14.0"
+		"tailwind-merge": "^1.14.0",
+		"xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
 	}
 }

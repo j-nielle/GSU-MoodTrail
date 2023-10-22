@@ -97,7 +97,7 @@
 	});
 </script>
 
-<Navbar class="!py-3 drop-shadow-sm w-full mx-5 relative z-20" {navDivClass}>
+<Navbar class="!py-3 drop-shadow-sm w-full mx-5 relative z-20 print:hidden" {navDivClass}>
 	{#if session}
 		<NavBrand tabindex="-1" href="/dashboard">
 			<img src={moodTrailOG} alt="Placeholder Logo" class="w-32 h-fit" />

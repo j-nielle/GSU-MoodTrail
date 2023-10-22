@@ -4,6 +4,12 @@ const config = {
 		'./src/**/*.{html,js,svelte,ts}',
 		'./node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}'
 	],
+	extend:{
+		screens: {
+			print: { raw: 'print' },
+			screen: { raw: 'screen' },
+		},			
+	},
 	darkMode: 'class',
 	theme: {
 		extend: {
