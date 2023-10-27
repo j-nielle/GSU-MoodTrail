@@ -2,7 +2,6 @@
 	// @ts-nocheck
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
-	import { moodColors } from '$lib/constants/index.js';
 
 	export let xData;
 	export let xType;
@@ -12,8 +11,8 @@
 	export let yName;
 	export let elementID;
 	export let style;
-	export let title;
-	export let markType;
+	export let title = '';
+	export let markType = 'average';
 	export let fontSize;
 
 	let simpleBarChart, currMType;

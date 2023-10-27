@@ -9,14 +9,12 @@
 	// dayjs.extend(relativeTime);
 	import { onMount } from 'svelte';
 	import {
-		PrintSolid, 
 		DownloadSolid, 
 		RocketOutline,
 	} from 'flowbite-svelte-icons';
 	import {
 		P,
-		SpeedDial, 
-		SpeedDialButton,
+		Tooltip, 
 		Card,
 		Button,
 		ButtonGroup,
@@ -391,6 +389,13 @@
 	<title>Student Mood Charts</title>
 </svelte:head>
 
+<Tooltip placement="top" class="fixed z-50 overflow-hidden" triggeredBy="#exportStudentData" on:hover={(e) => e.preventDefault()}>
+	Export [{result[0]?.student_id}]'s entries to spreadsheet (.xlsx)
+</Tooltip>
+<Tooltip placement="top" class="fixed z-50 overflow-hidden" triggeredBy="#resetStudentFilter" on:hover={(e) => e.preventDefault()}>
+	Reset filter
+</Tooltip>
+
 <div class="p-4 flex flex-col space-y-3.5">
 	<div class="flex flex-row max-w-full justify-center gap-2">
 		{#if urlResult?.length > 0}
@@ -423,7 +428,15 @@
 				}}
 			/>
 			<Select placeholder="Student" class="font-normal w-max h-11 bg-white" items={student} bind:value={selectedStudent} />
-			<Button class="h-11 w-fit" size="sm" color="red"
+			{#if selectedStudent || currentStudentID}
+				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
+					<svg class="w-4 h-4 text-white mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+					</svg>
+					Add Mood Entry
+				</Button>
+			{/if}
+			<Button id="resetStudentFilter" class="h-11 w-fit" size="sm" color="red"
 				on:click={() => {
 					searchTerm = '';
 					selectedCollege = '';
@@ -431,14 +444,12 @@
 					selectedYearLevel = '';
 					selectedStudent = '';
 					selectedLineChart = 'today';
-				}}>Reset</Button
-			>
-			{#if selectedStudent || currentStudentID}
-				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
-					Add Mood Entry
-				</Button>
-			{/if}
-			<Button class="h-11 shadow-md p-4 items-center" on:click={handleExport}>
+				}}>
+				<svg class="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 14">
+					<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7 1 4l3-3m0 12h6.5a4.5 4.5 0 1 0 0-9H2"/>
+				</svg>	
+			</Button>
+			<Button id="exportStudentData" class="h-11 shadow-md p-4 items-center" on:click={handleExport}>
 				<DownloadSolid tabindex="-1" class="text-white focus:outline-none" />
 			</Button>
 		{/if}
@@ -508,6 +519,10 @@
 											[{Object.keys(reason).find((key) => reason[key] == result[result?.length - 1].reason_score)}]
 										</p>
 										<p class="text-sm">
+											<span class="text-sm font-semibold text-zinc-800">Latest Log Time</span>
+											{result.slice(-1)[0].created_at.replace('T', ' ').substring(0, 19)}
+										</p>
+										<p class="text-sm">
 											<span class="text-sm font-semibold text-zinc-800">Most Frequent:</span>
 											{mostFrequentMood}
 										</p>
@@ -520,12 +535,6 @@
 							</div>
 						</div>
 					</Card>
-					<!-- <div class="flex space-x-2">
-						<Badge large border class="w-fit mt-2">
-							<ClockSolid class="text-primary-800 dark:text-primary-400 w-fit h-2.5 mr-1.5" />
-							{dayjs(result[result.length - 1].created_at).fromNow()}
-						</Badge>
-					</div> -->
 				{:else}
 					<P>Student not found.</P>
 				{/if}
@@ -623,12 +632,13 @@
 					</div>
 					<div class="mt-3 items-center">
 						<SimpleBarChart
-							xData={xDataSBC}
-							yData={yDataSBC}
+							xData={xDataSBC} yType="value" yName="Frequency" 
+							yData={yDataSBC} xType="category" xName="Reason"
 							title=""
+							fontSize="18"
 							markType={sbcMarkType}
 							elementID="reasonSBC"
-							style="width:645px; height:320px;"
+							style="width:695px; height:320px;"
 						/>
 					</div>
 					{:else}

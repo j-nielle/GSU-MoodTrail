@@ -118,10 +118,10 @@
 
 	$: ({ supabase } = data);
 
-	onMount(async () => {
+	onMount(() => {
 		const timer = setInterval(updateTime, interval);
 
-		const dashboardChannel = await supabase.channel('dashboard')
+		const dashboardChannel = supabase.channel('dashboard')
 			.on('postgres_changes', {
 					event: 'INSERT',
 					schema: 'public',
@@ -773,7 +773,7 @@
 	 * This is typically used to automatically scroll the user to a table after clicking `here` sa low moods notification.
 	 * The check for 'window' ensures this code only runs in the browser where 'window' is defined, 
 	 * not during server-side rendering.
-	 */	
+		*/	
 	$: if(typeof window !== 'undefined'){
 		if (tableRef && $focusTable) {
 			window?.scrollTo(0, tableRef?.offsetTop);
