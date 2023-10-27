@@ -65,7 +65,6 @@
 					type="text"
 					label="Middle Initial"
 					maxlength="1"
-					required
 				/>
 			</div>
 			<div class="w-full">

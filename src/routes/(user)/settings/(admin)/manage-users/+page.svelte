@@ -7,11 +7,7 @@
 		Modal,
 		Badge,
 		Alert,
-		// Card,
 		Button,
-		// ButtonGroup,
-		// Label,
-		// Select,
 		Table,
 		TableBody,
 		TableBodyCell,
@@ -19,8 +15,6 @@
 		TableHead,
 		TableHeadCell,
 		Search
-		// FloatingLabelInput,
-		// Helper
 	} from 'flowbite-svelte';
 	import { roleColor } from '$lib/constants/index.js';
 	import { addNewUser, editUser } from '$lib/stores/index.js';
@@ -43,10 +37,8 @@
 	let divClass = "text-left text-sm w-full text-gray-500 border border-zinc-300 dark:text-gray-400";
 
 	let userToUpdate;
-	let userToDelete, userID;
+	let userToDelete;
 	let removeUserModal = false;
-	addNewUser.set(false);
-	editUser.set(false);
 
 	onMount(() => {
 		const usersChannel = supabase.channel('usersChannel')
@@ -112,12 +104,6 @@
 		paginatedItems = filteredItems?.slice(startIndex, endIndex);
 	}
 
-	$: if(userToDelete){
-    userID = userToDelete[0]?.id;
-  }
-
-	//$: console.log($addNewUser, $editUser)
-
 	function handleAddUser(){
 		editUser.update(() => false);
 		addNewUser.update(()  => true);
@@ -132,7 +118,7 @@
 
 	async function handleRemoveUser(userID) {
 		removeUserModal = true;
-		userToDelete = usersData.filter((user) => user.id == userID);
+		userToDelete = userID;
 	}
 
 	function changePage(newPage) {
@@ -208,12 +194,11 @@
 								</div>
             </TableBodyCell>
             <TableBodyCell class="flex justify-center cursor-pointer ">
-							<div class="flex justify-center cursor-pointer">
+							<button class="flex justify-center cursor-pointer" on:click={handleRemoveUser(user.id)}>
 								<TrashBinSolid
 									class="text-red-600 focus:outline-none hover:text-red-700"
-									on:click={handleRemoveUser(user.id)}
 								/>
-							</div>
+							</button>
             </TableBodyCell>
 						</TableBodyRow>
 					{/each}
@@ -235,20 +220,14 @@
 	{/if}
 	</div>
 </div>
-{#if $addNewUser}
-  <div>
-		<AddUser />
-	</div>
-{:else}
-	<div>
-		<EditUser user={userToUpdate} />
-	</div>
-{/if}
+
+<AddUser />
+<EditUser user={userToUpdate} />
 
 <Modal title="Confirm Delete User?" bind:open={removeUserModal} size="xs" class="max-w-xs">
 	<form class="flex flex-col" method="POST" action="?/removeUser" use:enhance>
 
-    <input type="hidden" id="userID" name="userID" bind:value={userID} />
+    <input type="hidden" id="userID" name="userID" bind:value={userToDelete} />
 
 		<Button type="submit" color="red" class="w-full mt-3" on:click={() => removeUserModal = false}>CONFIRM DELETE</Button>
 	</form>

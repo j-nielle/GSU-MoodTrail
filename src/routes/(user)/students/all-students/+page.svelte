@@ -2,6 +2,7 @@
 	// @ts-nocheck
 	import _ from 'lodash';
 	import { onMount } from 'svelte';
+	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
 	import {
 		Alert,
@@ -13,7 +14,8 @@
 		TableBodyRow,
 		TableHead,
 		TableHeadCell,
-		Search
+		Search,
+		Modal
 	} from 'flowbite-svelte';
 	import { yearLvl } from '$lib/constants/index.js';
 	import { AddStudent, EditStudent } from '$lib/components/forms/index.js';
@@ -47,9 +49,11 @@
 
 	let addStudentModal = false;
 	let editStudentModal = false;
+	let removeStudentModal = false;
 
 	let addAlert = false, updateAlert = false, deleteAlert = false;
-	let errors = [];
+
+	let studentToDelete;
 
 	onMount(() => {
 		const studentsDataChannel = supabase.channel('studentsDataChannel')
@@ -134,8 +138,10 @@
 		paginatedItems = filteredItems?.slice(startIndex, endIndex);
 	}
 
-	$: if (form?.errors) {
-		errors = form?.errors;
+	$: if(deleteAlert || addAlert || updateAlert) {
+		addStudentModal = false;
+		editStudentModal = false;
+		removeStudentModal = false;
 	}
 
 	function changePage(newPage) {
@@ -145,14 +151,8 @@
 	}
 
 	async function handleRemove(student_id) {
-		const rowToDelete = studentsData.filter((student) => student.id == student_id);
-
-		try {
-			const { error } = await supabase.from('Student').delete().eq('id', rowToDelete[0].id);
-			console.log(error);
-		} catch (error) {
-			console.log(error);
-		}
+		removeStudentModal = true;
+		studentToDelete = student_id;
 	}
 
 	function handleUpdate(student_id) {
@@ -172,11 +172,11 @@
 		</Alert>
 	{:else if addAlert}
 		<Alert color="green" class="mx-8 mb-4">
-			<span class="font-medium">New Student detected!</span>
+			<span class="font-medium">New Student added!</span>
 		</Alert>
 	{:else if updateAlert}
 		<Alert color="purple" class="mx-8 mb-4">
-			<span class="font-medium">Student data changes detected!</span>
+			<span class="font-medium">Student data updated!</span>
 		</Alert>
 	{/if}
 	<div class="flex justify-between">
@@ -192,13 +192,9 @@
 		</div>
 		<Button
 			class="h-11 mr-7"
-			size="sm"
-			color="green"
-			on:click={() => {
-				addStudentModal = true;
-				errors = [];
-			}}>Add New Student</Button
-		>
+			size="sm" color="green" on:click={() => { addStudentModal = true; }}>
+			Add New Student
+		</Button>
 	</div>
 
 	<div class="ml-4-6 ml-4 mb-7 mr-11">
@@ -206,7 +202,7 @@
 			<P class="text-lg mt-3 font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
 				List of Students
 				<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-					Click a [<span class="font-bold">Student's ID</span>] to view more about their student
+					Click the [<span class="font-bold">ID Number</span>] to view more about their student and mood
 					information.
 				</p>
 			</P>
@@ -233,7 +229,7 @@
 
 		<Table divClass="w-full text-left text-sm text-gray-500 dark:text-gray-400 ml-4">
 			<TableHead class="border border-zinc-300 text-center">
-				<TableHeadCell>Student ID</TableHeadCell>
+				<TableHeadCell>ID Number</TableHeadCell>
 				<TableHeadCell>Full Name</TableHeadCell>
 				<TableHeadCell>Year Level</TableHeadCell>
 				<TableHeadCell>Course</TableHeadCell>
@@ -289,3 +285,12 @@
 
 <AddStudent bind:open={addStudentModal} bind:handler={form} bind:items={selectCourse} />
 <EditStudent bind:open={editStudentModal} bind:handler={form} bind:items={selectCourse} student={rowToUpdate} />
+
+<Modal title="Delete Student Confirm?" bind:open={removeStudentModal} size="xs" class="max-w-xs">
+	<form class="flex flex-col" method="POST" action="?/removeStudent" use:enhance>
+
+    <input type="hidden" id="studentID" name="studentID" bind:value={studentToDelete} />
+
+		<Button type="submit" color="red" class="w-full mt-3" on:click={() => removeStudentModal = false}>CONFIRM DELETE</Button>
+	</form>
+</Modal>

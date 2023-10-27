@@ -435,23 +435,23 @@
 					</svg>
 					Add Mood Entry
 				</Button>
+				<Button id="resetStudentFilter" class="h-11 w-fit" size="sm" color="red"
+					on:click={() => {
+						searchTerm = '';
+						selectedCollege = '';
+						selectedCourse = '';
+						selectedYearLevel = '';
+						selectedStudent = '';
+						selectedLineChart = 'today';
+					}}>
+					<svg class="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 14">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7 1 4l3-3m0 12h6.5a4.5 4.5 0 1 0 0-9H2"/>
+					</svg>	
+				</Button>
+				<Button id="exportStudentData" class="h-11 shadow-md p-4 items-center" on:click={handleExport}>
+					<DownloadSolid tabindex="-1" class="text-white focus:outline-none" />
+				</Button>
 			{/if}
-			<Button id="resetStudentFilter" class="h-11 w-fit" size="sm" color="red"
-				on:click={() => {
-					searchTerm = '';
-					selectedCollege = '';
-					selectedCourse = '';
-					selectedYearLevel = '';
-					selectedStudent = '';
-					selectedLineChart = 'today';
-				}}>
-				<svg class="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 14">
-					<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7 1 4l3-3m0 12h6.5a4.5 4.5 0 1 0 0-9H2"/>
-				</svg>	
-			</Button>
-			<Button id="exportStudentData" class="h-11 shadow-md p-4 items-center" on:click={handleExport}>
-				<DownloadSolid tabindex="-1" class="text-white focus:outline-none" />
-			</Button>
 		{/if}
 	</div>
 	

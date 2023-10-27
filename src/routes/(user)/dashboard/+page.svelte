@@ -1183,12 +1183,12 @@
 			</div>
 			<!-- Students with Consistent Low Moods Table -->
 			<div id="low-moods" bind:this={tableRef} class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
-				<caption class="text-lg mx-3 font-semibold text-left w-max text-black bg-white dark:text-white dark:bg-gray-800 mb-6">
-					<p class="mt-3 text-sm font-normal text-gray-500 dark:text-gray-400">
-						These students have experienced consistent low moods for <span class="font-semibold">atleast 4 consecutive days.</span>
+				<caption class="mx-3 text-left w-max text-black bg-white dark:text-white dark:bg-gray-800 mb-6">
+					<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
+						Click the <strong>ID Number</strong> to view their student and mood information.
 					</p>
-					<p class="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400">
-						*No prevailing reason found.
+					<p class="mt-2 text-xs font-normal text-gray-500 dark:text-gray-400">
+						(Student/s who have experienced low moods for <span class="font-semibold">atleast 4 consecutive days.</span>)
 					</p>
 				</caption>
 				<Table divClass="text-left mx-3 text-sm text-gray-500 border border-zinc-300 dark:text-gray-400 max-h-56 overflow-y-auto">

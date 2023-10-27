@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { redirect } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageServerLoad} */
@@ -36,7 +37,13 @@ export const actions = {
 		const newCourse = formData.get('addCourse');
 		const newYearLevel = formData.get('addYrLvl');
 
-		const newName = `${newFName} ${newMName}. ${newLName}`.trim().toUpperCase();
+		let newName = '';
+
+		if(newMName === null || newMName === undefined || newMName === '') {
+			newName = `${newFName} ${newLName}`.trim().toUpperCase();
+		}else{
+			newName = `${newFName} ${newMName} ${newLName}`.trim().toUpperCase();
+		}
 
 		let errors = [];
 
@@ -189,6 +196,34 @@ export const actions = {
 				errors: [],
 				success: true
 			};
+		}
+	},
+
+	removeStudent: async ({ request, locals: { supabase }  }) => {
+		const formData = await request.formData();
+		const studentID = formData?.get('studentID');
+
+		console.log(formData)
+		try {
+			const { data, error } = await supabase.from('Student').delete().eq('id', studentID);
+			console.log("delete",data);
+			if (error) {
+				console.log(error);
+				return fail(400, {
+					error: error.message,
+					success: false
+				});
+			} else {
+				return {
+					success: true,
+					error: false
+				};
+			}
+		} catch (error) {
+			return fail(400, {
+				error: error.message,
+				success: false
+			});
 		}
 	}
 };

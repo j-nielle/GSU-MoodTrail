@@ -1,6 +1,7 @@
 <script>
+	// @ts-nocheck
 	import { enhance } from '$app/forms';
-	import { Card, Button, Badge, FloatingLabelInput, Helper } from 'flowbite-svelte';
+	import { Card, Button, Badge, FloatingLabelInput } from 'flowbite-svelte';
 	import { roles, buttonState } from '$lib/constants/index.js';
 	import { addNewUser } from '$lib/stores/index.js';
 
