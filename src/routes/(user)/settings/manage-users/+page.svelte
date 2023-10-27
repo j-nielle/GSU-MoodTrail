@@ -1,5 +1,5 @@
 <script>
-	// @ts-nocheck
+	//@ts-nocheck
 	import _ from 'lodash';
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
@@ -132,7 +132,7 @@
 	<title>Manage Users</title>
 </svelte:head>
 
-<div class="p-10 ring-1 max-h-fit max-w-fit h-min w-max bg-white shadow-md drop-shadow-md rounded relative -z-10">
+<div class="p-10 ring-1 max-h-fit max-w-fit h-min w-max bg-white shadow-md drop-shadow-md rounded relative z-10">
 	{#if form?.success}
 			<div class="mb-4 text-center">
 				<Alert color="green" class="text-center p-2">
