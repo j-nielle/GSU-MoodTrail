@@ -42,7 +42,7 @@ export const actions = {
 				.select()
 
 			if(error){
-				console.log(error)
+				console.error(error)
 				return{
 					success: false,
 					error: error.message
@@ -54,7 +54,7 @@ export const actions = {
 				}
 			}
 		} catch (error) {
-			console.log(error)
+			console.error(error)
 			return{
 				success: false,
 				error: error

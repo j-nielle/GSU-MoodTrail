@@ -11,7 +11,7 @@ export const actions = {
 				.select("*")
 				.eq('email', email)
 			if(error){
-				console.log(error)
+				console.error(error)
 				return {
 					error: error.message,
 					success: false
@@ -23,7 +23,7 @@ export const actions = {
 				});
 		
 				if (error) {
-					console.log(error);
+					console.error(error);
 					return {
 						error: error.message,
 						success: false
@@ -42,7 +42,7 @@ export const actions = {
 				}
 			}
 		} catch (error) {
-			console.log(error)
+			console.error(error)
 			return {
 				error: error,
 				success: false

@@ -23,10 +23,10 @@ export async function load({ fetch, data, depends }) {
 	} = await supabase.auth.getSession();
 
 	if (error) {
-		console.log(error.message);
-		// if(error.message === 'Invalid Refresh Token: Already Used') {
-		//   return { supabase, session: null }
-		// }
+		console.error(error.message);
+		if(error.message === 'Invalid Refresh Token: Already Used') {
+		  return { supabase, session: null }
+		}
 	}
 
 	return { supabase, session };

@@ -84,7 +84,7 @@
 				},(payload) => {
 					studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
 				}
-			).subscribe((status) => console.log('/students/student-chart', status));
+			).subscribe() // (status) => console.log('/students/student-chart', status));
 
 		return () => {
 			studentChartChannel.unsubscribe();

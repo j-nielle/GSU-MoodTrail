@@ -141,7 +141,7 @@
 				}, (payload) => {
 					anonMoodData = _.cloneDeep([...anonMoodData, payload.new]);
 				}
-			).subscribe((status) => console.log('/dashboard', status));
+			).subscribe() // (status) => console.log('/dashboard', status));
 
 		return () => {
 			clearInterval(timer);

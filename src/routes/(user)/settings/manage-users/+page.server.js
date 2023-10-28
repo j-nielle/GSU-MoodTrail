@@ -59,7 +59,6 @@ export const actions = {
 					role: role,
 					email_confirm: true
 				});
-				console.log("insert",data);
 				if (error) {
 					return fail(400, {
 						error: error.message,
@@ -114,7 +113,7 @@ export const actions = {
 		else{
 			try {
 				const { data, error } = await adminAuthClient.getUserById(userID);
-				console.log(error);
+				console.error(error);
 				if (error) {
 					return fail(400, {
 						error: error.message,
@@ -126,7 +125,7 @@ export const actions = {
 						user_metadata: { username: newUsername, role: newRole },
 						role: newRole
 					});
-					console.log("update", data)
+					
 					if (error) {
 						return fail(400, {
 							error: error.message,
@@ -140,7 +139,7 @@ export const actions = {
 					}
 				}
 			} catch (error) {
-				console.log(error);
+				console.error(error);
 				return fail(400, {
 					error: error.message,
 					success: false
@@ -161,7 +160,7 @@ export const actions = {
 
 		const formData = await request.formData();
 		const userID = formData?.get('userID');
-		console.log(formData)
+		
 		if(userID == user.id){ // just in case
 			return {
 				error: "Unable to delete current user.",
@@ -171,9 +170,9 @@ export const actions = {
 		else {
 			try {
 				const { data, error } = await adminAuthClient.deleteUser(userID);
-				console.log("delete",data);
+				
 				if (error) {
-					console.log(error);
+					console.error(error);
 					return fail(400, {
 						error: error.message,
 						success: false

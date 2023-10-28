@@ -39,7 +39,7 @@
 
 	onMount(() => {
 		const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {
-			console.log(event)
+			// console.log(event)
 			if (_session?.expires_at !== session?.expires_at) {
 				invalidate('supabase:auth');
 			}
@@ -56,7 +56,7 @@
 						newRequest.update(() => false);
 					}, 5000);
 				}
-			).subscribe((status) => console.log(activeUrl,status));
+			).subscribe() // (status) => console.log(activeUrl,status));
 
 		// checks if there’s any new data in the consistentLowMoods store
 		// note: only runs when url is /dashboard since that is where the consistentLowMoods store is updated

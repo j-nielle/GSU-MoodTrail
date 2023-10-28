@@ -89,7 +89,7 @@ export const actions = {
 					.select();
 
 				if (error) {
-					console.log(error);
+					console.error(error);
 					if (error.message === 'duplicate key value violates unique constraint "St_pkey"') {
 						errors.push({
 							errorInput: 'duplicateID',
@@ -108,7 +108,7 @@ export const actions = {
 				}
 			}
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 		}
 
 		if (errors?.length > 0) {
@@ -165,7 +165,7 @@ export const actions = {
 				.eq('name', editName)
 				.eq('year_level_id', editYearLevel)
 				.eq('course_id', editCourse);
-			console.log(error);
+			console.error(error);
 			if (prevStudentData?.length > 0) {
 				errors.push({
 					errorInput: 'prevStudentData',
@@ -182,7 +182,7 @@ export const actions = {
 					})
 					.eq('id', editID)
 					.select();
-				console.log(data, error);
+				console.error(error);
 				if (error) {
 					errors.push({
 						errorInput: 'error',
@@ -191,7 +191,7 @@ export const actions = {
 				}
 			}
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 		}
 
 		if (errors?.length > 0) {
@@ -210,12 +210,11 @@ export const actions = {
 		const formData = await request.formData();
 		const studentID = formData?.get('studentID');
 
-		console.log(formData)
 		try {
 			const { data, error } = await supabase.from('Student').delete().eq('id', studentID);
-			console.log("delete",data);
+
 			if (error) {
-				console.log(error);
+				console.error(error);
 				return fail(400, {
 					error: error.message,
 					success: false

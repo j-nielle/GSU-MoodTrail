@@ -62,7 +62,6 @@
 					schema: 'public',
 					table: 'Student'
 				}, (payload) => {
-					console.log(payload.eventType)
 					if (payload.eventType === 'INSERT') {
 						addAlert = true;
 
@@ -104,7 +103,7 @@
 						studentsData = updatedStudentsData;
 					}
 				}
-			).subscribe((status) => console.log($page.url.pathname, status));
+			).subscribe() // (status) => console.log($page.url.pathname, status));
 
 		return () => {
 			studentsDataChannel.unsubscribe();

@@ -13,7 +13,7 @@ export async function load({ locals: { supabase, getSession } }) {
 	const { data: { user }, error } = await supabase.auth.getUser();
 
 	if (error) {
-		console.log(error);
+		console.error(error);
 		return{
 			error: error.message
 		};
@@ -37,13 +37,12 @@ export const actions = {
 		})
 		
 		if (error) {
-			console.log(error);
+			console.error(error);
 			return fail(400, {
 				error: error.message,
 				success: false
 			});
 		}else{
-			console.log(data)
 			return {
 				success: true,
 				error: false
@@ -78,7 +77,7 @@ export const actions = {
 			const { error } = await adminAuthClient.getUserById(id);
 
 			if (error) {
-				console.log(error);
+				console.error(error);
 				return fail(400, {
 					error: error.message,
 					success: false
@@ -87,9 +86,8 @@ export const actions = {
 				const { data, error } = await adminAuthClient.updateUserById(id, {
 					email: newEmail
 				});
-				console.log("update", data)
 				if (error) {
-					console.log(error.message)
+					console.error(error.message)
 					return fail(400, {
 						error: error.message,
 						success: false
@@ -102,7 +100,7 @@ export const actions = {
 				}
 			}
 		} catch (error) {
-			console.log(error)
+			console.error(error)
 			return fail(400, {
 				error: error,
 				success: false
@@ -118,13 +116,12 @@ export const actions = {
 		const { data, error } = await supabase.auth.updateUser({password: password})
 		
 		if (error) {
-			console.log(error);
+			console.error(error);
 			return fail(400, {
 				error: error.message,
 				success: false
 			});
 		}else{
-			console.log(data)
 			return {
 				success: true,
 				error: false

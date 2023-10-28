@@ -45,7 +45,7 @@
 				},(payload) => {
 					requestsData = _.cloneDeep([payload.new, ...requestsData]);
 				}
-			).subscribe((status) => console.log('/requests',status));
+			).subscribe() // (status) => console.log('/requests',status));
 
 		return () => {
 			requestsChannel.unsubscribe();
@@ -107,9 +107,9 @@
 				.eq('id', req.id)
 				.select()
 				.single();
-			if(error) console.log(error)
+			if(error) console.error(error)
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 		}
 	};
 

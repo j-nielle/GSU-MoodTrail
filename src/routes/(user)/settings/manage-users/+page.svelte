@@ -47,7 +47,6 @@
 					schema: 'public',
 					table: 'Users'
 				}, (payload) => {
-					console.log(payload.eventType)
 					if (payload.eventType === 'INSERT') {
 						usersData = _.cloneDeep([payload.new, ...usersData])
 						.sort((currentElem, nextElem) => currentElem.username.localeCompare(nextElem.username));
@@ -69,7 +68,7 @@
 						usersData = updatedUsersData;
 					}
 				}
-			).subscribe((status) => console.log('/settings/manage-users', status));
+			).subscribe() // (status) => console.log('/settings/manage-users', status));
 
 		return () => {
 			usersChannel.unsubscribe();
