@@ -27,11 +27,7 @@
 
 <Modal title="Edit Student Data" bind:open size="xs" class="max-w-xl">
 	<form class="flex flex-col" method="POST" action="?/editStudent" use:enhance>
-		{#if handler?.success}
-			<InputHelper color="green" msg="Student data updated succesfully!" />
-		{/if}
-
-		{#if handler?.errors.length > 0}
+		{#if handler?.errors?.length > 0}
 			{#each handler?.errors as error}
 				{#if error.errorInput === 'prevStudentData'}
 					<InputHelper color="red" msg={error.error} />
@@ -51,7 +47,7 @@
 				required
 			/>
 		</div>
-		{#if handler?.errors.length > 0}
+		{#if handler?.errors?.length > 0}
 			{#each handler?.errors as error}
 				{#if error.errorInput === 'editID'}
 					<InputHelper color="red" msg={error.error} />
@@ -98,7 +94,7 @@
 				/>
 			</div>
 		</div>
-		{#if handler?.errors.length > 0}
+		{#if handler?.errors?.length > 0}
 			{#each handler?.errors as error}
 				{#if error.errorInput === 'editID'}
 					<InputHelper color="red" msg={error.error} />
