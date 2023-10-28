@@ -43,6 +43,7 @@
 				type="text"
 				value={prevID}
 				label="Student ID"
+				minlength="10"
 				maxlength="10"
 				required
 			/>
@@ -78,7 +79,6 @@
 					value={prevMName}
 					label="Middle Initial"
 					maxlength="1"
-					required
 				/>
 			</div>
 			<div class="w-full">

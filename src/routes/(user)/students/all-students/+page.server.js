@@ -132,9 +132,16 @@ export const actions = {
 		const editLName = formData.get('editLName');
 		const editCourse = formData.get('editCourse');
 		const editYearLevel = formData.get('editYrLvl');
-		const editName = `${editFName} ${editMName} ${editLName}`.trim().toUpperCase();
 
 		let errors = [];
+
+		let editName = '';
+
+		if(editMName === null || editMName === undefined || editMName === '') {
+			editName = `${editFName} ${editLName}`.trim().toUpperCase();
+		}else{
+			editName = `${editFName} ${editMName}. ${editLName}`.trim().toUpperCase();
+		}
 
 		if (editID?.length < 10 || (editID?.slice(0, 3) != '202' && /[^0-9]/.test(editID))) {
 			errors.push({
