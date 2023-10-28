@@ -12,11 +12,7 @@
 
 <Modal title="Add New Student" bind:open size="xs" class="w-full">
 	<form class="flex flex-col" method="POST" action="?/addStudent" use:enhance>
-		{#if handler?.success}
-			<InputHelper color="green" msg="Student added succesfully!" />
-		{/if}
-
-		{#if handler?.errors.length > 0}
+		{#if handler?.errors?.length > 0}
 			{#each handler?.errors as error}
 				{#if error.errorInput === 'existingStudent'}
 					<InputHelper color="red" msg={error.error} />
@@ -31,11 +27,12 @@
 				name="addID"
 				type="text"
 				label="Student ID"
+				minlength="10"
 				maxlength="10"
 				required
 			/>
 		</div>
-		{#if handler?.errors.length > 0}
+		{#if handler?.errors?.length > 0}
 			{#each handler?.errors as error}
 				{#if error.errorInput === 'addID'}
 					<InputHelper color="red" msg={error.error} />
@@ -78,7 +75,7 @@
 				/>
 			</div>
 		</div>
-		{#if handler?.errors.length > 0}
+		{#if handler?.errors?.length > 0}
 			{#each handler?.errors as error}
 				{#if error.errorInput === 'newName'}
 					<InputHelper color="red" msg={error.error} />
