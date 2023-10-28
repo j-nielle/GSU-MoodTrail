@@ -389,12 +389,14 @@
 	<title>Student Mood Charts</title>
 </svelte:head>
 
+{#if selectedStudent || currentStudentID} <!-- to get rid of 'No triggers found.' error -->
 <Tooltip placement="top" class="fixed z-50 overflow-hidden" triggeredBy="#exportStudentData" on:hover={(e) => e.preventDefault()}>
 	Export [{result[0]?.student_id}]'s entries to spreadsheet (.xlsx)
 </Tooltip>
 <Tooltip placement="top" class="fixed z-50 overflow-hidden" triggeredBy="#resetStudentFilter" on:hover={(e) => e.preventDefault()}>
 	Reset filter
 </Tooltip>
+{/if}
 
 <div class="p-4 flex flex-col space-y-3.5">
 	<div class="flex flex-row max-w-full justify-center gap-2">
