@@ -337,7 +337,7 @@
 	async function handleExport() {
 		const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   	const fileExtension = ".xlsx";
-		const fileName = result[0].student_id + "_MoodEntries";
+		const fileName = currentStudentID + "_MoodEntries";
 
 		let keys = Object.keys(result[0]);
 		keys[keys.indexOf('mood_score')] = 'mood'; // replace mood_score with mood
@@ -389,15 +389,6 @@
 	<title>Student Mood Charts</title>
 </svelte:head>
 
-{#if selectedStudent || currentStudentID} <!-- to get rid of 'No triggers found.' error -->
-<Tooltip placement="top" class="fixed z-50 overflow-hidden" triggeredBy="#exportStudentData" on:hover={(e) => e.preventDefault()}>
-	Export [{result[0]?.student_id}]'s entries to spreadsheet (.xlsx)
-</Tooltip>
-<Tooltip placement="top" class="fixed z-50 overflow-hidden" triggeredBy="#resetStudentFilter" on:hover={(e) => e.preventDefault()}>
-	Reset filter
-</Tooltip>
-{/if}
-
 <div class="p-4 flex flex-col space-y-3.5">
 	<div class="flex flex-row max-w-full justify-center gap-2">
 		{#if urlResult?.length > 0}
@@ -430,30 +421,36 @@
 				}}
 			/>
 			<Select placeholder="Student" class="font-normal w-max h-11 bg-white" items={student} bind:value={selectedStudent} />
-			{#if selectedStudent || currentStudentID}
-				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
-					<svg class="w-4 h-4 text-white mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
-					</svg>
-					Add Mood Entry
-				</Button>
-				<Button id="resetStudentFilter" class="h-11 w-fit" size="sm" color="red"
-					on:click={() => {
-						searchTerm = '';
-						selectedCollege = '';
-						selectedCourse = '';
-						selectedYearLevel = '';
-						selectedStudent = '';
-						selectedLineChart = 'today';
-					}}>
-					<svg class="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 14">
-						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7 1 4l3-3m0 12h6.5a4.5 4.5 0 1 0 0-9H2"/>
-					</svg>	
-				</Button>
-				<Button id="exportStudentData" class="h-11 shadow-md p-4 items-center" on:click={handleExport}>
-					<DownloadSolid tabindex="-1" class="text-white focus:outline-none" />
-				</Button>
-			{/if}
+		{/if}
+		{#if result?.length > 0}
+			<Tooltip placement="top" class="fixed z-50 overflow-hidden" triggeredBy="#exportStudentData" on:hover={(e) => e.preventDefault()}>
+				Export [{selectedStudent || currentStudentID}]'s entries to spreadsheet (.xlsx)
+			</Tooltip>
+			<Tooltip placement="top" class="fixed z-50 overflow-hidden" triggeredBy="#resetStudentFilter" on:hover={(e) => e.preventDefault()}>
+				Reset filter
+			</Tooltip>
+			<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>
+				<svg class="w-4 h-4 text-white mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+					<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+				</svg>
+				Add Mood Entry
+			</Button>
+			<Button id="resetStudentFilter" class="h-11 w-fit" size="sm" color="red"
+				on:click={() => {
+					searchTerm = '';
+					selectedCollege = '';
+					selectedCourse = '';
+					selectedYearLevel = '';
+					selectedStudent = '';
+					selectedLineChart = 'today';
+				}}>
+				<svg class="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 14">
+					<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7 1 4l3-3m0 12h6.5a4.5 4.5 0 1 0 0-9H2"/>
+				</svg>	
+			</Button>
+			<Button id="exportStudentData" class="h-11 shadow-md p-4 items-center" on:click={handleExport}>
+				<DownloadSolid tabindex="-1" class="text-white focus:outline-none" />
+			</Button>
 		{/if}
 	</div>
 	
