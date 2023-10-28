@@ -138,10 +138,10 @@
 		paginatedItems = filteredItems?.slice(startIndex, endIndex);
 	}
 
-	$: if(deleteAlert || addAlert || updateAlert) {
-		addStudentModal = false;
-		editStudentModal = false;
-		removeStudentModal = false;
+	$: {
+		if(deleteAlert) removeStudentModal = false;
+		else if(addAlert) addStudentModal = false;
+		else if(updateAlert) editStudentModal = false;
 	}
 
 	function changePage(newPage) {
