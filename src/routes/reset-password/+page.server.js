@@ -1,5 +1,4 @@
-import { fail } from '@sveltejs/kit';
-
+// @ts-nocheck
 export const actions = {
 	requestPassReset: async ({ request, url, locals: { supabase } }) => {
 		const formData = await request.formData();

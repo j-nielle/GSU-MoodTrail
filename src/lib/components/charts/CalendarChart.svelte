@@ -11,33 +11,73 @@
 	export let reasonType;
 	export let moodType;
 
+	let calendarChart;
+	let dataUnavailable = false;
+
+	/**
+	 * This function groups and counts data entries by date for a specific reason and mood type.
+	 *
+	 * @param {Array} dataType - An array of data objects. Each object should have 'created_at', 'reason_score', and 'mood_score' properties.
+	 *
+	 * @returns {Array} finalData - An array of arrays. Each sub-array contains a date string in the format 'yyyy-MM-dd' and the count of entries for that date.
+	 *
+	 * @example
+	 * 
+	 * getCalendarData([
+	 *   {created_at: '2023-10-31T10:16:04+08:00', reason_score: 1, mood_score: 1},
+	 *   {created_at: '2023-11-01T10:16:04+08:00', reason_score: 1, mood_score: 1},
+	 *   {created_at: '2023-11-01T10:16:04+08:00', reason_score: 1, mood_score: 1}
+	 * ]);
+	 * 
+	 * // returns [['2023-10-31', 1], ['2023-11-01', 2]]
+	*/
 	function getCalendarData(dataType){
-		const final = [];
-		const dataMap = new Map(); // this is to group the data by date
+		// check if echarts is defined
+		if (!echarts || !echarts.time) {
+			console.error('echarts or echarts.time is not defined');
+			return [];
+		}
 
-		for (let i = 0; i < dataType.length; i++) {
-			const date = +echarts?.time.parse(dataType[i]?.created_at);
-			const formattedDate = echarts?.time.format(date, '{yyyy}-{MM}-{dd}', false);
-			const reasonScore = dataType[i]?.reason_score;
-			const moodScore = dataType[i]?.mood_score;
+		// use reduce to create the dataMap
+		const dataMap = dataType?.reduce((map, item) => {
+			// convert the date string to a timestamp
+			const date = +echarts.time.parse(item?.created_at);
 
+			// format the date to 'yyyy-MM-dd', false means not UTC
+			const formattedDate = echarts.time.format(date, '{yyyy}-{MM}-{dd}', false);
+
+			const reasonScore = item?.reason_score; // get the reason_score for current item
+			const moodScore = item?.mood_score; // get the mood_score for current item
+
+			// check if reasonType and moodType are defined and if reasonScore and moodScore match
 			if (reasonType && moodType && reasonScore == reasonType && moodScore == moodType) {
-				if (dataMap.has(formattedDate)) {
-					dataMap.set(formattedDate, dataMap.get(formattedDate) + 1);
-				} else {
-					dataMap.set(formattedDate, 1);
-				}
+				// add the formattedDate to the map and increment the count by 1
+				// if the formattedDate is not in the map, set the count to 1
+				map.set(formattedDate, (map.get(formattedDate) || 0) + 1);
 			}
+
+			return map; // return the map
+		}, new Map());
+
+		// convert the map entries to an array
+		const finalData = Array.from(dataMap.entries());
+
+		if (finalData.length === 0) {
+			dataUnavailable = true;
+		} else {
+			dataUnavailable = false;
 		}
 
-		for (const [date, count] of dataMap.entries()) {
-			final.push([date, count]);
-		}
-
-		return final;
+		return finalData; // return the finalData
 	}
 
-	let calendarChart;
+	$: {
+		if(dataUnavailable){
+			calendarChart?.showLoading();
+		}else {
+			calendarChart?.hideLoading();
+		}
+	}
 
 	onMount(() => {
 		calendarChart = echarts?.init(document?.getElementById(elementID));

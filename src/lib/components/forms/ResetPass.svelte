@@ -4,11 +4,7 @@
 	import { EnvelopeSolid } from 'flowbite-svelte-icons';
 </script>
 
-<Card
-	class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex max-w-2xl flex-col p-4 sm:p-12"
-	size="lg"
-	padding="lg"
->
+<Card size="lg" padding="lg">
 	<form class="flex flex-col space-y-4 w-fit" action="?/requestPassReset" method="POST" use:enhance>
 		<Label class="space-y-2 font-normal">
 			<span>Enter email associated with your account</span>

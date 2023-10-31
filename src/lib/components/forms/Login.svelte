@@ -3,13 +3,12 @@
 	import { Card, Button, Label, Input, Checkbox } from 'flowbite-svelte';
 	import { EnvelopeSolid, ShieldSolid } from 'flowbite-svelte-icons';
 
-	const cardClass="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex max-w-2xl flex-col p-4 sm:p-12"
 	const inputFont="font-normal"
 	const loginBtnClass = "w-full font-bold leading-relaxed"
 	const labelSpace = "space-y-2"
 </script>
 
-<Card class={cardClass}>
+<Card>
 	<form class="flex flex-col space-y-4" action="?/login" method="POST" use:enhance>
 		<h3 class="text-xl text-center font-bold text-gray-900 dark:text-white">Welcome back!</h3>
 		<Label class={labelSpace}>

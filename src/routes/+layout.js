@@ -1,6 +1,5 @@
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
 import { createSupabaseLoadClient } from '@supabase/auth-helpers-sveltekit';
-import { AuthApiError } from '@supabase/supabase-js';
 import { dev } from '$app/environment';
 import { inject } from '@vercel/analytics';
 
@@ -17,10 +16,7 @@ export async function load({ fetch, data, depends }) {
 		serverSession: data.session
 	});
 
-	const {
-		data: { session },
-		error
-	} = await supabase.auth.getSession();
+	const { data: { session }, error } = await supabase.auth.getSession();
 
 	if (error) {
 		console.error(error.message);
