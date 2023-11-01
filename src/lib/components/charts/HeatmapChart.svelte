@@ -65,7 +65,7 @@
 				calculable: true,
 				orient: 'horizontal',
 				left: 'center',
-				bottom: '15'
+				bottom: '0'
 			},
 			series: [
 				{

@@ -66,7 +66,7 @@
 			toolbox: {
 				show: true,
 				feature: {
-					// no dataZoom since di siya ga work sa radar charts for some reason...
+					// no dataZoom since di siya ga work sa radar charts.
 					dataView: { show: true, readOnly: false },
 					saveAsImage: { show: true }
 				}

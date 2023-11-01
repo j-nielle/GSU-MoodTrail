@@ -14,6 +14,7 @@
 	export let title = '';
 	export let markType = 'average';
 	export let fontSize;
+	export let yAxisRotate;
 
 	let simpleBarChart, currMType;
 
@@ -36,12 +37,13 @@
 				textStyle: {
 					color: '#000000',
 					fontSize: fontSize,
+					fontWeight: 'bold',
 				}
 			},
 			yAxis: {
 				type: yType,
 				name: yName,
-				nameRotate: 90,
+				nameRotate: yAxisRotate,
 				nameLocation: 'center',
 				nameGap: 35,
 				axisLabel: {
@@ -56,7 +58,7 @@
 				nameLocation: 'center',
 				nameGap: 35,
 				axisLabel: {
-					fontSize: 10,
+					fontSize: 9,
 					interval: 0
 				}
 			},

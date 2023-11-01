@@ -19,17 +19,20 @@
 	} from 'flowbite-svelte';
 	import { ChevronDownOutline, BellRingSolid, CloseSolid } from 'flowbite-svelte-icons';
 	import { consistentLowMoods, focusTable, newRequest } from '$lib/stores/index.js';
-	import { logoOg, moodTrailOG } from '$lib/img/index.js';
+	import { 
+		//logoOg, 
+		moodTrailOG 
+	} from '$lib/img/index.js';
 
 	export let data;
 
 	$: ({ supabase, session } = data);
 	$: activeUrl = $page.url.pathname;
 
-	const navDivClass = "flex justify-between items-center relative z-20"
+	const navDivClass = "flex justify-between items-center relative z-20 ml-3.5"
 	const activeClass = "text-blue-700 font-semibold"
 	const chevronClass = "w-3 h-3 ml-2 text-primary-800 dark:text-white inline focus:outline-0"
-	const avatarClass = "cursor-pointer fixed mr-3"
+	const avatarClass = "cursor-pointer fixed"
 	const containerClass = "relative z-30 drop-shadow-lg w-fit mt-8"
 	const dropdownItemClass = "relative z-50 py-2 text-sm font-semibold text-red-600 cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600"
 
@@ -97,18 +100,12 @@
 	});
 </script>
 
-<Navbar class="!py-3 drop-shadow-sm w-full mx-5 relative z-20 print:hidden" {navDivClass}>
+<Navbar class="!py-3 drop-shadow-sm w-full relative z-20 print:hidden" {navDivClass}>
 	{#if session}
 		<NavBrand tabindex="-1" href="/dashboard">
 			<img src={moodTrailOG} alt="Placeholder Logo" class="w-32 h-fit" />
 		</NavBrand>
-	{:else}
-		<NavBrand tabindex="-1" href="/">
-			<img src={moodTrailOG} alt="Placeholder Logo" class="w-32 h-fit" />
-		</NavBrand>
-	{/if}
-
-	{#if session}
+		
 		<NavUl>
 			<NavLi href="/dashboard" active={activeUrl === '/dashboard'} {activeClass}>
 				Dashboard
@@ -136,12 +133,15 @@
 			</form>
 		</Dropdown>
 	{:else}
+		<NavBrand tabindex="-1" href="/">
+			<img src={moodTrailOG} alt="Placeholder Logo" class="w-32 h-fit" />
+		</NavBrand>
 		<div class="flex space-x-4">
 			<Button href="/login" color="purple" class="mr-3 font-semibold tracking-wide">LOGIN</Button>
 		</div>
 	{/if}
 </Navbar>
-
+<!-- fix this: <Layout> received an unexpected slot "default" -->
 <main>
 	{#if $newRequest}
 		{#if activeUrl == '/dashboard'}
@@ -173,13 +173,13 @@
 					<BellRingSolid tabindex="-1" class="text-red-700" />
 					<div class="text-center">
 						{#if activeUrl != '/dashboard'}
-							To view the list of students experiencing consistent low moods for atleast 4 consecutive
+							To view the list of students experiencing low moods for atleast 4 consecutive
 							days, please navigate to <span class="font-semibold">dashboard</span>.
 						{:else}
 							Click 
 							<span role="button" tabindex="0" class="font-bold hover:underline" on:click={() => focusTable.update(() => true)} on:keypress={() => focusTable.update(() => true)}>
 								here
-							</span> to view the list of students experiencing consistent low moods for atleast 4 consecutive
+							</span> to view the list of students experiencing low moods for atleast 4 consecutive
 							days.
 						{/if}
 					</div>
@@ -192,13 +192,13 @@
 					<BellRingSolid tabindex="-1" class="text-red-700" />
 					<div class="text-center">
 						{#if activeUrl != '/dashboard'}
-							To view the list of students experiencing consistent low moods for atleast 4 consecutive
+							To view the list of students experiencing low moods for atleast 4 consecutive
 							days, please navigate to <span class="font-semibold">dashboard</span>.
 						{:else}
 							Click 
 							<span role="button" tabindex="0" class="font-bold hover:underline" on:click={() => focusTable.update(() => true)} on:keypress={() => focusTable.update(() => true)}>
 								here
-							</span> to view the list of students experiencing consistent low moods for atleast 4 consecutive
+							</span> to view the list of students experiencing low moods for atleast 4 consecutive
 							days.
 						{/if}
 					</div>

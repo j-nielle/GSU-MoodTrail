@@ -1,6 +1,6 @@
 <script>
 	// @ts-nocheck
-	import { Card, Label, Tooltip } from 'flowbite-svelte';
+	import { Card, Tooltip } from 'flowbite-svelte';
 	import { ProfileCardOutline, FaceLaughOutline, BrainOutline } from 'flowbite-svelte-icons';
 
 	export let title;
@@ -12,45 +12,63 @@
 	$: if(purpose === 'time'){
 		let dateObj = new Date(data);
 
-		let options = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true };
-		let monthOptions = { month: 'short' };
+		let options = { hour: '2-digit', minute: 'numeric', second: 'numeric', hour12: true };
+		let monthOptions = { month: 'long' };
 
-		time = dateObj.toLocaleTimeString('en-US', options);
-		day = dateObj.getDate();
-		month = dateObj.toLocaleDateString('en-US', monthOptions);
-		year = dateObj.getFullYear();
+		time = dateObj?.toLocaleTimeString('en-US', options);
+		day = dateObj?.getDate();
+		month = dateObj?.toLocaleDateString('en-US', monthOptions);
+		year = dateObj?.getFullYear();
+
+    let suffix = ['th', 'st', 'nd', 'rd'];
+    let v = day % 100;
+    day += (suffix[(v-20)%10] || suffix[v] || suffix[0]);
 	}
 </script>
 
 <Tooltip triggeredBy="#tooltip-recentStudent" class="z-50 relative">Most recent student who entered their mood entry.</Tooltip>
 
 {#if purpose === 'time'}
-	<Card class='max-h-12 w-xs justify-center flex-row items-center space-x-2'>
-		<p class="font-bold text-red-700 text-sm tracking-wide">{month.toUpperCase()} {day}, {year}</p>
-		<p class="text-slate-900 text-sm">{time.slice(0,-2)}<span class="font-semibold">{time.slice(-2)}</span></p>
+	<Card class='max-h-16 rounded w-xs justify-center flex-row items-center space-x-4'>
+		<div class="bg-blue-700 p-2 rounded"></div>
+		<div class="flex flex-col">
+			<p class="font-bold text-black text-xs tracking-wide">{month.toUpperCase()} {day}, {year}</p>
+			<p class="text-slate-900 text-xs">{time.slice(0,-2)}<span class="font-bold">{time.slice(-2)}</span></p>
+		</div>
 	</Card>
 {:else if purpose === 'mood'}
-	<Card class='max-h-12 max-w-full justify-center flex-row items-center space-x-2'>
-		<FaceLaughOutline tabindex="-1" class="text-slate-900" />
-		<p class="text-slate-900 text-sm">
-			{title} <span class="font-semibold">{data ?? 'N/A'}</span>
-		</p>
+	<Card class='max-h-16 rounded max-w-full justify-center flex-row items-center space-x-4'>
+		<div class="bg-blue-700 p-2 rounded"></div>
+		<!-- <FaceLaughOutline tabindex="-1" class="text-blue-700" /> -->
+		<div class="flex flex-col">
+			<p class="text-black text-xs font-bold uppercase">
+				{title}
+			</p>
+			<p class="text-xs text-black">{data ?? 'N/A'}</p>
+		</div>
 	</Card>
 {:else if purpose === 'reason'}
-	<Card class='max-h-12 max-w-full justify-center flex-row items-center space-x-2'>
-		<BrainOutline tabindex="-1" class="text-slate-900" />
-		<p class="text-slate-900 text-sm">
-			{title} <span class="font-semibold">{data ?? 'N/A'}</span>
-		</p>
+	<Card class='max-h-16 rounded max-w-full justify-center flex-row items-center space-x-4'>
+		<div class="bg-blue-700 p-2 rounded"></div>
+		<!-- <BrainOutline tabindex="-1" class="text-blue-700" /> -->
+		<div class="flex flex-col">
+			<p class="text-black text-xs font-bold uppercase">
+				{title}
+			</p>
+			<p class="text-xs text-black">{data ?? 'N/A'}</p>
+		</div>
 	</Card>
 {:else}
-	<Card id="tooltip-recentStudent" class='max-h-12 max-w-full justify-center flex-row items-center space-x-2'>
-		<ProfileCardOutline tabindex="-1" class="text-slate-900" />
-		<p class="text-slate-900 text-sm">
-			{title} 
-			<a class="font-semibold hover:text-blue-700 hover:underline cursor-pointer tracking-wide" href="/students/student-chart?search={data}" rel="noopener noreferrer">
+	<Card id="tooltip-recentStudent" class='max-h-16 rounded max-w-full justify-center flex-row items-center space-x-4'>
+		<div class="bg-blue-700 p-2 rounded"></div>
+		<!-- <ProfileCardOutline tabindex="-1" class="text-blue-700" /> -->
+		<div class="flex flex-col">
+			<p class="text-black text-xs font-bold uppercase">{title}</p>
+			<a class="text-xs text-black hover:text-blue-700 hover:underline cursor-pointer tracking-wide" 
+				href="/students/student-chart?search={data}" 
+				rel="noopener noreferrer">
 				{data ?? 'N/A'}
 			</a>
-		</p>
+		</div>
 	</Card>
 {/if}

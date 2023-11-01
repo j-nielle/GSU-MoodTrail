@@ -4,7 +4,6 @@
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
 	import {
-		PaginationItem,
 		Button,
 		Checkbox,
 		Input,
@@ -18,7 +17,6 @@
 		P
 	} from 'flowbite-svelte';
 	import { ChevronLeftSolid, ChevronRightSolid } from 'flowbite-svelte-icons';
-	import { newRequest } from '$lib/stores/index.js';
 
 	export let data;
 
@@ -62,8 +60,10 @@
 			// else it will return true which means it will not filter the data
 			const dateMatch = dateFilter !== '' ? dayjs(req.created_at).format('YYYY-MM-DD') === dayjs(dateFilter).format('YYYY-MM-DD') : true;
 
-			return searchTerm !== '' && dateFilter !== '' // if both search term and date filter are not empty
-				? (phoneMatch || reqMatch || statusMatch) && dateMatch // then it will filter the data according to the search term and date filter
+			// if both search term and date filter are not empty
+			return searchTerm !== '' && dateFilter !== '' 
+				// then it will filter the data according to the search term and date filter
+				? (phoneMatch || reqMatch || statusMatch) && dateMatch 
 				: searchTerm !== '' // else if search term is not empty
 				? phoneMatch || reqMatch || statusMatch // then it will filter the data according to the search term
 				: dateFilter !== '' // else if date filter is not empty
@@ -71,11 +71,11 @@
 				: true; // else it will return true which means it will not filter the data
 		});
 
-		startIndex = (page - 1) * limit; // Calculate the starting index for the current page.
-		endIndex = startIndex + limit; // Calculate the ending index for the current page.
-		maxPage = Math.ceil(filteredItems?.length / limit); // Calculate the maximum number of pages.
+		startIndex = (page - 1) * limit; // get the starting index for the current page.
+		endIndex = startIndex + limit; // get the ending index for the current page.
+		maxPage = Math.ceil(filteredItems?.length / limit); // get the max number of pages.
 		
-		// If the current page number exceeds the maximum number of pages
+		// if current page number exceeds the max number of pages
 		if (page > maxPage) {
 			page = 1; // set the current page to be the last page.
 
@@ -84,18 +84,18 @@
 			endIndex = startIndex + limit;
 		}
 
-		// Get only those items from 'filteredItems' that belong to the current page.
+		// get only those items from 'filteredItems' that belong to the current page.
 		paginatedItems = filteredItems?.slice(startIndex, endIndex);
 	}
 
 	$: {
     if(incompleteOnly){
-        paginatedItems = filteredItems.filter(req => !req.iscompleted).slice(startIndex, endIndex);
+			// paginatedItems will only show the incomplete requests
+      paginatedItems = filteredItems.filter(req => !req.iscompleted).slice(startIndex, endIndex);
     } else {
-        paginatedItems = filteredItems.slice(startIndex, endIndex);
+       paginatedItems = filteredItems.slice(startIndex, endIndex);
     }
 	}
-
 
 	const toggleRequestStatus = async (req) => {
 		let isCompleted = req.iscompleted;
@@ -113,8 +113,13 @@
 		}
 	};
 
+	/**
+	 * Changes the current page to 'newPage' if it's within a valid range.
+	 *
+	 * @param {number} newPage - The page number to navigate to.
+	 */
 	function changePage(newPage) {
-		// If 'newPage' is within valid range (i.e., between 1 and 'maxPage'), then update 'page'.
+		// if 'newPage' is within valid range (i.e., between 1 and 'maxPage'), then update 'page'
 		if (newPage >= 1 && newPage <= maxPage) {
 			page = newPage;
 		}

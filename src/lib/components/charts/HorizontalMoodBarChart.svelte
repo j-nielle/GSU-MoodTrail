@@ -9,22 +9,26 @@
 	export let elementID;
 	export let style;
 	export let title;
+	export let xAxisName;
+	export let yAxisName;
 
 	let horizontalMoodBarChart;
 
 	onMount(() => {
-		horizontalMoodBarChart = echarts.init(document.getElementById(elementID));
+		horizontalMoodBarChart = echarts?.init(document?.getElementById(elementID));
 
-		horizontalMoodBarChart.setOption({
+		horizontalMoodBarChart?.setOption({
 			title: {
 				text: title,
         textStyle:{
           color: '#000000',
-					fontSize: 20,
+					fontSize: 18,
+					//fontWeight: 'bold',
         },
 			},
 			yAxis: {
 				type: 'category',
+				name: yAxisName,
 				data: xData,
 				axisLabel: {
 					fontSize: 10,
@@ -33,7 +37,7 @@
 			},
 			xAxis: {
 				type: 'value',
-				name: "Frequency",
+				name: xAxisName,
         nameRotate: 0,
         nameLocation: "center",
         nameGap: 35,
@@ -44,6 +48,7 @@
 			series: [
 				{
 					data: yData,
+					name: "Frequency",
 					type: 'bar',
 					barMaxWidth: 20,
 					emphasis: {
@@ -89,7 +94,7 @@
 	});
 
 	afterUpdate(() => {
-		horizontalMoodBarChart.setOption({
+		horizontalMoodBarChart?.setOption({
 			yAxis: {
 				data: xData
 			},

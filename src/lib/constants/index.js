@@ -82,3 +82,5 @@ export function getNearestMoodLabel(score, mood) {
 
 	return nearestLabel;
 }
+
+export const daysShort = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];

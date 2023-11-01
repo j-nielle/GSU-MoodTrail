@@ -10,6 +10,7 @@
 	export let style;
 	export let reasonType;
 	export let moodType;
+	export let seriesName;
 
 	let calendarChart;
 	let dataUnavailable = false;
@@ -95,14 +96,17 @@
 			visualMap: {
 				show: false,
 				min: 0,
-				max: 10
+				max: 50
 			},
 			calendar: {
+				left: 22,
+				right: 1,
     		range: dayjs().format('YYYY'),
  		 	},
 			series: [
 				{
 					type: 'heatmap',
+					name: seriesName,
     			coordinateSystem: 'calendar',
 					data: getCalendarData(data)
 				}

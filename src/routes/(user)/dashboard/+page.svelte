@@ -34,7 +34,7 @@
 	} from '$lib/components/charts/index.js';
 	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
 	import { CardInfo } from '$lib/components/elements/index.js';
-	import { mood, reason, yearLvl, moodChoices, reasonChoices } from '$lib/constants/index.js';
+	import { mood, reason, yearLvl, daysShort, moodChoices, reasonChoices } from '$lib/constants/index.js';
 
 	export let data;
 
@@ -74,7 +74,7 @@
 		lineChartTitle = '';
 	let selectedNHBarChart = 'course';
 
-	let current = dayjs().format('MMM D, YYYY hh:mm:ss A');
+	let current = dayjs();
 	const interval = 1000;
 
 	let viewAnonData = false;
@@ -112,7 +112,6 @@
 	let tableRef;
 
 	let selectedMoodScore;
-	const days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
 	let xMoodWeek = [], yMoodWeekEntry = [];
 	let yReasonPercentage = [], xReason = [];
 
@@ -177,7 +176,7 @@
 			return [[parseInt(hour), parseInt(day), data.length || '-']];
 		});
 
-		// FOR HORIZONTAL MOOD BAR CHART - OVERALL MOOD FREQUENCY
+		// FOR HORIZONTAL MOOD BAR CHART - MOOD FREQUENCY
 		const moodCount = {}; // object to store the count of each mood
 
 		dataType.forEach((item) => {
@@ -481,7 +480,7 @@
 			yearlyMostFreqReason = Object.keys(reason).find((key) => reason[key] == parseInt(reasonValue[0]));
 		}
 
-		// FOR RADAR CHART
+		// FOR RADAR CHART - MOOD AND FREQUENCY OF RELATED REASONS
 		const moodData = {};
 
 		for (const entry of dataType) {
@@ -519,13 +518,13 @@
 			value: Object.keys(reason).map((reasonLabel) => moodData[moodLabel][reason[reasonLabel] - 1]),
 			name: moodLabel
 		}));
-
+	
 		// get the maximum value for each reason
 		const maxValues = Object.keys(reason).map((reasonLabel) =>
 			Math.max(...moodRadarData?.map((mood) => mood.value[reason[reasonLabel] - 1]))
 		);
 
-		// map over the keys of the 'reason' object. For each key (which we're calling 'reasonLabel'),
+		// map over the keys of the 'reason' object. for each key (which we're calling 'reasonLabel'),
 		// we're also getting its index in the array of keys (which we're calling 'reasonIndex').
 		reasonRadarIndicator = Object.keys(reason).map((reasonLabel, reasonIndex) => {
 
@@ -637,13 +636,12 @@
 					return null; // if there are no mood scores for this year level, return null
 				}
 			});
-
+			
 			// map over the yearLevelData array and get the year level labels
 			yearLvlYData = yearLevelData?.map((yearLevel) => {
 				if (typeof yearLevel.yearLevel === 'number') { // if year level is a number
 					return yearLvl[yearLevel.yearLevel]; // get the year level label from the yearLvl object
 				} else {
-
 					// if year level is not a number, remove the ' Level' from the string
 					return yearLevel.yearLevel.replace(' Level', '');
 				}
@@ -733,7 +731,7 @@
 		else if(selectedReasonMarkType === 'min') { sbcMarkType = 'min' }
 		else if(selectedReasonMarkType === 'max') { sbcMarkType = 'max' }
 
-		// SIMPLE BAR CHART -  # OF MOOD ENTRIES PER WEEKDAY
+		// SIMPLE BAR CHART - # OF MOOD ENTRIES PER WEEKDAY
 		// filter the dataType array to only include entries with the selected mood score
 		let filteredSelectedMoodData = dataType?.filter(data => data.mood_score == selectedMoodScore);
 
@@ -747,7 +745,7 @@
 		const entriesByWeekday = _.mapValues(groupedDays, data => data.length);
 
 		// map the day numbers to their respective names
-		xMoodWeek = _.keys(entriesByWeekday).map(dayNumber => days[dayNumber]);
+		xMoodWeek = _.keys(entriesByWeekday).map(dayNumber => daysShort[dayNumber]);
 
 		// store the counts of entries for each day of the week
 		yMoodWeekEntry = _.values(entriesByWeekday);
@@ -918,7 +916,7 @@
 	 * This is typically used to automatically scroll the user to a table after clicking `here` sa low moods notification.
 	 * The check for 'window' ensures this code only runs in the browser where 'window' is defined, 
 	 * not during server-side rendering.
-		*/	
+	 */	
 	$: if(typeof window !== 'undefined'){
 		if (tableRef && $focusTable) {
 			window?.scrollTo(0, tableRef?.offsetTop);
@@ -967,10 +965,9 @@
 
 	/**
 	 * Updates the `current` variable with the current date and time.
-	 * The date and time are formatted as 'MMM D, YYYY hh:mm:ss A' using **dayjs** library.
 	*/
 	function updateTime() {
-		current = dayjs().format('MMM D, YYYY hh:mm:ss A');
+		current = dayjs()
 	}
 
 	/**
@@ -993,7 +990,6 @@
 
 <!-- Student/Anonymous Floating Toggle Button -->
 {#if studentMoodData?.length > 0 || anonMoodData?.length > 0}
-	<!-- fixed: unexpected scroll behavior during hover events -->
 	<Tooltip placement="left" class="fixed z-50 overflow-hidden" triggeredBy="#switchData" on:hover={(e) => e.preventDefault()}>
 		Toggle between student and anonymous data
 	</Tooltip>
@@ -1014,81 +1010,87 @@
 	</div>
 {/if}
 
-<div class="bg-zinc-100 p-4 flex flex-col space-y-3">
+<div class="bg-zinc-100 flex flex-col space-y-3 mx-4 pt-4">
+	<!-- Card Section -->
 	<div class="flex justify-between w-full">
-		<!-- Info Card Section -->
-
 		<CardInfo purpose="time" title="" bind:data={current} />
-		<CardInfo purpose="recentStudent" title="Recent Student:" bind:data={recentStudent} />
+		<CardInfo purpose="recentStudent" title="Recent Student ID:" bind:data={recentStudent} />
 
-		{#if selectedLineChart === 'today'}
-			<div>
-				<CardInfo purpose="mood" title="Today's Mood:" bind:data={todayMostFreqMood} />
-			</div>
-			<div>
-				<CardInfo purpose="reason" title="Today's Reason:" bind:data={todayMostFreqReason} />
-			</div>
-		{:else if selectedLineChart === 'overall'}
-			<div>
-				<CardInfo purpose="mood" title="Mood (Overall):" bind:data={overallMostFreqMood} />
-			</div>
-			<div>
-				<CardInfo purpose="reason" title="Reason (Overall):" bind:data={overallMostFreqReason} />
-			</div>
-		{:else if selectedLineChart === 'weekly'}
-			<div>
-				<CardInfo purpose="mood" title="Mood (Weekly):" bind:data={weeklyMostFreqMood} />
-			</div>
-			<div>
-				<CardInfo purpose="reason" title="Reason (Weekly):" bind:data={weeklyMostFreqReason} />
-			</div>
-		{:else if selectedLineChart === 'monthly'}
-			<div>
-				<CardInfo purpose="mood" title="Mood (Monthly):" bind:data={monthlyMostFreqMood} />
-			</div>
-			<div>
-				<CardInfo purpose="reason" title="Reason (Monthly):" bind:data={monthlyMostFreqReason} />
-			</div>
-		{:else if selectedLineChart === 'yearly'}
-			<div>
-				<CardInfo purpose="mood" title="Mood (Yearly):" bind:data={yearlyMostFreqMood} />
-			</div>
-			<div>
-				<CardInfo purpose="reason" title="Reason (Yearly):" bind:data={yearlyMostFreqReason} />
-			</div>
-		{/if}
+			{#if selectedLineChart === 'today'}
+				<div>
+					<CardInfo purpose="mood" title="Today's Top Mood:" bind:data={todayMostFreqMood} />
+				</div>
+				<div>
+					<CardInfo purpose="reason" title="Today's Top Reason:" bind:data={todayMostFreqReason} />
+				</div>
+			{:else if selectedLineChart === 'overall'}
+				<div>
+					<CardInfo purpose="mood" title="Mood (Overall):" bind:data={overallMostFreqMood} />
+				</div>
+				<div>
+					<CardInfo purpose="reason" title="Reason (Overall):" bind:data={overallMostFreqReason} />
+				</div>
+			{:else if selectedLineChart === 'weekly'}
+				<div>
+					<CardInfo purpose="mood" title="Mood (Weekly):" bind:data={weeklyMostFreqMood} />
+				</div>
+				<div>
+					<CardInfo purpose="reason" title="Reason (Weekly):" bind:data={weeklyMostFreqReason} />
+				</div>
+			{:else if selectedLineChart === 'monthly'}
+				<div>
+					<CardInfo purpose="mood" title="Mood (Monthly):" bind:data={monthlyMostFreqMood} />
+				</div>
+				<div>
+					<CardInfo purpose="reason" title="Reason (Monthly):" bind:data={monthlyMostFreqReason} />
+				</div>
+			{:else if selectedLineChart === 'yearly'}
+				<div>
+					<CardInfo purpose="mood" title="Mood (Yearly):" bind:data={yearlyMostFreqMood} />
+				</div>
+				<div>
+					<CardInfo purpose="reason" title="Reason (Yearly):" bind:data={yearlyMostFreqReason} />
+				</div>
+			{/if} 
 		
-		<!-- Jump To -->
-		<Button class="w-fit" shadow on:click={() => jumpToModalState = true}>
-			<ForwardSolid class="mr-2 focus:outline-none" />Jump to
+
+		<Button class="w-fit" pill shadow on:click={() => jumpToModalState = true}>
+			<ForwardSolid class="mr-2 focus:outline-none" />
+			<div class="flex flex-col justify-start">
+				<p class="text-xs uppercase font-bold">Jump to a specific section</p>
+			</div>
 		</Button>
 	</div>
 
 	<div class="flex flex-col space-y-3 w-full">
 		<div class="flex space-x-4">
-			<!-- Overall Mood Frequency Bar Chart -->
-			<div id="overallMoodFreqHBC" class="p-3 bg-white rounded-sm drop-shadow-md hover:ring-1 self-center flex justify-center items-center pt-5 pl-4">
+			<!-- Mood Frequency Bar Chart -->
+			<div id="overallMoodFreqHBC" class="p-3 bg-white rounded drop-shadow-md hover:ring-1 self-center flex justify-center items-center pt-6 px-5">
 				{#if dataType?.length == 0}
-					<div class="flex flex-col justify-center items-center space-y-5" style="width:520px; height:400px;">
+					<div class="flex flex-col justify-center items-center space-y-5" style="width:520px; height:350px;">
 						<RocketOutline class="h-20 w-20" />
 						<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
 					</div>
 				{:else}
-					<HorizontalMoodBarChart
-						title="Overall Mood Frequency"
-						bind:xData={xDataMBC}
-						bind:yData={yDataMBC}
-						elementID="dashboardHBC"
-						style="width:520px; height:400px;"
-					/>
+					<div class="flex flex-col">
+						<p class="font-semibold">Mood Frequency</p>
+						<HorizontalMoodBarChart
+							title=""
+							xAxisName="Frequency" yAxisName=""
+							bind:xData={xDataMBC}
+							bind:yData={yDataMBC}
+							elementID="dashboardHBC"
+							style="width:520px; height:350px;"
+						/>
+					</div>
 				{/if}
 			</div>
 
 			<!-- Line Chart -->
-			<div id="lineChartMood" class="flex w-screen bg-white rounded-sm drop-shadow-md items-center justify-center hover:ring-1">
+			<div id="lineChartMood" class="flex w-screen bg-white rounded drop-shadow-md items-center justify-center hover:ring-1">
 				<div class="flex flex-col space-y-4">
-					<div class="flex justify-between items-center">
-						<p class="text-xl text-black font-semibold">{lineChartTitle}</p>
+					<div class="flex justify-between items-center mt-2">
+						<p class="font-semibold">{lineChartTitle}</p>
 						<ButtonGroup>
 							<Button
 								disabled={dataType.length == 0}
@@ -1128,35 +1130,35 @@
 								bind:xData={timestamps}
 								bind:yData={todaysMoodScores}
 								elementID="dashboardTLC"
-								style="width:690px; height:330px;"
+								style="width:670px; height:330px;"
 							/>
 						{:else if selectedLineChart === 'overall'}
 							<LineChart
 								bind:xData={overall}
 								bind:yData={overallAverages}
 								elementID="dashboardDLC"
-								style="width:690px; height:330px;"
+								style="width:670px; height:330px;"
 							/>
 						{:else if selectedLineChart === 'weekly'}
 							<LineChart
 								bind:xData={weekly}
 								bind:yData={weeklyAverages}
 								elementID="dashboardWLC"
-								style="width:690px; height:330px;"
+								style="width:670px; height:330px;"
 							/>
 						{:else if selectedLineChart === 'monthly'}
 							<LineChart
 								bind:xData={monthly}
 								bind:yData={monthlyAverages}
 								elementID="dashboardMLC"
-								style="width:690px; height:330px;"
+								style="width:670px; height:330px;"
 							/>
 						{:else if selectedLineChart === 'yearly'}
 							<LineChart
 								bind:xData={yearly}
 								bind:yData={yearlyAverages}
 								elementID="dashboardYLC"
-								style="width:690px; height:330px;"
+								style="width:670px; height:330px;"
 							/>
 						{/if}
 					{:else}
@@ -1171,10 +1173,10 @@
 
 		<div class="flex space-x-4">
 			<!-- Heatmap -->
-			<div id="moodFreqHeatmap" class="bg-white flex flex-col rounded-sm drop-shadow-md p-4 hover:ring-1">
+			<div id="moodFreqHeatmap" class="bg-white flex flex-col rounded drop-shadow-md p-4 hover:ring-1">
 				{#if dataType.length > 0}
-					<div class="flex justify-between my-2">
-						<p class="self-center text-lg ml-4 font-semibold">Mood Frequency by Day and Hour</p>
+					<div class="flex justify-between mt-1">
+						<p class="font-semibold">Mood Frequency by Day and Hour</p>
 						<div class="flex items-center justify-end mr-1.5 space-x-2">
 							<Checkbox class="cursor-pointer mr-0" bind:value={lowMoodsOnly} on:change={() => lowMoodsOnly = !lowMoodsOnly} />
 							<p class="text-sm font-normal text-gray-500 dark:text-gray-400">Low Moods Only</p>
@@ -1184,10 +1186,10 @@
 						{heatmapData}
 						title=""
 						elementID="dashboardHM"
-						style="width:580px; height:360px;"
+						style="width:575px; height:335px;"
 					/>
 				{:else}
-					<div class="flex flex-col justify-center items-center space-y-5" style="width:580px; height:360px;">
+					<div class="flex flex-col justify-center items-center space-y-5" style="width:575px; height:335px;">
 						<RocketOutline class="h-20 w-20" />
 						<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
 					</div>
@@ -1195,10 +1197,11 @@
 			</div>
 
 			<!-- Reason Simple Bar Chart -->
-			<div id="reasonFreqBC" class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+			<div id="reasonFreqBC" class="bg-white rounded drop-shadow-md flex justify-center hover:ring-1 p-4">
 				<div class="flex flex-col">
 					{#if dataType?.length > 0}
-					<div class="flex justify-end">
+					<div class="flex justify-between items-baseline">
+						<p class="font-semibold">Associated Reason Frequency</p>
 						<ButtonGroup class="mb-3">
 							<Button color={sbcBtnColors.average} 
 								on:click={() => selectReasonMarkType('average')}>
@@ -1214,19 +1217,17 @@
 							</Button>
 						</ButtonGroup>
 					</div>
-					<div class="mt-3 items-center">
-						<SimpleBarChart
+					<SimpleBarChart
 							xData={xDataSBC} xType="category" xName="Reason"
 							yData={yDataSBC} yType="value" yName="Frequency"
-							title="          Associated Reason Frequency"
+							title=""
 							fontSize="18"
 							markType={sbcMarkType}
 							elementID="reasonSBC"
-							style="width:650px; height:300px;"
+							style="width:655px; height:315px;"
 						/>
-					</div>
 					{:else}
-						<div class="flex flex-col justify-center items-center space-y-5" style="width:650px; height:300px;">
+						<div class="flex flex-col justify-center items-center space-y-5" style="width:655px; height:315px;">
 							<RocketOutline class="h-20 w-20" />
 							<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
 						</div>
@@ -1236,34 +1237,31 @@
 		</div>
 
 		<div class="flex space-x-4">
-			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+			<div class="p-4 bg-white rounded drop-shadow-md flex justify-center hover:ring-1">
 				<!-- Radar Chart -->
 				<div id="moodReasonRadarChart" class="flex flex-col">
 					{#if dataType?.length > 0}
-						<p class="text-lg self-center font-semibold mb-3">Mood and Frequency of Related Reasons</p>
+						<p class="font-semibold mt-1.5">Mood and Frequency of Related Reasons</p>
 						<RadarChart
 							bind:data={moodRadarData}
 							bind:indicator={reasonRadarIndicator}
 							elementID="moodReasonRadar"
-							style="width:616px; height:350px;"
+							style="width:616px; height:370px;"
 						/>
 					{:else}
-						<div class="flex flex-col justify-center items-center space-y-5" style="width:616px; height:350px;">
+						<div class="flex flex-col justify-center items-center space-y-5" style="width:616px; height:370px;">
 							<RocketOutline class="h-20 w-20" />
 							<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
 						</div>
 					{/if}
 				</div>
 			</div>
-			<div class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+			<div class="p-4 bg-white rounded drop-shadow-md flex justify-center hover:ring-1">
 				<!-- Mood Averages Bar Chart -->
 				<div id="moodAvgCourseYrReason" class="flex flex-col">
 					{#if dataType?.length > 0}
-						<div class="flex justify-between">
-							<div class="flex flex-col">
-								<p class="text-lg font-semibold ml-1">Mood Averages</p>
-								<p class="ml-1 font-light text-sm">(including the negatives)</p>
-							</div>
+						<div class="flex justify-between items-baseline">
+							<p class="font-semibold">Mood Averages</p>
 							<ButtonGroup class="mb-3">
 								<Button color={nhbcBtnColors.course} on:click={() => selectNHBarChart('course')}>
 									Course
@@ -1284,26 +1282,26 @@
 									bind:xData={avgMoodByCourse}
 									bind:yData={courseYData}
 									elementID="courseBarChart-1"
-									style="width:615px; height:350px;"
+									style="width:615px; height:335px;"
 								/>
 							{:else if selectedNHBarChart === 'year_level'}
 								<NegativeBarChart
 									bind:xData={avgMoodByYearLvl}
 									bind:yData={yearLvlYData}
 									elementID="yrLvlBarChart-1"
-									style="width:615px; height:350px;"
+									style="width:615px; height:335px;"
 								/>
 							{:else if selectedNHBarChart === 'reason'}
 								<NegativeBarChart
 									bind:xData={avgMoodByReason}
 									bind:yData={reasonYData}
 									elementID="reasonBarChart-1"
-									style="width:615px; height:350px;"
+									style="width:615px; height:335px;"
 								/>
 							{/if}
 						</div>
 					{:else}
-						<div class="flex flex-col justify-center items-center space-y-5" style="width:610px; height:350px;">
+						<div class="flex flex-col justify-center items-center space-y-5" style="width:615px; height:335px;">
 							<RocketOutline class="h-20 w-20" />
 							<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
 						</div>
@@ -1314,12 +1312,15 @@
 
 		<div class="flex space-x-4">
 			<!-- Histogram Chart -->
-			<div id="moodLoginHrsHistogram" class="p-4 bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
+			<div id="moodLoginHrsHistogram" class="p-4 bg-white rounded drop-shadow-md flex justify-center hover:ring-1">
 				{#if dataType?.length > 0}
-					<Histogram data={dataType} title="Mood Login Hours (in 24-hour format)"
-						elementID="HrsHistogram" 
-						style="width:510px; height:370px;"
-					/>
+					<div class="flex flex-col">
+						<p class="font-semibold mt-1">Mood Login Hours (in 24-hour format)</p>
+						<Histogram data={dataType} title=""
+							elementID="LoginHrsHistogram" 
+							style="width:510px; height:370px;"
+						/>
+					</div>
 				{:else}
 					<div class="flex flex-col justify-center items-center space-y-5" style="width:510px; height:370px;">
 						<RocketOutline class="h-20 w-20" />
@@ -1328,7 +1329,7 @@
 				{/if}
 			</div>
 			<!-- Students with Consistent Low Moods Table -->
-			<div id="low-moods" bind:this={tableRef} class="bg-white rounded-sm !p-5 drop-shadow-md w-full hover:ring-1">
+			<div id="low-moods" bind:this={tableRef} class="bg-white rounded !p-5 drop-shadow-md w-full hover:ring-1">
 				<caption class="mx-3 text-left w-max text-black bg-white dark:text-white dark:bg-gray-800 mb-6">
 					<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
 						Click the <strong>ID Number</strong> to view their student and mood information.
@@ -1413,30 +1414,30 @@
 		</div>
 
 		<!-- Calendar Chart -->
-		<div id="moodCalendar" class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
-			<div class="flex flex-col">
-				<div class="flex flex-row justify-between mt-4 space-y-3">
-					<div class="flex flex-col justify-start items-center">
-						<p class="text-lg font-semibold self-start">Mood-Reason Calendar</p>
+		<div id="moodCalendar" class="bg-white rounded drop-shadow-md flex justify-center hover:ring-1">
+			<div class="flex flex-col mt-1 px-4">
+				<div class="flex flex-row justify-between space-y-3 mt-4">
+					<div class="flex flex-col justify-start items-center mt-2">
+						<p class="font-semibold self-start">Mood-Reason Calendar</p>
 						<p class="text-xs">(Please select a mood and the associated reason.)</p>
 					</div>
-					<div class="flex flex-row justify-end space-x-3">
-						<Select placeholder="Mood" class="font-normal w-max h-11 bg-white" items={moodChoices} bind:value={selectedMoodCalendar} />
-						<Select placeholder="Associated Reason" class="font-normal w-max h-11 bg-white" items={reasonChoices} bind:value={selectedReasonCalendar} />
+					<div class="flex flex-row space-x-3">
+						<Select placeholder="Select Mood" class="font-normal w-max h-11 bg-white" items={moodChoices} bind:value={selectedMoodCalendar} />
+						<Select placeholder="Select Associated Reason" class="font-normal w-max h-11 bg-white" items={reasonChoices} bind:value={selectedReasonCalendar} />
 					</div>
 				</div>
 				{#if dataType?.length > 0}
 					<div class="items-center">
 						<CalendarChart 
-							data={dataType} 
+							data={dataType} seriesName="Mood-Reason Calendar"
 							bind:reasonType={selectedReasonCalendar} 
 							bind:moodType={selectedMoodCalendar}
 							elementID="moodCalendarChart" 
-							style="width:1160px;height:250px"
+							style="width:1270px;height:250px"
 						/>
 					</div>
 				{:else}
-					<div class="flex flex-col justify-center items-center w-full space-y-5" style="width:1160px;height:250px">
+					<div class="flex flex-col justify-center items-center w-full space-y-5">
 						<RocketOutline class="h-20 w-20" />
 						<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
 					</div>
@@ -1445,14 +1446,14 @@
 		</div>
 
 		<!-- 2 Charts (# of Mood Entries per Weekday & % of Reasons of the Selected Mood) -->
-		<div id="2Charts" class="p-2 w-full bg-white rounded-sm drop-shadow-md flex justify-center hover:ring-1">
-			<div class="flex flex-col w-full">
+		<div id="2Charts" class="p-3 w-full bg-white rounded drop-shadow-md flex justify-center hover:ring-1">
+			<div class="flex flex-col w-full space-y-4 p-2">
 				{#if dataType?.length > 0}
-				<div class="flex flex-row justify-center mt-2 mb-6 space-y-3">
-					<Select placeholder="Select a mood" class="font-normal w-max h-11 bg-white" items={moodChoices} bind:value={selectedMoodScore} />
+				<div class="flex justify-between items-baseline">
+					<p>Current Mood: <span class="font-semibold">{Object.keys(mood).find((key) => mood[key] === selectedMoodScore) || 'N/A'}</span></p>
+					<Select placeholder="Select a mood" class="font-normal w-fit bg-white" items={moodChoices} bind:value={selectedMoodScore} />
 				</div>
-				<div class="flex space-x-3 justify-between mx-4">
-					<!-- # of Mood Entries per Weekday -->
+				<div class="flex space-x-3 justify-between mt-1"> 
 					<div class="items-center">
 						<SimpleBarChart
 							xData={xMoodWeek} xType="category" xName="Day"
@@ -1460,14 +1461,13 @@
 							title="         # of Mood Entries per Weekday"
 							markType="average"
 							elementID="moodWeekDayEntries" fontSize="16"
-							style="width:545px; height:320px;"
+							style="width:590px; height:320px;"
 						/>
 					</div>
 
-					<!-- % of Reasons of the Selected Mood -->
 					<div class="items-center">
 						<SimpleBarChart
-							yData={yReasonPercentage} yType="value" yName="Percentage"
+							yData={yReasonPercentage} yType="value" yName="Percentage" yAxisRotate="90"
 							xData={xReason} xType="category" xName="Reason"
 							title="         % of Reasons of the Selected Mood"
 							markType="average"
