@@ -20,7 +20,12 @@
 	} from 'flowbite-svelte';
 	import {
 		RocketOutline, 
-		ForwardSolid, ArrowLeftToBracketOutline
+		ForwardSolid, 
+		ArrowLeftToBracketOutline,
+		ChartMixedOutline,
+		ChartOutline,
+		TableColumnOutline,
+		CalendarMonthOutline,
 	} from 'flowbite-svelte-icons';
 	import {
 		RadarChart,
@@ -85,7 +90,7 @@
 
 	const tableDivClass = "text-left mx-3 text-sm text-gray-500 border border-zinc-300 dark:text-gray-400 max-h-56 overflow-y-auto"
 
-	let toggleBtnClass = {
+	const toggleBtnClass = {
 		inactive:
 			'text-center font-medium inline-flex items-center justify-center px-3 py-2 text-xs text-white rounded-full',
 		active:
@@ -1016,44 +1021,43 @@
 		<CardInfo purpose="time" title="" bind:data={current} />
 		<CardInfo purpose="recentStudent" title="Recent Student ID:" bind:data={recentStudent} />
 
-			{#if selectedLineChart === 'today'}
+		{#if selectedLineChart === 'today'}
 				<div>
 					<CardInfo purpose="mood" title="Today's Top Mood:" bind:data={todayMostFreqMood} />
 				</div>
 				<div>
 					<CardInfo purpose="reason" title="Today's Top Reason:" bind:data={todayMostFreqReason} />
 				</div>
-			{:else if selectedLineChart === 'overall'}
+		{:else if selectedLineChart === 'overall'}
 				<div>
 					<CardInfo purpose="mood" title="Mood (Overall):" bind:data={overallMostFreqMood} />
 				</div>
 				<div>
 					<CardInfo purpose="reason" title="Reason (Overall):" bind:data={overallMostFreqReason} />
 				</div>
-			{:else if selectedLineChart === 'weekly'}
+		{:else if selectedLineChart === 'weekly'}
 				<div>
 					<CardInfo purpose="mood" title="Mood (Weekly):" bind:data={weeklyMostFreqMood} />
 				</div>
 				<div>
 					<CardInfo purpose="reason" title="Reason (Weekly):" bind:data={weeklyMostFreqReason} />
 				</div>
-			{:else if selectedLineChart === 'monthly'}
+		{:else if selectedLineChart === 'monthly'}
 				<div>
 					<CardInfo purpose="mood" title="Mood (Monthly):" bind:data={monthlyMostFreqMood} />
 				</div>
 				<div>
 					<CardInfo purpose="reason" title="Reason (Monthly):" bind:data={monthlyMostFreqReason} />
 				</div>
-			{:else if selectedLineChart === 'yearly'}
+		{:else if selectedLineChart === 'yearly'}
 				<div>
 					<CardInfo purpose="mood" title="Mood (Yearly):" bind:data={yearlyMostFreqMood} />
 				</div>
 				<div>
 					<CardInfo purpose="reason" title="Reason (Yearly):" bind:data={yearlyMostFreqReason} />
 				</div>
-			{/if} 
+		{/if} 
 		
-
 		<Button class="w-fit" pill shadow on:click={() => jumpToModalState = true}>
 			<ForwardSolid class="mr-2 focus:outline-none" />
 			<div class="flex flex-col justify-start">
@@ -1450,7 +1454,7 @@
 			<div class="flex flex-col w-full space-y-4 p-2">
 				{#if dataType?.length > 0}
 				<div class="flex justify-between items-baseline">
-					<p>Current Mood: <span class="font-semibold">{Object.keys(mood).find((key) => mood[key] === selectedMoodScore) || 'N/A'}</span></p>
+					<p class="text-sm">Current Mood: <span class="font-semibold">{Object.keys(mood).find((key) => mood[key] === selectedMoodScore) || 'N/A'}</span></p>
 					<Select placeholder="Select a mood" class="font-normal w-fit bg-white" items={moodChoices} bind:value={selectedMoodScore} />
 				</div>
 				<div class="flex space-x-3 justify-between mt-1"> 
@@ -1487,71 +1491,71 @@
 	</div>
 </div>
 
-<Modal class="flex relative max-w-fit w-full max-h-full" title="Jump to specific section" bind:open={jumpToModalState} autoclose>
+<Modal class="flex relative max-w-fit w-full max-h-full" title="Jump to a specific section" bind:open={jumpToModalState} autoclose>
 	<div class="flex flex-col gap-3">
 		<!-- 
-			The `href` attribute in this case is just used to provide a fallback for 
+			NOTE: The `href` attribute in this case is just used to provide a fallback for 
 			browsers that don’t support JavaScript or in case JavaScript fails to load. 
-			So even without JS, clicking the link will still take you to the right section of the page. 
+			So even without JS, clicking the link will still take you to the right section of the page.
 		-->
 		<a href="#overallMoodFreqHBC" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
-				Overall Mood Frequency Chart
+				<ChartMixedOutline class="focus:outline-none h-6 w-6 text-blue-700" /> 
+				<p class="text-sm">Overall Mood Frequency Chart</p>
 			</div>
 		</a>
 		<a href="#lineChartMood" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
-				Mood Line Chart
+				<ChartOutline class="focus:outline-none h-6 w-6 text-blue-700" /> 
+				<p class="text-sm">Mood Line Chart</p>
 			</div>
 		</a>
 		<a href="#moodFreqHeatmap" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
-				Mood Frequency by Day and Hour Chart
+				<CalendarMonthOutline class="focus:outline-none h-6 w-6 text-blue-700" /> 
+				<p class="text-sm">Mood Frequency by Day and Hour Chart</p>
 			</div>
 		</a>
 		<a href="#reasonFreqBC" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
-				Associated Reason Frequency Chart
+				<ChartMixedOutline class="focus:outline-none h-6 w-6 text-blue-700" /> 
+				<p class="text-sm">Associated Reason Frequency Chart</p>
 			</div>
 		</a>
 		<a href="#moodReasonRadarChart" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
-				Mood and Frequency of Related Reasons Chart
+				<ChartMixedOutline class="focus:outline-none h-6 w-6 text-blue-700" /> 
+				<p class="text-sm">Mood and Frequency of Related Reasons Chart</p>
 			</div>
 		</a>
 		<a href="#moodAvgCourseYrReason" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
-				Mood Averages (including the negatives)
+				<ChartMixedOutline class="focus:outline-none h-6 w-6 text-blue-700" /> 
+				<p class="text-sm">Mood Averages (Course/Year Level/Reason)</p>
 			</div>
 		</a>
 		<a href="#moodLoginHrsHistogram" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
-				Mood Login Hours (in 24-hour format)
+				<ChartMixedOutline class="focus:outline-none h-6 w-6 text-blue-700" /> 
+				<p class="text-sm">Mood Login Hours (in 24-hour format)</p>
 			</div>
 		</a>
 		<a href="#low-moods" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
-				Table of Students with Consistent Low Moods
+				<TableColumnOutline class="focus:outline-none h-6 w-6 text-blue-700" /> 
+				<p class="text-sm">Table of Students with Consistent Low Moods</p>
 			</div>
 		</a>
 		<a href="#moodCalendar" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
-				Mood Calendar
+				<CalendarMonthOutline class="focus:outline-none h-6 w-6 text-blue-700" /> 
+				<p class="text-sm">Mood Calendar</p>
 			</div>
 		</a>
 		<a href="#2Charts" on:click={scrollIntoView}>
 			<div class="flex gap-3 items-center">
-				<ArrowLeftToBracketOutline class="focus:outline-none" /> 
-				Selected Mood Bar Charts
+				<ChartMixedOutline class="focus:outline-none h-6 w-6 text-blue-700" /> 
+				<p class="text-sm">Selected Mood Bar Charts</p>
 			</div>
 		</a>
 	</div>
