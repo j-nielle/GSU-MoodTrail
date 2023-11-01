@@ -1015,7 +1015,7 @@
 	</div>
 {/if}
 
-<div class="bg-zinc-100 flex flex-col space-y-3 mx-4 pt-4">
+<div class="bg-zinc-100 flex flex-col space-y-4 mx-4 pt-4">
 	<!-- Card Section -->
 	<div class="flex justify-between w-full">
 		<CardInfo purpose="time" title="" bind:data={current} />
