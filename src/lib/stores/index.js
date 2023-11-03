@@ -6,3 +6,4 @@ export const removeUser = writable(false);
 export const newRequest = writable(false);
 export const focusTable = writable(false);
 export const consistentLowMoods = writable(new Map());
+export const exportData = writable([]);

@@ -21,7 +21,13 @@
 		Select,
 		Avatar,
 		Modal,
-		Alert
+		Alert,
+		Table,
+		TableBody,
+		TableBodyCell,
+		TableBodyRow,
+		TableHead,
+		TableHeadCell,
 	} from 'flowbite-svelte';
 	import {
 		LineChart,
@@ -31,6 +37,7 @@
 		//HeatmapChart
 	} from '$lib/components/charts/index.js';
 	import { yearLvl, mood, reason, moodChoices, reasonChoices } from '$lib/constants/index.js'; 
+	import { exportData } from '$lib/stores/index.js';
 	import * as FileSaver from "file-saver";
   import * as XLSX from "xlsx";
 
@@ -74,6 +81,8 @@
 	const divClass = "bg-white space-y-4 dark:bg-gray-800 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 text-slate-950 flex flex-col";
 
 	let currentStudentID;
+
+	let exportModalState = false;
 
 	onMount(() => {
 		const studentChartChannel = supabase.channel('studentChartChannel')
@@ -320,25 +329,7 @@
 		else if(selectedReasonMarkType === 'max') { sbcMarkType = 'max' }
 	}
 
-	const getWeekNumberString = (date) => {
-		const firstDayOfYear = dayjs(date).startOf('year').day(1);
-		const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
-		return `Week ${weekDiff}`;
-	};
-
-	function toggleChart(chart) {
-		selectedLineChart = chart;
-	}
-
-	function selectReasonMarkType(reasonMarkType) {
-		selectedReasonMarkType = reasonMarkType;
-	}
-
-	async function handleExport() {
-		const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-  	const fileExtension = ".xlsx";
-		const fileName = currentStudentID + "_MoodEntries";
-
+	$: if(exportModalState){
 		let keys = Object.keys(result[0]);
 		keys[keys.indexOf('mood_score')] = 'mood'; // replace mood_score with mood
 		keys[keys.indexOf('reason_score')] = 'reason'; // replace reason_score with reason
@@ -372,7 +363,28 @@
 			return Object.values(newObj);
 		});
 
-		let data = [keys, ...values];
+		exportData.update(() => [keys, ...values]);
+	}
+
+	const getWeekNumberString = (date) => {
+		const firstDayOfYear = dayjs(date).startOf('year').day(1);
+		const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
+		return `Week ${weekDiff}`;
+	};
+
+	function toggleChart(chart) {
+		selectedLineChart = chart;
+	}
+
+	function selectReasonMarkType(reasonMarkType) {
+		selectedReasonMarkType = reasonMarkType;
+	}
+
+	async function handleExport() {
+		let data = $exportData;
+		const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  	const fileExtension = ".xlsx";
+		const fileName = currentStudentID + "_MoodEntries";
 		
 		const workSheet = XLSX.utils.aoa_to_sheet(data);
     const workBook = {
@@ -381,7 +393,7 @@
     };
     const excelBuffer = await XLSX.write(workBook, { bookType: "xlsx", type: "array" });
     const fileData = new Blob([excelBuffer], { type: fileType });
-    await FileSaver.saveAs(fileData, fileName + fileExtension);
+    FileSaver.saveAs(fileData, fileName + fileExtension);
 	}
 </script>
 
@@ -448,7 +460,7 @@
 					<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7 1 4l3-3m0 12h6.5a4.5 4.5 0 1 0 0-9H2"/>
 				</svg>	
 			</Button>
-			<Button id="exportStudentData" class="h-11 shadow-md p-4 items-center" on:click={handleExport}>
+			<Button id="exportStudentData" class="h-11 shadow-md p-4 items-center" on:click={() => exportModalState = true}>
 				<DownloadSolid tabindex="-1" class="text-white focus:outline-none" />
 			</Button>
 		{/if}
@@ -667,4 +679,50 @@
 
 		<Button type="submit" class="w-full mt-3" on:click={() => newMoodEntry = false}>SAVE MOOD ENTRY</Button>
 	</form>
+</Modal>
+
+<Modal title="Export to Microsoft Excel spreadsheet (.xlsx)" size="lg" bind:open={exportModalState} class="max-w-full">
+	<p class="text-sm text-black uppercase font-semibold">First row:</p>
+	<Table class="w-fit">
+		<TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky text-center">
+			<TableHeadCell class="text-center">#</TableHeadCell>
+			<TableHeadCell class="text-center">Student ID</TableHeadCell>
+			<TableHeadCell class="text-center">Name</TableHeadCell>
+			<TableHeadCell class="text-center">Course</TableHeadCell>
+			<TableHeadCell class="text-center">Year Level</TableHeadCell>
+			<TableHeadCell class="text-center">College</TableHeadCell>
+			<TableHeadCell class="text-center">Mood</TableHeadCell>
+			<TableHeadCell class="text-center">Reason</TableHeadCell>
+			<TableHeadCell class="text-center">Date</TableHeadCell>
+			<TableHeadCell class="text-center">Time</TableHeadCell>
+		</TableHead>
+		<TableBody tableBodyClass="divide-y bg-white">
+			{#if $exportData?.length === 0}
+				<TableBodyRow class="border border-zinc-300 text-center">
+					<TableBodyCell>No data</TableBodyCell>        
+					<TableBodyCell>No data</TableBodyCell>
+					<TableBodyCell>No data</TableBodyCell>
+					<TableBodyCell>No data</TableBodyCell>
+					<TableBodyCell>No data</TableBodyCell>
+					<TableBodyCell>No data</TableBodyCell>
+					<TableBodyCell>No data</TableBodyCell>
+					<TableBodyCell>No data</TableBodyCell>
+					<TableBodyCell>No data</TableBodyCell>
+					<TableBodyCell>No data</TableBodyCell>
+				</TableBodyRow>
+			{:else}
+				{#each $exportData?.slice(1,2) as student}
+					<TableBodyRow>
+						{#each student as data}
+							<TableBodyCell>{data}</TableBodyCell>
+						{/each}
+					</TableBodyRow>
+				{/each}
+			{/if}
+		</TableBody>
+	</Table>
+	<div class="flex flex-row space-x-3">
+		<Button class="w-full mt-3" on:click={handleExport}>CONFIRM EXPORT</Button>
+		<Button color="red" class="w-full mt-3" on:click={() => exportModalState = false}>CANCEL</Button>
+	</div>
 </Modal>
