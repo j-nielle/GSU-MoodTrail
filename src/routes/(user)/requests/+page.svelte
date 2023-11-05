@@ -17,6 +17,7 @@
 		P
 	} from 'flowbite-svelte';
 	import { ChevronLeftSolid, ChevronRightSolid } from 'flowbite-svelte-icons';
+	import { freqHelpType } from '$lib/stores/index.js';
 
 	export let data;
 
@@ -42,6 +43,11 @@
 					table: 'RequestEntries'
 				},(payload) => {
 					requestsData = _.cloneDeep([payload.new, ...requestsData]);
+					requestsData.sort((currentElem, nextElem) => { // sort by date
+						const currentDate = new Date(currentElem.created_at);
+						const nextDate = new Date(nextElem.created_at);
+						return currentDate - nextDate;
+					});
 				}
 			).subscribe() // (status) => console.log('/requests',status));
 
@@ -51,7 +57,27 @@
 	});
 
 	$: {
-		filteredItems = requestsData.filter((req) => {
+		let requestTypes = requestsData?.map(request => request.request_type);
+		let uniqueRequestTypes = [...new Set(requestTypes)];
+
+		let mostFrequentRequestType = null;
+		let highestCount = 0;
+
+		uniqueRequestTypes.forEach(requestType => {
+			let count = requestTypes.filter(type => type === requestType).length;
+			if (count > highestCount) {
+				highestCount = count;
+				mostFrequentRequestType = requestType;
+			}
+		});
+
+		if (highestCount === uniqueRequestTypes.length) {
+			mostFrequentRequestType = "Equal counts for all types";
+		}
+
+		freqHelpType.update(() => mostFrequentRequestType);
+
+		filteredItems = requestsData?.filter((req) => {
 			const phoneMatch = req.contact_num.includes(searchTerm);
 			const reqMatch = req.request_type.toLowerCase().includes(searchTerm.toLowerCase());
 			const statusMatch = req.iscompleted.toString().toLowerCase().includes(searchTerm.toLowerCase());
@@ -91,9 +117,9 @@
 	$: {
     if(incompleteOnly){
 			// paginatedItems will only show the incomplete requests
-      paginatedItems = filteredItems.filter(req => !req.iscompleted).slice(startIndex, endIndex);
+      paginatedItems = filteredItems?.filter(req => !req.iscompleted).slice(startIndex, endIndex);
     } else {
-       paginatedItems = filteredItems.slice(startIndex, endIndex);
+       paginatedItems = filteredItems?.slice(startIndex, endIndex);
     }
 	}
 

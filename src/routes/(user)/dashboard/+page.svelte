@@ -37,9 +37,9 @@
 		SimpleBarChart,
 		CalendarChart,
 	} from '$lib/components/charts/index.js';
-	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
+	import { focusTable, consistentLowMoods, freqHelpType } from '$lib/stores/index.js';
 	import { CardInfo } from '$lib/components/elements/index.js';
-	import { mood, reason, yearLvl, daysShort, moodChoices, reasonChoices } from '$lib/constants/index.js';
+	import { mood, reason, yearLvl, daysShort, moodChoices, reasonChoices, getWeekNumberString } from '$lib/constants/index.js';
 
 	export let data;
 
@@ -254,8 +254,8 @@
 			);
 
 			// map the timestamps of today's entries to an array
-			timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss'));
-			todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score);
+			timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss')); // x
+			todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score); // y
 
 			// map the mood scores of today's entries to an array of mood labels
 			const todaysMoodLabels = todaysMoodScores.map(
@@ -281,14 +281,14 @@
 				dayjs(entry.created_at).format('YYYY-MM-DD')
 			); 
 
-			// map over the groupedByDay object and get the average mood score for each day
+			overall = _.sortBy(_.keys(groupedByDay)); // x, all days recorded (sorted in ascending order)
+
+			// y, average mood score for each day
 			overallAverages = Object.values(groupedByDay).map((entries) => {
 				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
 				const averageMoodScore = totalMoodScore / entries.length;
 				return averageMoodScore;
 			});
-
-			overall = _.sortBy(_.keys(groupedByDay)); // all days recorded (sorted in ascending order)
 
 			// object that stores number of occurences (value) for each recorded mood_score (key)
 			const mostFreqMood = Object.entries(groupedByDay)
@@ -334,14 +334,14 @@
 				getWeekNumberString(dayjs(entry.created_at))
 			);
 
-			// map over the groupedByWeek object and get the average mood score for each week
+			weekly = _.sortBy(_.keys(groupedByWeek)); // x, all weeks recorded (sorted in ascending order)
+
+			// y, get the average mood score for each week
 			weeklyAverages = Object.values(groupedByWeek).map((entries) => {
 				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
 				const averageMoodScore = totalMoodScore / entries.length;
 				return averageMoodScore;
 			});
-
-			weekly = _.sortBy(_.keys(groupedByWeek)); // all weeks recorded (sorted in ascending order)
 
 			// object that stores number of occurences (value) for each recorded mood_score (key)
 			const mostFreqMood = Object.entries(groupedByWeek)
@@ -387,14 +387,14 @@
 				dayjs(entry.created_at).format('YYYY-MM')
 			);
 
-			// map over the groupedByMonth object and get the average mood score for each month
+			monthly = _.sortBy(_.keys(groupedByMonth)); // x, all months recorded (sorted in ascending order)
+
+			// y, get the average mood score for each month
 			monthlyAverages = Object.values(groupedByMonth).map((entries) => {
 				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
 				const averageMoodScore = totalMoodScore / entries.length;
 				return averageMoodScore;
 			});
-
-			monthly = _.sortBy(_.keys(groupedByMonth)); // all months recorded (sorted in ascending order)
 
 			// object that stores number of occurences (value) for each recorded mood_score (key)
 			const mostFreqMood = Object.entries(groupedByMonth)
@@ -438,14 +438,14 @@
 			// group each mood entries by year
 			const groupedByYear = _.groupBy(dataType, (entry) => dayjs(entry.created_at).format('YYYY'));
 
-			// map over the groupedByYear object and get the average mood score for each year
+			yearly = _.sortBy(_.keys(groupedByYear)); // x, all years recorded (sorted in ascending order)
+
+			// y, get the average mood score for each year
 			yearlyAverages = Object.values(groupedByYear).map((entries) => {
 				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
 				const averageMoodScore = totalMoodScore / entries.length;
 				return averageMoodScore;
 			});
-
-			yearly = _.sortBy(_.keys(groupedByYear)); // all years recorded (sorted in ascending order)
 
 			// object that stores number of occurences (value) for each recorded mood_score (key)
 			const mostFreqMood = Object.entries(groupedByYear)
@@ -954,21 +954,6 @@
 	}
 
 	/**
-	 * Returns a string representing the week number of a given date within its year.
-	 * The week number is calculated as the number of weeks between the first day of the year and the given date.
-	 * @param {dayjs} date - The date to get the week number for.
-	 * @returns {string} A string in the format 'Week X', where X is the week number.
-	 */
-	const getWeekNumberString = (date) => {
-		const firstDayOfYear = dayjs(date).startOf('year').day(0); // get the first day of the year
-
-		// get the number of weeks between the first day of the year and the given date and add 1
-		// to get the week number
-		const weekDiff = date.diff(firstDayOfYear, 'week') + 1; 
-		return `Week ${weekDiff}`;
-	};
-
-	/**
 	 * Updates the `current` variable with the current date and time.
 	*/
 	function updateTime() {
@@ -1019,7 +1004,8 @@
 	<!-- Card Section -->
 	<div class="flex justify-between w-full">
 		<CardInfo purpose="time" title="" bind:data={current} />
-		<CardInfo purpose="recentStudent" title="Recent Student ID:" bind:data={recentStudent} />
+		<CardInfo purpose="recentStudent" title="Recent Student ID #:" bind:data={recentStudent} />
+		<CardInfo purpose="helpType" title="Most Requested Help Type:" bind:data={$freqHelpType} />
 
 		{#if selectedLineChart === 'today'}
 				<div>
@@ -1058,11 +1044,12 @@
 				</div>
 		{/if} 
 		
-		<Button class="w-fit" pill shadow on:click={() => jumpToModalState = true}>
-			<ForwardSolid class="mr-2 focus:outline-none" />
-			<div class="flex flex-col justify-start">
-				<p class="text-xs uppercase font-bold">Jump to a specific section</p>
-			</div>
+		<Tooltip placement="left" class="fixed z-50 overflow-hidden" triggeredBy="#jumpTo" on:hover={(e) => e.preventDefault()}>
+			Jump to a specific section
+		</Tooltip>
+
+		<Button id="jumpTo" class="w-fit rounded-md" shadow on:click={() => jumpToModalState = true}>
+			<ForwardSolid class="focus:outline-none" />
 		</Button>
 	</div>
 

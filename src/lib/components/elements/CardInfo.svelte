@@ -1,7 +1,7 @@
 <script>
 	// @ts-nocheck
 	import { Card, Tooltip } from 'flowbite-svelte';
-	import { ProfileCardOutline, FaceLaughOutline, BrainOutline } from 'flowbite-svelte-icons';
+	// import { ProfileCardOutline, FaceLaughOutline, BrainOutline } from 'flowbite-svelte-icons';
 
 	export let title;
 	export let data;
@@ -21,8 +21,8 @@
 		year = dateObj?.getFullYear();
 
     let suffix = ['th', 'st', 'nd', 'rd'];
-    let v = day % 100;
-    day += (suffix[(v-20)%10] || suffix[v] || suffix[0]);
+    let v = day % 100; // e.g 11 - 11 = 0, 12 - 11 = 1, 13 - 11 = 2
+    day += (suffix[(v-20) % 10] || suffix[v] || suffix[0]); // e.g 11 + th = 11th, 12 + nd = 12nd, 13 + rd = 13rd
 	}
 </script>
 
@@ -51,6 +51,16 @@
 	<Card class='max-h-16 rounded max-w-full justify-center flex-row items-center space-x-4'>
 		<div class="bg-blue-700 p-2 rounded"></div>
 		<!-- <BrainOutline tabindex="-1" class="text-blue-700" /> -->
+		<div class="flex flex-col">
+			<p class="text-black text-xs font-bold uppercase">
+				{title}
+			</p>
+			<p class="text-xs text-black">{data ?? 'N/A'}</p>
+		</div>
+	</Card>
+{:else if purpose === 'helpType'}
+	<Card class='max-h-16 rounded max-w-full justify-center flex-row items-center space-x-4'>
+		<div class="bg-blue-700 p-2 rounded"></div>
 		<div class="flex flex-col">
 			<p class="text-black text-xs font-bold uppercase">
 				{title}
