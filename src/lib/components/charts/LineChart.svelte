@@ -30,7 +30,7 @@
 		lineChart?.setOption({
 			title: {
 				subtext:
-					'Sad (-4), Annoyed (-3), Nervous (-2), Bored (-1), Neutral (0), Calm (1), Relaxed (2), Happy (3), Excited (4)',
+					'Sad (-4), Annoyed (-3), Nervous (-2), Bored (-1), Neutral (0),\nCalm (1), Relaxed (2), Happy (3), Excited (4)',
 				subtextStyle: {
 					fontSize: 11
 				}
