@@ -36,9 +36,9 @@
 		//RadarChart,
 		//HeatmapChart
 	} from '$lib/components/charts/index.js';
-	import { yearLvl, mood, reason, moodChoices, reasonChoices } from '$lib/constants/index.js'; 
+	import { yearLvl, mood, reason, moodChoices, reasonChoices, getWeekNumberString } from '$lib/constants/index.js'; 
 	import { exportData } from '$lib/stores/index.js';
-	import * as FileSaver from "file-saver";
+	import FileSaver from "file-saver";
   import * as XLSX from "xlsx";
 
 	export let data;
@@ -156,45 +156,35 @@
 		const moodCount = {};
 		const reasonCount = {};
 
+		// moodCount logic
 		result.forEach((item) => {
 			const moodScore = item.mood_score;
 			let moodLabel = null;
 
+			// iterate over each key in the mood object
 			for (const key in mood) {
+				// if the value of the current key is equal to the moodScore
 				if (mood[key] == moodScore) {
-					moodLabel = key;
-					break;
+					moodLabel = key; // set the moodLabel to the current key
+					break; // break out of the loop
 				}
 			}
 
+			// and if the moodLabel is not null
 			if (moodLabel) {
+				// add the moodLabel to the moodCount object
 				moodCount[moodLabel] = (moodCount[moodLabel] || 0) + 1;
 			}
 		});
 
-		result.forEach((item) => {
-			const reasonScore = item.reason_score;
-			let reasonLabel = null;
-
-			for (const key in reason) {
-				if (reason[key] == reasonScore) {
-					reasonLabel = key;
-					break;
-				}
-			}
-
-			if (reasonLabel) {
-				reasonCount[reasonLabel] = (reasonCount[reasonLabel] || 0) + 1;
-			}
-		});
-
+		// sort moodCount in descending order
 		const sortedMoodsArr = Object.keys(moodCount)
 			.sort((currElem, nxtElem) => moodCount[nxtElem] - moodCount[currElem]);
 		
-		// Get the m_counts of each mood
+		// Get the m_counts of each mood which is the value of each key in the moodCount object
 		const m_counts = Object.values(moodCount);
-		
-		// Check if all moods are equally frequent
+
+		// FOR STUDENT CARD - Check if all moods are equally frequent
 		if (m_counts.every(count => count === m_counts[0])) {
 				mostFrequentMood = 'Equal mood frequency';
 				leastFrequentMood = 'Equal mood frequency';
@@ -214,13 +204,13 @@
 				leastFrequentMood = leastFrequentMoods.length > 1 ? 'A tie.' : leastFrequentMoods[0];
 		}
 
-		// pie chart
+		// FOR PIE CHART - Breakdown of Moods	
 		const sortedMoodObj = Object.fromEntries(
 			Object.entries(moodCount).sort(([, currElem], [, nextElem]) => currElem - nextElem)
 		);
 
-		xDataMBC = _.keys(sortedMoodObj);
-		yDataMBC = _.values(sortedMoodObj);
+		xDataMBC = _.keys(sortedMoodObj); // mood
+		yDataMBC = _.values(sortedMoodObj); // frequency
 
 		pieChartData = xDataMBC.map((label, index) => {
 			return {
@@ -229,12 +219,34 @@
 			};
 		});
 
+		// FOR SIMPLE BAR CHART - Associated Reason Frequency
+		result.forEach((item) => {
+			const reasonScore = item.reason_score;
+			let reasonLabel = null;
+
+			// iterate over each key in the reason object
+			for (const key in reason) {
+				// if the value of the current key is equal to the reasonScore
+				if (reason[key] == reasonScore) {
+					reasonLabel = key; // set the reasonLabel to the current key
+					break; // break out of the loop
+				}
+			}
+
+			// and if the reasonLabel is not null
+			if (reasonLabel) {
+				// add the reasonLabel to the reasonCount object
+				reasonCount[reasonLabel] = (reasonCount[reasonLabel] || 0) + 1;
+			}
+		});
+
+		// 
 		const sortedReasonObj = Object.fromEntries(
 			Object.entries(reasonCount).sort(([, currElem], [, nextElem]) => currElem - nextElem)
 		);
 
-		xDataSBC = _.keys(sortedReasonObj);
-		yDataSBC = _.values(sortedReasonObj);
+		xDataSBC = _.keys(sortedReasonObj); // reason
+		yDataSBC = _.values(sortedReasonObj); // frequency
 
 		lcBtnColors = {
 			today: selectedLineChart === 'today' ? 'blue' : 'light',
@@ -244,78 +256,133 @@
 			yearly: selectedLineChart === 'yearly' ? 'blue' : 'light'
 		};
 
+		// FOR LINE CHARTS
 		if (selectedLineChart === 'today') {
+			// filter the result object to get only the entries for today
+			// it basically returns entries that are created today
 			const todaysEntries = result.filter(
 				(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === today
 			);
+
+			// Get the timestamps and mood scores for today's entries
 			timestamps = todaysEntries.map((entry) => dayjs(entry.created_at).format('HH:mm:ss')) || [];
 			todaysMoodScores = todaysEntries.map((entry) => entry.mood_score) || [];
+
+			// example:
+			// timestamps (x): [ '17:08:51', '17:09:12', '17:09:57', '17:10:10' ]
+      // todaysMoodScores (y): [ '-3', '-2', '0', '-1' ]
 		} else if (selectedLineChart === 'overall') {
+			// group the result object by day
+			/**
+			 * example:
+			 * {
+			 		'2023-10-03': [ {...}, {...} ],
+			 		'2023-10-09': [ {...}, {...}, {...}, {...}, {...} ],
+					'2023-10-12': [ {...} ],
+					'2023-10-13': [ {...} ],
+					'2023-10-21': [ {...}, {...}, {...}, {...} ],
+					...
+			 * }
+			*/
 			const groupedByDay = _.groupBy(result, (entry) =>
 				dayjs(entry.created_at).format('YYYY-MM-DD')
 			);
 
-			overallAverages =
-				Object.values(groupedByDay).map((entries) => {
-					const totalMoodScore = entries.reduce(
-						(sum, entry) => sum + parseInt(entry.mood_score),
-						0
-					);
-					const averageMoodScore = totalMoodScore / entries.length;
-					return averageMoodScore;
-				}) || [];
-
+			// sort the days in ascending order
 			overall = _.sortBy(_.keys(groupedByDay)) || [];
+
+			// calculate the average mood score for each day
+			overallAverages = Object.values(groupedByDay).map((entries) => {
+				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
+				const averageMoodScore = totalMoodScore / entries.length;
+				return averageMoodScore;
+			}) || [];
+
+			// example:
+			// overall (x): [ '2023-10-03', '2023-10-09', '2023-10-12', '2023-10-13' ]
+			// overallAverages (y): [ -2, 1, -3, -4 ]
 		} else if (selectedLineChart === 'weekly') {
+			// group the result object by week using the getWeekNumberString() function
+			/**
+			 * example:
+			 * {
+			 		'Week 10': [ {...}, {...} ],
+			 		'Week 11': [ {...}, {...}, {...} ],
+					'Week 12': [ {...} ],
+					...
+			 * }
+			*/
 			const groupedByWeek = _.groupBy(result, (entry) =>
 				getWeekNumberString(dayjs(entry.created_at))
 			);
 
-			weeklyAverages =
-				Object.values(groupedByWeek).map((entries) => {
-					const totalMoodScore = entries.reduce(
-						(sum, entry) => sum + parseInt(entry.mood_score),
-						0
-					);
-					const averageMoodScore = totalMoodScore / entries.length;
-					return averageMoodScore;
-				}) || [];
+			// sort the weeks in ascending order
+			weekly = _.sortBy(_.keys(groupedByWeek), (week) => {
+				const weekNumber = parseInt(week.replace('Week ', ''));
+				return weekNumber;
+			}) || [];
 
-			weekly =
-				_.sortBy(_.keys(groupedByWeek), (week) => {
-					const weekNumber = parseInt(week.replace('Week ', ''));
-					return weekNumber;
-				}) || [];
+			// calculate the average mood score for each week
+			weeklyAverages = Object.values(groupedByWeek).map((entries) => {
+				const totalMoodScore = entries.reduce( (sum, entry) => sum + parseInt(entry.mood_score), 0);
+				const averageMoodScore = totalMoodScore / entries.length;
+				return averageMoodScore;
+			}) || [];
+
+			// example:
+			// weekly (x): [ 'Week 10', 'Week 11', 'Week 12' ]
+			// weeklyAverages (y): [ -2, -0.125, -1.5 ]
 		} else if (selectedLineChart === 'monthly') {
+			// group the result object by month
+			/**
+			 * example:
+			 * {
+			 		'2023-10': [ {...}, {...} ],
+			 		'2023-11': [ {...}, {...}, {...} ],
+					'2023-12': [ {...} ],
+					...
+			 * }
+			*/
 			const groupedByMonth = _.groupBy(result, (entry) =>
 				dayjs(entry.created_at).format('YYYY-MM')
 			);
 
-			monthlyAverages =
-				Object.values(groupedByMonth).map((entries) => {
-					const totalMoodScore = entries.reduce(
-						(sum, entry) => sum + parseInt(entry.mood_score),
-						0
-					);
-					const averageMoodScore = totalMoodScore / entries.length;
-					return averageMoodScore;
-				}) || [];
-
+			// sort the months in ascending order
 			monthly = _.sortBy(_.keys(groupedByMonth)) || [];
+		
+			// calculate the average mood score for each month
+			monthlyAverages = Object.values(groupedByMonth).map((entries) => {
+				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
+				const averageMoodScore = totalMoodScore / entries.length;
+				return averageMoodScore;
+			}) || [];
+			
+			// example:
+			// monthly (x): [ '2023-10', '2023-11', '2023-12' ]
+			// monthlyAverages (y): [ -1, -2, -3.3333333333333335 ]
 		} else if (selectedLineChart === 'yearly') {
+			// group the result object by year
+			/**
+			 * example:
+			 * {
+			 		'2023': [ {...}, {...}, { ... }, ... ],
+			 * }
+			*/
 			const groupedByYear = _.groupBy(result, (entry) => dayjs(entry.created_at).format('YYYY'));
-
-			yearlyAverages =
-				Object.values(groupedByYear).map((entries) => {
-					const totalMoodScore = entries.reduce(
-						(sum, entry) => sum + parseInt(entry.mood_score),
-						0
-					);
-					const averageMoodScore = totalMoodScore / entries.length;
-					return averageMoodScore;
-				}) || [];
-
+			
+			// sort the year in ascending order
 			yearly = _.sortBy(_.keys(groupedByYear)) || [];
+
+			// calculate the average mood score for each year
+			yearlyAverages = Object.values(groupedByYear).map((entries) => {
+				const totalMoodScore = entries.reduce((sum, entry) => sum + parseInt(entry.mood_score), 0);
+				const averageMoodScore = totalMoodScore / entries.length;
+				return averageMoodScore;
+			}) || [];
+
+			// example:
+			// yearly (x): [ '2023' ]
+			// yearlyAverages (y): [ -1.7037037037037037 ]
 		}
 
 		sbcBtnColors = {
@@ -329,57 +396,60 @@
 		else if(selectedReasonMarkType === 'max') { sbcMarkType = 'max' }
 	}
 
+	/**
+	 * This reactive statement is triggered whenever `exportModalState` changes.
+	 * It prepares the data to be exported by transforming the `result` object.
+	 * It replaces 'mood_score' with 'mood', 'reason_score' with 'reason', and 'created_at' with 'date' and 'time'.
+	 * It also orders the properties of each object in the `result` array according to the `keys` array.
+	 */
 	$: if(exportModalState){
+		// get all property names (keys) of the first object in the `result` array and storing them in the keys array.
 		let keys = Object.keys(result[0]);
-		keys[keys.indexOf('mood_score')] = 'mood'; // replace mood_score with mood
-		keys[keys.indexOf('reason_score')] = 'reason'; // replace reason_score with reason
-		keys.splice(keys.indexOf('created_at'), 1, 'date', 'time'); // replace created_at with date and time
+		keys[keys.indexOf('mood_score')] = 'mood'; // rename `mood_score` with `mood`
+		keys[keys.indexOf('reason_score')] = 'reason'; // rename `reason_score` with `reason`
+		keys.splice(keys.indexOf('created_at'), 1, 'date', 'time'); // rename `created_at` with `date` and `time`
 
 		let values = result?.map(obj => {
-			let newObj = {...obj};
+			let newObj = {...obj}; // clone the object
+
+			// replace the `mood_score` and `reason_score` values with their corresponding keys
+			// e.g. 1 -> 'Calm', -4 -> 'Sad', etc.
+			// e.g. 1 -> 'Family', 6 -> 'Unwilling to specify', etc.
 			newObj.mood = Object.keys(mood).find(key => mood[key] === Number(obj.mood_score));
 			newObj.reason = Object.keys(reason).find(key => reason[key] === Number(obj.reason_score));
 			
-			let createdAt = new Date(obj.created_at);
-			newObj.date = createdAt.toISOString().split('T')[0];
-			newObj.time = createdAt.toTimeString().split(' ')[0];
+			let createdAt = new Date(obj.created_at); // create a new Date object from the `created_at` value
+			newObj.date = createdAt.toISOString().split('T')[0]; // get the date
+			newObj.time = createdAt.toTimeString().split(' ')[0]; // get the time
 			
-			delete newObj.created_at;
-			delete newObj.mood_score;
-			delete newObj.reason_score;
+			delete newObj.created_at; // delete the `created_at` property
+			delete newObj.mood_score; // delete the `mood_score` property
+			delete newObj.reason_score; // delete the `reason_score` property
 
-			// Initialize an empty object for the new object
+			// create an empty object for the new object
 			let orderedObj = {};
 
-			// Iterate over each key in the keys array
+			// iterate over each key in the keys array so that the properties are added in the correct order
 			for (let key of keys) {
-				// Add each key-value pair to the new object
+				// add each key-value pair to the new object
+				// in simpler terms, this is just a reordering of the properties of the object
 				orderedObj[key] = newObj[key];
 			}
 
-			// Now orderedObj is the new object with properties ordered as in keys
+			// now orderedObj is the new object that has the properties in the correct order
 			newObj = orderedObj;
 
-			return Object.values(newObj);
+			return Object.values(newObj); // return the values of the new object
 		});
 
-		exportData.update(() => [keys, ...values]);
+		exportData.update(() => [keys, ...values]); // update the exportData store with the new data
 	}
 
-	const getWeekNumberString = (date) => {
-		const firstDayOfYear = dayjs(date).startOf('year').day(1);
-		const weekDiff = date.diff(firstDayOfYear, 'week') + 1;
-		return `Week ${weekDiff}`;
-	};
-
-	function toggleChart(chart) {
-		selectedLineChart = chart;
-	}
-
-	function selectReasonMarkType(reasonMarkType) {
-		selectedReasonMarkType = reasonMarkType;
-	}
-
+	/**
+	 * This `handleExport()` handles the export of data of the current student.
+	 * It converts the data into a format suitable for an Excel file, creates a Blob from it, and then saves it as an .xlsx file.
+	 * The file is named according to the `currentStudentID` followed by "_MoodEntries".
+	 */
 	async function handleExport() {
 		let data = $exportData;
 		const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -395,10 +465,24 @@
     const fileData = new Blob([excelBuffer], { type: fileType });
     FileSaver.saveAs(fileData, fileName + fileExtension);
 	}
+
+	/**
+	 * This function changes the selected line chart.
+	*/
+	function toggleChart(chart) {
+		selectedLineChart = chart;
+	}
+
+	/**
+	 * This function changes the selected reason mark type.
+	*/
+	function selectReasonMarkType(reasonMarkType) {
+		selectedReasonMarkType = reasonMarkType;
+	}
 </script>
 
 <svelte:head>
-	<title>Student Mood Charts</title>
+	<title>Student Mood Information</title>
 </svelte:head>
 
 <div class="p-4 flex flex-col space-y-3.5">
@@ -468,9 +552,10 @@
 	
 	<div class={divClass}>
 		<div class="flex space-x-6 justify-between">
-			<div class="flex flex-col p-5">
+			<div class="flex flex-col">
 				{#if form?.success}
 					<Alert color="green" class="mb-2"><span class="font-medium">Mood entry added succesfully!</span></Alert>
+					<p class="hidden">{ setTimeout(() => { form.success = null; }, 3000) }</p>
 				{:else if form?.error}
 					<Alert color="red" class="mb-2"><span class="font-medium">{form?.error}</span></Alert>
 				{/if}
@@ -496,7 +581,7 @@
 							</div>
 						</div>
 					</Card>
-					<p class="italic mt-4 text-sm">*This student have yet to have mood entries.</p>
+					<p class="italic mt-4 text-sm">*This student have does not have mood entries yet.</p>
 				{:else if result?.length > 0}
 					<Card class="max-w-full">
 						<div class="flex flex-row space-x-8">
@@ -682,7 +767,7 @@
 </Modal>
 
 <Modal title="Export to Microsoft Excel spreadsheet (.xlsx)" size="lg" bind:open={exportModalState} class="max-w-full">
-	<p class="text-sm text-black uppercase font-semibold">First row:</p>
+	<p class="text-sm text-black uppercase font-semibold">First row (preview):</p>
 	<Table class="w-fit">
 		<TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky text-center">
 			<TableHeadCell class="text-center">#</TableHeadCell>
