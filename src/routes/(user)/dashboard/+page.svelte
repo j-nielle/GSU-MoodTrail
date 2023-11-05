@@ -37,7 +37,7 @@
 		SimpleBarChart,
 		CalendarChart,
 	} from '$lib/components/charts/index.js';
-	import { focusTable, consistentLowMoods, freqHelpType } from '$lib/stores/index.js';
+	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
 	import { CardInfo } from '$lib/components/elements/index.js';
 	import { mood, reason, yearLvl, daysShort, moodChoices, reasonChoices, getWeekNumberString } from '$lib/constants/index.js';
 
@@ -45,6 +45,7 @@
 
 	let studentMoodData = data.studentMood;
 	let anonMoodData = data.anonMood;
+	let requestsData = data.requests;
 
 	let dataType = {};
 
@@ -122,6 +123,8 @@
 
 	let lowMoodsOnly = false;
 
+	let mostFrequentRequestType = '';
+
 	$: ({ supabase } = data);
 
 	onMount(() => {
@@ -156,6 +159,28 @@
 	});
 
 	$: viewAnonData ? (dataType = anonMoodData) : (dataType = studentMoodData);
+
+	$: if(requestsData){
+		let requestTypes = requestsData?.map(request => request.request_type);
+		let uniqueRequestTypes = [...new Set(requestTypes)];
+
+		let highestCount = 0;
+
+		uniqueRequestTypes.forEach(requestType => {
+			let count = requestTypes.filter(type => type === requestType).length;
+			if (count > highestCount) {
+				highestCount = count;
+				mostFrequentRequestType = requestType;
+			}
+		});
+		
+		if (uniqueRequestTypes.length === 0) {
+			mostFrequentRequestType = "No requests";
+		}
+		else if (highestCount === uniqueRequestTypes.length) {
+			mostFrequentRequestType = "Equal counts for all types";
+		}
+	}
 
 	$: if (dataType) {
 		// FOR HEATMAP CHART - MOOD FREQUENCY BY DAY AND HOUR
@@ -1005,7 +1030,7 @@
 	<div class="flex justify-between w-full">
 		<CardInfo purpose="time" title="" bind:data={current} />
 		<CardInfo purpose="recentStudent" title="Recent Student ID #:" bind:data={recentStudent} />
-		<CardInfo purpose="helpType" title="Most Requested Help Type:" bind:data={$freqHelpType} />
+		<CardInfo purpose="helpType" title="Most Requested Help Type:" bind:data={mostFrequentRequestType} />
 
 		{#if selectedLineChart === 'today'}
 				<div>

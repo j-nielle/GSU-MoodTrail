@@ -7,4 +7,3 @@ export const newRequest = writable(false);
 export const focusTable = writable(false);
 export const consistentLowMoods = writable(new Map());
 export const exportData = writable([]);
-export const freqHelpType = writable("NO DATA");

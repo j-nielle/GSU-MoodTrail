@@ -16,10 +16,16 @@ export async function load({ parent }) {
 		.from('AnonMood')
 		.select()
 		.order('created_at', { ascending: true });
-		
+	
+	const { data: requests } = await supabase
+		.from('RequestEntries')
+		.select()
+		.order('created_at', { ascending: false });
+
 	return {
 		studentMood: studentMood || [],
 		anonMood: anonMood || [],
+		requests: requests || [],
 		session: session
 	};
 }
