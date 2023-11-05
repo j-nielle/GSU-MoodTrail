@@ -1,4 +1,5 @@
 // @ts-nocheck
+import dayjs from 'dayjs';
 
 export const moodColors = {
 	Sad: "#115f9a",
@@ -66,17 +67,31 @@ export const yearLvl = {
 	4: '4th Year'
 };
 
+/**
+ * This function returns the nearest mood label to the given score.
+ * @param {number} score - The score to find the nearest mood label of.
+ * @param {object} mood - The mood object to compare the score with.
+ * @returns {string} The nearest mood label to the given score.
+ */
 export function getNearestMoodLabel(score, mood) {
-	let nearestLabel = null;
-	let nearestDifference = Infinity;
+	let nearestLabel = null; // set to null so that we can check if it was set later on
 
+	// set to infinity so that the first difference will always be less than this
+	// in simpler terms, this is what we will compare the differences to
+	// e.g. 1 - 2 = 1, 1 < Infinity, so 1 is the nearest difference
+	let nearestDifference = Infinity; 
+
+	// iterate through the mood object
 	for (const label in mood) {
+		// get the mood score of the current label
 		const moodScore = mood[label];
+		// get the absolute difference between the mood score and the given score
 		const difference = Math.abs(moodScore - score);
 
+		// if the difference is less than the nearest difference, set the nearest label
 		if (difference < nearestDifference) {
-			nearestLabel = label;
-			nearestDifference = difference;
+			nearestLabel = label; // set the nearest label
+			nearestDifference = difference; // set the nearest difference e.g. 1 - 2 = 1
 		}
 	}
 
@@ -84,3 +99,17 @@ export function getNearestMoodLabel(score, mood) {
 }
 
 export const daysShort = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+
+/**
+	* This function returns the week number of the given date.
+	* @param {Date} date - The date to get the week number of.
+	* @returns {string} The week number of the given date (e.g. 'Week 1', 'Week 2', etc.)
+*/
+export const getWeekNumberString = (date) => {
+	const firstDayOfYear = dayjs(date).startOf('year').day(0); // get the first day of the year
+
+	// get the number of weeks between the first day of the year and the given date and add 1
+	// to get the week number
+	const weekDiff = date.diff(firstDayOfYear, 'week') + 1; 
+	return `Week ${weekDiff}`;
+};
