@@ -34,7 +34,7 @@
 	const chevronClass = "w-3 h-3 ml-2 text-primary-800 dark:text-white inline focus:outline-0"
 	const avatarClass = "cursor-pointer fixed"
 	const containerClass = "relative z-30 drop-shadow-lg w-fit mt-8"
-	const dropdownItemClass = "relative z-50 py-2 text-sm font-semibold text-red-600 cursor-pointer cupx-4 hover:bg-gray-100 dark:hover:bg-gray-600"
+	const dropdownItemClass = "relative z-50 py-2 text-sm font-bold text-red-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
 
 	let newLowMoodData = false;
 	let consistentStreaksInfo = new Map();
@@ -118,7 +118,7 @@
 			</NavLi>
 			<Dropdown triggeredBy="#student-menu" dropdownClass="w-36 items-center relative z-20">
 				<DropdownItem href="/students/all-students">List of Students</DropdownItem>
-				<DropdownItem href="/students/student-chart">Info and Charts</DropdownItem>
+				<DropdownItem href="/students/student-chart">Student Mood Information</DropdownItem>
 			</Dropdown>
 		</NavUl>
 
