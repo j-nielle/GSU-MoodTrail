@@ -20,16 +20,13 @@ export const handle = async ({ event, resolve }) => {
 	};
 
 	const userNotAllowed = ['/login', '/'];
-	if (userNotAllowed.includes(event.url.pathname)) {
-		const session = await event.locals.getSession();
-		if (session) {
-			throw redirect(303, '/dashboard');
-		}
+	const session = await event.locals.getSession();
+	if (userNotAllowed.includes(event.url.pathname) && session) {
+		throw redirect(303, '/dashboard');
 	}
 
 	const adminPath = '/settings/manage-users';
 	if ( event.url.pathname === adminPath || (event.url.pathname === adminPath && event.request.method === 'POST')) {
-		const session = await event.locals.getSession();
 		if (session?.user.role != 'admin') {
 			throw redirect(303, '/settings/account');
 		}
