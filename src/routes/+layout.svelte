@@ -14,7 +14,7 @@
 		Button,
 		Dropdown,
 		DropdownDivider,
-		DropdownHeader,
+		//DropdownHeader,
 		DropdownItem
 	} from 'flowbite-svelte';
 	import { ChevronDownOutline, BellRingSolid, CloseSolid } from 'flowbite-svelte-icons';
@@ -26,9 +26,6 @@
 
 	export let data;
 
-	$: ({ supabase, session } = data);
-	$: activeUrl = $page.url.pathname;
-
 	const navDivClass = "flex justify-between items-center relative z-20 ml-3.5"
 	const activeClass = "text-blue-700 font-semibold"
 	const chevronClass = "w-3 h-3 ml-2 text-primary-800 dark:text-white inline focus:outline-0"
@@ -37,8 +34,22 @@
 	const dropdownItemClass = "relative z-50 py-2 text-sm font-bold text-red-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
 
 	let newLowMoodData = false;
+	let currStudentIDNotif = '';
 	let consistentStreaksInfo = new Map();
 	const students = [];
+
+	let lastLogin = null;
+	let notifText = '';
+
+	$: ({ supabase, session } = data);
+	$: activeUrl = $page.url.pathname;
+
+	$: {
+		// new Date(data.session.user.amr[0].timestamp * 1000) //.toLocaleString()
+		// admin@test.com: 1699343710
+		// staff@test.com: 1699344819 | '11/7/2023, 4:13:39 PM' 
+		lastLogin = data?.session?.user?.amr[0]?.timestamp;
+	}
 
 	onMount(() => {
 		const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {
@@ -55,9 +66,9 @@
 					table: 'RequestEntries'
 				},(payload) => {
 					newRequest.update(() => true);
-					setTimeout(() => {
-						newRequest.update(() => false);
-					}, 5000);
+					// setTimeout(() => {
+					// 	newRequest.update(() => false);
+					// }, 5000);
 				}
 			).subscribe() // (status) => console.log(activeUrl,status));
 
@@ -66,6 +77,7 @@
 		const unsubscribe = consistentLowMoods.subscribe((updatedMoods) => {
 			updatedMoods.forEach((moodEntry) => {
 				const studentId = moodEntry.studentId;
+				currStudentIDNotif = studentId;
 				const streaksLength = moodEntry.streaks.length;
 
 				// checks if the studentId is already in the students array
@@ -74,21 +86,22 @@
 					students.push(studentId);
 				}
 
-				// checks if there’s already an entry for this student in the consistentStreaksInfo Map 
-				// (which maps from studentId to an object containing streaksLength)
+				// checks if the studentId is in the consistentStreaksInfo map
 				if (consistentStreaksInfo.has(studentId)) {
-
-					// if there is, check if the streaksLength has changed since the last time
-					if (streaksLength !== consistentStreaksInfo.get(studentId).streaksLength) {
-						// if it has, set newLowMoodData to true
-						newLowMoodData = true;
-					}
-				} else {
-					// if student is not present in the Map, set newLowMoodData to true (since this is new data).
-					newLowMoodData = true;
-				}
-				// updates/create the entry for this student in the Map with the new streaksLength
-				consistentStreaksInfo.set(studentId, { streaksLength });
+					// checks if the streaksLength is different from the streaksLength in the map
+          if (streaksLength !== consistentStreaksInfo.get(studentId).streaksLength) {
+						// basically, if the streaksLength is different, it means that the student has a new streak
+           	newLowMoodData = true;
+						notifText = ` has a new low mood streak, `;
+            consistentStreaksInfo.set(studentId, { streaksLength }); // updates the streaksLength in the map
+          }
+        } else { 
+					// if the studentId is not in the map, add the studentId and streaksLength to the map
+					// basically means that a new student has been added to the consistentLowMoods store
+          newLowMoodData = true;
+					notifText = ` has been added to the consistent low moods table, `
+          consistentStreaksInfo.set(studentId, { streaksLength }); // adds the streaksLength to the map
+        }
 			});
 		});
 
@@ -174,13 +187,9 @@
 					<div class="text-center">
 						{#if activeUrl != '/dashboard'}
 							To view the list of students experiencing low moods for atleast 4 consecutive
-							days, please navigate to <span class="font-semibold">dashboard</span>.
+							days, please navigate to <a href="/dashboard" class="font-semibold">dashboard</a>.
 						{:else}
-							Click 
-							<span role="button" tabindex="0" class="font-bold hover:underline" on:click={() => focusTable.update(() => true)} on:keypress={() => focusTable.update(() => true)}>
-								here
-							</span> to view the list of students experiencing low moods for atleast 4 consecutive
-							days.
+							<span class="font-semibold">[{currStudentIDNotif}]</span>{notifText} click <button on:click={() => focusTable.update(() => true)} class="font-semibold hover:underline hover:text-blue-700">here</button> to view.
 						{/if}
 					</div>
 					<CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700 focus:outline-none" on:click={() => (newLowMoodData = false)} />
@@ -193,13 +202,9 @@
 					<div class="text-center">
 						{#if activeUrl != '/dashboard'}
 							To view the list of students experiencing low moods for atleast 4 consecutive
-							days, please navigate to <span class="font-semibold">dashboard</span>.
+							days, please navigate to <a href="/dashboard" class="font-semibold">dashboard</a>.
 						{:else}
-							Click 
-							<span role="button" tabindex="0" class="font-bold hover:underline" on:click={() => focusTable.update(() => true)} on:keypress={() => focusTable.update(() => true)}>
-								here
-							</span> to view the list of students experiencing low moods for atleast 4 consecutive
-							days.
+							<span class="font-semibold">[{currStudentIDNotif}]</span>{notifText} click <button on:click={() => focusTable.update(() => true)} class="font-semibold hover:underline hover:text-blue-700">here</button> to view.
 						{/if}
 					</div>
 					<CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700 focus:outline-none" on:click={() => (newLowMoodData = false)} />

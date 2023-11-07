@@ -800,6 +800,14 @@
 		recentStudent = studentMoodData?.slice(-1)[0]?.student_id; // for an info card
 
 		// for table of students w consistent low moods
+
+		// minor issue(?): since this logic only uses a svelte store to store
+		// the students w consistent low moods and dili siya stored in a persistent 
+		// storage like a database kay which means na it WILL always show the alert
+		// notif every after user login even if there's no new data jud bitaw from the last login
+		// but the alert login WHEN there is new data is working fine japun
+		// so like ... it's a feature ig...
+
 		let filteredStudents = new Map();
 		let consecutiveDaysMap = new Map();
 		consistentLowMoods.set([]);
