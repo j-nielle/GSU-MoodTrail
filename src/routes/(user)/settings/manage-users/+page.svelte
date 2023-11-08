@@ -81,8 +81,8 @@
 			const emailMatch = req?.email?.toLowerCase().includes(searchTerm.toLowerCase());
 			const roleMatch = req?.role?.toLowerCase().includes(searchTerm.toLowerCase());
 
-			return searchTerm !== '' // if
-				? usernameMatch || emailMatch || roleMatch
+			return searchTerm !== ''
+				? usernameMatch || emailMatch || roleMatch // if true
 				: true; // else
 		});
 
@@ -103,11 +103,19 @@
 		paginatedItems = filteredItems?.slice(startIndex, endIndex);
 	}
 
+	/**
+	 * This function is called when the user clicks on the add button.
+	*/
 	function handleAddUser(){
 		editUser.update(() => false);
 		addNewUser.update(()  => true);
 	}
 
+	/**
+	 * This function is called when the user clicks on the edit button.
+	 * It basically sets the value of the userToUpdate variable to the user to be edited.
+	 * @param {string} email
+	*/
 	function handleEditUser(email){
 		addNewUser.update(() => false);
 		editUser.update(()  => true);
@@ -115,14 +123,35 @@
 		userToUpdate = usersData.filter((user) => user.email == email);
 	}
 
+	/**
+	 * This function is called when the user clicks on the delete button.
+	 * It basically sets the value of the userToDelete variable to the id of the user to be deleted.
+	 * @param {number} userID
+	 *
+	 */
 	async function handleRemoveUser(userID) {
 		removeUserModal = true;
 		userToDelete = userID;
 	}
 
+	/**
+	 * This function is called when the user clicks on the left or right arrow button.
+	 * @param newPage
+	 */
 	function changePage(newPage) {
+		// If the new page number is within the range of the maximum number of pages
 		if (newPage >= 1 && newPage <= maxPage) {
+			// set the current page to the new page number.
 			currentPage = newPage;
+		}
+	}
+
+	$: {
+		// If the form is successfully submitted, close the modals.
+	 	if(form?.success) {
+			addNewUser.update(() => false); 
+			editUser.update(() => false); 
+			removeUserModal = false;
 		}
 	}
 </script>
@@ -131,17 +160,18 @@
 	<title>Manage Users</title>
 </svelte:head>
 
-<div class="p-10 ring-1 max-h-fit max-w-fit h-min w-max bg-white shadow-md drop-shadow-md rounded relative z-10">
+<div class="p-8 ring-1 max-h-fit max-w-fit h-min w-max bg-white shadow-md drop-shadow-md rounded relative z-10">
 	{#if form?.success}
 			<div class="mb-4 text-center">
 				<Alert color="green" class="text-center p-2">
-					<span class="font-medium">Operation successful!</span>
+					<span class="font-medium">{form?.successMsg}</span>
 				</Alert>
 			</div>
+			<p class="hidden">{ setTimeout(() => { form.success = null; }, 3000) }</p>
 	{:else if form?.error}
 			<div class="mb-4 text-center">
 				<Alert color="red" class="text-center">
-					<span class="font-medium">{form?.error}</span>
+					<span class="font-medium">{form?.error}.</span>
 				</Alert>
 			</div>
 	{/if}
@@ -152,7 +182,7 @@
 			/>
 		</div>
 		<div class="ml-4">
-			<Button size="sm" shadow color="purple" pill on:click={handleAddUser}>Add User</Button>
+			<Button size="sm" shadow color="green" on:click={handleAddUser}>Add User</Button>
 		</div>
 	</div>
 	<caption class="text-xl mb-3 mt-6 font-bold text-left w-max text-gray-900 dark:text-white dark:bg-gray-800">
@@ -225,9 +255,7 @@
 
 <Modal title="Confirm Delete User?" bind:open={removeUserModal} size="xs" class="max-w-xs">
 	<form class="flex flex-col" method="POST" action="?/removeUser" use:enhance>
-
     <input type="hidden" id="userID" name="userID" bind:value={userToDelete} />
-
 		<Button type="submit" color="red" class="w-full mt-3" on:click={() => removeUserModal = false}>CONFIRM DELETE</Button>
 	</form>
 </Modal>

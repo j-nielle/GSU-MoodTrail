@@ -1,5 +1,11 @@
 <script>
-	import { Alert, Avatar, Card, Button, Label, Input } from 'flowbite-svelte';
+	// @ts-nocheck
+	import { 
+		Alert, 
+		Card, 
+		Button, 
+		Input 
+	} from 'flowbite-svelte';
 	import { ShieldSolid } from 'flowbite-svelte-icons';
 	import { enhance } from '$app/forms';
 
@@ -19,87 +25,96 @@
 	<title>Account Settings</title>
 </svelte:head>
 
-<div class="flex space-x-4 ring-1 rounded-lg">
-	<Card padding="sm" class="max-w-full">
-		{#if form?.success}
-			<div class="mb-4">
-				<Alert color="green" class="text-center">
-					<span class="font-medium">Updated succesfully!</span>
-				</Alert>
+<div class="p-8 ring-1 h-fit w-1/3 bg-white shadow-md drop-shadow-md rounded relative z-10">
+	{#if form?.success}
+		<div class="mb-4">
+			<Alert color="green" class="text-center">
+				<span class="font-medium">Updated succesfully!</span>
+			</Alert>
+		</div>
+		<p class="hidden">{ setTimeout(() => { form.success = null; }, 3000) }</p>
+	{:else if form?.error}
+		<div class="mb-4">
+			<Alert color="red" class="text-center">
+				<span class="font-medium">{form?.error}.</span> Please try again later.
+			</Alert>
+		</div>
+	{/if}
+	<div class="flex flex-col justify-between space-y-4 rounded">
+		<div class="flex flex-row justify-between space-x-4 items-center">
+			<div class="flex flex-col">
+				<p class="text-xs uppercase font-bold text-black">display name</p>
+				<p class="text-xs uppercase text-black">{username || 'USER'}</p>
 			</div>
-		{:else if form?.error}
-			<div class="mb-4">
-				<Alert color="red" class="text-center">
-					<span class="font-medium">{form?.error}.</span> Please try again later.
-				</Alert>
+			<Button color="dark" class="text-white" on:click={() => { changeUsername = true; changeEmail = false; changePass= false; }}>
+				Edit
+			</Button>
+		</div>
+		<div class="flex flex-row justify-between space-x-4 items-center">
+			<div class="flex flex-col">
+				<p class="text-xs uppercase font-bold text-black">email address</p>
+				<p class="text-xs text-black">{user?.email}</p>
 			</div>
-		{/if}
-		<div class="flex flex-col items-center pb-4">
-			<h5 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">
-				{username || 'USER'}
-			</h5>
-			<span class="text-sm text-gray-500 dark:text-gray-400">{user?.email}, {user?.role}</span>
-			<div class="flex flex-col mt-4 space-y-3 lg:mt-6">
-				<Button color="dark" class="dark:text-white" on:click={() => { changeUsername = true; changeEmail = false; changePass= false; }}>
-					Change Username
-				</Button>
-				
-				<Button color="dark" class="dark:text-white" on:click={() => { changeUsername = false; changeEmail = true; changePass= false; }}>
-					Change Email
-				</Button> 
-
-				<Button color="dark" class="dark:text-white" on:click={() => { changeUsername = false; changeEmail = false; changePass= true; }}>
-					Change Password
-				</Button>
+			<Button color="dark" class="text-white" on:click={() => { changeUsername = false; changeEmail = true; changePass= false }}>
+				Edit
+			</Button>
+		</div>
+		<div class="flex flex-row justify-between space-x-4 items-center">
+			<div class="flex flex-col">
+				<p class="text-xs uppercase font-bold text-black">password</p>
+				<p class="text-xs uppercase text-black">*********</p>
+			</div>
+			<Button color="dark" class="text-white" on:click={() => { changeUsername = false; changeEmail = false; changePass= true; }}>
+				Edit
+			</Button>
+		</div>
+		<div class="flex flex-row justify-between space-x-4 items-center">
+			<div class="flex flex-col">
+				<p class="text-xs uppercase font-bold text-black">user role</p>
+				<p class="text-xs uppercase text-black">{user?.role}</p>
 			</div>
 		</div>
-	</Card>
+	</div>
 </div>
 
 {#if changePass}
-		<Card class="sm:p-8  ring-1 rounded h-fit">
-			<form class="flex flex-col space-y-5" action="?/resetPassword" method="POST" use:enhance>
-				<p class="">New Password:</p>
-				<Input type="password" id="newPass" name="newPass" placeholder="••••••••" required autocomplete>
-					<svelte:fragment slot="left">
-						<ShieldSolid tabindex="-1" size="xs" class="ml-1" />
-					</svelte:fragment>
-				</Input>
-				<div class="flex flex-row space-x-3 justify-between mt-4">
-					<Button class="w-full" color="red" on:click={() => {changePass = false}}>CANCEL</Button>
-					<Button color="green" type="submit" class="w-full">RESET</Button>
-				</div>
-			</form>
-		</Card>
+	<form class="flex flex-col space-y-3 p-4 bg-white rounded ring-1 justify-center h-fit" action="?/resetPassword" method="POST" use:enhance>
+		<p class="text-sm uppercase text-black font-semibold">Edit Password:</p>
+		<Input type="password" id="newPass" name="newPass" placeholder="••••••••••••" required autocomplete>
+			<svelte:fragment slot="left">
+				<ShieldSolid tabindex="-1" size="xs" class="ml-1" />
+			</svelte:fragment>
+		</Input>
+		<div class="flex flex-row space-x-3 justify-between mt-4">
+			<Button color="green" type="submit" class="w-full">RESET</Button>
+			<Button class="w-full" color="red" on:click={() => {changePass = false}}>CANCEL</Button>
+		</div>
+	</form>
 {:else if changeUsername}
-		<Card class="sm:p-8  ring-1 rounded h-fit">
-			<form class="flex flex-col space-y-5" action="?/resetUsername" method="POST" use:enhance>
-				<p class="">New Username:</p>
-				<Input type="text" id="newUsername" name="newUsername" placeholder={username || 'USER'} required autocomplete>
-					<svelte:fragment slot="left">
-						<ShieldSolid tabindex="-1" size="xs" class="ml-1" />
-					</svelte:fragment>
-				</Input>
-				<div class="flex flex-row space-x-3 justify-between mt-4">
-					<Button class="w-full" color="red" on:click={() => {changeUsername = false}}>CANCEL</Button>
-					<Button color="green" type="submit" class="w-full">RESET</Button>
-				</div>
-			</form>
-		</Card>
+	<form class="flex flex-col space-y-3 p-4 bg-white rounded ring-1 justify-center h-fit" action="?/resetUsername" method="POST" use:enhance>
+		<p class="text-sm uppercase text-black font-semibold">Edit Username:</p>
+		<Input type="text" id="newUsername" name="newUsername" placeholder={username || 'USER'} required autocomplete>
+			<svelte:fragment slot="left">
+				<ShieldSolid tabindex="-1" size="xs" class="ml-1" />
+			</svelte:fragment>
+		</Input>
+		<div class="flex flex-row space-x-3 justify-between mt-4">
+			<Button color="green" type="submit" class="w-full">RESET</Button>
+			<Button class="w-full" color="red" on:click={() => {changeUsername = false}}>CANCEL</Button>
+		</div>
+	</form>
 {:else if changeEmail}
-		<Card class="sm:p-8  ring-1 rounded h-fit">
-			<form class="flex flex-col space-y-5" action="?/resetEmail" method="POST" use:enhance>
-				<p class="">New Email:</p>
-				<input type="hidden" id="userID" name="userID" bind:value={id} />
-				<Input type="email" id="newEmail" name="newEmail" placeholder={user?.email} required autocomplete>
-					<svelte:fragment slot="left">
-						<ShieldSolid tabindex="-1" size="xs" class="ml-1" />
-					</svelte:fragment>
-				</Input>
-				<div class="flex flex-row space-x-3 justify-between mt-4">
-					<Button class="w-full" color="red" on:click={() => {changeEmail = false}}>CANCEL</Button>
-					<Button color="green" type="submit" class="w-full">RESET</Button>
-				</div>
-			</form>
-		</Card>
-	{/if}
+	<form class="flex flex-col space-y-3 p-4 bg-white rounded ring-1 justify-center h-fit" action="?/resetEmail" method="POST" use:enhance>
+		<p class="text-sm uppercase text-black font-semibold">Edit Email:</p>
+		<input type="hidden" id="userID" name="userID" bind:value={id} />
+		<Input type="email" id="newEmail" name="newEmail" placeholder={user?.email} required autocomplete>
+			<svelte:fragment slot="left">
+				<ShieldSolid tabindex="-1" size="xs" class="ml-1" />
+			</svelte:fragment>
+		</Input>
+		<div class="flex flex-row space-x-3 justify-between mt-4">
+			<Button color="green" type="submit" class="w-full">RESET</Button>
+			<Button class="w-full" color="red" on:click={() => {changeEmail = false}}>CANCEL</Button>
+		</div>
+	</form>
+{/if}

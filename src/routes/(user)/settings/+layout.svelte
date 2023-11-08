@@ -21,7 +21,7 @@
 
 <div class="p-4 flex space-x-3 overflow-x-hidden z-10">
 	<Sidebar class="w-fit">
-		<SidebarWrapper class="bg-white drop-shadow-lg ring-1 h-fit w-32 flex p-3 justify-center">
+		<SidebarWrapper class="bg-white drop-shadow-lg ring-1 h-fit w-fit flex p-3 rounded">
 			<SidebarGroup>
 				<SidebarItem class="text-sm rounded" label="Account" href="/settings/account" {activeClass}
 					active={activeUrl === '/settings/account'}>

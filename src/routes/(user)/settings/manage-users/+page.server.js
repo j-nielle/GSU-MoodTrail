@@ -43,7 +43,7 @@ export const actions = {
 		const role = formData?.get('addRole');
 		const email = formData?.get('addEmail');
 		const password = formData?.get('addPassword');
-
+		// console.log(formData)
 		if (!username || !role || !email || !password){
 			return {
 				error: "Missing fields. Please try again later.",
@@ -67,6 +67,7 @@ export const actions = {
 				}else{
 					return {
 						success: true,
+						successMsg: username+"'s account added successfully!",
 						error: false
 					}
 				}
@@ -95,7 +96,7 @@ export const actions = {
 		const newUsername = formData?.get('editUsername');
 		const newRole = formData?.get('editRole');
 		const newEmail = formData?.get('editEmail');
-
+		// console.log(formData)
 		if(userID == user.id){ // just in case
 			if(newRole != user.role){
 				return {
@@ -125,7 +126,7 @@ export const actions = {
 						user_metadata: { username: newUsername, role: newRole },
 						role: newRole
 					});
-					
+
 					if (error) {
 						return fail(400, {
 							error: error.message,
@@ -134,6 +135,7 @@ export const actions = {
 					}else{
 						return {
 							success: true,
+							successMsg: newUsername+"'s account updated successfully!",
 							error: false
 						}
 					}
@@ -180,6 +182,7 @@ export const actions = {
 				} else {
 					return {
 						success: true,
+						successMsg: 'User has been deleted successfully.',
 						error: false
 					};
 				}

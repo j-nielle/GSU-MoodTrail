@@ -55,6 +55,8 @@ export const roles = [
 	{ label: 'staff', color: roleColor.staff }
 ];
 
+export const roleChoices = Object.keys(roleColor).map(key => ({ value: key, name: key.toUpperCase() }));
+
 export const buttonState = {
 	active: 'opacity-100 cursor-pointer drop-shadow-md',
 	inactive: 'opacity-50 cursor-pointer'

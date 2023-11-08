@@ -1,19 +1,19 @@
 <script>
 	// @ts-nocheck
 	import { enhance } from '$app/forms';
-	import { Card, Button, Badge, FloatingLabelInput } from 'flowbite-svelte';
-	import { roles, buttonState } from '$lib/constants/index.js';
+	import { Select, Button, FloatingLabelInput } from 'flowbite-svelte';
+	import { roleChoices } from '$lib/constants/index.js';
 	import { addNewUser } from '$lib/stores/index.js';
 
 	let selectedRole = '';
 
-	const cardClass = "p-4 h-max w-max space-y-5 rounded bg-white dark:bg-gray-800 self-start"
+	const cardClass = "p-4 h-max w-max space-y-3 rounded bg-white self-start ring-1"
 	const btnClass = "w-full font-bold leading-relaxed"
 </script>
 
 {#if $addNewUser}
-	<Card class={cardClass} size="lg" padding="xl">
-		<h3 class="font-bold text-slate-950 text-center text-xl">Add New User</h3>
+	<div class={cardClass}>
+		<h3 class="font-bold text-slate-950 text-center text-lg my-3">Add New User</h3>
 		<form class="space-y-5" action="?/newUser" method="POST" use:enhance>
 			<FloatingLabelInput size="small" style="outlined" id="addName" name="addName" type="text"
 				label="Username (Optional)"
@@ -27,25 +27,11 @@
 				autocomplete
 				required
 			/>
-			<input type="hidden" id="addRole" name="addRole" bind:value={selectedRole} />
-
-			<div class="space-y-3">
-				<p class="text-sm">Choose their role:</p>
-				<div class="flex flex-row space-x-2">
-					{#each roles as role}
-						<button type="button" on:click={() => { selectedRole = role.label; }}>
-						<Badge class={selectedRole != role.label ? buttonState.inactive : buttonState.active}
-							border rounded color={role.color}>
-							{role.label}
-						</Badge>
-						</button>
-					{/each}
-				</div>
-			</div>
+			<Select size="sm" items={roleChoices} class="my-2" placeholder="Select User Role" value={selectedRole} name="addRole" required />
 			<div class="flex space-x-3 justify-between">
-				<Button size="sm" pill shadow type="submit" color="purple" class={btnClass}>SAVE</Button>
-				<Button size="sm" pill shadow color="red" class={btnClass} on:click={() =>  addNewUser.update(() => false)}>CANCEL</Button>
+				<Button size="sm" shadow type="submit" color="green" class={btnClass}>SAVE</Button>
+				<Button size="sm" shadow color="red" class={btnClass} on:click={() =>  addNewUser.update(() => false)}>CANCEL</Button>
 			</div>
 		</form>
-	</Card>
+	</div>
 {/if}
