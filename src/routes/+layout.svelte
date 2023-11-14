@@ -187,7 +187,7 @@
 					<div class="text-center">
 						{#if activeUrl != '/dashboard'}
 							To view the list of students experiencing low moods for atleast 4 consecutive
-							days, please navigate to <a href="/dashboard" class="font-semibold">dashboard</a>.
+							days, please navigate to <a href="/dashboard" class="font-semibold hover:underline hover:text-blue-700">dashboard</a>.
 						{:else}
 							<span class="font-semibold">[{currStudentIDNotif}]</span>{notifText} click <button on:click={() => focusTable.update(() => true)} class="font-semibold hover:underline hover:text-blue-700">here</button> to view.
 						{/if}
@@ -202,7 +202,7 @@
 					<div class="text-center">
 						{#if activeUrl != '/dashboard'}
 							To view the list of students experiencing low moods for atleast 4 consecutive
-							days, please navigate to <a href="/dashboard" class="font-semibold">dashboard</a>.
+							days, please navigate to <a href="/dashboard" class="font-semibold hover:underline hover:text-blue-700">dashboard</a>.
 						{:else}
 							<span class="font-semibold">[{currStudentIDNotif}]</span>{notifText} click <button on:click={() => focusTable.update(() => true)} class="font-semibold hover:underline hover:text-blue-700">here</button> to view.
 						{/if}
