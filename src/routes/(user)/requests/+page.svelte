@@ -17,6 +17,7 @@
 		P
 	} from 'flowbite-svelte';
 	import { ChevronLeftSolid, ChevronRightSolid } from 'flowbite-svelte-icons';
+	import { requestTypes } from '$lib/constants/index.js';
 
 	export let data;
 
@@ -39,7 +40,7 @@
 			.on('postgres_changes',{
 					event: 'INSERT',
 					schema: 'public',
-					table: 'RequestEntries'
+					table: 'Request'
 				},(payload) => {
 					requestsData = _.cloneDeep([payload.new, ...requestsData]);
 					// requestsData.sort((currentElem, nextElem) => { // sort by date
@@ -58,7 +59,7 @@
 	$: {
 		filteredItems = requestsData?.filter((req) => {
 			const phoneMatch = req.contact_num.includes(searchTerm);
-			const reqMatch = req.request_type.toLowerCase().includes(searchTerm.toLowerCase());
+			const reqMatch = requestTypes[req.request_type].toLowerCase().includes(searchTerm.toLowerCase());
 			const statusMatch = req.iscompleted.toString().toLowerCase().includes(searchTerm.toLowerCase());
 
 			// if date filter is not empty, it will format the date of the results to YYYY-MM-DD
@@ -107,7 +108,7 @@
 
 		try {
 			const { data, error } = await supabase
-				.from('RequestEntries')
+				.from('Request')
 				.update({ iscompleted: isCompleted })
 				.eq('id', req.id)
 				.select()
@@ -138,7 +139,7 @@
 <div class="bg-white">
 	<div class="flex justify-between">
 		<div class="flex items-center ml-8">
-			<Search size="md" class="w-80 mr-3 h-11" placeholder="Search by request, phone, or status*" bind:value={searchTerm} />
+			<Search size="md" class="w-96 mr-3 h-11" placeholder="Search by phone number, request, or status*" bind:value={searchTerm} />
 			<div class="flex flex-row justify-start w-full space-x-2">
 				<Checkbox class="cursor-pointer mr-0" bind:value={incompleteOnly} on:change={() => incompleteOnly = !incompleteOnly} />
 				<P class="text-sm font-normal text-gray-500 dark:text-gray-400">Show Incomplete Requests Only</P>
@@ -195,7 +196,7 @@
 					{#each paginatedItems as req}
 						<TableBodyRow>
 							<TableBodyCell>{req.contact_num}</TableBodyCell>
-							<TableBodyCell>{req.request_type}</TableBodyCell>
+							<TableBodyCell>{requestTypes[req.request_type]}</TableBodyCell>
 							<TableBodyCell>{new Date(req.created_at).toLocaleString()}</TableBodyCell>
 							<TableBodyCell class="flex justify-center">
 								<Checkbox class="cursor-pointer mr-0" bind:checked={req.iscompleted} on:change={() => toggleRequestStatus(req)} />

@@ -39,7 +39,16 @@
 	} from '$lib/components/charts/index.js';
 	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
 	import { CardInfo } from '$lib/components/elements/index.js';
-	import { mood, reason, yearLvl, daysShort, moodChoices, reasonChoices, getWeekNumberString } from '$lib/constants/index.js';
+	import { 
+		mood, 
+		reason, 
+		yearLvl, 
+		daysShort, 
+		moodChoices, 
+		reasonChoices, 
+		getWeekNumberString, 
+		requestTypes 
+	} from '$lib/constants/index.js';
 
 	export let data;
 
@@ -161,23 +170,22 @@
 	$: viewAnonData ? (dataType = anonMoodData) : (dataType = studentMoodData);
 
 	$: if(requestsData){
-		let requestTypes = requestsData?.map(request => request.request_type);
-		let uniqueRequestTypes = [...new Set(requestTypes)];
-
+		let getRequests = requestsData?.map(req => requestTypes[req.request_type]);
+		let uniqueRequestTypes = [...new Set(getRequests)];
 		let highestCount = 0;
 
-		uniqueRequestTypes.forEach(requestType => {
-			let count = requestTypes.filter(type => type === requestType).length;
+		uniqueRequestTypes?.forEach(requestType => {
+			let count = getRequests?.filter(type => type === requestType).length;
 			if (count > highestCount) {
 				highestCount = count;
 				mostFrequentRequestType = requestType;
 			}
 		});
 		
-		if (uniqueRequestTypes.length === 0) {
+		if (uniqueRequestTypes?.length === 0) {
 			mostFrequentRequestType = "No requests";
 		}
-		else if (highestCount === uniqueRequestTypes.length) {
+		else if (highestCount === uniqueRequestTypes?.length) {
 			mostFrequentRequestType = "Equal counts for all types";
 		}
 	}

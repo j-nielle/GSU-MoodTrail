@@ -8,7 +8,7 @@ export async function load({ url, locals: { supabase, getSession } }) {
 	}
 
 	const { data: requests } = await supabase
-		.from('RequestEntries')
+		.from('Request')
 		.select()
 		.order('created_at', { ascending: false });
 

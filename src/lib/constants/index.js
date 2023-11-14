@@ -115,3 +115,5 @@ export const getWeekNumberString = (date) => {
 	const weekDiff = date.diff(firstDayOfYear, 'week') + 1; 
 	return `Week ${weekDiff}`;
 };
+
+export const requestTypes = { 1: 'Request for a consultation', 2: 'Refer/Help a friend' }

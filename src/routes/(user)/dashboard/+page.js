@@ -18,7 +18,7 @@ export async function load({ parent }) {
 		.order('created_at', { ascending: true });
 	
 	const { data: requests } = await supabase
-		.from('RequestEntries')
+		.from('Request')
 		.select()
 		.order('created_at', { ascending: false });
 

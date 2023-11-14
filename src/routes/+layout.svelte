@@ -63,7 +63,7 @@
 			.on('postgres_changes',{
 					event: 'INSERT',
 					schema: 'public',
-					table: 'RequestEntries'
+					table: 'Request'
 				},(payload) => {
 					newRequest.update(() => true);
 					// setTimeout(() => {
