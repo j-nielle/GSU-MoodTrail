@@ -149,9 +149,12 @@
 		<NavBrand tabindex="-1" href="/">
 			<img src={moodTrailOG} alt="Placeholder Logo" class="w-32 h-fit" />
 		</NavBrand>
-		<div class="flex space-x-4">
+		
+		{#if activeUrl == '/'}
 			<Button href="/login" color="purple" class="mr-3 font-semibold tracking-wide">LOGIN</Button>
-		</div>
+		{:else}
+			<Button disabled href="/login" color="purple" class="mr-3 font-semibold tracking-wide">LOGIN</Button>
+		{/if}
 	{/if}
 </Navbar>
 <!-- fix this: <Layout> received an unexpected slot "default" -->
@@ -185,12 +188,7 @@
 				<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900">
 					<BellRingSolid tabindex="-1" class="text-red-700" />
 					<div class="text-center">
-						{#if activeUrl != '/dashboard'}
-							To view the list of students experiencing low moods for atleast 4 consecutive
-							days, please navigate to <a href="/dashboard" class="font-semibold hover:underline hover:text-blue-700">dashboard</a>.
-						{:else}
-							<span class="font-semibold">[{currStudentIDNotif}]</span>{notifText} click <button on:click={() => focusTable.update(() => true)} class="font-semibold hover:underline hover:text-blue-700">here</button> to view.
-						{/if}
+						<span class="font-semibold">[{currStudentIDNotif}]</span>{notifText} click <button on:click={() => focusTable.update(() => true)} class="font-semibold hover:underline hover:text-blue-700">here</button> to view.
 					</div>
 					<CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700 focus:outline-none" on:click={() => (newLowMoodData = false)} />
 				</Alert>
@@ -200,12 +198,8 @@
 				<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900">
 					<BellRingSolid tabindex="-1" class="text-red-700" />
 					<div class="text-center">
-						{#if activeUrl != '/dashboard'}
-							To view the list of students experiencing low moods for atleast 4 consecutive
+						To view the list of students experiencing low moods for atleast 4 consecutive
 							days, please navigate to <a href="/dashboard" class="font-semibold hover:underline hover:text-blue-700">dashboard</a>.
-						{:else}
-							<span class="font-semibold">[{currStudentIDNotif}]</span>{notifText} click <button on:click={() => focusTable.update(() => true)} class="font-semibold hover:underline hover:text-blue-700">here</button> to view.
-						{/if}
 					</div>
 					<CloseSolid tabindex="-1" class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700 focus:outline-none" on:click={() => (newLowMoodData = false)} />
 				</Alert>

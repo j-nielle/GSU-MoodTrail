@@ -8,9 +8,9 @@
 	export let yData;
 	export let elementID;
 	export let style;
-	export let title;
-	export let xAxisName;
-	export let yAxisName;
+	export let title = '';
+	export let xAxisName = '';
+	export let yAxisName = '';
 
 	let horizontalMoodBarChart;
 

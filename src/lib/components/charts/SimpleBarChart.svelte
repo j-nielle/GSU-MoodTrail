@@ -5,16 +5,16 @@
 
 	export let xData;
 	export let xType;
-	export let xName;
+	export let xName = '';
 	export let yData;
 	export let yType;
-	export let yName;
+	export let yName = '';
 	export let elementID;
 	export let style;
 	export let title = '';
 	export let markType = 'average';
-	export let fontSize;
-	export let yAxisRotate;
+	export let fontSize = '';
+	export let yAxisRotate = '';
 
 	let simpleBarChart, currMType;
 

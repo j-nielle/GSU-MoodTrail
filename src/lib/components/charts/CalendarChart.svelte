@@ -8,9 +8,9 @@
 	export let data;
 	export let elementID;
 	export let style;
-	export let reasonType;
-	export let moodType;
-	export let seriesName;
+	export let reasonType = '';
+	export let moodType = '';
+	export let seriesName = '';
 
 	let calendarChart;
 	let dataUnavailable = false;

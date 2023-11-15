@@ -4,7 +4,7 @@
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
 
-	export let title;
+	export let title = '';
 	export let heatmapData;
 	export let elementID;
 	export let style;

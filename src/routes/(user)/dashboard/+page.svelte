@@ -169,23 +169,36 @@
 
 	$: viewAnonData ? (dataType = anonMoodData) : (dataType = studentMoodData);
 
+	// note: while this is reactive, it's not realtime. it only updates when the page is refreshed.
+	// because the data is only fetched once, and not subscribed to.
 	$: if(requestsData){
 		let getRequests = requestsData?.map(req => requestTypes[req.request_type]);
 		let uniqueRequestTypes = [...new Set(getRequests)];
 		let highestCount = 0;
 
 		uniqueRequestTypes?.forEach(requestType => {
+			// this is the number of times the current request type appears in the array
 			let count = getRequests?.filter(type => type === requestType).length;
+			// if the current request type appears more times than the previous highest count,
 			if (count > highestCount) {
-				highestCount = count;
-				mostFrequentRequestType = requestType;
+				highestCount = count; // set the current count as the new highest count
+				mostFrequentRequestType = requestType; // set the current request type as the most frequent
 			}
 		});
 		
+		// if there are no requests, 
 		if (uniqueRequestTypes?.length === 0) {
+			// set mostFrequentRequestType to 'No requests'
 			mostFrequentRequestType = "No requests";
 		}
+		// if there is only one request type, 
+		else if (uniqueRequestTypes?.length === 1) {
+			// set mostFrequentRequestType to that request type
+			mostFrequentRequestType = uniqueRequestTypes[0];
+		}
+		// if there are multiple request types with the same highest count,
 		else if (highestCount === uniqueRequestTypes?.length) {
+			// set mostFrequentRequestType to 'Equal counts for all types'
 			mostFrequentRequestType = "Equal counts for all types";
 		}
 	}
@@ -571,7 +584,15 @@
 
 			// round up the maximum value to the nearest multiple of 10
 			// which will give ECharts more room to generate readable ticks.
-			let roundedMax = Math.ceil(maxValue / 10) * 10;
+			// another solution would be to set the interval to 1, but that would
+			// make the chart look too cluttered.
+			// is this optimal? i don't know. but it works for now.
+
+			// [ECharts] The ticks may be not readable when set min: 0, max: 20 and alignTicks: true
+			// idk why this happens but it's probably because the ticks are too close together
+			// even when im rounding up to the nearest multiple of 10
+			// so i'm just gonna set the max value to 100 for now
+			let roundedMax = 100// Math.ceil(maxValue / 10) * 10;
 
 			// return an object for this reason which includes the name of the reason 
 			// and the rounded maximum value.
