@@ -67,7 +67,7 @@
 
 						setTimeout(() => {
 							addAlert = false;
-						}, 2000);
+						}, 1500);
 
 						studentsData = _.cloneDeep([payload.new, ...studentsData]).sort((currentElem, nextElem) =>
 							currentElem.name.localeCompare(nextElem.name)
@@ -77,7 +77,7 @@
 
 						setTimeout(() => {
 							updateAlert = false;
-						}, 2000);
+						}, 1500);
 
 						// payload.new returns updated row, payload.old returns property "id" of updated row
 						const updatedIndex = studentsData.findIndex((student) => student.id === payload.old.id);
@@ -94,8 +94,8 @@
 
 						setTimeout(() => {
 							deleteAlert = false;
-						}, 2000);
-
+						}, 1500);
+						
 						// payload.old returns property "id" of deleted row
 						const updatedStudentsData = studentsData.filter(
 							(student) => student.id !== payload.old.id
@@ -112,7 +112,7 @@
 
 	$: if (studentsData) {
 		filteredItems = studentsData?.filter((req) => {
-			const idMatch = req.id.toString().includes(searchTerm);
+			const idMatch = req.student_id.toString().includes(searchTerm);
 			const nameMatch = req.name.toLowerCase().includes(searchTerm.toLowerCase());
 			const courseMatch = req.course_id.toLowerCase().includes(searchTerm.toLowerCase());
 			const yearLevelMatch = yearLvl[req.year_level_id].toLowerCase().includes(searchTerm.toLowerCase());
@@ -156,7 +156,7 @@
 
 	function handleUpdate(student_id) {
 		editStudentModal = true;
-		rowToUpdate = studentsData.filter((student) => student.id == student_id);
+		rowToUpdate = studentsData.filter((student) => student.student_id == student_id);
 	}
 </script>
 
@@ -249,10 +249,10 @@
 							<TableBodyCell>
 								<a
 									class="hover:underline"
-									href="/students/student-chart?search={student.id}"
+									href="/students/student-chart?search={student.student_id}"
 									rel="noopener noreferrer"
 								>
-									{student.id}
+									{student.student_id}
 								</a>
 							</TableBodyCell>
 							<TableBodyCell>{student.name}</TableBodyCell>
@@ -262,7 +262,7 @@
 								<div class="flex justify-center cursor-pointer">
 									<EditOutline
 										class="text-purple-600 focus:outline-none hover:text-green-700"
-										on:click={handleUpdate(student.id)}
+										on:click={handleUpdate(student.student_id)}
 									/>
 								</div>
 							</TableBodyCell>
@@ -270,7 +270,7 @@
 								<div class="flex justify-center cursor-pointer">
 									<TrashBinSolid
 										class="text-red-600 focus:outline-none hover:text-red-700"
-										on:click={handleRemove(student.id)}
+										on:click={handleRemove(student.student_id)}
 									/>
 								</div>
 							</TableBodyCell>
@@ -285,7 +285,7 @@
 <AddStudent bind:open={addStudentModal} bind:handler={form} bind:items={selectCourse} />
 <EditStudent bind:open={editStudentModal} bind:handler={form} bind:items={selectCourse} student={rowToUpdate} />
 
-<Modal title="Delete Student Confirm?" bind:open={removeStudentModal} size="xs" class="max-w-xs">
+<Modal title="Confirm Delete?" bind:open={removeStudentModal} size="xs" class="max-w-xs">
 	<form class="flex flex-col" method="POST" action="?/removeStudent" use:enhance>
 
     <input type="hidden" id="studentID" name="studentID" bind:value={studentToDelete} />

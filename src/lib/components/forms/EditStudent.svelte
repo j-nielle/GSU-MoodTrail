@@ -2,7 +2,7 @@
 	// @ts-nocheck
 	import { enhance } from '$app/forms';
 	import { Button, Select, Modal, FloatingLabelInput } from 'flowbite-svelte';
-	import { yearLvl } from '$lib/constants/index.js';
+	import { yearLvl, yrlvlChoices } from '$lib/constants/index.js';
 	import { InputHelper } from '$lib/components/elements/index.js';
 
 	export let open;
@@ -10,19 +10,29 @@
 	export let items;
 	export let student;
 
-	let prevID, prevFName, prevMName, prevLName, prevYrLvl, prevCourse;
+	let rowNum, prevID, prevFName, prevMName, prevLName, prevYrLvl, prevCourse;
 
 	$: if (student) {
+		rowNum = student[0]?.id;
 		const fullName = student[0]?.name.split(' ');
 		const prevMIndex = fullName.findIndex((part) => part.length === 2 && part.includes('.'));
 
-		prevID = student[0]?.id;
-		prevFName = fullName.slice(0, prevMIndex).join(' ');
-		prevMName = fullName[prevMIndex];
-		prevLName = fullName.slice(prevMIndex + 1).join(' ');
+		prevID = student[0]?.student_id;
+		
+		// check if a middle name was found
+		if (prevMIndex !== -1) {
+			prevFName = fullName.slice(0, prevMIndex).join(' ');
+			prevMName = fullName[prevMIndex];
+			prevLName = fullName.slice(prevMIndex + 1).join(' ');
+		} else { // if not
+			prevFName = fullName.slice(0, -1).join(' ');
+			prevMName = '';
+			prevLName = fullName[fullName.length - 1];
+		}
 		prevYrLvl = student[0]?.year_level_id;
 		prevCourse = student[0]?.course_id;
 	}
+
 </script>
 
 <Modal title="Edit Student Data" bind:open size="xs" class="max-w-xl">
@@ -35,6 +45,7 @@
 			{/each}
 		{/if}
 
+		<input type="text" class="hidden" id="studentRow" name="studentRow" bind:value={rowNum} />
 		<div class="mb-2">
 			<FloatingLabelInput
 				size="small"
@@ -112,16 +123,14 @@
 			required
 		/>
 
-		<p class="text-sm my-2">
-			Previous Year Level: <span class="font-semibold text-orange-500">{yearLvl[prevYrLvl]}</span>
-		</p>
-		<div class="flex flex-row space-x-3 my-2 justify-between">
-			{#each Object.keys(yearLvl) as key}
-				<label class="text-sm" for={`editYrLvl_${key}`}>
-					<input type="radio" name="editYrLvl" value={key} id={`editYrLvl_${key}`} required />
-					{yearLvl[key]}
-				</label> 
-			{/each}
+		<div class="flex flex-row my-2 items-center space-x-2 justify-between">
+			<p class="text-sm">
+				Previous Year Level: <span class="font-semibold text-orange-500">{yearLvl[prevYrLvl]}</span>
+			</p>
+	
+			<Select size="sm" items={yrlvlChoices} class="w-fit" 
+				placeholder="Select New Role" 
+				value={String(prevYrLvl)} name="editYrLvl" required />
 		</div>
 
 		<Button type="submit" class="w-full mt-3">Update Student</Button>

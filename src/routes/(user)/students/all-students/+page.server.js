@@ -65,7 +65,7 @@ export const actions = {
 			const { data: existingStudent, error } = await supabase
 				.from('Student')
 				.select('*')
-				.eq('id', newID)
+				.eq('student_id', newID)
 				.eq('name', newName)
 				.eq('year_level_id', newYearLevel)
 				.eq('course_id', newCourse);
@@ -80,7 +80,7 @@ export const actions = {
 					.from('Student')
 					.insert([
 						{
-							id: newID,
+							student_id: newID,
 							name: newName.toString().toUpperCase(),
 							year_level_id: newYearLevel,
 							course_id: newCourse
@@ -125,7 +125,8 @@ export const actions = {
 
 	editStudent: async ({ request, locals: { supabase } }) => {
 		const formData = await request.formData();
-
+		
+		const studentRow = formData.get('studentRow');
 		const editID = formData.get('editID');
 		const editFName = formData.get('editFName');
 		const editMName = formData.get('editMName');
@@ -137,10 +138,10 @@ export const actions = {
 
 		let editName = '';
 
-		if(editMName === null || editMName === undefined || editMName === '') {
+		if(editMName === null || editMName === undefined || editMName.trim() === '') {
 			editName = `${editFName} ${editLName}`.trim().toUpperCase();
 		}else{
-			editName = `${editFName} ${editMName}. ${editLName}`.trim().toUpperCase();
+			editName = `${editFName} ${editMName} ${editLName}`.trim().toUpperCase();
 		}
 
 		if (editID?.length < 10 || (editID?.slice(0, 3) != '202' && /[^0-9]/.test(editID))) {
@@ -156,34 +157,41 @@ export const actions = {
 				error: 'Please enter a valid name.'
 			});
 		}
-
+		console.log(formData)
 		try {
 			const { data: prevStudentData, error } = await supabase
 				.from('Student')
 				.select('*')
-				.eq('id', editID)
+				.eq('student_id', editID)
 				.eq('name', editName)
 				.eq('year_level_id', editYearLevel)
 				.eq('course_id', editCourse);
-			console.error(error);
 			if (prevStudentData?.length > 0) {
 				errors.push({
 					errorInput: 'prevStudentData',
 					error: 'No changes made. Please exit and try again.'
 				});
-			} else {
+			} 
+			else if (error) {
+				console.error(error);
+				errors.push({
+					errorInput: 'error',
+					error: error.message
+				});
+			}
+			else {
 				const { data, error } = await supabase
 					.from('Student')
 					.update({
-						id: editID,
+						student_id: editID,
 						name: editName,
 						year_level_id: editYearLevel,
 						course_id: editCourse
 					})
-					.eq('id', editID)
+					.eq('id', studentRow)
 					.select();
-				console.error(error);
 				if (error) {
+					console.error(error);
 					errors.push({
 						errorInput: 'error',
 						error: error.message
@@ -192,11 +200,16 @@ export const actions = {
 			}
 		} catch (error) {
 			console.error(error);
+			errors.push({
+				errorInput: 'error',
+				error: error.message
+			});
 		}
 
 		if (errors?.length > 0) {
 			return {
-				errors: errors
+				errors: errors,
+				success: false
 			};
 		} else {
 			return {
@@ -211,7 +224,7 @@ export const actions = {
 		const studentID = formData?.get('studentID');
 
 		try {
-			const { data, error } = await supabase.from('Student').delete().eq('id', studentID);
+			const { data, error } = await supabase.from('Student').delete().eq('student_id', studentID);
 
 			if (error) {
 				console.error(error);

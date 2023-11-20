@@ -69,6 +69,8 @@ export const yearLvl = {
 	4: '4th Year'
 };
 
+export const yrlvlChoices = Object.keys(yearLvl).map(key => ({ value: key, name: yearLvl[key] }));
+
 /**
  * This function returns the nearest mood label to the given score.
  * @param {number} score - The score to find the nearest mood label of.

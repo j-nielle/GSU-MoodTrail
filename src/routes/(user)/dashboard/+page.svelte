@@ -55,7 +55,6 @@
 	let studentMoodData = data.studentMood;
 	let anonMoodData = data.anonMood;
 	let requestsData = data.requests;
-
 	let dataType = {};
 
 	let todaysEntries = [];
@@ -141,16 +140,31 @@
 
 		const dashboardChannel = supabase.channel('dashboard')
 			.on('postgres_changes', {
-					event: 'INSERT',
+					event: '*',
 					schema: 'public',
 					table: 'StudentMoodEntries'
-				}, (payload) => {
-					studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
-					studentMoodData.sort((currentElem, nextElem) => { // sort by date
-						const currentDate = new Date(currentElem.created_at);
-						const nextDate = new Date(nextElem.created_at);
-						return currentDate - nextDate;
-					});
+				},(payload) => {
+					if (payload.eventType === 'INSERT') {
+						studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
+						studentMoodData.sort((currentElem, nextElem) => { // sort by date (asc)
+							const currentDate = new Date(currentElem.created_at);
+							const nextDate = new Date(nextElem.created_at);
+							return currentDate - nextDate;
+						});
+					} else if (payload.eventType === 'UPDATE') {
+						const updatedIndex = studentMoodData.findIndex((student) => student.id === payload.old.id);
+
+						if (updatedIndex !== -1) {
+							studentMoodData[updatedIndex] = payload.new;
+						}
+
+						studentMoodData = _.cloneDeep(studentMoodData);
+					} else if (payload.eventType === 'DELETE') {
+						const updatedStudentMoodData = studentMoodData.filter(
+							(student) => student.id !== payload.old.id
+						);
+						studentMoodData = updatedStudentMoodData;
+					}
 				}
 			).on('postgres_changes', {
 					event: 'INSERT',
@@ -843,7 +857,7 @@
 
 		// keep track of the maximum number of consecutive low mood days encountered
 		let maxConsecutiveDays = 0; 
-
+		console.log(studentMoodData)
 		// filter the student mood data to only include entries with negative mood scores
 		filteredStudents = studentMoodData?.reduce(
 
@@ -863,7 +877,7 @@
 
 				// get the student's data or create a new map()
 				const studentData = students.get(student_id) || new Map(); 
-
+				console.log(studentData)
 				// get the reason label from the reason score using reason object
 				const reason_label = Object.keys(reason).find((key) => reason[key] === reason_score);
 
@@ -879,7 +893,7 @@
 			},
 			new Map()
 		);
-
+		console.log(filteredStudents)
 		for (const [studentId, studentEntry] of filteredStudents) {
 			// variable to be used for tracking consecutive low mood days
 			let consecutiveDays = 0; 
@@ -903,14 +917,14 @@
 					// else, reset the consecutive days to 1
 					consecutiveDays = 1;
 				}
-
+				console.log(consecutiveDays)
 				// if the consecutive days is >= to 4, 
 				// then check if the previous date is the day before the current date
 				if (consecutiveDays >= 4) {
 					// get the last record of the student's streaks 
 					// which is the last element of the array
 					const lastRecord = (consecutiveDaysMap?.get(studentId) || []).slice(-1)[0]; 
-
+					console.log(lastRecord)
 					// if the last record's end date is the day before the current date, 
 					// then update the last record
 					if (
@@ -975,6 +989,7 @@
 			// add a new entry for a student’s streaks to the consistentLowMoods store.
 			consistentLowMoods?.update((moods) => [...moods, { studentId, streaks: studentStreaks }]);
 		});
+		console.log(consecutiveDaysMap)
 	}
 
 	/**
@@ -1272,7 +1287,7 @@
 					</div>
 					<SimpleBarChart
 							xData={xDataSBC} xType="category" xName="Reason"
-							yData={yDataSBC} yType="value" yName="Frequency"
+							yData={yDataSBC} yType="value" yName="Frequency"  yAxisRotate="90"
 							title=""
 							fontSize="18"
 							markType={sbcMarkType}
@@ -1511,7 +1526,7 @@
 					<div class="items-center">
 						<SimpleBarChart
 							xData={xMoodWeek} xType="category" xName="Day"
-							yData={yMoodWeekEntry} yType="value" yName="Frequency"
+							yData={yMoodWeekEntry} yType="value" yName="Frequency" yAxisRotate="90"
 							title="         # of Mood Entries per Weekday"
 							markType="average"
 							elementID="moodWeekDayEntries" fontSize="16"

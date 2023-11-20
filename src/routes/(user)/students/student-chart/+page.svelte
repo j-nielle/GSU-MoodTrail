@@ -84,14 +84,69 @@
 
 	let exportModalState = false;
 
+	let addedMoodEntryAlert = false;
+
 	onMount(() => {
 		const studentChartChannel = supabase.channel('studentChartChannel')
 			.on('postgres_changes', {
-					event: 'INSERT',
+					event: '*',
 					schema: 'public',
 					table: 'StudentMoodEntries'
 				},(payload) => {
-					studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
+					if (payload.eventType === 'INSERT') {
+						addedMoodEntryAlert = true;
+
+						setTimeout(() => {
+							addedMoodEntryAlert = false;
+						}, 1000);
+
+						studentMoodData = _.cloneDeep([...studentMoodData, payload.new]);
+						studentMoodData.sort((currentElem, nextElem) => { // sort by date (asc)
+							const currentDate = new Date(currentElem.created_at);
+							const nextDate = new Date(nextElem.created_at);
+							return currentDate - nextDate;
+						});
+					} else if (payload.eventType === 'UPDATE') {
+						const updatedIndex = studentMoodData.findIndex((student) => student.id === payload.old.id);
+
+						if (updatedIndex !== -1) {
+							studentMoodData[updatedIndex] = payload.new;
+						}
+
+						studentMoodData = _.cloneDeep(studentMoodData);
+					} else if (payload.eventType === 'DELETE') {
+						const updatedStudentMoodData = studentMoodData.filter(
+							(student) => student.id !== payload.old.id
+						);
+						studentMoodData = updatedStudentMoodData;
+					}
+				}
+			).on('postgres_changes', {
+					event: '*',
+					schema: 'public',
+					table: 'Student'
+				}, (payload) => {
+					if (payload.eventType === 'INSERT') {
+						students = _.cloneDeep([payload.new, ...students]).sort((currentElem, nextElem) =>
+							currentElem.name.localeCompare(nextElem.name)
+						);
+					} else if (payload.eventType === 'UPDATE') {
+						const updatedIndex = students.findIndex((student) => student.id === payload.old.id);
+
+						if (updatedIndex !== -1) {
+							students[updatedIndex] = payload.new;
+						}
+
+						students = _.cloneDeep(students).sort((currentElem, nextElem) =>
+							currentElem.name.localeCompare(nextElem.name)
+						);
+					}
+					else if (payload.eventType === 'DELETE') {
+						const updatedStudentsData = students.filter(
+							(student) => student.id !== payload.old.id
+						);
+						students = updatedStudentsData;
+					}
 				}
 			).subscribe() // (status) => console.log('/students/student-chart', status));
 
@@ -102,19 +157,23 @@
 
 	$: {
 		searchTerm = $page?.url?.searchParams?.get('search');
+
 		if (selectedStudent) {
 			searchTerm = selectedStudent
 		}
+
 		hasEntry = studentMoodData?.find((student) => student.student_id == searchTerm);
-		
+
 		if (hasEntry) {
 			urlResult = {};
 			result = studentMoodData?.filter((student) => student?.student_id == searchTerm);
+			console.log(result)
 			currentStudentID = result[0]?.student_id;
 		} else if (hasEntry === undefined){
 			result = {};
-			urlResult = students?.filter((student) => student?.id == searchTerm);
-			currentStudentID = urlResult[0]?.id;
+			urlResult = students?.filter((student) => student?.student_id == searchTerm);
+			console.log(urlResult)
+			currentStudentID = urlResult[0]?.student_id;
 		}
 	}
 
@@ -139,7 +198,7 @@
 			.sort()
 			.map((yearLevel) => ({ value: yearLevel, name: yearLevel.replace(' Level', '') }))
 			.value();
-			
+
 		student = _.chain(studentMoodData)
 			.filter({ college: selectedCollege, course: selectedCourse, year_level: selectedYearLevel })
 			.map('student_id')
@@ -181,27 +240,31 @@
 		const sortedMoodsArr = Object.keys(moodCount)
 			.sort((currElem, nxtElem) => moodCount[nxtElem] - moodCount[currElem]);
 		
-		// Get the m_counts of each mood which is the value of each key in the moodCount object
+		// FOR STUDENT CARD - get the m_counts of each mood which is the value of each key in the moodCount object
 		const m_counts = Object.values(moodCount);
 
-		// FOR STUDENT CARD - Check if all moods are equally frequent
-		if (m_counts.every(count => count === m_counts[0])) {
-				mostFrequentMood = 'Equal mood frequency';
-				leastFrequentMood = 'Equal mood frequency';
+		if(m_counts === 1) {
+			mostFrequentMood = 'Not enough data';
+			leastFrequentMood = 'Not enough data';
+		}
+		// Check if all moods are equally frequent
+		else if (m_counts.every(count => count === m_counts[0])) {
+			mostFrequentMood = 'Equal mood frequency';
+			leastFrequentMood = 'Equal mood frequency';
 		} else {
-				// Get the mood(s) with the maximum count
-				const maxCount = Math.max(...m_counts);
-				const mostFrequentMoods = sortedMoodsArr.filter(mood => moodCount[mood] === maxCount);
+			// Get the mood(s) with the maximum count
+			const maxCount = Math.max(...m_counts);
+			const mostFrequentMoods = sortedMoodsArr.filter(mood => moodCount[mood] === maxCount);
 
-				// If there's a tie for the most frequent mood, set mostFrequentMood to 'Tie'
-				mostFrequentMood = mostFrequentMoods.length > 1 ? 'A tie.' : mostFrequentMoods[0];
+			// If there's a tie for the most frequent mood, set mostFrequentMood to 'A tie'
+			mostFrequentMood = mostFrequentMoods.length > 1 ? 'A tie.' : mostFrequentMoods[0];
 
-				// Get the mood(s) with the minimum count
-				const minCount = Math.min(...m_counts);
-				const leastFrequentMoods = sortedMoodsArr.filter(mood => moodCount[mood] === minCount);
+			// Get the mood(s) with the minimum count
+			const minCount = Math.min(...m_counts);
+			const leastFrequentMoods = sortedMoodsArr.filter(mood => moodCount[mood] === minCount);
 
-				// If there's a tie for the least frequent mood, set leastFrequentMood to 'Tie'
-				leastFrequentMood = leastFrequentMoods.length > 1 ? 'A tie.' : leastFrequentMoods[0];
+			// If there's a tie for the least frequent mood, set leastFrequentMood to 'A tie'
+			leastFrequentMood = leastFrequentMoods.length > 1 ? 'A tie.' : leastFrequentMoods[0];
 		}
 
 		// FOR PIE CHART - Breakdown of Moods	
@@ -553,9 +616,9 @@
 	<div class={divClass}>
 		<div class="flex space-x-6 justify-between">
 			<div class="flex flex-col">
-				{#if form?.success}
+				{#if addedMoodEntryAlert}
 					<Alert color="green" class="mb-2"><span class="font-medium">Mood entry added succesfully!</span></Alert>
-					<p class="hidden">{ setTimeout(() => { form.success = null; }, 3000) }</p>
+					<!-- <p class="hidden">{ setTimeout(() => { form.success = null; }, 3000) }</p> -->
 				{:else if form?.error}
 					<Alert color="red" class="mb-2"><span class="font-medium">{form?.error}</span></Alert>
 				{/if}
@@ -567,7 +630,7 @@
 							</div>
 							<div class="flex flex-col">
 								<h5 class="text-xl font-medium text-zinc-800 max-w-sm">{urlResult[0]?.name}</h5>
-								<span class="text-sm text-gray-500 dark:text-gray-400">{urlResult[0]?.id}</span>
+								<span class="text-sm text-gray-500 dark:text-gray-400">{urlResult[0]?.student_id}</span>
 								<div class="flex mt-5 space-x-10">
 									<div class="flex flex-col">
 										<p class="text-sm font-semibold text-zinc-800">COURSE</p>
