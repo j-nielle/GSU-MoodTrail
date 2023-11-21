@@ -38,18 +38,10 @@
 	let consistentStreaksInfo = new Map();
 	const students = [];
 
-	let lastLogin = null;
 	let notifText = '';
 
-	$: ({ supabase, session } = data);
+	$: ({ supabase, session, error } = data);
 	$: activeUrl = $page.url.pathname;
-
-	$: {
-		// new Date(data.session.user.amr[0].timestamp * 1000) //.toLocaleString()
-		// admin@test.com: 1699343710
-		// staff@test.com: 1699344819 | '11/7/2023, 4:13:39 PM' 
-		lastLogin = data?.session?.user?.amr[0]?.timestamp;
-	}
 
 	onMount(() => {
 		const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {
@@ -66,9 +58,6 @@
 					table: 'Request'
 				},(payload) => {
 					newRequest.update(() => true);
-					// setTimeout(() => {
-					// 	newRequest.update(() => false);
-					// }, 5000);
 				}
 			).subscribe() // (status) => console.log(activeUrl,status));
 
@@ -205,6 +194,13 @@
 				</Alert>
 			</div>
 		{/if}
+	{/if}
+	{#if error}
+			{#if error === 'Auth session missing!'}
+				<Alert color="red" dismissable class="bg-red-100 text-red-900 font-semibold rounded-none">
+					Session has expired.
+				</Alert>
+			{/if}
 	{/if}
 	<slot />
 </main>

@@ -16,15 +16,16 @@ export async function load({ fetch, data, depends }) {
 		serverSession: data.session
 	});
 
-	const { data: { session }, error } = await supabase.auth.getSession();
+	const refresh_token = data?.session?.refresh_token;
+
+	const { data: { session }, error } = await supabase.auth.refreshSession({ refresh_token }); // await supabase.auth.getSession();
 
 	if (error) {
-		console.error(error.message);
-		if(error.message === 'Invalid Refresh Token: Already Used') {
-		  return { supabase, session: null }
+		console.error("ERROR:",error.message);
+		return {
+			error: error.message
 		}
 	}
-
 	return { supabase, session };
 }
 
