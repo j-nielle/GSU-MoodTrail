@@ -139,10 +139,10 @@
 			<img src={moodTrailOG} alt="Placeholder Logo" class="w-32 h-fit" />
 		</NavBrand>
 		
-		{#if activeUrl == '/'}
+		{#if activeUrl != '/login'}
 			<Button href="/login" color="purple" class="mr-3 font-semibold tracking-wide">LOGIN</Button>
 		{:else}
-			<Button disabled href="/login" color="purple" class="mr-3 font-semibold tracking-wide">LOGIN</Button>
+			<Button disabled href="/login" color="purple" class="mr-3 font-semibold tracking-wide pointer-events-none">LOGIN</Button>
 		{/if}
 	{/if}
 </Navbar>
