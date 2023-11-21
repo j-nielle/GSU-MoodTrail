@@ -167,12 +167,12 @@
 		if (hasEntry) {
 			urlResult = {};
 			result = studentMoodData?.filter((student) => student?.student_id == searchTerm);
-			console.log(result)
+			//console.log(result)
 			currentStudentID = result[0]?.student_id;
 		} else if (hasEntry === undefined){
 			result = {};
 			urlResult = students?.filter((student) => student?.student_id == searchTerm);
-			console.log(urlResult)
+			//console.log(urlResult)
 			currentStudentID = urlResult[0]?.student_id;
 		}
 	}

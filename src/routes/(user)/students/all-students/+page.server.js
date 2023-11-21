@@ -157,7 +157,7 @@ export const actions = {
 				error: 'Please enter a valid name.'
 			});
 		}
-		console.log(formData)
+		//console.log(formData)
 		try {
 			const { data: prevStudentData, error } = await supabase
 				.from('Student')

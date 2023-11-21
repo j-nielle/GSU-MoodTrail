@@ -857,7 +857,6 @@
 
 		// keep track of the maximum number of consecutive low mood days encountered
 		let maxConsecutiveDays = 0; 
-		console.log(studentMoodData)
 		// filter the student mood data to only include entries with negative mood scores
 		filteredStudents = studentMoodData?.reduce(
 
@@ -877,7 +876,7 @@
 
 				// get the student's data or create a new map()
 				const studentData = students.get(student_id) || new Map(); 
-				console.log(studentData)
+
 				// get the reason label from the reason score using reason object
 				const reason_label = Object.keys(reason).find((key) => reason[key] === reason_score);
 
@@ -893,7 +892,7 @@
 			},
 			new Map()
 		);
-		console.log(filteredStudents)
+		
 		for (const [studentId, studentEntry] of filteredStudents) {
 			// variable to be used for tracking consecutive low mood days
 			let consecutiveDays = 0; 
@@ -917,14 +916,14 @@
 					// else, reset the consecutive days to 1
 					consecutiveDays = 1;
 				}
-				console.log(consecutiveDays)
+				
 				// if the consecutive days is >= to 4, 
 				// then check if the previous date is the day before the current date
 				if (consecutiveDays >= 4) {
 					// get the last record of the student's streaks 
 					// which is the last element of the array
 					const lastRecord = (consecutiveDaysMap?.get(studentId) || []).slice(-1)[0]; 
-					console.log(lastRecord)
+					
 					// if the last record's end date is the day before the current date, 
 					// then update the last record
 					if (
@@ -989,7 +988,6 @@
 			// add a new entry for a student’s streaks to the consistentLowMoods store.
 			consistentLowMoods?.update((moods) => [...moods, { studentId, streaks: studentStreaks }]);
 		});
-		console.log(consecutiveDaysMap)
 	}
 
 	/**
