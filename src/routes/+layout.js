@@ -16,8 +16,6 @@ export async function load({ fetch, data, depends }) {
 		serverSession: data.session
 	});
 
-	const refresh_token = data?.session?.refresh_token;
-
 	const { data: { session }, error } = await supabase.auth.getSession();
 
 	if (error) {
