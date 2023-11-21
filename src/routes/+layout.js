@@ -21,10 +21,10 @@ export async function load({ fetch, data, depends }) {
 	if (error) {
 		console.error("ERROR:",error.message);
 		return {
+			supabase, session: null,
 			error: error.message
 		}
-	}
-	return { supabase, session };
+	} else return { supabase, session };
 }
 
 /** @type {import('@sveltejs/adapter-vercel').Config} */
