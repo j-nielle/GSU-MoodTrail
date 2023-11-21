@@ -195,12 +195,10 @@
 			</div>
 		{/if}
 	{/if}
-	{#if error}
-			{#if error === 'Auth session missing!'}
-				<Alert color="red" dismissable class="bg-red-100 text-red-900 font-semibold rounded-none">
-					Session has expired.
-				</Alert>
-			{/if}
+	{#if error === 'Auth session missing!'}
+		<Alert color="red" dismissable class="bg-red-100 text-red-900 font-semibold rounded-none">
+			Session has expired. Login or refresh.
+		</Alert>
 	{/if}
 	<slot />
 </main>
