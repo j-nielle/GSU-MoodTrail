@@ -75,7 +75,7 @@
 		<div class="flex flex-col">
 			<p class="text-black text-xs font-bold uppercase">{title}</p>
 			<a class="text-xs text-black hover:text-blue-700 hover:underline cursor-pointer tracking-wide" 
-				href="/students/student-chart?search={data}" 
+				href="/students/student-mood-information?search={data}" 
 				rel="noopener noreferrer">
 				{data ?? 'N/A'}
 			</a>

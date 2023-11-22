@@ -148,7 +148,7 @@
 						students = updatedStudentsData;
 					}
 				}
-			).subscribe() // (status) => console.log('/students/student-chart', status));
+			).subscribe() // (status) => console.log('/students/student-mood-information', status));
 
 		return () => {
 			studentChartChannel.unsubscribe();
@@ -552,7 +552,7 @@
 	<div class="flex flex-row max-w-full justify-center gap-2">
 		{#if urlResult?.length > 0}
 			<div class="space-x-2">
-				<Button class="h-11 w-fit" size="sm" color="dark" on:click={() => goto('/students/all-students')}>
+				<Button class="h-11 w-fit" size="sm" color="dark" on:click={() => goto('/students/student-list')}>
 					Back to Student List
 				</Button>
 				<Button class="h-11 w-fit" size="sm" color="green" on:click={() => { newMoodEntry = true; }}>

@@ -119,8 +119,8 @@
 				Students<ChevronDownOutline class={chevronClass} />
 			</NavLi>
 			<Dropdown triggeredBy="#student-menu" dropdownClass="w-36 items-center relative z-20">
-				<DropdownItem href="/students/all-students">List of Students</DropdownItem>
-				<DropdownItem href="/students/student-chart">Student Mood Information</DropdownItem>
+				<DropdownItem href="/students/student-list">Student List</DropdownItem>
+				<DropdownItem href="/students/student-mood-information">Student Mood Information</DropdownItem>
 			</Dropdown>
 		</NavUl>
 

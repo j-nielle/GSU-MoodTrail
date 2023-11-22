@@ -249,7 +249,7 @@
 							<TableBodyCell>
 								<a
 									class="hover:underline"
-									href="/students/student-chart?search={student.student_id}"
+									href="/students/student-mood-information?search={student.student_id}"
 									rel="noopener noreferrer"
 								>
 									{student.student_id}
