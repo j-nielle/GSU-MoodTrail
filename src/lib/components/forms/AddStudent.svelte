@@ -4,6 +4,7 @@
 	import { Button, Select, Modal, FloatingLabelInput } from 'flowbite-svelte';
 	import { yearLvl } from '$lib/constants/index.js';
 	import { InputHelper } from '$lib/components/elements/index.js';
+	import { onMount } from 'svelte';
 
 	export let open;
 	export let handler;
@@ -14,9 +15,8 @@
 	<form class="flex flex-col" method="POST" action="?/addStudent" use:enhance>
 		{#if handler?.errors?.length > 0}
 			{#each handler?.errors as error}
-				{#if error.errorInput === 'existingStudent'}
-					<InputHelper color="red" msg={error.error} />
-				{/if}
+				<InputHelper color="red" msg={error.error} />
+				<p class="hidden">{ setTimeout(() => { error.error = ''; }, 2500) }</p>
 			{/each}
 		{/if}
 
@@ -32,16 +32,7 @@
 				required
 			/>
 		</div>
-		{#if handler?.errors?.length > 0}
-			{#each handler?.errors as error}
-				{#if error.errorInput === 'addID'}
-					<InputHelper color="red" msg={error.error} />
-				{:else if error.errorInput === 'duplicateID' || !error.errorInput === 'existingStudent'}
-					<InputHelper color="red" msg={error.error} />
-				{/if}
-			{/each}
-		{/if}
-
+		
 		<div class="my-2">
 			<FloatingLabelInput
 				size="small"
@@ -75,15 +66,6 @@
 				/>
 			</div>
 		</div>
-		{#if handler?.errors?.length > 0}
-			{#each handler?.errors as error}
-				{#if error.errorInput === 'newName'}
-					<InputHelper color="red" msg={error.error} />
-				{:else if error.errorInput === 'duplicateName'}
-					<InputHelper color="red" msg={error.error} />
-				{/if}
-			{/each}
-		{/if}
 
 		<Select size="sm" {items} class="my-2" placeholder="Select Course" name="addCourse" required />
 

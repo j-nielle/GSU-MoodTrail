@@ -39,76 +39,88 @@ export const actions = {
 
 		let newName = '';
 
-		if(newMName === null || newMName === undefined || newMName === '') {
-			newName = `${newFName} ${newLName}`.trim().toUpperCase();
-		}else{
-			newName = `${newFName} ${newMName} ${newLName}`.trim().toUpperCase();
-		}
-
 		let errors = [];
 
-		if (newID?.length < 10 || (newID?.slice(0, 3) != '202' && /[^0-9]/.test(newID))) {
+		if(newMName === null || newMName === undefined || newMName === '') {
+			newName = `${newFName} ${newLName}`.trim().toUpperCase();
+		}
+		else if(newMName.startsWith('.')) {
 			errors.push({
-				errorInput: 'addID',
-				error: 'Please enter a valid ID number (e.g 2020303123).'
+				errorInput: 'InvalidMiddleInitial',
+				error: 'Invalid middle initial, please exit and try again.'
 			});
 		}
-
-		if (newName?.length < 5 || !/^[A-Za-z]+(?:\s+[A-Za-z]+\s*\.?\s*)+$/.test(newName)) {
+		else{
+			newName = `${newFName} ${newMName}. ${newLName}`.trim().toUpperCase();
+		}
+		
+		if((/[^0-9]/.test(newID))){
 			errors.push({
-				errorInput: 'newName',
-				error: 'Please enter a valid name.'
+				errorInput: 'NonNumericID',
+				error: 'Valid ID number (e.g 2020303123), please exit and try again.'
 			});
 		}
-
-		try {
-			const { data: existingStudent, error } = await supabase
-				.from('Student')
-				.select('*')
-				.eq('student_id', newID)
-				.eq('name', newName)
-				.eq('year_level_id', newYearLevel)
-				.eq('course_id', newCourse);
-
-			if (existingStudent.length > 0) {
-				errors.push({
-					errorInput: 'existingStudent',
-					error: 'Student already exists.'
-				});
-			} else {
-				const { data, error } = await supabase
+		else if(newID?.slice(0, 3) != '202'){
+			errors.push({
+				errorInput: 'InvalidIDNum',
+				error: 'Valid ID number (e.g 2020303123), please exit and try again.'
+			});
+		}
+		else if (newName?.length < 5 || /\d/.test(newName)) {
+			errors.push({
+				errorInput: 'InvalidName',
+				error: 'Invalid name, please exit and try again.'
+			});
+		}
+		else {
+			try {
+				const { data: existingStudent, error } = await supabase
 					.from('Student')
-					.insert([
-						{
-							student_id: newID,
-							name: newName.toString().toUpperCase(),
-							year_level_id: newYearLevel,
-							course_id: newCourse
+					.select('*')
+					.eq('student_id', newID)
+					.eq('name', newName)
+					.eq('year_level_id', newYearLevel)
+					.eq('course_id', newCourse);
+	
+				if (existingStudent.length > 0) {
+					errors.push({
+						errorInput: 'existingStudent',
+						error: 'Student already exists, please exit and try again.'
+					});
+				} else {
+					const { data, error } = await supabase
+						.from('Student')
+						.insert([
+							{
+								student_id: newID,
+								name: newName,
+								year_level_id: newYearLevel,
+								course_id: newCourse
+							}
+						])
+						.select();
+	
+					if (error) {
+						console.error(error);
+						if (error.message == 'duplicate key value violates unique constraint "student_id_key"') {
+							errors.push({
+								errorInput: 'duplicateID',
+								error: 'Student ID already exists, please exit and try again.'
+							});
 						}
-					])
-					.select();
-
-				if (error) {
-					console.error(error);
-					if (error.message === 'duplicate key value violates unique constraint "St_pkey"') {
-						errors.push({
-							errorInput: 'duplicateID',
-							error: 'Student ID already exists.'
-						});
-					}
-					if (
-						error.message ===
-						'duplicate key value violates unique constraint "unique_name_constraint"'
-					) {
-						errors.push({
-							errorInput: 'duplicateName',
-							error: 'Student already exists.'
-						});
+						else if(error.message == 'duplicate key value violates unique constraint "Student_name_key"' 
+							|| error.message == 'duplicate key value violates unique constraint "name_unique"') 
+						{
+							errors.push({
+								errorInput: 'duplicateName',
+								error: 'Student name already exists, please exit and try again.'
+							});
+						}
 					}
 				}
+			} catch (error) {
+				console.error(error);
 			}
-		} catch (error) {
-			console.error(error);
 		}
 
 		if (errors?.length > 0) {
@@ -129,7 +141,7 @@ export const actions = {
 		const studentRow = formData.get('studentRow');
 		const editID = formData.get('editID');
 		const editFName = formData.get('editFName');
-		const editMName = formData.get('editMName');
+		let editMName = formData.get('editMName');
 		const editLName = formData.get('editLName');
 		const editCourse = formData.get('editCourse');
 		const editYearLevel = formData.get('editYrLvl');
@@ -137,73 +149,95 @@ export const actions = {
 		let errors = [];
 
 		let editName = '';
+		
+		if(/[0-9]/.test(editMName)){
+			errors.push({
+				errorInput: 'NumericMiddleInitial',
+				error: 'Invalid middle initial, please try again.'
+			});
+			editMName = '';
+		}
+		else if (editMName.startsWith('.')) {
+			errors.push({
+				errorInput: 'InvalidMiddleInitial',
+				error: 'Invalid middle initial, please try again.'
+			});
+			editMName = '';
+		}
 
-		if(editMName === null || editMName === undefined || editMName.trim() === '') {
+		if(editMName === null || editMName === undefined || editMName === '') {
 			editName = `${editFName} ${editLName}`.trim().toUpperCase();
-		}else{
-			editName = `${editFName} ${editMName} ${editLName}`.trim().toUpperCase();
+		}
+		else{
+			editName = `${editFName} ${editMName}. ${editLName}`.trim().toUpperCase();
 		}
 
-		if (editID?.length < 10 || (editID?.slice(0, 3) != '202' && /[^0-9]/.test(editID))) {
+		if(/[^0-9]/.test(editID)){
 			errors.push({
-				errorInput: 'editID',
-				error: 'Please enter a valid ID number (e.g 2020303123).'
+				errorInput: 'NonNumericID',
+				error: 'Valid ID number (e.g 2020303123), please exit and try again.'
 			});
 		}
-
-		if (editName?.length < 5 || !/^[A-Za-z]+(?:\s+[A-Za-z]+\s*\.?\s*)+$/.test(editName)) {
+		else if(editID?.slice(0, 3) != '202'){
 			errors.push({
-				errorInput: 'editName',
-				error: 'Please enter a valid name.'
+				errorInput: 'InvalidIDNum',
+				error: 'Valid ID number (e.g 2020303123), please exit and try again.'
 			});
 		}
-		//console.log(formData)
-		try {
-			const { data: prevStudentData, error } = await supabase
-				.from('Student')
-				.select('*')
-				.eq('student_id', editID)
-				.eq('name', editName)
-				.eq('year_level_id', editYearLevel)
-				.eq('course_id', editCourse);
-			if (prevStudentData?.length > 0) {
-				errors.push({
-					errorInput: 'prevStudentData',
-					error: 'No changes made. Please exit and try again.'
-				});
-			} 
-			else if (error) {
-				console.error(error);
-				errors.push({
-					errorInput: 'error',
-					error: error.message
-				});
-			}
-			else {
-				const { data, error } = await supabase
+		else if (editName?.length < 5 || /\d/.test(editName)) {
+			errors.push({
+				errorInput: 'InvalidName',
+				error: 'Entered invalid name, please exit and try again.'
+			});
+		}
+		else {
+			try {
+				const { data: prevStudentData, error } = await supabase
 					.from('Student')
-					.update({
-						student_id: editID,
-						name: editName,
-						year_level_id: editYearLevel,
-						course_id: editCourse
-					})
-					.eq('id', studentRow)
-					.select();
-				if (error) {
+					.select('*')
+					.eq('student_id', editID)
+					.eq('name', editName)
+					.eq('year_level_id', editYearLevel)
+					.eq('course_id', editCourse);
+				if (prevStudentData?.length > 0) {
+					errors.push({
+						errorInput: 'prevStudentData',
+						error: 'No changes made. Please exit and try again.'
+					});
+				} 
+				else if (error) {
 					console.error(error);
 					errors.push({
 						errorInput: 'error',
 						error: error.message
 					});
 				}
+				else {
+					const { data, error } = await supabase
+						.from('Student')
+						.update({
+							student_id: editID,
+							name: editName,
+							year_level_id: editYearLevel,
+							course_id: editCourse
+						})
+						.eq('id', studentRow)
+						.select();
+					if (error) {
+						console.error(error);
+						errors.push({
+							errorInput: 'error',
+							error: error.message
+						});
+					}
+				}
+			} catch (error) {
+				console.error(error);
+				errors.push({
+					errorInput: 'error',
+					error: error.message
+				});
 			}
-		} catch (error) {
-			console.error(error);
-			errors.push({
-				errorInput: 'error',
-				error: error.message
-			});
 		}
 
 		if (errors?.length > 0) {

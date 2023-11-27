@@ -848,8 +848,8 @@
 		// the students w consistent low moods and dili siya stored in a persistent 
 		// storage like a database kay which means na it WILL always show the alert
 		// notif every after user login even if there's no new data jud bitaw from the last login
-		// but the alert login WHEN there is new data is working fine japun
-		// so like ... it's a feature ig...
+		// but the alert WHEN there is new data is working fine japun
+		// so like ... it's a feature ig... dk
 
 		let filteredStudents = new Map();
 		let consecutiveDaysMap = new Map();
@@ -867,7 +867,7 @@
 					return students; // skip this entry
 				}
 
-				// get the date of the entry in MM/DD/YYYY format
+				// get the date of the entry in YYYY/MM/DD format
 				const dateKey = new Date(created_at).toLocaleDateString('en-US', {
 					year: 'numeric',
 					month: '2-digit',
@@ -892,7 +892,7 @@
 			},
 			new Map()
 		);
-		
+
 		for (const [studentId, studentEntry] of filteredStudents) {
 			// variable to be used for tracking consecutive low mood days
 			let consecutiveDays = 0; 

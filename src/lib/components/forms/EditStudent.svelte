@@ -15,6 +15,8 @@
 	$: if (student) {
 		rowNum = student[0]?.id;
 		const fullName = student[0]?.name.split(' ');
+
+		// find the index of the middle name, the part that has a length of 2 and has a period
 		const prevMIndex = fullName.findIndex((part) => part.length === 2 && part.includes('.'));
 
 		prevID = student[0]?.student_id;
@@ -22,7 +24,8 @@
 		// check if a middle name was found
 		if (prevMIndex !== -1) {
 			prevFName = fullName.slice(0, prevMIndex).join(' ');
-			prevMName = fullName[prevMIndex];
+			prevMName = fullName[prevMIndex].slice(0, -1);
+			console.log(prevMName)
 			prevLName = fullName.slice(prevMIndex + 1).join(' ');
 		} else { // if not
 			prevFName = fullName.slice(0, -1).join(' ');
@@ -39,9 +42,8 @@
 	<form class="flex flex-col" method="POST" action="?/editStudent" use:enhance>
 		{#if handler?.errors?.length > 0}
 			{#each handler?.errors as error}
-				{#if error.errorInput === 'prevStudentData'}
-					<InputHelper color="red" msg={error.error} />
-				{/if}
+				<InputHelper color="red" msg={error.error} />
+				<p class="hidden">{ setTimeout(() => { error.error = ''; }, 2500) }</p>
 			{/each}
 		{/if}
 
@@ -59,13 +61,6 @@
 				required
 			/>
 		</div>
-		{#if handler?.errors?.length > 0}
-			{#each handler?.errors as error}
-				{#if error.errorInput === 'editID'}
-					<InputHelper color="red" msg={error.error} />
-				{/if}
-			{/each}
-		{/if}
 
 		<div class="my-2">
 			<FloatingLabelInput
@@ -105,13 +100,6 @@
 				/>
 			</div>
 		</div>
-		{#if handler?.errors?.length > 0}
-			{#each handler?.errors as error}
-				{#if error.errorInput === 'editID'}
-					<InputHelper color="red" msg={error.error} />
-				{/if}
-			{/each}
-		{/if}
 
 		<Select
 			size="sm"

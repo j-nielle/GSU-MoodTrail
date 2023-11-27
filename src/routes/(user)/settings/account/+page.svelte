@@ -32,7 +32,7 @@
 				<span class="font-medium">Updated succesfully!</span>
 			</Alert>
 		</div>
-		<p class="hidden">{ setTimeout(() => { form.success = null; }, 3000) }</p>
+		<p class="hidden">{ setTimeout(() => { form.success = false; }, 2500) }</p>
 	{:else if form?.error}
 		<div class="mb-4">
 			<Alert color="red" class="text-center">

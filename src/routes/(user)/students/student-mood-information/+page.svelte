@@ -618,7 +618,7 @@
 			<div class="flex flex-col">
 				{#if addedMoodEntryAlert}
 					<Alert color="green" class="mb-2"><span class="font-medium">Mood entry added succesfully!</span></Alert>
-					<!-- <p class="hidden">{ setTimeout(() => { form.success = null; }, 3000) }</p> -->
+					<p class="hidden">{ setTimeout(() => { addedMoodEntryAlert = false; }, 3000) }</p>
 				{:else if form?.error}
 					<Alert color="red" class="mb-2"><span class="font-medium">{form?.error}</span></Alert>
 				{/if}
