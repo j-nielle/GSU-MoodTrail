@@ -14,9 +14,13 @@ export const handle = async ({ event, resolve }) => {
 	});
 
 	event.locals.getSession = async () => {
-		const { data: { session }, error } = await event.locals.supabase.auth.getSession();
-		if (error) return console.error(error);
-		else return session;
+		try {
+			const { data: { session }, error } = await event.locals.supabase.auth.getSession();
+			if (error) throw error;
+			return session;
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	const userNotAllowed = ['/login', '/'];
