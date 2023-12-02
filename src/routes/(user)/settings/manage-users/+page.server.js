@@ -59,21 +59,15 @@ export const actions = {
 					role: role,
 					email_confirm: true
 				});
-				if (error) {
-					return fail(400, {
-						error: error.message,
-						success: false
-					});
-				}else{
-					return {
-						success: true,
-						successMsg: username+"'s account added successfully!",
-						error: false
-					}
+				if (error) throw error;
+				return {
+					success: true,
+					successMsg: username+"'s account added successfully!",
+					error: false
 				}
 			} catch (error) {
 				return fail(400, {
-					error: error.message,
+					error: error,
 					success: false
 				});
 			}
@@ -113,32 +107,22 @@ export const actions = {
 		}
 		else{
 			try {
-				const { data, error } = await adminAuthClient.getUserById(userID);
-				console.error(error);
-				if (error) {
-					return fail(400, {
-						error: error.message,
-						success: false
-					});
-				} else {
-					const { data, error } = await adminAuthClient.updateUserById(userID, {
-						email: newEmail,
-						user_metadata: { username: newUsername, role: newRole },
-						role: newRole
-					});
+				const { error: getUserByIdError } = await adminAuthClient.getUserById(userID);
+				
+				if (getUserByIdError) throw getUserByIdError;
 
-					if (error) {
-						return fail(400, {
-							error: error.message,
-							success: false
-						});
-					}else{
-						return {
-							success: true,
-							successMsg: newUsername+"'s account updated successfully!",
-							error: false
-						}
-					}
+				const { error: updateUserByIdError } = await adminAuthClient.updateUserById(userID, {
+					email: newEmail,
+					user_metadata: { username: newUsername, role: newRole },
+					role: newRole
+				});
+
+				if (updateUserByIdError) throw updateUserByIdError;
+
+				return {
+					success: true,
+					successMsg: newUsername+"'s account updated successfully!",
+					error: false
 				}
 			} catch (error) {
 				console.error(error);
@@ -173,19 +157,12 @@ export const actions = {
 			try {
 				const { data, error } = await adminAuthClient.deleteUser(userID);
 				
-				if (error) {
-					console.error(error);
-					return fail(400, {
-						error: error.message,
-						success: false
-					});
-				} else {
-					return {
-						success: true,
-						successMsg: 'User has been deleted successfully.',
-						error: false
-					};
-				}
+				if (error) throw error;
+				return {
+					success: true,
+					successMsg: 'User has been deleted successfully.',
+					error: false
+				};
 			} catch (error) {
 				return fail(400, {
 					error: error.message,

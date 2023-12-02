@@ -81,14 +81,15 @@ export const actions = {
 					.eq('name', newName)
 					.eq('year_level_id', newYearLevel)
 					.eq('course_id', newCourse);
-	
+				
+				if(error) throw error;
 				if (existingStudent.length > 0) {
 					errors.push({
 						errorInput: 'existingStudent',
 						error: 'Student already exists, please exit and try again.'
 					});
 				} else {
-					const { data, error } = await supabase
+					const { data, error: insertStudentError } = await supabase
 						.from('Student')
 						.insert([
 							{
@@ -100,16 +101,16 @@ export const actions = {
 						])
 						.select();
 	
-					if (error) {
-						console.error(error);
-						if (error.message == 'duplicate key value violates unique constraint "student_id_key"') {
+					if (insertStudentError) {
+						console.error(insertStudentError);
+						if (insertStudentError.message == 'duplicate key value violates unique constraint "student_id_key"') {
 							errors.push({
 								errorInput: 'duplicateID',
 								error: 'Student ID already exists, please exit and try again.'
 							});
 						}
-						else if(error.message == 'duplicate key value violates unique constraint "Student_name_key"' 
-							|| error.message == 'duplicate key value violates unique constraint "name_unique"') 
+						else if(insertStudentError.message == 'duplicate key value violates unique constraint "Student_name_key"' 
+							|| insertStudentError.message == 'duplicate key value violates unique constraint "name_unique"') 
 						{
 							errors.push({
 								errorInput: 'duplicateName',
@@ -205,13 +206,7 @@ export const actions = {
 						error: 'No changes made. Please exit and try again.'
 					});
 				} 
-				else if (error) {
-					console.error(error);
-					errors.push({
-						errorInput: 'error',
-						error: error.message
-					});
-				}
+				else if (error) throw error;
 				else {
 					const { data, error } = await supabase
 						.from('Student')
@@ -223,13 +218,7 @@ export const actions = {
 						})
 						.eq('id', studentRow)
 						.select();
-					if (error) {
-						console.error(error);
-						errors.push({
-							errorInput: 'error',
-							error: error.message
-						});
-					}
+					if (error) throw error;
 				}
 			} catch (error) {
 				console.error(error);
@@ -258,20 +247,13 @@ export const actions = {
 		const studentID = formData?.get('studentID');
 
 		try {
-			const { data, error } = await supabase.from('Student').delete().eq('student_id', studentID);
+			const { error } = await supabase.from('Student').delete().eq('student_id', studentID);
 
-			if (error) {
-				console.error(error);
-				return fail(400, {
-					error: error.message,
-					success: false
-				});
-			} else {
-				return {
-					success: true,
-					error: false
-				};
-			}
+			if (error) throw error;
+			return {
+				success: true,
+				error: false
+			};
 		} catch (error) {
 			return fail(400, {
 				error: error.message,
