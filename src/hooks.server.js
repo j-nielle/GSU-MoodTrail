@@ -15,8 +15,10 @@ export const handle = async ({ event, resolve }) => {
 
 	event.locals.getSession = async () => {
 		try {
-			const { data: { session }, error } = await event.locals.supabase.auth.getSession();
-			if (error) throw error;
+			const { data: { session }, error: getSessionError } = await event.locals.supabase.auth.getSession();
+
+			if (getSessionError) throw getSessionError;
+			
 			return session;
 		} catch (error) {
 			console.error(error);

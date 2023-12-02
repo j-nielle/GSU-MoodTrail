@@ -579,7 +579,8 @@
 		// prepare data in a format suitable for a radar chart
 		moodRadarData = Object.keys(moodData).map((moodLabel) => ({
 
-			// map mood data to an array of values, representing number of occurences for each reason under each mood
+			// map mood data to an array of values, 
+			// representing number of occurences for each reason under each mood
 			value: Object.keys(reason).map((reasonLabel) => moodData[moodLabel][reason[reasonLabel] - 1]),
 			name: moodLabel
 		}));
@@ -589,8 +590,8 @@
 			Math.max(...moodRadarData?.map((mood) => mood.value[reason[reasonLabel] - 1]))
 		);
 
-		// map over the keys of the 'reason' object. for each key (which we're calling 'reasonLabel'),
-		// we're also getting its index in the array of keys (which we're calling 'reasonIndex').
+		// map over the keys of the 'reason' object. for each key ('reasonLabel'),
+		// we're also getting its index in the array of keys ('reasonIndex').
 		reasonRadarIndicator = Object.keys(reason).map((reasonLabel, reasonIndex) => {
 
 			// get the maximum value for this reason from the 'maxValues' array.

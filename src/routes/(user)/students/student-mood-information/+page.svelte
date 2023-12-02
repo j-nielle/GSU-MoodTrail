@@ -791,7 +791,7 @@
 					</div>
 					<div class="mt-3 items-center">
 						<SimpleBarChart
-							xData={xDataSBC} yType="value" yName="Frequency" 
+							xData={xDataSBC} yType="value" yName="Frequency" yAxisRotate="90"
 							yData={yDataSBC} xType="category" xName="Reason"
 							title=""
 							fontSize="18"

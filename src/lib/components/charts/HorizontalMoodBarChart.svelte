@@ -75,7 +75,10 @@
 				feature: {
 					dataZoom: {
 						show: true,
-						xAxisIndex: 'none'
+						yAxisIndex: 'none'
+					},
+					restore: {
+						show: true
 					},
 					dataView: {
 						show: true,

@@ -25,7 +25,6 @@
 		if (prevMIndex !== -1) {
 			prevFName = fullName.slice(0, prevMIndex).join(' ');
 			prevMName = fullName[prevMIndex].slice(0, -1);
-			console.log(prevMName)
 			prevLName = fullName.slice(prevMIndex + 1).join(' ');
 		} else { // if not
 			prevFName = fullName.slice(0, -1).join(' ');
@@ -95,7 +94,7 @@
 					type="text"
 					value={prevLName}
 					label="Last Name"
-					minlength="3"
+					minlength="2"
 					required
 				/>
 			</div>

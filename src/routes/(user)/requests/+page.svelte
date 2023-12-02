@@ -107,13 +107,14 @@
 		let isCompleted = req.iscompleted;
 
 		try {
-			const { error } = await supabase
+			const { error: updateError } = await supabase
 				.from('Request')
 				.update({ iscompleted: isCompleted })
 				.eq('id', req.id)
 				.select()
 				.single();
-			if(error) console.error(error)
+
+			if(updateError) throw updateError;
 		} catch (error) {
 			console.error(error);
 		}

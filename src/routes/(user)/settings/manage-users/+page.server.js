@@ -52,28 +52,24 @@ export const actions = {
 		}
 		else {
 			try {
-				const { data, error } = await adminAuthClient.createUser({
+				const { error: createUserError } = await adminAuthClient.createUser({
 					email: email,
 					password: password,
 					user_metadata: { username: username, role: role },
 					role: role,
 					email_confirm: true
 				});
-				if (error) {
-					return fail(400, {
-						error: error.message,
-						success: false
-					});
-				}else{
-					return {
-						success: true,
-						successMsg: username+"'s account added successfully!",
-						error: false
-					}
+
+				if (createUserError) throw createUserError;
+
+				return {
+					success: true,
+					successMsg: username+"'s account added successfully!",
+					error: false
 				}
 			} catch (error) {
 				return fail(400, {
-					error: error.message,
+					error: error,
 					success: false
 				});
 			}
@@ -93,7 +89,7 @@ export const actions = {
 
 		const formData = await request.formData();
 		const userID = formData?.get('userID');
-		const newUsername = formData?.get('editUsername');
+		const newUsername = formData?.get('editUsername') || 'User';
 		const newRole = formData?.get('editRole');
 		const newEmail = formData?.get('editEmail');
 		// console.log(formData)
@@ -105,7 +101,7 @@ export const actions = {
 				};
 			}
 		}
-		else if (!userID || !newUsername || !newEmail || !newRole){
+		else if (!userID || !newEmail || !newRole){
 			return {
 				error: "Missing fields. Please try again later.",
 				success: false
@@ -130,13 +126,13 @@ export const actions = {
 
 				return {
 					success: true,
-					successMsg: newUsername+"'s account updated successfully!",
+					successMsg: "An account has been updated successfully!",
 					error: false
 				}
 			} catch (error) {
 				console.error(error);
 				return fail(400, {
-					error: error.message,
+					error: error,
 					success: false
 				});
 			}
@@ -164,24 +160,18 @@ export const actions = {
 		}
 		else {
 			try {
-				const { data, error } = await adminAuthClient.deleteUser(userID);
+				const { error: deleteUserError } = await adminAuthClient.deleteUser(userID);
 				
-				if (error) {
-					console.error(error);
-					return fail(400, {
-						error: error.message,
-						success: false
-					});
-				} else {
-					return {
-						success: true,
-						successMsg: 'User has been deleted successfully.',
-						error: false
-					};
-				}
+				if (deleteUserError) throw deleteUserError;
+
+				return {
+					success: true,
+					successMsg: 'User has been deleted successfully.',
+					error: false
+				};
 			} catch (error) {
 				return fail(400, {
-					error: error.message,
+					error: error,
 					success: false
 				});
 			}

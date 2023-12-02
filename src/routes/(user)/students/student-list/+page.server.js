@@ -74,21 +74,23 @@ export const actions = {
 		}
 		else {
 			try {
-				const { data: existingStudent, error } = await supabase
+				const { data: existingStudent, error: searchStudentError } = await supabase
 					.from('Student')
 					.select('*')
 					.eq('student_id', newID)
 					.eq('name', newName)
 					.eq('year_level_id', newYearLevel)
 					.eq('course_id', newCourse);
-	
+				
+				if(searchStudentError) throw searchStudentError;
 				if (existingStudent.length > 0) {
 					errors.push({
 						errorInput: 'existingStudent',
 						error: 'Student already exists, please exit and try again.'
 					});
-				} else {
-					const { data, error } = await supabase
+				} 
+				else{
+					const { error: insertStudentError } = await supabase
 						.from('Student')
 						.insert([
 							{
@@ -100,26 +102,29 @@ export const actions = {
 						])
 						.select();
 	
-					if (error) {
-						console.error(error);
-						if (error.message == 'duplicate key value violates unique constraint "student_id_key"') {
+					if (insertStudentError) {
+						if (insertStudentError.message == 'duplicate key value violates unique constraint "student_id_key"') {
 							errors.push({
 								errorInput: 'duplicateID',
 								error: 'Student ID already exists, please exit and try again.'
 							});
 						}
-						else if(error.message == 'duplicate key value violates unique constraint "Student_name_key"' 
-							|| error.message == 'duplicate key value violates unique constraint "name_unique"') 
+						else if(insertStudentError.message == 'duplicate key value violates unique constraint "Student_name_key"' 
+							|| insertStudentError.message == 'duplicate key value violates unique constraint "name_unique"') 
 						{
 							errors.push({
 								errorInput: 'duplicateName',
 								error: 'Student name already exists, please exit and try again.'
 							});
 						}
+						else throw insertStudentError;
 					}
 				}
 			} catch (error) {
-				console.error(error);
+				errors.push({
+					errorInput: 'error',
+					error: error
+				});
 			}
 		}
 
@@ -192,28 +197,23 @@ export const actions = {
 		}
 		else {
 			try {
-				const { data: prevStudentData, error } = await supabase
+				const { data: prevStudentData, error: searchStudentError } = await supabase
 					.from('Student')
 					.select('*')
 					.eq('student_id', editID)
 					.eq('name', editName)
 					.eq('year_level_id', editYearLevel)
 					.eq('course_id', editCourse);
+				
+				if(searchStudentError) throw searchStudentError;
 				if (prevStudentData?.length > 0) {
 					errors.push({
 						errorInput: 'prevStudentData',
 						error: 'No changes made. Please exit and try again.'
 					});
-				} 
-				else if (error) {
-					console.error(error);
-					errors.push({
-						errorInput: 'error',
-						error: error.message
-					});
 				}
-				else {
-					const { data, error } = await supabase
+				else{
+					const { error: updateStudentError } = await supabase
 						.from('Student')
 						.update({
 							student_id: editID,
@@ -223,19 +223,13 @@ export const actions = {
 						})
 						.eq('id', studentRow)
 						.select();
-					if (error) {
-						console.error(error);
-						errors.push({
-							errorInput: 'error',
-							error: error.message
-						});
-					}
+					if (updateStudentError) throw updateStudentError;
 				}
 			} catch (error) {
 				console.error(error);
 				errors.push({
 					errorInput: 'error',
-					error: error.message
+					error: error
 				});
 			}
 		}
@@ -258,23 +252,17 @@ export const actions = {
 		const studentID = formData?.get('studentID');
 
 		try {
-			const { error } = await supabase.from('Student').delete().eq('student_id', studentID);
+			const { error: deleteStudentError } = await supabase.from('Student').delete().eq('student_id', studentID);
 
-			if (error) {
-				console.error(error);
-				return fail(400, {
-					error: error.message,
-					success: false
-				});
-			} else {
-				return {
-					success: true,
-					error: false
-				};
-			}
+			if (deleteStudentError) throw deleteStudentError;
+			
+			return {
+				success: true,
+				error: false
+			};
 		} catch (error) {
 			return fail(400, {
-				error: error.message,
+				error: error,
 				success: false
 			});
 		}
