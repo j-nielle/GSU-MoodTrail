@@ -597,20 +597,17 @@
 			// get the maximum value for this reason from the 'maxValues' array.
 			let maxValue = maxValues[reasonIndex];
 
-			// round up the maximum value to the nearest multiple of 10
-			// which will give ECharts more room to generate readable ticks.
-			// another solution would be to set the interval to 1, but that would
+			// one solution would be to set the interval to 1, but that would
 			// make the chart look too cluttered.
 			// is this optimal? i don't know. but it works for now.
 
-			// [ECharts] The ticks may be not readable when set min: 0, max: 20 and alignTicks: true
+			// [ECharts] The ticks may be not readable ... error
 			// idk why this happens but it's probably because the ticks are too close together
-			// even when im rounding up to the nearest multiple of 10
-			// so i'm just gonna set the max value to 100 for now
-			let roundedMax = 100// Math.ceil(maxValue / 10) * 10;
+			// so i'm just gonna set the max value to this (round up to the nearest multiple of 10)
+			let roundedMax = Math.ceil(maxValue / 10) * 10;
 
 			// return an object for this reason which includes the name of the reason 
-			// and the rounded maximum value.
+			// and the max.
 			return {
 				name: reasonLabel,
 				max: roundedMax

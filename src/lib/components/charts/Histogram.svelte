@@ -12,28 +12,15 @@
 
 	let histogramChart;
   let transformedData;
-  let median;
 
   $: transformedData = data?.map(function (item) {
     // returns an array with x as the login hour and y as the mood score
     return [new Date(item.created_at).getHours(), item.mood_score];
   });
 
-  $: {
-    let values = data?.map(item => item.mood_score);
-    let sortedValues = values?.sort((currentElem, nextElem) => currentElem - nextElem);
-    let middleIndex = Math.floor(sortedValues?.length / 2);
-
-    if (sortedValues.length % 2 === 0) {
-      median = (sortedValues[middleIndex - 1] + sortedValues[middleIndex]) / 2;
-    } else {
-      median = sortedValues[middleIndex];
-    }
-  }
-
 	onMount(() => {
     echarts.registerTransform(ecStat.transform.histogram);
-		histogramChart = echarts?.init(document.getElementById(elementID));
+		histogramChart = echarts?.init(document?.getElementById(elementID));
 
 		histogramChart?.setOption({
 			tooltip: {
@@ -104,6 +91,7 @@
 						show: true,
             yAxisIndex: true
 					},
+          dataView: { show: true, readOnly: false },
           restore: {
             show: true
           },

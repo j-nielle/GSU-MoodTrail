@@ -2,7 +2,7 @@
 	// @ts-nocheck
 	import * as echarts from 'echarts';
 	import { onMount, afterUpdate } from 'svelte';
-	import { mood, moodColors } from '$lib/constants/index.js';
+	import { moodColors } from '$lib/constants/index.js';
 
 	export let elementID;
 	export let style;
@@ -10,6 +10,8 @@
 	export let data;
 
 	let radarChart;
+
+	console.log(indicator)
 
 	onMount(() => {
 		radarChart = echarts.init(document.getElementById(elementID));
@@ -38,7 +40,12 @@
 					show: true
 				},
 				axisNameGap: 10,
-				scale: true
+				scale: true,
+				axisLabel: {
+					show: true,
+      		showMaxLabel: true,
+      		color: "rgba(215, 215, 215, 1)"
+				}
 			},
 			series: [
 				{
@@ -66,7 +73,7 @@
 			toolbox: {
 				show: true,
 				feature: {
-					// no dataZoom since di siya ga work sa radar charts.
+					// no dataZoom since di jud siya ga work sa radar charts.
 					dataView: { show: true, readOnly: false },
 					saveAsImage: { show: true }
 				}
