@@ -41,17 +41,10 @@ export const actions = {
 				])
 				.select()
 
-			if(error){
-				console.error(error)
-				return{
-					success: false,
-					error: error.message
-				}
-			}else{
-				return{
-					success: true,
-					error: false
-				}
+			if(error) throw error;
+			return{
+				success: true,
+				error: false
 			}
 		} catch (error) {
 			console.error(error)

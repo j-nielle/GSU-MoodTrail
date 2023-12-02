@@ -74,30 +74,19 @@ export const actions = {
 		const adminAuthClient = supabaseAdminClient.auth.admin;
 
 		try {
-			const { error } = await adminAuthClient.getUserById(id);
-
-			if (error) {
-				console.error(error);
-				return fail(400, {
-					error: error.message,
-					success: false
-				});
-			}else{
-				const { data, error } = await adminAuthClient.updateUserById(id, {
-					email: newEmail
-				});
-				if (error) {
-					console.error(error.message)
-					return fail(400, {
-						error: error.message,
-						success: false
-					});
-				}else{
-					return {
-						success: true,
-						error: false
-					}
-				}
+			const { error: getUserError } = await adminAuthClient.getUserById(id);
+		
+			if (getUserError) throw getUserError;
+		
+			const { data, error: updateUserError } = await adminAuthClient.updateUserById(id, {
+				email: newEmail
+			});
+		
+			if (updateUserError) throw updateUserError;
+		
+			return {
+				success: true,
+				error: false
 			}
 		} catch (error) {
 			console.error(error)

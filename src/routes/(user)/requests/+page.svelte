@@ -113,7 +113,7 @@
 				.eq('id', req.id)
 				.select()
 				.single();
-			if(error) console.error(error)
+			if(error) throw (error)
 		} catch (error) {
 			console.error(error);
 		}
