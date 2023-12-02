@@ -113,7 +113,10 @@ export const actions = {
 
 				const { error: updateUserByIdError } = await adminAuthClient.updateUserById(userID, {
 					email: newEmail,
-					user_metadata: { username: newUsername, role: newRole },
+					user_metadata: { 
+						username: newUsername, 
+						role: newRole 
+					},
 					role: newRole
 				});
 
