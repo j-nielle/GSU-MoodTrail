@@ -59,15 +59,21 @@ export const actions = {
 					role: role,
 					email_confirm: true
 				});
-				if (error) throw error;
-				return {
-					success: true,
-					successMsg: username+"'s account added successfully!",
-					error: false
+				if (error) {
+					return fail(400, {
+						error: error.message,
+						success: false
+					});
+				}else{
+					return {
+						success: true,
+						successMsg: username+"'s account added successfully!",
+						error: false
+					}
 				}
 			} catch (error) {
 				return fail(400, {
-					error: error,
+					error: error.message,
 					success: false
 				});
 			}
@@ -160,12 +166,19 @@ export const actions = {
 			try {
 				const { data, error } = await adminAuthClient.deleteUser(userID);
 				
-				if (error) throw error;
-				return {
-					success: true,
-					successMsg: 'User has been deleted successfully.',
-					error: false
-				};
+				if (error) {
+					console.error(error);
+					return fail(400, {
+						error: error.message,
+						success: false
+					});
+				} else {
+					return {
+						success: true,
+						successMsg: 'User has been deleted successfully.',
+						error: false
+					};
+				}
 			} catch (error) {
 				return fail(400, {
 					error: error.message,

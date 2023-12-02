@@ -9,21 +9,34 @@ export const actions = {
 				.from('Users')
 				.select("*")
 				.eq('email', email)
-			if(error) throw error;
+			if(error){
+				console.error(error)
+				return {
+					error: error.message,
+					success: false
+				}
+			}
 			else if(user?.length > 0){
-				const { error: resetPassError } = await supabase.auth.resetPasswordForEmail(email, {
+				const { error } = await supabase.auth.resetPasswordForEmail(email, {
 					redirectTo: `${url.origin}/auth/callback?next=/settings/account`
 				});
 		
-				if (resetPassError)  throw resetPassError;
-				return {
+				if (error) {
+					console.error(error);
+					return {
+						error: error.message,
+						success: false
+					}
+				}else{
+					return {
 						success: true,
 						error: false
 					};
+				}
 			}
 			else if(user?.length === 0 && error === null){
 				return {
-					error: "Email not found in our database.",
+					error: "Email not found.",
 					success: false
 				}
 			}

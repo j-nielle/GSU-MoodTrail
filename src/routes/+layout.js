@@ -16,13 +16,15 @@ export async function load({ fetch, data, depends }) {
 		serverSession: data.session
 	});
 
-	try {
-		const { data: { session }, error } = await supabase.auth.getSession();
-		if (error) throw error;
-		return { supabase, session };
-	} catch (error) {
-		console.error(error);
+	const { data: { session }, error } = await supabase.auth.getSession(); // await supabase.auth.refreshSession({ refreshToken });
+	
+	if (error) {
+		console.error("ERROR:",error.message);
+		return {
+			error: error.message
+		}
 	}
+	return { supabase, session };
 }
 
 /** @type {import('@sveltejs/adapter-vercel').Config} */
