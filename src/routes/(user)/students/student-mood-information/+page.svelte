@@ -169,7 +169,7 @@
 			result = studentMoodData?.filter((student) => student?.student_id == searchTerm);
 			//console.log(result)
 			currentStudentID = result[0]?.student_id;
-		} else if (hasEntry === undefined){
+		} else if (!hasEntry){
 			result = {};
 			urlResult = students?.filter((student) => student?.student_id == searchTerm);
 			//console.log(urlResult)
