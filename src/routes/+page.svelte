@@ -11,3 +11,4 @@
 	<p class="italic">“Tracking Student Moods, Transforming Campus Experiences”</p>
 	<p class="font-semibold">USTP-CDO Guidance Services Unit's Mood Monitoring Dashboard System</p>
 </div>
+<p class="text-xs text-center italic text-neutral-400">(note: placeholder landing page, 3d landing page soon)</p>
