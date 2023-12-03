@@ -10,18 +10,15 @@ export async function load({ locals: { supabase, getSession } }) {
 		throw redirect(303, '/login');
 	}
 
-	const { data: { user }, error } = await supabase.auth.getUser();
-
-	if (error) {
-		console.error(error);
-		return{
-			error: error.message
+	try {
+		const { data: { user }, error } = await supabase.auth.getUser();
+		if(error) throw error;
+		return {
+			user: user || []
 		};
+	} catch (error) {
+		console.error(error)
 	}
-
-	return {
-		user: user || []
-	};
 }
 
 /** @type {import('./$types').Actions} */
@@ -31,22 +28,21 @@ export const actions = {
 
 		const username = formData.get('newUsername');
 
-		
-		const { data, error } = await supabase.auth.updateUser({
-			data: { username: username }
-		})
-		
-		if (error) {
-			console.error(error);
-			return fail(400, {
-				error: error.message,
-				success: false
-			});
-		}else{
+		try {
+			const { error } = await supabase.auth.updateUser({
+				data: { username: username }
+			})
+			if (error) throw error;
 			return {
 				success: true,
 				error: false
 			};
+		} catch (error) {
+			console.error("ERROR:",error.message)
+			return fail(400, {
+				error: error.message,
+				success: false
+			});
 		}
 	},
 
@@ -89,9 +85,9 @@ export const actions = {
 				error: false
 			}
 		} catch (error) {
-			console.error(error)
+			console.error("ERROR:",error.message)
 			return fail(400, {
-				error: error,
+				error: error.message,
 				success: false
 			});
 		}
@@ -105,7 +101,7 @@ export const actions = {
 		const { data, error } = await supabase.auth.updateUser({password: password})
 		
 		if (error) {
-			console.error(error);
+			console.error("ERROR:",error.message)
 			return fail(400, {
 				error: error.message,
 				success: false

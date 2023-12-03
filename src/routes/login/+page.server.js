@@ -13,13 +13,8 @@ export const actions = {
 			password
 		});
 
-		if (error) {
-			if (error instanceof AuthApiError && error.status === 400) {
-				return fail(400, {
-					error: 'Invalid credentials.',
-					success: false
-				});
-			}
+		if(error) {
+			console.error("ERROR:",error.message)
 			return fail(400, {
 				error: error.message,
 				success: false

@@ -12,19 +12,28 @@ export async function load({ locals: { supabase, getSession } }) {
 		throw redirect(303, '/login');
 	}
 
-	const { data } = await supabase
+	try {
+		const { data, error: getUsersError } = await supabase
 		.from('Users')
 		.select()
 		.order('username', { ascending: true });
 
-	const { data: { user: currentAdmin }, error } = await supabase.auth.getUser();
+		if (getUsersError) throw getUsersError;
 
-	const users = data.filter((user) => { return user.id != currentAdmin.id });
+		const { data: { user: currentAdmin }, error: getUserError } = await supabase.auth.getUser();
 
-	return {
-		users: users || [],
-		session: session
-	};
+		if (getUserError) throw getUserError;
+
+		// return all users except the current admin
+		const users = data.filter((user) => { return user.id != currentAdmin.id });
+
+		return {
+			users: users || [],
+			session: session
+		};
+	} catch (error) {
+		console.error(error)
+	}
 }
 
 export const actions = {
@@ -68,8 +77,9 @@ export const actions = {
 					error: false
 				}
 			} catch (error) {
+				console.error("ERROR:",error.message)
 				return fail(400, {
-					error: error,
+					error: error.message,
 					success: false
 				});
 			}
@@ -130,9 +140,9 @@ export const actions = {
 					error: false
 				}
 			} catch (error) {
-				console.error(error);
+				console.error("ERROR:",error.message)
 				return fail(400, {
-					error: error,
+					error: error.message,
 					success: false
 				});
 			}
@@ -170,8 +180,9 @@ export const actions = {
 					error: false
 				};
 			} catch (error) {
+				console.error("ERROR:",error.message)
 				return fail(400, {
-					error: error,
+					error: error.message,
 					success: false
 				});
 			}

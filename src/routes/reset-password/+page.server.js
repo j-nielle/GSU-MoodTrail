@@ -1,4 +1,6 @@
 // @ts-nocheck
+import { fail } from '@sveltejs/kit';
+
 export const actions = {
 	requestPassReset: async ({ request, url, locals: { supabase } }) => {
 		const formData = await request.formData();
@@ -24,17 +26,17 @@ export const actions = {
 				};
 			}
 			else if(user?.length === 0 && error === null){
-				return {
+				return fail(400, {
 					error: "Email not found.",
 					success: false
-				}
+				});
 			}
 		} catch (error) {
-			console.error(error)
-			return {
-				error: error,
+			console.error("ERROR:",error.message)
+			return fail(400, {
+				error: error.message,
 				success: false
-			}
+			});
 		}
 	}
 };

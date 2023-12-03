@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { redirect } from '@sveltejs/kit';
+import { fail,redirect } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ url, locals: { supabase, getSession } }) {
@@ -121,9 +121,10 @@ export const actions = {
 					}
 				}
 			} catch (error) {
+				console.error("ERROR:",error.message)
 				errors.push({
 					errorInput: 'error',
-					error: error
+					error: error.message
 				});
 			}
 		}
@@ -226,10 +227,10 @@ export const actions = {
 					if (updateStudentError) throw updateStudentError;
 				}
 			} catch (error) {
-				console.error(error);
+				console.error("ERROR:",error.message);
 				errors.push({
 					errorInput: 'error',
-					error: error
+					error: error.message
 				});
 			}
 		}
@@ -261,8 +262,9 @@ export const actions = {
 				error: false
 			};
 		} catch (error) {
+			console.error("ERROR:",error.message)
 			return fail(400, {
-				error: error,
+				error: error.message,
 				success: false
 			});
 		}

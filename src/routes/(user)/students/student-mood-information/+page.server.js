@@ -1,4 +1,4 @@
-import { redirect } from '@sveltejs/kit';
+import { fail,redirect } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals: { supabase, getSession } }) {
@@ -48,11 +48,11 @@ export const actions = {
 				error: false
 			}
 		} catch (error) {
-			console.error(error)
-			return{
-				success: false,
-				error: error
-			}
+			console.error("ERROR:",error.message)
+			return fail(400, {
+				error: error.message,
+				success: false
+			});
 		}
 	}
 };
