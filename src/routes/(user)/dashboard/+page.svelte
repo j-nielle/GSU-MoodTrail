@@ -1481,17 +1481,17 @@
 		<!-- Calendar Chart -->
 		<div id="moodCalendar" class="bg-white rounded drop-shadow-md flex justify-center hover:ring-1">
 			<div class="flex flex-col mt-1 px-4">
-				<div class="flex flex-row justify-between space-y-3 mt-4">
-					<div class="flex flex-col justify-start items-center mt-2">
-						<p class="font-semibold self-start">Mood-Reason Calendar</p>
-						<p class="text-xs">(Please select a mood and the associated reason.)</p>
-					</div>
-					<div class="flex flex-row space-x-3">
-						<Select placeholder="Select Mood" class="font-normal w-max h-11 bg-white" items={moodChoices} bind:value={selectedMoodCalendar} />
-						<Select placeholder="Select Associated Reason" class="font-normal w-max h-11 bg-white" items={reasonChoices} bind:value={selectedReasonCalendar} />
-					</div>
-				</div>
 				{#if dataType?.length > 0}
+					<div class="flex flex-row justify-between space-y-3 mt-4">
+						<div class="flex flex-col justify-start items-center mt-2">
+							<p class="font-semibold self-start">Mood-Reason Calendar</p>
+							<p class="text-xs">(Please select a mood and the associated reason.)</p>
+						</div>
+						<div class="flex flex-row space-x-3">
+							<Select placeholder="Select Mood" class="font-normal w-max h-11 bg-white" items={moodChoices} bind:value={selectedMoodCalendar} />
+							<Select placeholder="Select Associated Reason" class="font-normal w-max h-11 bg-white" items={reasonChoices} bind:value={selectedReasonCalendar} />
+						</div>
+					</div>
 					<div class="items-center">
 						<CalendarChart 
 							data={dataType} seriesName="Mood-Reason Calendar"
@@ -1502,7 +1502,7 @@
 						/>
 					</div>
 				{:else}
-					<div class="flex flex-col justify-center items-center w-full space-y-5">
+					<div class="flex flex-col justify-center items-center w-full space-y-5 my-4">
 						<RocketOutline class="h-20 w-20" />
 						<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
 					</div>
