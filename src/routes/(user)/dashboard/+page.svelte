@@ -804,7 +804,7 @@
 
 		// SIMPLE BAR CHART - # OF MOOD ENTRIES PER WEEKDAY
 		// filter the dataType array to only include entries with the selected mood score
-		let filteredSelectedMoodData = dataType?.filter(data => data.mood_score == selectedMoodScore);
+		let filteredSelectedMoodData = dataType?.filter(data => data.mood_score === selectedMoodScore);
 
 		// group the filtered data by the day of the week when each entry was created
 		const groupedDays = _.groupBy(filteredSelectedMoodData, (data) => {
