@@ -84,7 +84,7 @@
 	let timestamps = [],
 		todaysMoodScores = [];
 
-	let selectedLineChart = 'today',
+	let selectedLineChart = 'weekly',
 		lineChartTitle = '';
 	let selectedNHBarChart = 'course';
 
@@ -244,11 +244,24 @@
 		// FOR HORIZONTAL MOOD BAR CHART - MOOD FREQUENCY
 		const moodCount = {}; // object to store the count of each mood
 
+		/**
+		 * example: 
+		 * 
+		 * moodCount = {
+		 *	Happy: 3,
+		 *	Calm: 2,
+		 *	Sad: 1,
+		 *	Excited: 1,
+		 *	Nervous: 1,
+		 *	Neutral: 1,
+		 *	Bored: 3
+		 * }
+		*/
 		dataType.forEach((item) => {
 			const moodScore = item.mood_score; // get mood_score from the current item
 			let moodLabel = null;
 
-			// iterate over each key in the mood object
+			// iterate over each key in the mood object (basically mood label:value pairs)
 			for (const key in mood) {
 				// if the current key's value matches the moodScore, 
 				// make key the value of moodLabel and break the loop
@@ -271,8 +284,8 @@
 			Object.entries(moodCount).sort(([, curr], [, next]) => curr - next)
 		);
 
-		xDataMBC = _.keys(sortedMoodCount);
-		yDataMBC = _.values(sortedMoodCount);
+		xDataMBC = _.keys(sortedMoodCount); // 'Happy', 'Calm', 'Sad', 'Excited', 'Nervous', 'Neutral', 'Bored
+		yDataMBC = _.values(sortedMoodCount); // 3, 2, 1, 1, 1, 1, 3 
 
 		// FOR SIMPLE BAR CHART - ASSOCIATED REASON FREQUENCY
 		const reasonCount = {}; // object to store the count of each reason
@@ -313,7 +326,6 @@
 				(entry) => dayjs(entry.created_at).format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD')
 			);
 
-			// map the timestamps of today's entries to an array
 			timestamps = _.map(todaysEntries, (entry) => dayjs(entry.created_at).format('HH:mm:ss')); // x
 			todaysMoodScores = _.map(todaysEntries, (entry) => entry.mood_score); // y
 
@@ -340,7 +352,7 @@
 			const groupedByDay = _.groupBy(dataType, (entry) =>
 				dayjs(entry.created_at).format('YYYY-MM-DD')
 			); 
-
+			
 			overall = _.sortBy(_.keys(groupedByDay)); // x, all days recorded (sorted in ascending order)
 
 			// y, average mood score for each day
@@ -352,7 +364,7 @@
 
 			// object that stores number of occurences (value) for each recorded mood_score (key)
 			const mostFreqMood = Object.entries(groupedByDay)
-				.flatMap(([_, entries]) => entries) // get the entries from groupedByWeek object into a single array
+				.flatMap(([_, entries]) => entries) // get the entries from groupedByDay object into a single array
 				.reduce((moodCounts, entry) => {
 					const mood = entry.mood_score;
 					moodCounts[mood] = (moodCounts[mood] || 0) + 1; // 0 if mood is not yet in moodCounts, else increment by 1
@@ -585,32 +597,24 @@
 			name: moodLabel
 		}));
 	
-		// get the maximum value for each reason
-		const maxValues = Object.keys(reason).map((reasonLabel) =>
-			Math.max(...moodRadarData?.map((mood) => mood.value[reason[reasonLabel] - 1]))
-		);
+		let maxCount = 0;
+		moodRadarData.forEach(mood => {
+			const moodMax = Math.max(...mood.value);
+			if (moodMax > maxCount) maxCount = moodMax;
+		});
+
+		// scale factor for the maximum axis value
+		const scaleFactor = 1.2; 
+
+		// get the maximum axis value by multiplying the maximum count by the scale factor
+		const maxAxisValue = Math.ceil(maxCount * scaleFactor);
 
 		// map over the keys of the 'reason' object. for each key ('reasonLabel'),
 		// we're also getting its index in the array of keys ('reasonIndex').
 		reasonRadarIndicator = Object.keys(reason).map((reasonLabel, reasonIndex) => {
-
-			// get the maximum value for this reason from the 'maxValues' array.
-			let maxValue = maxValues[reasonIndex];
-
-			// one solution would be to set the interval to 1, but that would
-			// make the chart look too cluttered.
-			// is this optimal? i don't know. but it works for now.
-
-			// [ECharts] The ticks may be not readable ... error
-			// idk why this happens but it's probably because the ticks are too close together
-			// so i'm just gonna set the max value to this (round up to the nearest multiple of 10)
-			let roundedMax = Math.ceil(maxValue / 10) * 10;
-
-			// return an object for this reason which includes the name of the reason 
-			// and the max.
 			return {
 				name: reasonLabel,
-				max: roundedMax
+				max: maxAxisValue
 			};
 		});
 
