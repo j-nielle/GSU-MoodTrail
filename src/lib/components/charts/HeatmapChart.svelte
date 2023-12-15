@@ -9,7 +9,7 @@
 	export let elementID;
 	export let style;
 
-	// Define the days and hours for the axis labels
+	// define the days and hours for the axis labels
 	var days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
 
 	// creates an array of hours from 1-12 and appends AM or PM

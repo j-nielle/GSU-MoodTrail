@@ -43,11 +43,6 @@
 					table: 'Request'
 				},(payload) => {
 					requestsData = _.cloneDeep([payload.new, ...requestsData]);
-					// requestsData.sort((currentElem, nextElem) => { // sort by date
-					// 	const currentDate = new Date(currentElem.created_at);
-					// 	const nextDate = new Date(nextElem.created_at);
-					// 	return currentDate - nextDate;
-					// });
 				}
 			).subscribe() // (status) => console.log('/requests',status));
 
@@ -81,15 +76,13 @@
 		endIndex = startIndex + limit; // get the ending index for the current page.
 		maxPage = Math.ceil(filteredItems?.length / limit); // get the max number of pages.
 		
-		// if current page number exceeds the max number of pages
-		if (page > maxPage) {
+		if (page > maxPage) { // if current page number exceeds the max number of pages
 			page = 1; // set the current page to be the last page.
 
 			// recalculate the starting and ending indices for the last page
 			startIndex = (page - 1) * limit;
 			endIndex = startIndex + limit;
 		}
-
 		// get only those items from 'filteredItems' that belong to the current page.
 		paginatedItems = filteredItems?.slice(startIndex, endIndex);
 	}
