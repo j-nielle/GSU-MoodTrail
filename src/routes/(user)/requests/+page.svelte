@@ -55,7 +55,6 @@
 		filteredItems = requestsData?.filter((req) => {
 			const phoneMatch = req.contact_num.includes(searchTerm);
 			const reqMatch = requestTypes[req.request_type].toLowerCase().includes(searchTerm.toLowerCase());
-			const statusMatch = req.iscompleted.toString().toLowerCase().includes(searchTerm.toLowerCase());
 
 			// if date filter is not empty, it will format the date of the results to YYYY-MM-DD
 			// else it will return true which means it will not filter the data
@@ -64,9 +63,9 @@
 			// if both search term and date filter are not empty
 			return searchTerm !== '' && dateFilter !== '' 
 				// then it will filter the data according to the search term and date filter
-				? (phoneMatch || reqMatch || statusMatch) && dateMatch 
+				? (phoneMatch || reqMatch) && dateMatch 
 				: searchTerm !== '' // else if search term is not empty
-				? phoneMatch || reqMatch || statusMatch // then it will filter the data according to the search term
+				? phoneMatch || reqMatch // then it will filter the data according to the search term
 				: dateFilter !== '' // else if date filter is not empty
 				? dateMatch // then it will filter the data according to the date filter
 				: true; // else it will return true which means it will not filter the data
@@ -74,7 +73,7 @@
 
 		startIndex = (page - 1) * limit; // get the starting index for the current page.
 		endIndex = startIndex + limit; // get the ending index for the current page.
-		maxPage = Math.ceil(filteredItems?.length / limit); // get the max number of pages.
+		; // get the max number of pages.
 		
 		if (page > maxPage) { // if current page number exceeds the max number of pages
 			page = 1; // set the current page to be the last page.
@@ -83,16 +82,15 @@
 			startIndex = (page - 1) * limit;
 			endIndex = startIndex + limit;
 		}
-		// get only those items from 'filteredItems' that belong to the current page.
-		paginatedItems = filteredItems?.slice(startIndex, endIndex);
-	}
 
-	$: {
-    if(incompleteOnly){
+		if(incompleteOnly){
 			// paginatedItems will only show the incomplete requests
       paginatedItems = filteredItems?.filter(req => !req.iscompleted).slice(startIndex, endIndex);
+			const remainingItems = filteredItems?.filter(req => !req.iscompleted);
+			maxPage = Math.ceil(remainingItems?.length / limit)
     } else {
-       paginatedItems = filteredItems?.slice(startIndex, endIndex);
+      paginatedItems = filteredItems?.slice(startIndex, endIndex);
+			maxPage = Math.ceil(filteredItems?.length / limit)
     }
 	}
 
@@ -133,7 +131,7 @@
 <div class="bg-white">
 	<div class="flex justify-between">
 		<div class="flex items-center ml-8">
-			<Search size="md" class="w-96 mr-3 h-11" placeholder="Search by phone number, request, or status*" bind:value={searchTerm} />
+			<Search size="md" class="w-96 mr-3 h-11" placeholder="Search by phone number or request type" bind:value={searchTerm} />
 			<div class="flex flex-row justify-start w-full space-x-2">
 				<Checkbox class="cursor-pointer mr-0" bind:value={incompleteOnly} on:change={() => incompleteOnly = !incompleteOnly} />
 				<P class="text-sm font-normal text-gray-500 dark:text-gray-400">Show Incomplete Requests Only</P>
@@ -154,9 +152,6 @@
 				<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
 					By default, it shows requests for the current date and is sorted according to the latest
 					request.
-				</p>
-				<p class="mt-1 text-xs font-light text-gray-500 dark:text-gray-400">
-					(*status: false/true, pertains to the completion of the request)
 				</p>
 			</P>
 			{#if maxPage > 1}
