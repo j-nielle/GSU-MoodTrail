@@ -13,6 +13,7 @@
 	let currentMood;
 	let showSymbol = false;
 
+	//$: console.log(yData?.length)
 	$: currentMood = yData?.map((score) => getNearestMoodLabel(score, mood));
 	$: currentMood?.length != 1 ? (showSymbol = false) : (showSymbol = true);
 

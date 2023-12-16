@@ -84,7 +84,7 @@
 	let timestamps = [],
 		todaysMoodScores = [];
 
-	let selectedLineChart = 'weekly',
+	let selectedLineChart = 'today',
 		lineChartTitle = '';
 	let selectedNHBarChart = 'course';
 
@@ -370,7 +370,7 @@
 					moodCounts[mood] = (moodCounts[mood] || 0) + 1; // 0 if mood is not yet in moodCounts, else increment by 1
 					return moodCounts;
 				}, {});
-
+			//console.log(mostFreqMood)	
 			// object that stores number of occurences (value) for each recorded reason_score (key)
 			const mostFreqReason = Object.entries(groupedByDay)
 				.flatMap(([_, entries]) => entries)
