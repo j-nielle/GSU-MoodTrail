@@ -8,11 +8,17 @@
 	export let style;
 	export let indicator;
 	export let data;
+	export let title;
 
 	let radarChart;
 
 	onMount(() => {
 		radarChart = echarts.init(document.getElementById(elementID));
+
+		window?.addEventListener('resize', () => {
+			radarChart?.resize();
+			console.log('Window resized, radar chart updated.');
+		});
 
 		radarChart?.setOption({
 			legend: {
@@ -24,6 +30,18 @@
 				textStyle: {
 					fontSize: 9
 				}
+			},
+			title: {
+				text: title,
+				left: 'center',
+				bottom: 0,
+				padding: 0,
+				textStyle:{
+          color: '#000000',
+					fontSize: 16,
+					fontStyle: "normal",
+					fontWeight: 500
+        }
 			},
 			textStyle: {
 				fontFamily: "Inter"
@@ -79,6 +97,9 @@
 		});
 
 		return () => {
+			window?.removeEventListener('resize', () => {
+				radarChart?.resize();
+			});
 			radarChart?.dispose();
 		};
 	});

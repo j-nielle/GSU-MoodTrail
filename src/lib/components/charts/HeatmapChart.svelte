@@ -10,7 +10,7 @@
 	export let style;
 
 	// define the days and hours for the axis labels
-	var days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+	var days = ['S', 'M', 'T', 'W', 'Th', 'F', 'S'];
 
 	// creates an array of hours from 1-12 and appends AM or PM
 	var hours = Array.from({ length: 24 }, (_, i) => {
@@ -23,6 +23,11 @@
 
 	onMount(() => {
 		heatmapChart = echarts?.init(document.getElementById(elementID));
+
+		window?.addEventListener('resize', () => {
+			heatmapChart?.resize();
+			console.log('Window resized, heatmap chart updated.');
+		});
 
 		heatmapChart?.setOption({
 			tooltip: {
@@ -39,8 +44,12 @@
 			},
 			title: {
 				text: title,
+				subtext: 'By Day and Hour',
         textStyle:{
-          color: '#000000'
+          color: '#000000',
+					fontSize: 16,
+					fontStyle: "normal",
+					fontWeight: 500
         }
 			},
 			xAxis: {
@@ -85,10 +94,7 @@
 			toolbox: {
 				show: true,
 				feature: {
-					dataZoom: {
-						show: true,
-						yAxisIndex: 'none'
-					},
+					dataView: { show: true, readOnly: false },
 					saveAsImage: {
 						show: true
 					}
@@ -97,6 +103,9 @@
 		});
 
 		return () => {
+			window?.removeEventListener('resize', () => {
+				heatmapChart?.resize();
+			});
 			heatmapChart?.dispose();
 		};
 	});

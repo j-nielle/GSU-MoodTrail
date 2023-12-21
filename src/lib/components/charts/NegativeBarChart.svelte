@@ -14,15 +14,19 @@
 	onMount(() => {
 		negativeBarChart = echarts.init(document.getElementById(elementID));
 
+		window?.addEventListener('resize', () => {
+			negativeBarChart?.resize();
+			console.log('Window resized, negative bar chart updated.');
+		});
+
 		negativeBarChart.setOption({
 			title: {
-				subtext:
-					'Sad (-4), Annoyed (-3), Nervous (-2), Bored (-1), Neutral (0), \nCalm (1), Relaxed (2), Happy (3), Excited (4)',
-				subtextStyle: {
-					fontSize: 11
-				},
-        textStyle:{
-          color: '#000000'
+				text: 'Mood Averages',
+				textStyle:{
+          color: '#000000',
+					fontSize: 16,
+					fontStyle: "normal",
+					fontWeight: 500
         }
 			},
 			textStyle: {
@@ -44,7 +48,7 @@
 				}
 			},
 			xAxis: {
-				name: "Mood Score",
+				name: "Average Mood Score",
 				nameLocation: "middle",
         nameGap: 35,
 				type: 'value',
@@ -90,6 +94,7 @@
           restore: {
             show: true
           },
+					dataView: { show: true, readOnly: false },
 					saveAsImage: {
 						show: true
 					}
@@ -98,6 +103,9 @@
 		});
 
 		return () => {
+			window?.removeEventListener('resize', () => {
+				negativeBarChart?.resize();
+			});
 			negativeBarChart.dispose();
 		};
 	});

@@ -19,8 +19,13 @@
   });
 
 	onMount(() => {
-    echarts.registerTransform(ecStat.transform.histogram);
+    echarts?.registerTransform(ecStat.transform.histogram);
 		histogramChart = echarts?.init(document?.getElementById(elementID));
+
+    window?.addEventListener('resize', () => {
+			histogramChart?.resize();
+			console.log('Window resized, histogram chart updated.');
+		});
 
 		histogramChart?.setOption({
 			tooltip: {
@@ -29,8 +34,11 @@
       title: {
         text: title,
         textStyle:{
-          color: '#000000'
-        }
+          color: '#000000',
+					fontSize: 16,
+					fontStyle: "normal",
+					fontWeight: 500
+        },
       },
 			dataset: [
         {
@@ -53,13 +61,15 @@
 				axisLabel: {
 					fontSize: 10,
     			interval: 0 
-				} 
+				},
+        nameRotate: 90,
+        nameGap: 10 
       },
       yAxis: { 
         name: "Frequency",
         nameRotate: 90,
         nameLocation: "middle",
-        nameGap: 35
+        nameGap: 25
       },
 			textStyle: {
 				fontFamily: "Inter"
@@ -103,6 +113,9 @@
 		});
 
 		return () => {
+      window?.removeEventListener('resize', () => {
+				histogramChart?.resize();
+			});
 			histogramChart?.dispose();
 		};
 	});

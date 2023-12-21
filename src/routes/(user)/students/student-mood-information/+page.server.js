@@ -32,16 +32,35 @@ export const actions = {
 		const studentID = formData?.get('studentID');
 		const addMood = formData?.get('addMood');
 		const addReason = formData?.get('addReason');
+		
+		/**
+		 *  user:{
+					id: 'd5a331c2-811e-4dbf-9557-eae2394bdc17',
+					role: 'admin',
+					email: 'admin@test.com',
+					user_metadata: { role: 'admin', username: 'admin test' }
+				}
+		 */
 
 		try {
+			const { data: { user }, error } = await supabase.auth.getUser();
+			const currentUserId = user?.id;
+
 			const { error: insertMoodEntryError } = await supabase
 				.from('StudentMood')
 				.insert([
-					{ student_id: studentID, mood_id: addMood, reason_id: addReason },
+					{ 
+						student_id: studentID, mood_id: addMood, reason_id: addReason, 
+						created_by: currentUserId
+					},
 				])
 				.select()
 
-			if(insertMoodEntryError) throw insertMoodEntryError;
+			if(insertMoodEntryError) {
+				console.log(insertMoodEntryError)
+				throw insertMoodEntryError;
+			}
+			if(error) throw error;
 			
 			return{
 				success: true,

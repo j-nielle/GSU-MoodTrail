@@ -54,6 +54,7 @@
 	$: {
 		filteredItems = requestsData?.filter((req) => {
 			const phoneMatch = req.contact_num.includes(searchTerm);
+			const emailMatch = req?.email_address?.toLowerCase().includes(searchTerm.toLowerCase());
 			const reqMatch = requestTypes[req.request_type].toLowerCase().includes(searchTerm.toLowerCase());
 
 			// if date filter is not empty, it will format the date of the results to YYYY-MM-DD
@@ -63,20 +64,19 @@
 			// if both search term and date filter are not empty
 			return searchTerm !== '' && dateFilter !== '' 
 				// then it will filter the data according to the search term and date filter
-				? (phoneMatch || reqMatch) && dateMatch 
+				? (phoneMatch || reqMatch || emailMatch) && dateMatch 
 				: searchTerm !== '' // else if search term is not empty
-				? phoneMatch || reqMatch // then it will filter the data according to the search term
+				? phoneMatch || reqMatch || emailMatch // then it will filter the data according to the search term
 				: dateFilter !== '' // else if date filter is not empty
 				? dateMatch // then it will filter the data according to the date filter
 				: true; // else it will return true which means it will not filter the data
 		});
 
-		startIndex = (page - 1) * limit; // get the starting index for the current page.
-		endIndex = startIndex + limit; // get the ending index for the current page.
-		; // get the max number of pages.
+		startIndex = (page - 1) * limit; // get the starting index for the current page
+		endIndex = startIndex + limit; // get the ending index for the current page
 		
 		if (page > maxPage) { // if current page number exceeds the max number of pages
-			page = 1; // set the current page to be the last page.
+			page = 1; // set the current page to be the last page
 
 			// recalculate the starting and ending indices for the last page
 			startIndex = (page - 1) * limit;
@@ -169,6 +169,7 @@
 		<Table divClass="w-full text-left text-sm text-gray-500 dark:text-gray-400 ml-4">
 			<TableHead class="border border-zinc-300">
 				<TableHeadCell>Phone Number</TableHeadCell>
+				<TableHeadCell>Email Address</TableHeadCell>
 				<TableHeadCell>Request Type</TableHeadCell>
 				<TableHeadCell>Timestamp</TableHeadCell>
 				<TableHeadCell class="text-center">Status</TableHeadCell>
@@ -180,11 +181,13 @@
 						<TableBodyCell>No data</TableBodyCell>
 						<TableBodyCell>No data</TableBodyCell>
 						<TableBodyCell>No data</TableBodyCell>
+						<TableBodyCell>No data</TableBodyCell>
 					</TableBodyRow>
 				{:else}
 					{#each paginatedItems as req}
 						<TableBodyRow>
 							<TableBodyCell>{req.contact_num}</TableBodyCell>
+							<TableBodyCell>{req.email_address || 'Unavailable'}</TableBodyCell>
 							<TableBodyCell>{requestTypes[req.request_type]}</TableBodyCell>
 							<TableBodyCell>{new Date(req.created_at).toLocaleString()}</TableBodyCell>
 							<TableBodyCell class="flex justify-center">

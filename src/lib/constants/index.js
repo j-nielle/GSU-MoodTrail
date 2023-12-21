@@ -118,4 +118,4 @@ export const getWeekNumberString = (date) => {
 	return `Week ${weekDiff}`;
 };
 
-export const requestTypes = { 1: 'Request for a consultation', 2: 'Refer/Help a friend' }
+export const requestTypes = { 1: 'Request for a consultation', 2: 'Refer a student' }

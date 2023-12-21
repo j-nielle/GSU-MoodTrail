@@ -23,6 +23,7 @@
 		Modal,
 		Alert,
 		Table,
+		Badge,
 		TableBody,
 		TableBodyCell,
 		TableBodyRow,
@@ -32,11 +33,17 @@
 	import {
 		LineChart,
 		SimpleBarChart,
-		PieChart,
-		//RadarChart,
-		//HeatmapChart
+		PieChart
 	} from '$lib/components/charts/index.js';
-	import { yearLvl, mood, reason, moodChoices, reasonChoices, getWeekNumberString } from '$lib/constants/index.js'; 
+	import { 
+		yearLvl, 
+		mood, 
+		reason, 
+		moodChoices, 
+		reasonChoices, 
+		getWeekNumberString, 
+		roleColor 
+	} from '$lib/constants/index.js'; 
 	import { exportData } from '$lib/stores/index.js';
 	import FileSaver from "file-saver";
   import * as XLSX from "xlsx";
@@ -85,6 +92,8 @@
 	let exportModalState = false;
 
 	let addedMoodEntryAlert = false;
+
+	let loggedBy = '';
 
 	onMount(() => {
 		const studentChartChannel = supabase.channel('studentChartChannel')
@@ -212,6 +221,8 @@
 	}
 
 	$: if (result?.length > 0) {
+		//loggedBy = result?.slice(-1)[0]?.created_by?.role || '';
+
 		const moodCount = {};
 		const reasonCount = {};
 
@@ -542,6 +553,22 @@
 	function selectReasonMarkType(reasonMarkType) {
 		selectedReasonMarkType = reasonMarkType;
 	}
+
+	/**
+			{
+				id: 86,
+				student_id: 2020300482,
+				name: 'ADRIAN AUGUIS',
+				course: 'BSIT',
+				year_level: '4th Year Level',
+				college: 'CITC',
+				mood_score: -2,
+				reason_score: 3,
+				created_at: '2023-12-19T19:41:05.737362+08:00',
+				created_by: 'Staff'
+			}
+		]
+	*/
 </script>
 
 <svelte:head>
@@ -677,9 +704,27 @@
 											{Object.keys(mood).find((key) => mood[key] == result[result?.length - 1].mood_score)}
 											[{Object.keys(reason).find((key) => reason[key] == result[result?.length - 1].reason_score)}]
 										</p>
-										<p class="text-sm">
-											<span class="text-sm font-semibold text-zinc-800">Latest Log Time</span>
+										<p class="text-sm space-x-1">
+											<span class="text-sm font-semibold text-zinc-800">Latest Log Time:</span>
 											{result.slice(-1)[0].created_at.replace('T', ' ').substring(0, 19)}
+											<!-- {#if loggedBy != ''}
+												<Badge border color={roleColor[loggedBy]}>
+													{loggedBy.toUpperCase()}
+												</Badge>
+											{:else}
+												<Badge border color="blue">
+													KIOSK
+												</Badge>
+											{/if} -->
+											{#if result.slice(-1)[0]?.created_by != null}
+												<Badge border color="purple">
+													{result.slice(-1)[0].created_by}
+												</Badge>
+											{:else}
+												<Badge border color="blue">
+													KIOSK
+												</Badge>
+											{/if}
 										</p>
 										<p class="text-sm">
 											<span class="text-sm font-semibold text-zinc-800">Most Frequent:</span>

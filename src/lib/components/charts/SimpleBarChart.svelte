@@ -31,21 +31,27 @@
 	onMount(() => {
 		simpleBarChart = echarts?.init(document?.getElementById(elementID));
 
+		window?.addEventListener('resize', () => {
+			simpleBarChart?.resize();
+			console.log('Window resized, bar chart updated.');
+		});
+
 		simpleBarChart?.setOption({
 			title: {
 				text: title,
-				textStyle: {
-					color: '#000000',
-					fontSize: fontSize,
-					fontWeight: 'bold',
-				}
+				textStyle:{
+          color: '#000000',
+					fontSize: 16,
+					fontStyle: "normal",
+					fontWeight: 500
+        }
 			},
 			yAxis: {
 				type: yType,
 				name: yName,
 				nameRotate: yAxisRotate,
 				nameLocation: 'center',
-				nameGap: 35,
+				nameGap: 23,
 				axisLabel: {
 					fontSize: 10
 				}
@@ -53,13 +59,13 @@
 			xAxis: {
 				type: xType,
 				data: xData,
-				name: xName,
 				nameRotate: 0,
 				nameLocation: 'center',
-				nameGap: 35,
+				nameGap: 25,
 				axisLabel: {
 					fontSize: 9,
-					interval: 0
+					interval: 0,
+					rotate: 35
 				}
 			},
 			series: [
@@ -117,6 +123,9 @@
 		});
 
 		return () => {
+			window?.removeEventListener('resize', () => {
+				simpleBarChart?.resize();
+			});
 			simpleBarChart?.dispose();
 		};
 	});

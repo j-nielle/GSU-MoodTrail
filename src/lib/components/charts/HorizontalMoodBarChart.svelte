@@ -17,23 +17,33 @@
 	onMount(() => {
 		horizontalMoodBarChart = echarts?.init(document?.getElementById(elementID));
 
+		window?.addEventListener('resize', () => {
+			horizontalMoodBarChart?.resize();
+			console.log('Window resized, horizontal bar chart updated.');
+		});
+
 		horizontalMoodBarChart?.setOption({
 			title: {
 				text: title,
         textStyle:{
           color: '#000000',
-					fontSize: 18,
-					//fontWeight: 'bold',
+					fontSize: 16,
+					fontStyle: "normal",
+					fontWeight: 500
         },
 			},
 			yAxis: {
 				type: 'category',
 				name: yAxisName,
 				data: xData,
+				position: "right",
+				label: {
+					show: true
+				},
 				axisLabel: {
-					fontSize: 10,
-					interval: 0
-				}
+					inside: true
+				},
+    		//inverse: true
 			},
 			xAxis: {
 				type: 'value',
@@ -50,7 +60,7 @@
 					data: yData,
 					name: "Frequency",
 					type: 'bar',
-					barMaxWidth: 20,
+					barWidth: "75%",
 					emphasis: {
 						focus: 'self'
 					},
@@ -92,6 +102,9 @@
 		});
 
 		return () => {
+			window?.removeEventListener('resize', () => {
+				horizontalMoodBarChart?.resize();
+			});
 			horizontalMoodBarChart.dispose();
 		};
 	});

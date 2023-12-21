@@ -1,7 +1,6 @@
 <script>
 	// @ts-nocheck
-	import { Card, Tooltip } from 'flowbite-svelte';
-	// import { ProfileCardOutline, FaceLaughOutline, BrainOutline } from 'flowbite-svelte-icons';
+	import { Tooltip } from 'flowbite-svelte';
 
 	export let title;
 	export let data;
@@ -28,57 +27,34 @@
 
 <Tooltip triggeredBy="#tooltip-recentStudent" class="z-50 relative">Most recent student who entered their mood entry.</Tooltip>
 
-{#if purpose === 'time'}
-	<Card class='max-h-16 rounded w-xs justify-center flex-row items-center space-x-4'>
+{#if purpose == 'time'}
+	<div class='bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 rounded w-fit justify-center md:flex md:flex-initial flex flex-auto h-auto flex-row items-center space-x-4'>
 		<div class="bg-blue-700 p-2 rounded"></div>
 		<div class="flex flex-col">
 			<p class="font-bold text-black text-xs tracking-wide">{month.toUpperCase()} {day}, {year}</p>
 			<p class="text-slate-900 text-xs">{time.slice(0,-2)}<span class="font-bold">{time.slice(-2)}</span></p>
 		</div>
-	</Card>
-{:else if purpose === 'mood'}
-	<Card class='max-h-16 rounded max-w-full justify-center flex-row items-center space-x-4'>
+	</div>
+{:else if purpose == 'recentStudent'}
+	<div id="tooltip-recentStudent" class='bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 rounded w-fit justify-center md:flex md:flex-initial flex flex-auto h-auto flex-row items-center space-x-4'>
 		<div class="bg-blue-700 p-2 rounded"></div>
-		<!-- <FaceLaughOutline tabindex="-1" class="text-blue-700" /> -->
-		<div class="flex flex-col">
-			<p class="text-black text-xs font-bold uppercase">
-				{title}
-			</p>
-			<p class="text-xs text-black">{data ?? 'N/A'}</p>
-		</div>
-	</Card>
-{:else if purpose === 'reason'}
-	<Card class='max-h-16 rounded max-w-full justify-center flex-row items-center space-x-4'>
-		<div class="bg-blue-700 p-2 rounded"></div>
-		<!-- <BrainOutline tabindex="-1" class="text-blue-700" /> -->
-		<div class="flex flex-col">
-			<p class="text-black text-xs font-bold uppercase">
-				{title}
-			</p>
-			<p class="text-xs text-black">{data ?? 'N/A'}</p>
-		</div>
-	</Card>
-{:else if purpose === 'helpType'}
-	<Card class='max-h-16 rounded max-w-full justify-center flex-row items-center space-x-4'>
-		<div class="bg-blue-700 p-2 rounded"></div>
-		<div class="flex flex-col">
-			<p class="text-black text-xs font-bold uppercase">
-				{title}
-			</p>
-			<p class="text-xs text-black">{data ?? 'N/A'}</p>
-		</div>
-	</Card>
-{:else}
-	<Card id="tooltip-recentStudent" class='max-h-16 rounded max-w-full justify-center flex-row items-center space-x-4'>
-		<div class="bg-blue-700 p-2 rounded"></div>
-		<!-- <ProfileCardOutline tabindex="-1" class="text-blue-700" /> -->
 		<div class="flex flex-col">
 			<p class="text-black text-xs font-bold uppercase">{title}</p>
 			<a class="text-xs text-black hover:text-blue-700 hover:underline cursor-pointer tracking-wide" 
 				href="/students/student-mood-information?search={data}" 
 				rel="noopener noreferrer">
-				{data ?? 'N/A'}
+				{data || 'Unavailable'}
 			</a>
 		</div>
-	</Card>
+	</div>
+{:else if purpose == ''}
+	<div class='bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md p-4 sm:p-6 rounded w-fit justify-center md:flex md:flex-initial flex flex-auto h-auto flex-row items-center space-x-4'>
+		<div class="bg-blue-700 p-2 rounded"></div>
+		<div class="flex flex-col">
+			<p class="text-black text-xs font-bold uppercase">
+				{title}
+			</p>
+			<p class="text-xs text-black">{data || 'Unavailable'}</p>
+		</div>
+	</div>
 {/if}

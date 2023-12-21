@@ -13,6 +13,11 @@
 	onMount(() => {
 		pieChart = echarts.init(document.getElementById(elementID));
 
+		window?.addEventListener('resize', () => {
+			pieChart?.resize();
+			console.log('Window resized, pie chart updated.');
+		});
+
 		pieChart.setOption({
 			title: {
 				text: title,
@@ -60,6 +65,9 @@
 		});
 
 		return () => {
+			window?.removeEventListener('resize', () => {
+				pieChart?.resize();
+			});
 			pieChart.dispose();
 		};
 	});

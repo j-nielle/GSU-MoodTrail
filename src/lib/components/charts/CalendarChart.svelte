@@ -83,6 +83,11 @@
 	onMount(() => {
 		calendarChart = echarts?.init(document?.getElementById(elementID));
 
+		window?.addEventListener('resize', () => {
+			calendarChart?.resize();
+			console.log('Window resized, calendar chart updated.');
+		});
+
 		calendarChart?.setOption({
 			tooltip: {
 				position: 'top',
@@ -127,6 +132,9 @@
 		});
 
 		return () => {
+			window?.removeEventListener('resize', () => {
+				calendarChart?.resize();
+			});
 			calendarChart?.dispose();
 		};
 	});

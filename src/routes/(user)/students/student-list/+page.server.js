@@ -74,6 +74,9 @@ export const actions = {
 		}
 		else {
 			try {
+				const { data: { user }, error } = await supabase.auth.getUser();
+				const currentUserId = user?.id;
+				
 				const { data: existingStudent, error: searchStudentError } = await supabase
 					.from('Student')
 					.select('*')
@@ -83,6 +86,7 @@ export const actions = {
 					.eq('course_id', newCourse);
 				
 				if(searchStudentError) throw searchStudentError;
+				if(error) throw error;
 				if (existingStudent.length > 0) {
 					errors.push({
 						errorInput: 'existingStudent',
@@ -97,7 +101,8 @@ export const actions = {
 								student_id: newID,
 								name: newName,
 								year_level_id: newYearLevel,
-								course_id: newCourse
+								course_id: newCourse,
+								created_by: currentUserId
 							}
 						])
 						.select();
@@ -198,6 +203,9 @@ export const actions = {
 		}
 		else {
 			try {
+				const { data: { user }, error } = await supabase.auth.getUser();
+				const currentUserId = user?.id;
+
 				const { data: prevStudentData, error: searchStudentError } = await supabase
 					.from('Student')
 					.select('*')
@@ -207,6 +215,7 @@ export const actions = {
 					.eq('course_id', editCourse);
 				
 				if(searchStudentError) throw searchStudentError;
+				if(error) throw error;
 				if (prevStudentData?.length > 0) {
 					errors.push({
 						errorInput: 'prevStudentData',
@@ -220,7 +229,8 @@ export const actions = {
 							student_id: editID,
 							name: editName,
 							year_level_id: editYearLevel,
-							course_id: editCourse
+							course_id: editCourse,
+							edited_by: currentUserId
 						})
 						.eq('id', studentRow)
 						.select();
