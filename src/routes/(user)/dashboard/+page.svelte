@@ -1126,8 +1126,8 @@
 		<CardInfo purpose="" title={infoCardTitle} bind:data={topMoodReason} />
 		<CardInfo purpose="" title="Number of Entries:" bind:data={dataType.length} />
 
-		<Tooltip triggeredBy="#importExport" placement="left" class="z-50 relative">Import/Export Mood Information</Tooltip>
-		<Tooltip triggeredBy="#filterCharts" placement="left" class="z-50 relative">Filter Charts</Tooltip>
+		<Tooltip triggeredBy="#importExport" placement="left" on:hover={(e) => e.preventDefault()} class="z-50 relative">Import/Export Mood Information</Tooltip>
+		<Tooltip triggeredBy="#filterCharts" placement="left" on:hover={(e) => e.preventDefault()} class="z-50 relative">Filter Charts</Tooltip>
 
 		<Button id="importExport" class="w-full rounded-md flex flex-1 gap-2" color="green" shadow>
 			<ArchiveSolid tabindex="-1" class="text-white focus:outline-none" />
@@ -1166,31 +1166,31 @@
 						disabled={dataType.length == 0}
 						color={lcBtnColors.today}
 						on:click={() => selectLineChart('today')}>
-						TODAY
+						Today
 					</Button>
-					<Button class="sm:text-xs"
+					<Button class="sm:text-xs" id="weeklySLC"
 						disabled={dataType.length == 0}
 						color={lcBtnColors.weekly}
 						on:click={() => selectLineChart('weekly')}>
-						W
+						Weekly
 					</Button>
-					<Button class="sm:text-xs"
+					<Button class="sm:text-xs" id="monthlySLC"
 						disabled={dataType.length == 0}
 						color={lcBtnColors.monthly}
 						on:click={() => selectLineChart('monthly')}>
-						M
+						Monthly
 					</Button>
-					<Button class="sm:text-xs first:rounded-l-lg last:rounded-r-lg"
+					<Button class="sm:text-xs" id="yearlySLC"
 						disabled={dataType.length == 0}
 						color={lcBtnColors.yearly}
 						on:click={() => selectLineChart('yearly')}>
-						Y
+						Yearly
 					</Button>
 					<Button class="sm:text-xs"
 						disabled={dataType.length == 0}
 						color={lcBtnColors.overall}
 						on:click={() => selectLineChart('overall')}>
-						OVERALL
+						Overall
 					</Button>
 				</ButtonGroup>
 				{#if dataType?.length > 0}
@@ -1244,15 +1244,15 @@
 			{#if dataType?.length > 0}
 				<ButtonGroup class="self-center">
 					<Button class="sm:text-xs" color={nhbcBtnColors.course} on:click={() => selectNHBarChart('course')}>
-						COURSE
+						Course
 					</Button>
 					<Button class="sm:text-xs"
 						color={nhbcBtnColors.year_level}
 						on:click={() => selectNHBarChart('year_level')}>
-						YEAR LEVEL
+						Year Level
 					</Button>
 					<Button class="sm:text-xs" color={nhbcBtnColors.reason} on:click={() => selectNHBarChart('reason')}>
-						REASON
+						Reason
 					</Button>
 				</ButtonGroup>
 				<div class="mt-3 items-center">
@@ -1294,15 +1294,15 @@
 				<ButtonGroup class="self-center">
 					<Button class="sm:text-xs" color={sbcBtnColors.average} 
 						on:click={() => selectReasonMarkType('average')}>
-						AVG
+						Average
 					</Button>
 					<Button class="sm:text-xs" color={sbcBtnColors.max}
 						on:click={() => selectReasonMarkType('max')}>
-						MAX
+						Max
 					</Button>
 					<Button class="sm:text-xs" color={sbcBtnColors.min} 
 						on:click={() => selectReasonMarkType('min')}>
-						MIN
+						Min
 					</Button>
 				</ButtonGroup>
 				<SimpleBarChart
