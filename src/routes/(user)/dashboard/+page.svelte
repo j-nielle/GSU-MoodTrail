@@ -30,7 +30,7 @@
 		ChartMixedOutline,
 		ChartOutline,
 		TableColumnOutline,
-		ArchiveSolid
+		FileImportSolid
 	} from 'flowbite-svelte-icons';
 	import {
 		RadarChart,
@@ -1353,7 +1353,7 @@
 		<Tooltip triggeredBy="#filterCharts" placement="left" on:hover={(e) => e.preventDefault()} class="z-50 relative">Filter Charts</Tooltip>
 
 		<Button id="importExport" class="w-full rounded-md flex flex-1 gap-2" color="green" shadow on:click={() => importExportModalState = true}>
-			<ArchiveSolid tabindex="-1" class="text-white focus:outline-none" />
+			<FileImportSolid tabindex="-1" class="text-white focus:outline-none" />
 		</Button>
 
 		<Button id="filterCharts" class="w-full rounded-md flex flex-1 gap-2" shadow on:click={() => chartFilterModalState = true}>
@@ -1710,7 +1710,7 @@
 	</div> 
 </div>
 
-<Modal class="flex relative w-full max-h-full" title="Toggle a chart" bind:open={chartFilterModalState}>
+<Modal class="flex relative max-w-fit max-h-full" title="Toggle a chart" bind:open={chartFilterModalState}>
 	<div class="flex flex-col gap-3">
 		<!-- 
 			NOTE: The `href` attribute in this case is just used to provide a fallback for 
@@ -1786,7 +1786,7 @@
 	</div>
 </Modal>
 
-<Modal class="flex relative max-w-fit w-full max-h-full" bind:open={importExportModalState}>
+<Modal class="flex relative w-full max-h-full" bind:open={importExportModalState}>
 	<Tabs style="underline" contentClass="bg-white rounded-lg">
 		<TabItem open title="FORMAT FOR IMPORT">
 			<div class="flex flex-col my-4 space-y-4">
