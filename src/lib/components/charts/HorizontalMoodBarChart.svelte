@@ -36,14 +36,7 @@
 				type: 'category',
 				name: yAxisName,
 				data: xData,
-				position: "right",
-				label: {
-					show: true
-				},
-				axisLabel: {
-					inside: true
-				},
-    		//inverse: true
+				axisLabel: { show: false },
 			},
 			xAxis: {
 				type: 'value',
@@ -63,6 +56,11 @@
 					barWidth: "75%",
 					emphasis: {
 						focus: 'self'
+					},
+					label: {
+						show: true,
+						formatter: '{b}',
+						borderWidth: 0
 					},
 					itemStyle: {
 						color: function (params) {

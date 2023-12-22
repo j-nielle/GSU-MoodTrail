@@ -44,7 +44,7 @@
 		getWeekNumberString, 
 		roleColor 
 	} from '$lib/constants/index.js'; 
-	import { exportData } from '$lib/stores/index.js';
+	import { exportStudentData } from '$lib/stores/index.js';
 	import FileSaver from "file-saver";
   import * as XLSX from "xlsx";
 
@@ -516,7 +516,7 @@
 			return Object.values(newObj); // return the values of the new object
 		});
 
-		exportData.update(() => [keys, ...values]); // update the exportData store with the new data
+		exportStudentData.update(() => [keys, ...values]); // update the exportStudentData store with the new data
 	}
 
 	/**
@@ -525,7 +525,7 @@
 	 * The file is named according to the `currentStudentID` followed by "_MoodEntries".
 	 */
 	async function handleExport() {
-		let data = $exportData;
+		let data = $exportStudentData;
 		const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   	const fileExtension = ".xlsx";
 		const fileName = currentStudentID + "_MoodEntries";
@@ -890,7 +890,7 @@
 			<TableHeadCell class="text-center">Time</TableHeadCell>
 		</TableHead>
 		<TableBody tableBodyClass="divide-y bg-white">
-			{#if $exportData?.length === 0}
+			{#if $exportStudentData?.length === 0}
 				<TableBodyRow class="border border-zinc-300 text-center">
 					<TableBodyCell>No data</TableBodyCell>        
 					<TableBodyCell>No data</TableBodyCell>
@@ -904,7 +904,7 @@
 					<TableBodyCell>No data</TableBodyCell>
 				</TableBodyRow>
 			{:else}
-				{#each $exportData?.slice(1,2) as student}
+				{#each $exportStudentData?.slice(1,2) as student}
 					<TableBodyRow>
 						{#each student as data}
 							<TableBodyCell>{data}</TableBodyCell>

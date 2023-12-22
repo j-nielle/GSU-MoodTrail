@@ -16,7 +16,13 @@
 		TableHeadCell,
 		Tooltip, 
 		Modal, 
-		Checkbox
+		Checkbox,
+		Label, 
+		Fileupload,
+		Tabs, 
+		TabItem, 
+		Helper,
+		Alert 
 	} from 'flowbite-svelte';
 	import {
 		RocketOutline, 
@@ -36,7 +42,7 @@
 		SimpleBarChart,
 		CalendarChart,
 	} from '$lib/components/charts/index.js';
-	import { focusTable, consistentLowMoods } from '$lib/stores/index.js';
+	import { focusTable, consistentLowMoods, exportMoodsData } from '$lib/stores/index.js';
 	import { CardInfo } from '$lib/components/elements/index.js';
 	import { 
 		mood, 
@@ -48,12 +54,15 @@
 		getWeekNumberString, 
 		requestTypes,
 	} from '$lib/constants/index.js';
+	import FileSaver from "file-saver";
+  import * as XLSX from "xlsx";
 
 	export let data;
 
 	let studentMoodData = data.studentMood;
 	let anonMoodData = data.anonMood;
 	let requestsData = data.requests;
+	let guestMoodData = data.guestMood;
 	let dataType = {};
 
 	let todaysEntries = [];
@@ -82,7 +91,11 @@
 	let current = dayjs();
 	const interval = 1000;
 
-	let viewAnonData = false;
+	let switchMoodData = {
+		student: true,
+		anon: false,
+		guest: false
+	};
 
 	let lcBtnColors = {};
 	let nhbcBtnColors = {};
@@ -124,6 +137,14 @@
 
 	let heatmap = false, radar = false, moodReasonCalendarChart = false;
 
+	let importExportModalState = false;
+
+	let currentDataView = '';
+
+	let currentUserID = data?.user?.id, currentUserName = data?.user?.user_metadata?.username;
+	
+	let importError = '';
+
 	$: ({ supabase } = data);
 
 	onMount(() => {
@@ -164,6 +185,13 @@
 				}, (payload) => {
 					anonMoodData = _.cloneDeep([...anonMoodData, payload.new]);
 				}
+			).on('postgres_changes', {
+					event: 'INSERT',
+					schema: 'public',
+					table: 'GuestMood'
+				}, (payload) => {
+					guestMoodData = _.cloneDeep([...guestMoodData, payload.new]);
+				}
 			).subscribe() // (status) => console.log('/dashboard', status));
 
 		return () => {
@@ -172,10 +200,240 @@
 		};
 	});
 
-	$: viewAnonData ? (dataType = anonMoodData) : (dataType = studentMoodData);
+	/**
+	 * View selected line chart (Today/Weekly/Monthly/Yearly/Overall).
+	 * @param {string} lineChart - The line chart selected by the user.
+	 */
+	 function selectLineChart(lineChart) {
+		selectedLineChart = lineChart;
+	}
+
+	/**
+	 * View selected bar chart for **Mood Averages Chart** (Course/Year Level/Reason).
+	 * @param {string} barChart - The bar chart selected by the user.
+	 */
+	function selectNHBarChart(barChart) {
+		selectedNHBarChart = barChart;
+	}
+
+	/**
+	 * View selected reason mark type for **Associated Reason Frequency Chart** (Average/Min/Max).
+	 * @param {string} reasonMarkType - The reason mark type selected by the user.
+	 */
+	function selectReasonMarkType(reasonMarkType) {
+		selectedReasonMarkType = reasonMarkType;
+	}
+
+	/**
+	 * Updates the `current` variable with the current date and time.
+	*/
+	function updateTime() {
+		current = dayjs()
+	}
+
+	/**
+	 * Handles the click event on an element to smoothly scroll to a target element.
+	 * @param {MouseEvent} event
+	 * The target of this event is expected to have an 'id' attribute that corresponds to the 
+	 * id of the target element to scroll to.
+	*/
+	function scrollIntoView({ target }) {
+    const targetElement = document?.getElementById(target.getAttribute('id'));
+    if (!targetElement) return;
+		targetElement.scrollIntoView({
+     	behavior: 'smooth'
+    });
+  }
+
+	/**
+	 * Handles the click event on a checkbox to show/hide a chart.
+	 * @param {boolean} checkedState - The checked state of the checkbox.
+	 * @param {MouseEvent} event
+	 * 
+	 * The target of this event is expected to have an 'id' attribute that corresponds to the 
+	 * id of the target element to show/hide.
+	*/
+	function filterChart(checkedState, event){
+		const target = event.target;
+		const targetElement = document?.getElementById(target.getAttribute('id'));
+		if (!targetElement) return;
+
+		const aElement = targetElement?.parentElement?.querySelector('a');
+		if (!aElement) return;
+
+		const href = aElement?.getAttribute('href');
+		const chartDiv = document.getElementById(href.slice(1))
+		if (!chartDiv) return;
+
+		if (target.checked) {
+			checkedState = true;
+			if(href.slice(1) == 'moodCalendar') {
+				chartDiv.classList.remove('hidden'); 
+				chartDiv.classList.add('flex', 'p-4', 'justify-center', 'items-center', 'w-full', 'bg-white', 'rounded', 'drop-shadow-md', 'hover:ring-1');
+			}
+			else{
+				chartDiv.classList.remove('hidden');
+				chartDiv.classList.add('flex', 'flex-1', 'p-4', 'w-full', 'bg-white', 'rounded', 'justify-center', 'items-center', 'drop-shadow-md', 'hover:ring-1');
+			}
+		} else {
+			checkedState = false;
+			chartDiv.classList.remove('flex', 'flex-1', 'p-4', 'w-full', 'bg-white', 'rounded', 'justify-center', 'items-center', 'drop-shadow-md', 'hover:ring-1');
+			chartDiv.classList.add('hidden');
+		}
+	}
+
+	async function handleExport(){
+		let data = $exportMoodsData;
+		const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  	const fileExtension = ".xlsx";
+		const fileName = currentDataView + "_MoodData";
+		
+		const workSheet = XLSX.utils.aoa_to_sheet(data);
+    const workBook = {
+      Sheets: { data: workSheet, cols: [] },
+      SheetNames: ["data"],
+    };
+    const excelBuffer = await XLSX.write(workBook, { bookType: "xlsx", type: "array" });
+    const fileData = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(fileData, fileName + fileExtension);
+	}
+
+	async function handleImport(event){
+		const file = event.target.files[0];
+		const reader = new FileReader();
+
+		if(!file) {
+			importError = 'No file selected.';
+			return;
+		}
+		else if(file.type != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+			importError = 'Invalid file type. Please upload an .xlsx file.';
+			return;
+		}
+
+		reader.onload = async (e) => {
+			const data = new Uint8Array(e.target.result);
+			const workbook = XLSX.read(data, {type: 'array'});
+			
+			const worksheetName = workbook.SheetNames[0];
+			const worksheet = workbook.Sheets[worksheetName];
+			
+			const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: false});
+
+			const keys = jsonData[0].map(value => value.toLowerCase());
+
+			const dataColumns = {
+				'Guest': ['mood_score', 'reason_score', 'created_at'],
+				'Anon': ['mood_score', 'reason_score', 'created_at', 'course', 'year_level'],
+				'Student': ['student_id', 'mood_id', 'reason_id', 'created_at']
+			};
+
+			const checkMoodDataType = (values) => {
+				return values.every(value => keys.includes(value)) && keys.every(key => values.includes(key));
+			};
+
+			let moodDataType = Object.keys(dataColumns).find(type => checkMoodDataType(dataColumns[type]));
+
+			if (!moodDataType) {
+				importError = 'Invalid format. Please upload a file with the correct format.';
+				return;
+			}
+			
+			const arrayOfObjects = jsonData.slice(1).map((row) => {
+				return row.reduce((obj, item, index) => {
+					obj[keys[index]] = item;
+					return obj;
+				}, {});
+			});
+
+			if(arrayOfObjects.length === 0) return; // if the file is empty, return
+			
+			try {
+				if(moodDataType == 'Student'){
+					const dataToInsert = arrayOfObjects.map(obj => ({
+						student_id: obj.student_id,
+						mood_id: obj.mood_id,
+						reason_id: obj.reason_id,
+						created_at: obj.created_at,
+						created_by: currentUserID,
+					}));
+					
+					const studentIds = dataToInsert.map(obj => obj.student_id);
+
+					const { data: Students, error: searchStudentErrror } = await supabase
+						.from('Student')
+						.select('*')
+						.in('student_id', studentIds)
+  
+					if(searchStudentErrror) throw searchStudentErrror;
+					else if(!Students || Students.length === 0) {
+						importError = 'One or more student not found in the database. Please create a student record first.';
+						return;
+					}
+
+					const { error: insertStudentMoodError } = await supabase
+						.from('StudentMood')
+						.insert(dataToInsert)
+						.select();
+							
+					if(insertStudentMoodError) throw insertStudentMoodError;
+				}
+				else if(moodDataType == 'Anon'){
+					const dataToInsert = arrayOfObjects.map(obj => ({
+						mood_score: obj.mood_score,
+						reason_score: obj.reason_score,
+						created_at: obj.created_at,
+						course: obj.course,
+						year_level: obj.year_level,
+						created_by: currentUserName,
+					}));
+
+					const { error: insertAnonMoodError } = await supabase
+						.from('AnonMood')
+						.insert(dataToInsert)
+						.select();
+					
+					if(insertAnonMoodError) throw insertAnonMoodError;
+				}
+				else if(moodDataType == 'Guest'){
+					const dataToInsert = arrayOfObjects.map(obj => ({
+						mood_score: obj.mood_score,
+						reason_score: obj.reason_score,
+						created_at: obj.created_at,
+						created_by: currentUserName,
+					}));
+
+					const { error: insertGuestMoodError } = await supabase
+						.from('GuestMood')
+						.insert(dataToInsert)
+						.select();
+
+        	if(insertGuestMoodError) throw insertGuestMoodError;
+				}
+			} catch (error) {
+				importError = error.message;
+				console.error(error.message);	
+			}
+		};
+		reader.readAsArrayBuffer(file);
+	}
+
+	$: {
+		if(switchMoodData.student) {
+			dataType = studentMoodData;
+			currentDataView = 'Student';
+		} else if (switchMoodData.anon) {
+			dataType = anonMoodData;
+			currentDataView = 'Anon';
+		}	else if(switchMoodData.guest) {
+			dataType = guestMoodData;
+			selectedNHBarChart = 'reason';
+			currentDataView = 'Guest';
+		}
+	}
 
 	// note: while this is reactive, it's not realtime. it only updates when the page is refreshed.
-	// because the data is only fetched once, and not subscribed to.
+	// because the data is only fetched once, and not subscribed to gamit supabase.
 	$: if(requestsData){
 		let getRequests = requestsData?.map(req => requestTypes[req.request_type]);
 		let uniqueRequestTypes = [...new Set(getRequests)];
@@ -607,7 +865,7 @@
 			value: Object.keys(reason).map((reasonLabel) => moodData[moodLabel][reason[reasonLabel] - 1]),
 			name: moodLabel
 		}));
-	
+
 		let maxCount = 0;
 		moodRadarData.forEach(mood => {
 			const moodMax = Math.max(...mood.value);
@@ -630,8 +888,7 @@
 		});
 
 		// FOR NEGATIVE HORIZONTAL BAR CHART - MOOD AVERAGES BY COURSE/YEARLVL/REASON
-		if (selectedNHBarChart === 'course') {
-
+		if (selectedNHBarChart === 'course' && !switchMoodData.guest) {
 			// reduce the dataType object to an array of objects
 			// where each object represents a course and its mood scores
 			const courseData = dataType?.reduce((acc, entry) => {
@@ -678,7 +935,7 @@
 
 			// map over the courseData array and get the course labels
 			courseYData = courseData?.map((course) => course.course);
-		} else if (selectedNHBarChart === 'year_level') {
+		} else if (selectedNHBarChart === 'year_level' && !switchMoodData.guest) {
 
 			// reduce the dataType object to an array of objects
 			// where each object represents a year level and its mood scores
@@ -733,7 +990,6 @@
 				}
 			});
 		} else if (selectedNHBarChart === 'reason') {
-
 			// reduce the dataType object to an array of objects
 			// where each object represents a reason and its mood scores
 			const reasonData = dataType?.reduce((acc, entry) => {
@@ -999,90 +1255,45 @@
 		});
 	}
 
-	/**
-	 * This reactive statement checks if the 'tableRef' is defined and if 'focusTable' is true.
-	 * If both conditions are true, it scrolls the window to the top offset of 'tableRef' and sets 'focusTable' to false.
-	 * This is typically used to automatically scroll the user to a table after clicking `here` sa low moods notification.
-	 * The check for 'window' ensures this code only runs in the browser where 'window' is defined, 
-	 * not during server-side rendering.
-	 */	
+	$: if(importExportModalState){
+		let keys = Object.keys(dataType[0]);
+		keys[keys.indexOf('mood_score')] = 'mood';
+		keys[keys.indexOf('reason_score')] = 'reason';
+		keys.splice(keys.indexOf('created_at'), 1, 'date', 'time');
+
+		let values = dataType?.map(obj => {
+			let newObj = {...obj};
+			
+			newObj.mood = Object.keys(mood).find(key => mood[key] === Number(obj.mood_score));
+			newObj.reason = Object.keys(reason).find(key => reason[key] === Number(obj.reason_score));
+		
+			let createdAt = new Date(obj.created_at);
+			newObj.date = createdAt.toISOString().split('T')[0];
+			newObj.time = createdAt.toTimeString().split(' ')[0]; 
+			
+			delete newObj.created_at;
+			delete newObj.mood_score; 
+			delete newObj.reason_score;
+
+			if(newObj.created_by == null) newObj.created_by = 'N/A';
+
+			let orderedObj = {};
+
+			for (let key of keys) {
+				orderedObj[key] = newObj[key];
+			}
+
+			newObj = orderedObj;
+			return Object.values(newObj);
+		});
+
+		exportMoodsData.update(() => [keys, ...values]); 
+	}
+
 	$: if(typeof window !== 'undefined'){
 		if (tableRef && $focusTable) {
 			window?.scrollTo(0, tableRef?.offsetTop);
 			focusTable?.update((value) => value = false);
-		}
-	}
-
-	/**
-	 * View selected line chart (Today/Weekly/Monthly/Yearly/Overall).
-	 * @param {string} lineChart - The line chart selected by the user.
-	 */
-	 function selectLineChart(lineChart) {
-		selectedLineChart = lineChart;
-	}
-
-	/**
-	 * View selected bar chart for **Mood Averages Chart** (Course/Year Level/Reason).
-	 * @param {string} barChart - The bar chart selected by the user.
-	 */
-	function selectNHBarChart(barChart) {
-		selectedNHBarChart = barChart;
-	}
-
-	/**
-	 * View selected reason mark type for **Associated Reason Frequency Chart** (Average/Min/Max).
-	 * @param {string} reasonMarkType - The reason mark type selected by the user.
-	 */
-	function selectReasonMarkType(reasonMarkType) {
-		selectedReasonMarkType = reasonMarkType;
-	}
-
-	/**
-	 * Updates the `current` variable with the current date and time.
-	*/
-	function updateTime() {
-		current = dayjs()
-	}
-
-	/**
-	 * Handles the click event on an element to smoothly scroll to a target element.
-	 * @param {MouseEvent} event
-	 * The target of this event is expected to have an 'id' attribute that corresponds to the id of the target element to scroll to.
-	*/
-	function scrollIntoView({ target }) {
-    const targetElement = document?.getElementById(target.getAttribute('id'));
-    if (!targetElement) return;
-		targetElement.scrollIntoView({
-     	behavior: 'smooth'
-    });
-  }
-
-	function test(checkedState, event){
-		const target = event.target;
-		const targetElement = document?.getElementById(target.getAttribute('id'));
-		if (!targetElement) return;
-
-		const aElement = targetElement?.parentElement?.querySelector('a');
-		if (!aElement) return;
-
-		const href = aElement?.getAttribute('href');
-		const chartDiv = document.getElementById(href.slice(1))
-		if (!chartDiv) return;
-
-		if (target.checked) {
-			checkedState = true;
-			if(href.slice(1) == 'moodCalendar') {
-				chartDiv.classList.remove('hidden'); 
-				chartDiv.classList.add('flex', 'p-4', 'justify-center', 'items-center', 'w-full', 'bg-white', 'rounded', 'drop-shadow-md', 'hover:ring-1');
-			}
-			else{
-				chartDiv.classList.remove('hidden');
-				chartDiv.classList.add('flex', 'flex-1', 'p-4', 'w-full', 'bg-white', 'rounded', 'justify-center', 'items-center', 'drop-shadow-md', 'hover:ring-1');
-			}
-		} else {
-			checkedState = false;
-			chartDiv.classList.remove('flex', 'flex-1', 'p-4', 'w-full', 'bg-white', 'rounded', 'justify-center', 'items-center', 'drop-shadow-md', 'hover:ring-1');
-			chartDiv.classList.add('hidden');
 		}
 	}
 </script>
@@ -1091,23 +1302,29 @@
 	<title>Dashboard</title>
 </svelte:head>
 
-<!-- Student/Anonymous Floating Toggle Button -->
+<!-- Student/Anonymous/Guest Floating Toggle Button -->
 {#if studentMoodData?.length > 0 || anonMoodData?.length > 0}
 	<Tooltip placement="left" class="fixed z-50 overflow-hidden" triggeredBy="#switchData" on:hover={(e) => e.preventDefault()}>
-		Toggle between student and anonymous data
+		Toggle between student, anonymous, and guest mood data
 	</Tooltip>
 
 	<div id="switchData" class="flex justify-evenly space-x-2 bg-slate-900 p-2 rounded-full w-fit fixed right-4 bottom-4 z-20">
-		<button class={!viewAnonData ? toggleBtnClass.active : toggleBtnClass.inactive}
-			on:click={() => (viewAnonData = false)}>
-			<p class={!viewAnonData ? 'text-white font-semibold tracking-widest' : 'text-slate-500 tracking-widest'}>
+		<button class={switchMoodData.student ? toggleBtnClass.active : toggleBtnClass.inactive}
+			on:click={() => {switchMoodData = {student: true, anon: false, guest: false};}}>
+			<p class={switchMoodData.student ? 'text-white font-semibold tracking-widest' : 'text-slate-500 tracking-widest'}>
 				STUDENT
 			</p>
 		</button>
-		<button class={viewAnonData ? toggleBtnClass.active : toggleBtnClass.inactive}
-			on:click={() => (viewAnonData = true)}>
-			<p class={viewAnonData ? 'text-white font-semibold tracking-widest' : 'text-slate-500 tracking-widest'}>
-				ANONYMOUS
+		<button class={switchMoodData.anon ? toggleBtnClass.active : toggleBtnClass.inactive}
+			on:click={() => {switchMoodData = {student: false, anon: true, guest: false};}}>
+			<p class={switchMoodData.anon ? 'text-white font-semibold tracking-widest' : 'text-slate-500 tracking-widest'}>
+				ANON
+			</p>
+		</button>
+		<button class={switchMoodData.guest ? toggleBtnClass.active : toggleBtnClass.inactive}
+			on:click={() => {switchMoodData = {student: false, anon: false, guest: true};}}>
+			<p class={switchMoodData.guest ? 'text-white font-semibold tracking-widest' : 'text-slate-500 tracking-widest'}>
+				GUEST
 			</p>
 		</button>
 	</div>
@@ -1118,6 +1335,12 @@
 	<!-- 
 		DEC 20, 2023:
 		- kulang nalang modal for import/export mood information
+
+		DEC 21, 2023:
+		- added guest sa toggle data view
+
+		DEC 22, 2023:
+		- completed import/export for all data mood types (student/anon/guest)
 	 -->
 	<div class="flex flex-row flex-wrap flex-1 justify-between w-full gap-4">
 		<CardInfo purpose="time" title="" bind:data={current} />
@@ -1129,7 +1352,7 @@
 		<Tooltip triggeredBy="#importExport" placement="left" on:hover={(e) => e.preventDefault()} class="z-50 relative">Import/Export Mood Information</Tooltip>
 		<Tooltip triggeredBy="#filterCharts" placement="left" on:hover={(e) => e.preventDefault()} class="z-50 relative">Filter Charts</Tooltip>
 
-		<Button id="importExport" class="w-full rounded-md flex flex-1 gap-2" color="green" shadow>
+		<Button id="importExport" class="w-full rounded-md flex flex-1 gap-2" color="green" shadow on:click={() => importExportModalState = true}>
 			<ArchiveSolid tabindex="-1" class="text-white focus:outline-none" />
 		</Button>
 
@@ -1137,12 +1360,12 @@
 			<AdjustmentsVerticalSolid tabindex="-1" class="focus:outline-none" />
 		</Button>
 	</div>
-
+	
+	<!--  -->
 	<div class="flex flex-row flex-wrap gap-4">
-		<!-- Mood Frequency Bar Chart -->
 		<div id="overallMoodFreqHBC" class="flex p-4 pt-5 bg-white rounded drop-shadow-md hover:ring-1 flex-wrap justify-center pl-6 w-full flex-1">
 			{#if dataType?.length == 0}
-				<div class="flex flex-col justify-center items-center space-y-5" style="width: 250px; min-width: 100%; height:350px;">
+				<div class="flex flex-col justify-center items-center space-y-5" style="width: 225px; min-width: 100%; height:350px;">
 					<RocketOutline class="h-20 w-20" />
 					<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
 				</div>
@@ -1153,85 +1376,84 @@
 					bind:xData={xDataMBC}
 					bind:yData={yDataMBC}
 					elementID="dashboardHBC"
-					style="width: 250px; min-width: 100%; height:350px;"
+					style="width: 225px; min-width: 100%; height:350px;"
 				/>
 			{/if}
 		</div>
 		
-		<!-- Line Charts -->
 		<div id="lineChartMood" class="flex flex-1 p-4 w-full bg-white rounded drop-shadow-md hover:ring-1 flex-wrap justify-center">
 			<div class="flex flex-col space-y-3">
-				<ButtonGroup class="inline-flex rounded-lg shadow-sm self-center flex-wrap justify-center">
-					<Button class="sm:text-xs"
-						disabled={dataType.length == 0}
-						color={lcBtnColors.today}
-						on:click={() => selectLineChart('today')}>
-						Today
-					</Button>
-					<Button class="sm:text-xs" id="weeklySLC"
-						disabled={dataType.length == 0}
-						color={lcBtnColors.weekly}
-						on:click={() => selectLineChart('weekly')}>
-						Weekly
-					</Button>
-					<Button class="sm:text-xs" id="monthlySLC"
-						disabled={dataType.length == 0}
-						color={lcBtnColors.monthly}
-						on:click={() => selectLineChart('monthly')}>
-						Monthly
-					</Button>
-					<Button class="sm:text-xs" id="yearlySLC"
-						disabled={dataType.length == 0}
-						color={lcBtnColors.yearly}
-						on:click={() => selectLineChart('yearly')}>
-						Yearly
-					</Button>
-					<Button class="sm:text-xs"
-						disabled={dataType.length == 0}
-						color={lcBtnColors.overall}
-						on:click={() => selectLineChart('overall')}>
-						Overall
-					</Button>
-				</ButtonGroup>
 				{#if dataType?.length > 0}
+					<ButtonGroup class="inline-flex rounded-lg shadow-sm self-center flex-wrap justify-center">
+						<Button class="sm:text-xs"
+							disabled={dataType.length == 0}
+							color={lcBtnColors.today}
+							on:click={() => selectLineChart('today')}>
+							Today
+						</Button>
+						<Button class="sm:text-xs" id="weeklySLC"
+							disabled={dataType.length == 0}
+							color={lcBtnColors.weekly}
+							on:click={() => selectLineChart('weekly')}>
+							Weekly
+						</Button>
+						<Button class="sm:text-xs" id="monthlySLC"
+							disabled={dataType.length == 0}
+							color={lcBtnColors.monthly}
+							on:click={() => selectLineChart('monthly')}>
+							Monthly
+						</Button>
+						<Button class="sm:text-xs" id="yearlySLC"
+							disabled={dataType.length == 0}
+							color={lcBtnColors.yearly}
+							on:click={() => selectLineChart('yearly')}>
+							Yearly
+						</Button>
+						<Button class="sm:text-xs"
+							disabled={dataType.length == 0}
+							color={lcBtnColors.overall}
+							on:click={() => selectLineChart('overall')}>
+							Overall
+						</Button>
+					</ButtonGroup>
 					{#if selectedLineChart === 'today'}
 						<LineChart
 							bind:xData={timestamps}
 							bind:yData={todaysMoodScores}
 							elementID="dashboardTLC"
-							style="width: 350px; min-width: 100%; height:300px;"
+							style="width: 400px; min-width: 100%; height:300px;"
 						/>
 					{:else if selectedLineChart === 'overall'}
 						<LineChart
 							bind:xData={overall}
 							bind:yData={overallAverages}
 							elementID="dashboardDLC"
-							style="width: 350px; min-width: 100%; height:300px;"
+							style="width: 400px; min-width: 100%; height:300px;"
 						/>
 					{:else if selectedLineChart === 'weekly'}
 						<LineChart
 							bind:xData={weekly}
 							bind:yData={weeklyAverages}
 							elementID="dashboardWLC"
-							style="width: 350px; min-width: 100%; height:300px;"
+							style="width: 400px; min-width: 100%; height:300px;"
 						/>
 					{:else if selectedLineChart === 'monthly'}
 						<LineChart
 							bind:xData={monthly}
 							bind:yData={monthlyAverages}
 							elementID="dashboardMLC"
-							style="width: 350px; min-width: 100%; height:300px;"
+							style="width: 400px; min-width: 100%; height:300px;"
 						/>
 					{:else if selectedLineChart === 'yearly'}
 						<LineChart
 							bind:xData={yearly}
 							bind:yData={yearlyAverages}
 							elementID="dashboardYLC"
-							style="width: 350px; min-width: 100%; height:300px;"
+							style="width: 400px; min-width: 100%; height:300px;"
 						/>
 					{/if}
 				{:else}
-					<div class="flex flex-col justify-center items-center space-y-5" style="width: 350px; min-width: 100%; height:300px;">
+					<div class="flex flex-col justify-center items-center space-y-5" style="width: 400px; min-width: 100%; height:300px;">
 						<RocketOutline class="h-20 w-20" />
 						<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
 					</div>
@@ -1239,22 +1461,28 @@
 			</div>
 		</div>
 
-		<!-- Mood Averages -->
 		<div id="moodAvgCourseYrReason" class="flex flex-col flex-1 p-4 w-full bg-white rounded items-center drop-shadow-md hover:ring-1">
 			{#if dataType?.length > 0}
-				<ButtonGroup class="self-center">
-					<Button class="sm:text-xs" color={nhbcBtnColors.course} on:click={() => selectNHBarChart('course')}>
-						Course
-					</Button>
-					<Button class="sm:text-xs"
-						color={nhbcBtnColors.year_level}
-						on:click={() => selectNHBarChart('year_level')}>
-						Year Level
-					</Button>
+				
+				{#if switchMoodData.guest}
 					<Button class="sm:text-xs" color={nhbcBtnColors.reason} on:click={() => selectNHBarChart('reason')}>
 						Reason
 					</Button>
-				</ButtonGroup>
+				{:else}
+					<ButtonGroup class="self-center">
+						<Button class="sm:text-xs" color={nhbcBtnColors.course} on:click={() => selectNHBarChart('course')}>
+							Course
+						</Button>
+						<Button class="sm:text-xs"
+							color={nhbcBtnColors.year_level}
+							on:click={() => selectNHBarChart('year_level')}>
+							Year Level
+						</Button>
+						<Button class="sm:text-xs" color={nhbcBtnColors.reason} on:click={() => selectNHBarChart('reason')}>
+							Reason
+						</Button>
+					</ButtonGroup>
+				{/if}
 				<div class="mt-3 items-center">
 					{#if selectedNHBarChart === 'course'}
 						<NegativeBarChart
@@ -1287,7 +1515,6 @@
 			{/if}
 		</div>
 		
-		<!-- Associated Reason Freq -->
 		<div id="reasonFreqBC" class="flex flex-1 p-4 justify-center w-full bg-white rounded drop-shadow-md hover:ring-1">
 			<div class="flex flex-col space-y-3">
 				{#if dataType?.length > 0}
@@ -1322,7 +1549,6 @@
 			</div>
 		</div>
 
-		<!-- Histogram Chart -->
 		<div id="moodLoginHrsHistogram" class="flex flex-1 p-4 w-full bg-white rounded justify-center items-center drop-shadow-md hover:ring-1">
 			{#if dataType?.length > 0}
 				<Histogram data={dataType} title="Mood Login Hours (24-hour)"
@@ -1337,7 +1563,6 @@
 			{/if}
 		</div>
 
-		<!-- Students with Consistent Low Moods Table -->
 		<div id="low-moods" bind:this={tableRef} class="flex flex-col flex-1 justify-start bg-white rounded !p-4 drop-shadow-md w-full hover:ring-1 items-center flex-wrap space-y-4">
 			<p class="text-center my-3 break-words text-sm font-normal text-gray-500 dark:text-gray-400">(Students with low mood entries for <span class="font-semibold">atleast 4 days</span>)</p>
 			<Table striped divClass="relative overflow-x-auto shadow-md" class="table-auto overflow-x-auto min-w-full">
@@ -1413,7 +1638,6 @@
 			</Table>
 		</div>
 
-		<!-- optional: Heatmap -->
 		<div id="moodFreqHeatmap" class="hidden">
 			{#if dataType.length > 0}
 				<div class="flex flex-col justify-evenly space-y-4">
@@ -1436,7 +1660,6 @@
 			{/if}
 		</div>
 
-		<!-- optional: Radar Chart -->
 		<div id="moodReasonRadarChart" class="hidden">
 			{#if dataType?.length > 0}
 				<RadarChart
@@ -1454,7 +1677,6 @@
 			{/if}
 		</div>
 
-		<!-- optional: Calendar Chart -->
 		<div id="moodCalendar" class="hidden">
 			<div class="flex flex-col mt-1 px-4">
 				{#if dataType?.length > 0}
@@ -1485,10 +1707,10 @@
 				{/if}
 			</div>
 		</div>
-	</div>
+	</div> 
 </div>
 
-<Modal class="flex relative max-w-fit w-full max-h-full" title="Add a Chart" bind:open={chartFilterModalState}>
+<Modal class="flex relative w-full max-h-full" title="Toggle a chart" bind:open={chartFilterModalState}>
 	<div class="flex flex-col gap-3">
 		<!-- 
 			NOTE: The `href` attribute in this case is just used to provide a fallback for 
@@ -1540,21 +1762,21 @@
 		</a>
 
 		<p class="mt-2 text-sm">Additional charts:</p>
-		<Checkbox id="heatmap" bind:checked={heatmap} on:change={(event) => test(heatmap, event)}>
+		<Checkbox id="heatmap" bind:checked={heatmap} on:change={(event) => filterChart(heatmap, event)}>
 			<a href="#moodFreqHeatmap" on:click={scrollIntoView}>
 				<div class="flex gap-3 items-center">
 					<p class="text-sm">Mood Frequency by Day and Hour Chart</p>
 				</div>
 			</a>
 		</Checkbox>
-		<Checkbox id="radar" bind:checked={radar} on:change={(event) => test(radar, event)}>
+		<Checkbox id="radar" bind:checked={radar} on:change={(event) => filterChart(radar, event)}>
 			<a href="#moodReasonRadarChart" on:click={scrollIntoView}>
 				<div class="flex gap-3 items-center">
 					<p class="text-sm">Mood and Frequency of Related Reasons Chart</p>
 				</div>
 			</a>
 		</Checkbox>
-		<Checkbox id="moodReasonCalendarChart" bind:checked={moodReasonCalendarChart} on:change={(event) => test(moodReasonCalendarChart, event)}>
+		<Checkbox id="moodReasonCalendarChart" bind:checked={moodReasonCalendarChart} on:change={(event) => filterChart(moodReasonCalendarChart, event)}>
 			<a href="#moodCalendar" on:click={scrollIntoView}>
 				<div class="flex gap-3 items-center">
 					<p class="text-sm">Mood Calendar</p>
@@ -1562,4 +1784,160 @@
 			</a>
 		</Checkbox>
 	</div>
+</Modal>
+
+<Modal class="flex relative max-w-fit w-full max-h-full" bind:open={importExportModalState}>
+	<Tabs style="underline" contentClass="bg-white rounded-lg">
+		<TabItem open title="FORMAT FOR IMPORT">
+			<div class="flex flex-col my-4 space-y-4">
+				<p class="text-sm text-black uppercase font-semibold">Student:</p>
+				<Table striped divClass="relative overflow-x-auto shadow-md" class="table-auto overflow-x-auto min-w-full">
+					<TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky lowercase text-center">
+						<TableHeadCell>student_id</TableHeadCell>
+						<TableHeadCell>mood_id</TableHeadCell>
+						<TableHeadCell>reason_id</TableHeadCell>
+						<TableHeadCell>created_at</TableHeadCell>
+					</TableHead>
+					<TableBody tableBodyClass="divide-y bg-white">
+						<TableBodyRow class="border border-zinc-300 text-center">
+							<TableBodyCell>2020303123</TableBodyCell>        
+							<TableBodyCell>1</TableBodyCell>
+							<TableBodyCell>4</TableBodyCell>
+							<TableBodyCell>2024-01-30 13:01:20</TableBodyCell>
+						</TableBodyRow>
+					</TableBody>
+				</Table>
+				<p class="text-sm text-black uppercase font-semibold">Anon:</p>
+				<Table striped divClass="relative overflow-x-auto shadow-md" class="table-auto overflow-x-auto min-w-full">
+					<TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky lowercase text-center">
+						<TableHeadCell>mood_score</TableHeadCell>
+						<TableHeadCell>reason_score</TableHeadCell>
+						<TableHeadCell>course</TableHeadCell>
+						<TableHeadCell>year_level</TableHeadCell>
+						<TableHeadCell>created_at</TableHeadCell>
+					</TableHead>
+					<TableBody tableBodyClass="divide-y bg-white">
+						<TableBodyRow class="border border-zinc-300 text-center">
+							<TableBodyCell>1</TableBodyCell>
+							<TableBodyCell>4</TableBodyCell>
+							<TableBodyCell>BSIT</TableBodyCell>
+							<TableBodyCell>4</TableBodyCell>
+							<TableBodyCell>2024-01-30 13:01:20</TableBodyCell>
+						</TableBodyRow>
+					</TableBody>
+				</Table>
+				<p class="text-sm text-black uppercase font-semibold">Guest:</p>
+				<Table striped divClass="relative overflow-x-auto shadow-md" class="table-auto overflow-x-auto min-w-full">
+					<TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky lowercase text-center">
+						<TableHeadCell>mood_score</TableHeadCell>
+						<TableHeadCell>reason_score</TableHeadCell>
+						<TableHeadCell>created_at</TableHeadCell>
+					</TableHead>
+					<TableBody tableBodyClass="divide-y bg-white">
+						<TableBodyRow class="border border-zinc-300 text-center">
+							<TableBodyCell>1</TableBodyCell>
+							<TableBodyCell>4</TableBodyCell>
+							<TableBodyCell>2024-01-30 13:01:20</TableBodyCell>
+						</TableBodyRow>
+					</TableBody>
+				</Table>
+			</div>
+		</TabItem> 
+
+		<TabItem title="IMPORT">
+			<Label for="with_helper" class="pb-2">Upload file (.xlsx file only):</Label>
+			<Fileupload class="w-full" id="with_helper" accept=".xlsx" on:change={handleImport} />
+			{#if importError}
+				<p class="mt-3 text-red-500 text-sm"><span class="font-semibold">ERROR: </span>{importError}</p>
+			{/if}
+		</TabItem>
+
+		<TabItem title={"EXPORT "+currentDataView.toUpperCase()+" MOOD DATA"} class="space-y-4 items-center">
+			<p class="text-sm text-black uppercase font-semibold mb-2">(data preview):</p>
+			<Table striped divClass="relative overflow-x-auto shadow-md" class="table-auto overflow-x-auto min-w-full">
+				{#if currentDataView == 'Student'}
+					<TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky text-center">
+						<TableHeadCell>#</TableHeadCell>
+						<TableHeadCell>Student ID</TableHeadCell>
+						<TableHeadCell>Name</TableHeadCell>
+						<TableHeadCell>Course</TableHeadCell>
+						<TableHeadCell>Year Level</TableHeadCell>
+						<TableHeadCell>College</TableHeadCell>
+						<TableHeadCell>Mood</TableHeadCell>
+						<TableHeadCell>Reason</TableHeadCell>
+						<TableHeadCell>Date</TableHeadCell>
+						<TableHeadCell>Time</TableHeadCell>
+						<TableHeadCell>Created By</TableHeadCell>
+					</TableHead>
+				{:else if currentDataView == 'Anon'}
+					<TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky text-center">
+						<TableHeadCell>#</TableHeadCell>
+						<TableHeadCell>Mood</TableHeadCell>
+						<TableHeadCell>Reason</TableHeadCell>
+						<TableHeadCell>Date</TableHeadCell>
+						<TableHeadCell>Time</TableHeadCell>
+						<TableHeadCell>Course</TableHeadCell>
+						<TableHeadCell>Year Level</TableHeadCell>
+						<TableHeadCell>Created By</TableHeadCell>
+					</TableHead>
+				{:else if currentDataView == 'Guest'}
+					<TableHead class="bg-zinc-100 border border-t border-zinc-300 top-0 sticky text-center">
+						<TableHeadCell>#</TableHeadCell>
+						<TableHeadCell>Mood</TableHeadCell>
+						<TableHeadCell>Reason</TableHeadCell>
+						<TableHeadCell>Date</TableHeadCell>
+						<TableHeadCell>Time</TableHeadCell>
+						<TableHeadCell>Created By</TableHeadCell>
+					</TableHead>
+				{/if}
+				<TableBody tableBodyClass="divide-y bg-white">
+					{#if $exportMoodsData?.length === 0}
+						{#if currentDataView == 'Student'}
+							<TableBodyRow class="border border-zinc-300 text-center">
+								<TableBodyCell>No data</TableBodyCell>        
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+							</TableBodyRow>
+						{:else if currentDataView == 'Anon'}
+							<TableBodyRow class="border border-zinc-300 text-center">
+								<TableBodyCell>No data</TableBodyCell>        
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+							</TableBodyRow>
+						{:else if currentDataView == 'Guest'}
+							<TableBodyRow class="border border-zinc-300 text-center">
+								<TableBodyCell>No data</TableBodyCell>        
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+								<TableBodyCell>No data</TableBodyCell>
+							</TableBodyRow>
+						{/if}
+					{:else}
+						{#each $exportMoodsData?.slice(1,2) as entry}
+							<TableBodyRow class="border border-zinc-300 text-center">
+								{#each entry as row}
+									<TableBodyCell>{row}</TableBodyCell>
+								{/each}
+							</TableBodyRow>
+						{/each}
+					{/if}
+				</TableBody>
+			</Table>
+			<Button class="w-fit mt-4" on:click={handleExport}>CONFIRM EXPORT</Button>
+		</TabItem>
+	</Tabs>
 </Modal>

@@ -6,4 +6,5 @@ export const removeUser = writable(false);
 export const newRequest = writable(false);
 export const focusTable = writable(false);
 export const consistentLowMoods = writable([]);
-export const exportData = writable([]);
+export const exportStudentData = writable([]);
+export const exportMoodsData = writable([]);

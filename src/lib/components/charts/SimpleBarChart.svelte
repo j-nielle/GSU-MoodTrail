@@ -62,11 +62,7 @@
 				nameRotate: 0,
 				nameLocation: 'center',
 				nameGap: 25,
-				axisLabel: {
-					fontSize: 9,
-					interval: 0,
-					rotate: 35
-				}
+				axisLabel: { show: false },
 			},
 			series: [
 				{
@@ -77,6 +73,11 @@
 					},
 					itemStyle: {
 						color: '#1a56db'
+					},
+					label: {
+						show: true,
+						formatter: '{b}',
+						borderWidth: 0
 					},
 					markLine: {
 						label: {

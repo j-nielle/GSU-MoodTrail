@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { redirect } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageLoad} */
@@ -16,17 +17,26 @@ export async function load({ parent }) {
 		.from('AnonMood')
 		.select()
 		.order('created_at', { ascending: true });
+
+	const { data: guestMood } = await supabase
+		.from('GuestMood')
+		.select()
+		.order('created_at', { ascending: true });
 	
 	const { data: requests } = await supabase
 		.from('Request')
 		.select()
 		.order('created_at', { ascending: false });
 
+	const { data: { user } } = await supabase.auth.getUser();
+	
 	return {
 		studentMood: studentMood || [],
 		anonMood: anonMood || [],
 		requests: requests || [],
-		session: session
+		guestMood: guestMood || [],
+		session: session,
+		user: user,
 	};
 }
 
