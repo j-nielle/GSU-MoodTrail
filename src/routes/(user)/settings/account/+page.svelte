@@ -44,7 +44,7 @@
 		<div class="flex flex-row justify-between space-x-4 items-center">
 			<div class="flex flex-col">
 				<p class="text-xs uppercase font-bold text-black">display name</p>
-				<p class="text-xs uppercase text-black">{username || 'USER'}</p>
+				<p class="text-xs text-black">{username}</p>
 			</div>
 			<Button color="dark" class="text-white" on:click={() => { changeUsername = true; changeEmail = false; changePass= false; }}>
 				Edit

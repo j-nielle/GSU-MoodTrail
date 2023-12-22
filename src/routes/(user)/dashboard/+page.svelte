@@ -1,6 +1,6 @@
 <script>
 	// @ts-nocheck
-	import _, { findLastKey } from 'lodash';
+	import _ from 'lodash';
 	import dayjs from 'dayjs';
 	import { onMount } from 'svelte';
 	import {
@@ -21,8 +21,6 @@
 		Fileupload,
 		Tabs, 
 		TabItem, 
-		Helper,
-		Alert 
 	} from 'flowbite-svelte';
 	import {
 		RocketOutline, 
@@ -1349,7 +1347,7 @@
 		<CardInfo purpose="" title={infoCardTitle} bind:data={topMoodReason} />
 		<CardInfo purpose="" title="Number of Entries:" bind:data={dataType.length} />
 
-		<Tooltip triggeredBy="#importExport" placement="left" on:hover={(e) => e.preventDefault()} class="z-50 relative">Import/Export Mood Information</Tooltip>
+		<Tooltip triggeredBy="#importExport" placement="left" on:hover={(e) => e.preventDefault()} class="z-50 relative">Import/Export Mood Data</Tooltip>
 		<Tooltip triggeredBy="#filterCharts" placement="left" on:hover={(e) => e.preventDefault()} class="z-50 relative">Filter Charts</Tooltip>
 
 		<Button id="importExport" class="w-full rounded-md flex flex-1 gap-2" color="green" shadow on:click={() => importExportModalState = true}>

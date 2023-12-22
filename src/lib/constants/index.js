@@ -119,3 +119,5 @@ export const getWeekNumberString = (date) => {
 };
 
 export const requestTypes = { 1: 'Request for a consultation', 2: 'Refer a student' }
+
+export const requestStatus = { false: 'Pending', true: 'Completed' }

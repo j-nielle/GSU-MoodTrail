@@ -32,9 +32,9 @@
 			<input type="hidden" id="userPass" name="userPass" bind:value={userPass} />
 
 			<FloatingLabelInput size="small" style="outlined" id="editUsername" name="editUsername" type="text"
-				value={prevUsername} label="Username (Optional)"
+				value={prevUsername} label="Username" minlength="3" maxlength="10" required
 			/>
-			<FloatingLabelInput size="small" style="outlined" id="editEmail" name="editEmail" type="text" 
+			<FloatingLabelInput size="small" style="outlined" id="editEmail" name="editEmail" type="email" 
 				value={prevEmail} label="Email Address"
 				required
 			/>

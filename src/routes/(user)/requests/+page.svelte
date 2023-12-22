@@ -29,7 +29,7 @@
 	let limit = 5;
 	let maxPage, startIndex, endIndex, paginatedItems = {};
 
-	let incompleteOnly = false;
+	let pendingRequestsOnly = true;
 
 	let requestsData = data.requests;
 
@@ -83,8 +83,8 @@
 			endIndex = startIndex + limit;
 		}
 
-		if(incompleteOnly){
-			// paginatedItems will only show the incomplete requests
+		if(pendingRequestsOnly){
+			// paginatedItems will only show the pending requests
       paginatedItems = filteredItems?.filter(req => !req.iscompleted).slice(startIndex, endIndex);
 			const remainingItems = filteredItems?.filter(req => !req.iscompleted);
 			maxPage = Math.ceil(remainingItems?.length / limit)
@@ -133,8 +133,8 @@
 		<div class="flex items-center ml-8">
 			<Search size="md" class="w-96 mr-3 h-11" placeholder="Search by phone number or request type" bind:value={searchTerm} />
 			<div class="flex flex-row justify-start w-full space-x-2">
-				<Checkbox class="cursor-pointer mr-0" bind:value={incompleteOnly} on:change={() => incompleteOnly = !incompleteOnly} />
-				<P class="text-sm font-normal text-gray-500 dark:text-gray-400">Show Incomplete Requests Only</P>
+				<Checkbox class="cursor-pointer mr-0" bind:value={pendingRequestsOnly} bind:checked={pendingRequestsOnly} on:click={() => pendingRequestsOnly = !pendingRequestsOnly} />
+				<P class="text-sm font-normal text-gray-500 dark:text-gray-400">Show pending requests only</P>
 			</div>
 		</div>
 		<div class="flex items-center mr-8"> 
@@ -150,8 +150,7 @@
 			<P class="text-lg mt-3 font-bold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 mb-6">
 				Help Requests from the Kiosk
 				<p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">
-					By default, it shows requests for the current date and is sorted according to the latest
-					request.
+					By default, it shows pending requests only. You can change this by unchecking the checkbox above.
 				</p>
 			</P>
 			{#if maxPage > 1}

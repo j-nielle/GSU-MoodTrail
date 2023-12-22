@@ -48,11 +48,11 @@ export const actions = {
 		const adminAuthClient = supabaseAdminClient.auth.admin;
 
 		const formData = await request.formData();
-		const username = formData?.get('addName') || 'User';
+		const username = formData?.get('addName');
 		const role = formData?.get('addRole');
 		const email = formData?.get('addEmail');
 		const password = formData?.get('addPassword');
-		// console.log(formData)
+
 		if (!username || !role || !email || !password){
 			return {
 				error: "Missing fields. Please try again later.",
@@ -99,7 +99,7 @@ export const actions = {
 
 		const formData = await request.formData();
 		const userID = formData?.get('userID');
-		const newUsername = formData?.get('editUsername') || 'User';
+		const newUsername = formData?.get('editUsername');
 		const newRole = formData?.get('editRole');
 		const newEmail = formData?.get('editEmail');
 		// console.log(formData)
@@ -111,7 +111,7 @@ export const actions = {
 				};
 			}
 		}
-		else if (!userID || !newEmail || !newRole){
+		else if (!userID || !newEmail || !newRole || !newUsername){
 			return {
 				error: "Missing fields. Please try again later.",
 				success: false
