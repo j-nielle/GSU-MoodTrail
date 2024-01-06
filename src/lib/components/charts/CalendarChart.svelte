@@ -11,12 +11,13 @@
 	export let reasonType = '';
 	export let moodType = '';
 	export let seriesName = '';
+	export let calendarYear = '';
 
 	let calendarChart;
 	let dataUnavailable = false;
 
 	/**
-	 * This function groups and counts data entries by date for a specific reason and mood type.
+	 * This function groups and counts data entries by selected calendar year for a specific reason and mood type.
 	 *
 	 * @param {Array} dataType - An array of data objects. Each object should have 'created_at', 'reason_score', and 'mood_score' properties.
 	 *
@@ -39,14 +40,19 @@
 			return [];
 		}
 
+		const records = dataType?.filter((item) => {
+			const date = +echarts.time.parse(item?.created_at);
+			const formattedDate = echarts.time.format(date, '{yyyy}', false);
+			return formattedDate == calendarYear;
+		});
+
 		// use reduce to create the dataMap
-		const dataMap = dataType?.reduce((map, item) => {
+		const dataMap = records?.reduce((map, item) => {
 			// convert the date string to a timestamp
 			const date = +echarts.time.parse(item?.created_at);
-
+			
 			// format the date to 'yyyy-MM-dd', false means not UTC
 			const formattedDate = echarts.time.format(date, '{yyyy}-{MM}-{dd}', false);
-
 			const reasonScore = item?.reason_score; // get the reason_score for current item
 			const moodScore = item?.mood_score; // get the mood_score for current item
 
@@ -106,7 +112,7 @@
 			calendar: {
 				left: 22,
 				right: 1,
-    		range: dayjs().format('YYYY'),
+    		range: calendarYear || dayjs().format('YYYY'),
  		 	},
 			series: [
 				{
@@ -142,7 +148,7 @@
 	afterUpdate(() => {
 		calendarChart?.setOption({
 			calendar: {
-    		range: dayjs().format('YYYY'),
+    		range: calendarYear || dayjs().format('YYYY'),
  		 	},
 			series: [
 				{

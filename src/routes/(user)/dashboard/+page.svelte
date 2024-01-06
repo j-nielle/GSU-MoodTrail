@@ -54,6 +54,7 @@
 	} from '$lib/constants/index.js';
 	import FileSaver from "file-saver";
   import * as XLSX from "xlsx";
+	import * as echarts from 'echarts';
 
 	export let data;
 
@@ -82,7 +83,7 @@
 	let timestamps = [],
 		todaysMoodScores = [];
 
-	let selectedLineChart = 'weekly',
+	let selectedLineChart = 'today',
 		lineChartTitle = '';
 	let selectedNHBarChart = 'course';
 
@@ -120,7 +121,9 @@
 		yDataSBC = [];
 
 	let selectedReasonMarkType = 'average', sbcMarkType = '';
-	let selectedReasonCalendar = '', selectedMoodCalendar = '';
+	let selectedReasonCalendar = '', selectedMoodCalendar = '', selectedCalendarYear = '';
+
+	let calendarYearChoices = [];
 	
 	let chartFilterModalState = false;
 	let tableRef;
@@ -465,6 +468,13 @@
 	}
 
 	$: if (dataType) {
+		// CALENDAR CHART 
+		calendarYearChoices = _.uniqBy(dataType?.map((item) => {
+			const date = +echarts.time.parse(item?.created_at);
+			const formattedDate = echarts.time.format(date, '{yyyy}', false); // format the date to 'yyyy', false means not UTC
+			return { name: formattedDate, value: formattedDate };
+		}), 'name');
+
 		// FOR HEATMAP CHART - MOOD FREQUENCY BY DAY AND HOUR
 
 		// apply lowMoodsOnly filter if true
@@ -1330,16 +1340,6 @@
 
 <div class="bg-zinc-100 flex flex-col space-y-4 mx-4 pt-4">
 	<!-- Card Section -->
-	<!-- 
-		DEC 20, 2023:
-		- kulang nalang modal for import/export mood information
-
-		DEC 21, 2023:
-		- added guest sa toggle data view
-
-		DEC 22, 2023:
-		- completed import/export for all data mood types (student/anon/guest)
-	 -->
 	<div class="flex flex-row flex-wrap flex-1 justify-between w-full gap-4">
 		<CardInfo purpose="time" title="" bind:data={current} />
 		<CardInfo purpose="recentStudent" title="Recent Student ID:" bind:data={recentStudent} />
@@ -1681,9 +1681,10 @@
 					<div class="flex flex-row justify-between space-x-3 mt-4">
 						<div class="flex flex-col justify-start items-center mt-2">
 							<p class="font-semibold self-start">Mood-Reason Calendar</p>
-							<p class="text-xs">(Please select a mood and the associated reason.)</p>
+							<p class="text-xs">(Please select the calendar year, mood and the associated reason.)</p>
 						</div>
 						<div class="flex flex-row space-x-3">
+							<Select placeholder="Year" class="font-normal h-11 bg-white" items={calendarYearChoices} bind:value={selectedCalendarYear} />
 							<Select placeholder="Mood" class="font-normal h-11 bg-white" items={moodChoices} bind:value={selectedMoodCalendar} />
 							<Select placeholder="Reason" class="font-normal h-11 bg-white" items={reasonChoices} bind:value={selectedReasonCalendar} />
 						</div>
@@ -1691,6 +1692,7 @@
 					<div class="items-center">
 						<CalendarChart 
 							data={dataType} seriesName="Mood-Reason Calendar"
+							bind:calendarYear={selectedCalendarYear}
 							bind:reasonType={selectedReasonCalendar} 
 							bind:moodType={selectedMoodCalendar}
 							elementID="moodCalendarChart" 
