@@ -1,5 +1,7 @@
 // @ts-nocheck
 import dayjs from 'dayjs';
+import isoWeek from 'dayjs/plugin/isoWeek';
+dayjs.extend(isoWeek);
 
 export const moodColors = {
 	Sad: "#115f9a",
@@ -110,12 +112,13 @@ export const daysShort = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
 	* @returns {string} The week number of the given date (e.g. 'Week 1', 'Week 2', etc.)
 */
 export const getWeekNumberString = (date) => {
-	const firstDayOfYear = dayjs(date).startOf('year').day(0); // get the first day of the year
+  const dayjsDate = dayjs(date);
 
-	// get the number of weeks between the first day of the year and the given date and add 1
-	// to get the week number
-	const weekDiff = date.diff(firstDayOfYear, 'week') + 1; 
-	return `Week ${weekDiff}`;
+  // Get the week number using isoWeek() method
+  const weekNo = dayjsDate.isoWeek();
+	
+  // Return week number
+  return `Week ${weekNo}`;
 };
 
 export const requestTypes = { 1: 'Request for a consultation', 2: 'Refer a student' }

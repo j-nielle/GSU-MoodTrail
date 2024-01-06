@@ -82,7 +82,7 @@
 	let timestamps = [],
 		todaysMoodScores = [];
 
-	let selectedLineChart = 'today',
+	let selectedLineChart = 'weekly',
 		lineChartTitle = '';
 	let selectedNHBarChart = 'course';
 
@@ -660,7 +660,7 @@
 			const groupedByWeek = _.groupBy(dataType, (entry) =>
 				getWeekNumberString(dayjs(entry.created_at))
 			);
-
+			
 			weekly = _.sortBy(_.keys(groupedByWeek)); // x, all weeks recorded (sorted in ascending order)
 
 			// y, get the average mood score for each week
