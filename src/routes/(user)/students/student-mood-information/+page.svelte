@@ -888,6 +888,7 @@
 			<TableHeadCell class="text-center">Reason</TableHeadCell>
 			<TableHeadCell class="text-center">Date</TableHeadCell>
 			<TableHeadCell class="text-center">Time</TableHeadCell>
+			<TableHeadCell class="text-center">Recorded By</TableHeadCell>
 		</TableHead>
 		<TableBody tableBodyClass="divide-y bg-white">
 			{#if $exportStudentData?.length === 0}
