@@ -16,7 +16,7 @@
 
 		window?.addEventListener('resize', () => {
 			negativeBarChart?.resize();
-			console.log('Window resized, negative bar chart updated.');
+			//console.log('Window resized, negative bar chart updated.');
 		});
 
 		negativeBarChart.setOption({

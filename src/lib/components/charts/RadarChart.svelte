@@ -17,7 +17,7 @@
 
 		window?.addEventListener('resize', () => {
 			radarChart?.resize();
-			console.log('Window resized, radar chart updated.');
+			//console.log('Window resized, radar chart updated.');
 		});
 
 		radarChart?.setOption({

@@ -24,7 +24,7 @@
 
     window?.addEventListener('resize', () => {
 			histogramChart?.resize();
-			console.log('Window resized, histogram chart updated.');
+			//console.log('Window resized, histogram chart updated.');
 		});
 
 		histogramChart?.setOption({

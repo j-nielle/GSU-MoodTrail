@@ -15,7 +15,7 @@
 
 		window?.addEventListener('resize', () => {
 			pieChart?.resize();
-			console.log('Window resized, pie chart updated.');
+			//console.log('Window resized, pie chart updated.');
 		});
 
 		pieChart.setOption({

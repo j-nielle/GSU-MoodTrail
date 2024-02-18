@@ -33,7 +33,7 @@
 
 		window?.addEventListener('resize', () => {
 			simpleBarChart?.resize();
-			console.log('Window resized, bar chart updated.');
+			//console.log('Window resized, bar chart updated.');
 		});
 
 		simpleBarChart?.setOption({

@@ -91,7 +91,7 @@
 
 		window?.addEventListener('resize', () => {
 			calendarChart?.resize();
-			console.log('Window resized, calendar chart updated.');
+			//console.log('Window resized, calendar chart updated.');
 		});
 
 		calendarChart?.setOption({

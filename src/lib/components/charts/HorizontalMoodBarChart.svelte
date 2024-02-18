@@ -19,7 +19,7 @@
 
 		window?.addEventListener('resize', () => {
 			horizontalMoodBarChart?.resize();
-			console.log('Window resized, horizontal bar chart updated.');
+			//console.log('Window resized, horizontal bar chart updated.');
 		});
 
 		horizontalMoodBarChart?.setOption({

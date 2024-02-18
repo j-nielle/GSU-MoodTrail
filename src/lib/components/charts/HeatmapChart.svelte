@@ -26,7 +26,7 @@
 
 		window?.addEventListener('resize', () => {
 			heatmapChart?.resize();
-			console.log('Window resized, heatmap chart updated.');
+			//console.log('Window resized, heatmap chart updated.');
 		});
 
 		heatmapChart?.setOption({

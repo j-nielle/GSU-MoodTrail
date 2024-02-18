@@ -30,7 +30,7 @@
 
 		window?.addEventListener('resize', () => {
 			lineChart?.resize();
-			console.log('Window resized, line chart updated.');
+			//console.log('Window resized, line chart updated.');
 		});
 
 		lineChart?.setOption({

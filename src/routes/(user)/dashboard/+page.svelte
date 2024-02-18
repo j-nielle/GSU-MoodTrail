@@ -270,15 +270,15 @@
 			checkedState = true;
 			if(href.slice(1) == 'moodCalendar') {
 				chartDiv.classList.remove('hidden'); 
-				chartDiv.classList.add('flex', 'p-4', 'justify-center', 'items-center', 'w-full', 'bg-white', 'rounded', 'drop-shadow-md', 'hover:ring-1');
+				chartDiv.classList.add('flex', 'p-4', 'justify-center', 'self-center', 'items-center', 'w-full', 'bg-white', 'rounded', 'drop-shadow-md', 'hover:ring-1');
 			}
 			else{
 				chartDiv.classList.remove('hidden');
-				chartDiv.classList.add('flex', 'flex-1', 'p-4', 'w-full', 'bg-white', 'rounded', 'justify-center', 'items-center', 'drop-shadow-md', 'hover:ring-1');
+				chartDiv.classList.add('flex', 'flex-1', 'p-4', 'w-full', 'bg-white', 'rounded', 'justify-center', 'items-center', 'self-center', 'drop-shadow-md', 'hover:ring-1');
 			}
 		} else {
 			checkedState = false;
-			chartDiv.classList.remove('flex', 'flex-1', 'p-4', 'w-full', 'bg-white', 'rounded', 'justify-center', 'items-center', 'drop-shadow-md', 'hover:ring-1');
+			chartDiv.classList.remove('flex', 'flex-1', 'p-4', 'w-full', 'bg-white', 'rounded', 'justify-center', 'items-center', 'self-center', 'drop-shadow-md', 'hover:ring-1');
 			chartDiv.classList.add('hidden');
 		}
 	}
@@ -433,8 +433,6 @@
 		}
 	}
 
-	// note: while this is reactive, it's not realtime. it only updates when the page is refreshed.
-	// because the data is only fetched once, and not subscribed to gamit supabase.
 	$: if(requestsData){
 		let getRequests = requestsData?.map(req => requestTypes[req.request_type]);
 		let uniqueRequestTypes = [...new Set(getRequests)];
@@ -1338,7 +1336,7 @@
 	</div>
 {/if}
 
-<div class="bg-zinc-100 flex flex-col space-y-4 mx-4 pt-4">
+<div class="bg-zinc-100 flex flex-col space-y-4 mx-4 pt-4 mb-4">
 	<!-- Card Section -->
 	<div class="flex flex-row flex-wrap flex-1 justify-between w-full gap-4">
 		<CardInfo purpose="time" title="" bind:data={current} />
