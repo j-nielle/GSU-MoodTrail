@@ -18,8 +18,19 @@ export async function load({ fetch, data, depends }) {
 
 	try{
 		const { data: { session }, error } = await supabase.auth.getSession();
-		if(error) throw error;
-		return { supabase, session };
+
+		const { data: requests, error: reqDataErr } = await supabase
+			.from('Request')
+			.select('*')
+			.eq('iscompleted', 'FALSE')
+			.order('created_at', { ascending: false });
+		
+		if(error || reqDataErr) throw error;
+		return { 
+			supabase, 
+			session, 
+			requests: requests || []
+		};
 	}catch(error){
 		console.error(error);
 	}

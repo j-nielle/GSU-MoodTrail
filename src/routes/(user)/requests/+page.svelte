@@ -38,13 +38,23 @@
 	onMount(() => {
 		const requestsChannel = supabase.channel('requestsChannel')
 			.on('postgres_changes',{
-					event: 'INSERT',
+					event: '*',
 					schema: 'public',
 					table: 'Request'
 				},(payload) => {
-					requestsData = _.cloneDeep([payload.new, ...requestsData]);
+					if (payload.eventType === 'INSERT') {
+						requestsData = _.cloneDeep([payload.new, ...requestsData]);
+					} else if (payload.eventType === 'UPDATE') {
+						const updatedIndex = requestsData.findIndex((req) => req.id === payload.old.id);
+
+						if (updatedIndex !== -1) {
+							requestsData[updatedIndex] = payload.new;
+						}
+
+						requestsData = _.cloneDeep(requestsData);
+					}
 				}
-			).subscribe() // (status) => console.log('/requests',status));
+			).subscribe()
 
 		return () => {
 			requestsChannel.unsubscribe();
@@ -96,15 +106,14 @@
 
 	const toggleRequestStatus = async (req) => {
 		let isCompleted = req.iscompleted;
-
+		console.log(isCompleted)
 		try {
-			const { error: updateError } = await supabase
+			const { data,error: updateError } = await supabase
 				.from('Request')
 				.update({ iscompleted: isCompleted })
 				.eq('id', req.id)
 				.select()
-				.single();
-
+			console.log(data,updateError)
 			if(updateError) throw updateError;
 		} catch (error) {
 			console.error(error);

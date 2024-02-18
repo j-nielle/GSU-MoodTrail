@@ -49,10 +49,9 @@
 		role: ''
 	};
 
-	let requestsData = [];
-
 	$: ({ supabase, session } = data);
 	$: activeUrl = $page.url.pathname;
+	$: requestsData = data.requests;
 
 	$: {
 		if (session) {
@@ -63,36 +62,32 @@
 	}
 
 	onMount(async () => {
-		const { data: requests, error } = await supabase
-			.from('Request')
-			.select()
-			.order('created_at', { ascending: false });
-
-		requestsData = requests.filter((req) => req.iscompleted === false);
-
-		const {
-			data: { subscription }
-		} = supabase.auth.onAuthStateChange((event, _session) => {
+		const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {
 			console.log(event);
 			if (_session?.expires_at !== session?.expires_at) {
 				invalidate('supabase:auth');
 			}
 		});
 
-		const newRequestChannel = supabase
-			.channel('newRequestChannel')
-			.on(
-				'postgres_changes',
-				{
-					event: 'INSERT',
+		const reqChann = supabase.channel('reqChann')
+			.on('postgres_changes', {
+				event: '*',
 					schema: 'public',
 					table: 'Request'
-				},
-				(payload) => {
-					newRequest.update(() => true);
+				},(payload) => {
+					if (payload.eventType === 'INSERT') {
+						requestsData = _.cloneDeep([payload.new, ...requestsData]);
+					} else if (payload.eventType === 'UPDATE') {
+						const updatedIndex = requestsData.findIndex((req) => req.id === payload.old.id);
+
+						if (updatedIndex !== -1) {
+							requestsData.splice(updatedIndex, 1);
+						}
+
+						requestsData = _.cloneDeep(requestsData);
+					}
 				}
-			)
-			.subscribe(); // (status) => console.log(activeUrl,status));
+			).subscribe(); // (status) => console.log(activeUrl,status));
 
 		// checks if there’s any new data in the consistentLowMoods store
 		// note: only runs when url is /dashboard since that is where the consistentLowMoods store is updated
@@ -129,7 +124,7 @@
 
 		return () => {
 			subscription.unsubscribe();
-			newRequestChannel.unsubscribe();
+			reqChann.unsubscribe();
 			unsubscribe();
 		};
 	});
