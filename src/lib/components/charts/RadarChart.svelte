@@ -34,11 +34,11 @@
 			title: {
 				text: title,
 				left: 'center',
-				bottom: 0,
-				padding: 0,
+				bottom: -6,
+				padding: 5,
 				textStyle:{
           color: '#000000',
-					fontSize: 16,
+					fontSize: 14,
 					fontStyle: "normal",
 					fontWeight: 500
         }
@@ -118,4 +118,4 @@
 	});
 </script>
 
-<div id={elementID} {style} />
+<div class="flex justify-center items-center self-center" id={elementID} {style} />
