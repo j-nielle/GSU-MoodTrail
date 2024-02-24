@@ -203,7 +203,7 @@
 			</NavUl>
 		</div>
 
-		<div>
+		<div class="flex space-x-3 items-center">
 			<label for="avatar-menu">
 				<Avatar class={avatarClass} id="avatar-menu" alt="User Profile Pic" border />
 			</label>
@@ -213,10 +213,13 @@
 					<span class="block truncate text-sm font-medium">{currentUser.email}</span>
 				</DropdownHeader>
 				<DropdownItem href="/settings/account">Account</DropdownItem>
+				<!-- <DropdownItem href="/settings/itsupport">Ask IT Support</DropdownItem> -->
 				{#if currentUser.role.toLowerCase() == 'admin'}
 					<DropdownItem href="/settings/manage-users">Manage Users</DropdownItem>
 				{/if}
 				<DropdownDivider />
+<!-- 				<DropdownItem class="italic font-light">moodtrail.supp@gmail.com</DropdownItem>
+				<DropdownDivider /> -->
 				<form method="POST" action="/logout">
 					<DropdownItem type="submit">Log out</DropdownItem>
 				</form>
@@ -227,12 +230,11 @@
 			<img src={moodTrailOG} alt="Placeholder Logo" class="w-32 h-fit" />
 		</NavBrand>
 
-		{#if activeUrl != '/login'}
+		{#if activeUrl != '/login/'}
 			<Button href="/login" color="purple" class="mr-3 font-semibold tracking-wide">LOGIN</Button>
 		{:else}
 			<Button
 				disabled
-				href="/login"
 				color="purple"
 				class="mr-3 font-semibold tracking-wide pointer-events-none">LOGIN</Button
 			>

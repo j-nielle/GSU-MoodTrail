@@ -1,4 +1,5 @@
 <script>
+ // @ts-nocheck
 	import { page } from '$app/stores';
 	import { 
 		Sidebar, 
@@ -8,6 +9,7 @@
 	import {
 		DatabaseSolid,
 		UserEditOutline,
+		EnvelopeSolid
 	} from 'flowbite-svelte-icons';
 
 	export let data;
@@ -29,6 +31,12 @@
 						<UserEditOutline class="focus:outline-0" />
 					</svelte:fragment>
 				</SidebarItem>
+<!-- 				<SidebarItem class="text-sm rounded" label="Ask IT Support" href="/settings/itsupport" {activeClass}
+					active={activeUrl === '/settings/itsupport'}>
+					<svelte:fragment slot="icon">
+						<EnvelopeSolid class="focus:outline-0" />
+					</svelte:fragment>
+				</SidebarItem> -->
 				{#if session?.user.role === 'admin'}
 					<SidebarItem class="text-sm rounded" label="Users" href="/settings/manage-users" {activeClass}
 						active={activeUrl === '/settings/manage-users'}>
