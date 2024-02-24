@@ -22,14 +22,20 @@ export async function load({ fetch, data, depends }) {
 		const { data: requests, error: reqDataErr } = await supabase
 			.from('Request')
 			.select('*')
+			.order('created_at', { ascending: false });
+		
+		const { data: pendingRequests, error: pendingReqDataErr } = await supabase
+			.from('Request')
+			.select('*')
 			.eq('iscompleted', 'FALSE')
 			.order('created_at', { ascending: false });
 		
-		if(error || reqDataErr) throw error;
+		if(error || reqDataErr || pendingReqDataErr) throw error;
 		return { 
 			supabase, 
 			session, 
-			requests: requests || []
+			requests: requests || [],
+			pendingRequests: pendingRequests || []
 		};
 	}catch(error){
 		console.error(error);

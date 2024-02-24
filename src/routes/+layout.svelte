@@ -19,9 +19,9 @@
 		DropdownHeader,
 		DropdownItem,
 		Indicator,
-		Listgroup
+		Listgroup, Toast 
 	} from 'flowbite-svelte';
-	import { ChevronDownOutline, BellRingSolid, CloseSolid, InboxSolid } from 'flowbite-svelte-icons';
+	import { ChevronDownOutline, BellRingSolid, CloseSolid, InboxSolid, FireOutline } from 'flowbite-svelte-icons';
 	import { consistentLowMoods, focusTable, newRequest } from '$lib/stores/index.js';
 	import { requestTypes, requestStatus } from '$lib/constants/index.js';
 	import {
@@ -49,9 +49,14 @@
 		role: ''
 	};
 
+	let mainDivClass = '';
+
 	$: ({ supabase, session } = data);
 	$: activeUrl = $page.url.pathname;
 	$: requestsData = data.requests;
+	$: pendingReqs = data.pendingRequests;
+
+	$: activeUrl === '/dashboard' ? mainDivClass = 'pb-2 pt-2 bg-zinc-100' : mainDivClass = 'pb-2 pt-2';
 
 	$: {
 		if (session) {
@@ -68,7 +73,7 @@
 				invalidate('supabase:auth');
 			}
 		});
-
+		
 		const reqChann = supabase.channel('reqChann')
 			.on('postgres_changes', {
 				event: '*',
@@ -76,7 +81,10 @@
 					table: 'Request'
 				},(payload) => {
 					if (payload.eventType === 'INSERT') {
+						newRequest.update(() => true);
 						requestsData = _.cloneDeep([payload.new, ...requestsData]);
+						pendingReqs = requestsData.filter((req) => req.iscompleted === false);
+						//console.log(requestsData.length, pendingReqs.length)
 					} else if (payload.eventType === 'UPDATE') {
 						const updatedIndex = requestsData.findIndex((req) => req.id === payload.old.id);
 
@@ -144,11 +152,7 @@
 							<InboxSolid class="outline-none text-white dark:text-white" />
 							<span class="sr-only">Notifications</span>
 							<Indicator color="blue" border size="xl" placement="top-right" class="text-xs font-bold">
-								{#if requestsData}
-									{requestsData.length}
-								{:else}
-									0
-								{/if}
+								{pendingReqs.length ?? 0}
 							</Indicator>
 						</Button>
 					</label>
@@ -160,8 +164,8 @@
 									View all
 								</a>
 							</div>
-							{#if requestsData}
-								<Listgroup items={requestsData.slice(0, 4)} let:item class="border-0 dark:!bg-transparent">
+							{#if pendingReqs}
+								<Listgroup items={pendingReqs.slice(0, 4)} let:item class="border-0 dark:!bg-transparent">
 									<div class="flex items-center space-x-4 rtl:space-x-reverse">
 										<div class="flex-1 min-w-0">
 											<p class="text-sm font-medium text-gray-900 truncate dark:text-white">
@@ -241,43 +245,24 @@
 		{/if}
 	{/if}
 </Navbar>
-<!-- fix this: <Layout> received an unexpected slot "default" -->
+
 <main>
-	{#if $newRequest}
-		{#if activeUrl == '/dashboard'}
-			<div class="px-4 pt-4 bg-zinc-100">
-				<Alert class="bg-blue-100 text-blue-900 flex justify-between items-center content-center">
-					<BellRingSolid tabindex="-1" class="text-blue-700" />
-					<div>
-						<span class="font-bold text-blue-700">(NEW)</span> Help request received!
-					</div>
-					<CloseSolid
-						tabindex="-1"
-						class="cursor-pointer w-4 h-4 text-blue-500 hover:text-blue-700 focus:outline-none"
-						on:click={() => newRequest.update(() => false)}
-					/>
-				</Alert>
-			</div>
-		{:else}
-			<div class="px-4 pt-4">
-				<Alert class="bg-blue-100 text-blue-900 flex justify-between items-center content-center">
-					<BellRingSolid tabindex="-1" class="text-blue-700" />
-					<div>
-						<span class="font-bold text-blue-700">(NEW)</span> Help request received!
-					</div>
-					<CloseSolid
-						tabindex="-1"
-						class="cursor-pointer w-4 h-4 text-blue-500 hover:text-blue-700 focus:outline-none"
-						on:click={() => newRequest.update(() => false)}
-					/>
-				</Alert>
-			</div>
-		{/if}
-	{/if}
-	{#if newLowMoodData}
-		{#if activeUrl == '/dashboard'}
-			<div class="px-4 pt-4 bg-zinc-100">
-				<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900">
+	<div class={mainDivClass}>
+		{#if $newRequest}
+			<Alert class="bg-blue-100 text-blue-900 flex justify-between items-center content-center mx-4 mt-4">
+				<BellRingSolid tabindex="-1" class="text-blue-700" />
+				<div>
+					<span class="font-bold text-blue-700">(NEW)</span> Help request received! Total of {pendingReqs.length} <span class="font-bold">pending</span> requests.
+				</div>
+				<CloseSolid
+					tabindex="-1"
+					class="cursor-pointer w-4 h-4 text-blue-500 hover:text-blue-700 focus:outline-none"
+					on:click={() => newRequest.update(() => false)}
+				/>
+			</Alert>
+		{:else if newLowMoodData}
+			{#if activeUrl == '/dashboard'}
+				<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900 mx-4 mt-4">
 					<BellRingSolid tabindex="-1" class="text-red-700" />
 					<div class="text-center">
 						<span class="font-semibold">[{currStudentIDNotif}]</span>{notifText} click
@@ -292,10 +277,8 @@
 						on:click={() => (newLowMoodData = false)}
 					/>
 				</Alert>
-			</div>
-		{:else}
-			<div class="px-4 pt-4">
-				<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900">
+			{:else}
+				<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900 mx-4 mt-4">
 					<BellRingSolid tabindex="-1" class="text-red-700" />
 					<div class="text-center">
 						To view the list of students experiencing low moods for atleast 4 consecutive days,
@@ -310,8 +293,8 @@
 						on:click={() => (newLowMoodData = false)}
 					/>
 				</Alert>
-			</div>
+			{/if}
 		{/if}
-	{/if}
+	</div>
 	<slot />
 </main>
