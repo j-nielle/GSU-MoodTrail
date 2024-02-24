@@ -252,7 +252,7 @@
 			<Alert class="bg-blue-100 text-blue-900 flex justify-between items-center content-center mx-4 mt-4">
 				<BellRingSolid tabindex="-1" class="text-blue-700" />
 				<div>
-					<span class="font-bold text-blue-700">(NEW)</span> Help request received! Total of {pendingReqs.length} <span class="font-bold">pending</span> requests.
+					<span class="font-bold text-blue-700">(NEW)</span> Help request received! Total of {requestsData.length} help requests.
 				</div>
 				<CloseSolid
 					tabindex="-1"
