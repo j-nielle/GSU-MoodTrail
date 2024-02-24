@@ -30,12 +30,19 @@ export async function load({ fetch, data, depends }) {
 			.eq('iscompleted', 'FALSE')
 			.order('created_at', { ascending: false });
 		
-		if(error || reqDataErr || pendingReqDataErr) throw error;
+		const { data: lowMoods, error: lowMoodsDataErr } = await supabase
+			.from('StudentMoodEntries')
+			.select('*')
+			.lt('mood_score', 0)
+			.order('created_at', { ascending: true });
+
+		if(error || reqDataErr || pendingReqDataErr || lowMoodsDataErr) throw error;
 		return { 
 			supabase, 
 			session, 
 			requests: requests || [],
-			pendingRequests: pendingRequests || []
+			pendingRequests: pendingRequests || [],
+			lowMoods: lowMoods || []
 		};
 	}catch(error){
 		console.error(error);

@@ -23,7 +23,7 @@
 	} from 'flowbite-svelte';
 	import { ChevronDownOutline, BellRingSolid, CloseSolid, InboxSolid, FireOutline } from 'flowbite-svelte-icons';
 	import { consistentLowMoods, focusTable, newRequest } from '$lib/stores/index.js';
-	import { requestTypes, requestStatus } from '$lib/constants/index.js';
+	import { requestTypes, requestStatus, mood, reason  } from '$lib/constants/index.js';
 	import {
 		//logoOg,
 		moodTrailOG
@@ -55,6 +55,7 @@
 	$: activeUrl = $page.url.pathname;
 	$: requestsData = data.requests;
 	$: pendingReqs = data.pendingRequests;
+	$: lowMoods = data.lowMoods;
 
 	$: activeUrl === '/dashboard' ? mainDivClass = 'pb-2 pt-2 bg-zinc-100' : mainDivClass = 'pb-2 pt-2';
 
@@ -95,11 +96,184 @@
 						requestsData = _.cloneDeep(requestsData);
 					}
 				}
+			).on('postgres_changes', {
+					event: '*',
+					schema: 'public',
+					table: 'StudentMoodEntries'
+				},(payload) => {
+					if (payload.eventType === 'INSERT') {
+						lowMoods = _.cloneDeep([...lowMoods, payload.new]);
+						lowMoods = lowMoods.filter((student) => student.mood_score < 0);
+						lowMoods.sort((currentElem, nextElem) => { // sort by date (asc)
+							const currentDate = new Date(currentElem.created_at);
+							const nextDate = new Date(nextElem.created_at);
+							return currentDate - nextDate;
+						});
+					} else if (payload.eventType === 'UPDATE') {
+						const updatedIndex = lowMoods.findIndex((student) => student.id === payload.old.id);
+
+						if (updatedIndex !== -1) {
+							lowMoods[updatedIndex] = payload.new;
+						}
+
+						lowMoods = _.cloneDeep(lowMoods);
+					} else if (payload.eventType === 'DELETE') {
+						const updatedlowMoods = lowMoods.filter(
+							(student) => student.id !== payload.old.id
+						);
+						lowMoods = updatedlowMoods;
+					}
+				}
 			).subscribe(); // (status) => console.log(activeUrl,status));
 
-		// checks if there’s any new data in the consistentLowMoods store
-		// note: only runs when url is /dashboard since that is where the consistentLowMoods store is updated
-		const unsubscribe = consistentLowMoods.subscribe((updatedMoods) => {
+		return () => {
+			subscription.unsubscribe();
+			reqChann.unsubscribe();
+		};
+	});
+
+	$: if (lowMoods) {
+		let formattedData = new Map();
+		let consecutiveDaysMap = new Map();
+		consistentLowMoods.set([]); //avoid duplicates
+
+		// keep track of the maximum number of consecutive low mood days encountered
+		let maxConsecutiveDays = 0; 
+		
+		formattedData = lowMoods?.reduce(
+			// extract the student id, mood score, created at, and reason score from each entry
+			(students, { student_id, mood_score, created_at, reason_score }) => {
+				if (!created_at) {
+					// if created_at is null 
+					return students; // skip this entry
+				}
+
+				// get the date of the entry in YYYY/MM/DD format
+				const dateKey = new Date(created_at).toLocaleDateString('en-US', {
+					year: 'numeric',
+					month: '2-digit',
+					day: '2-digit'
+				});
+
+				// get the student's data or create a new map()
+				const studentData = students.get(student_id) || new Map(); 
+
+				// get the reason label from the reason score using reason object
+				const reason_label = Object.keys(reason).find((key) => reason[key] === reason_score);
+
+				// add the moods and reasons to the student's data based on the corresponding date
+				studentData.set(dateKey, {
+					// moodScores & reasonLabels are arrays of mood and reason scores for the day
+					moodScores: [...(studentData.get(dateKey)?.moodScores || []), mood_score],
+					reasonLabels: [...(studentData.get(dateKey)?.reasonLabels || []), reason_label]
+				});
+
+				return students.set(student_id, studentData); // update the student's data
+			},
+			new Map()
+		);
+
+ 		for (const [studentId, studentEntry] of formattedData) {
+			// variable to be used for tracking consecutive low mood days
+			let consecutiveDays = 0; 
+
+			// variable to be used for checking if the current date is the next day of the previous date
+			let previousDate = null; 
+
+			// variable to be used for storing the current streak data
+			let currentStreakData = null; 
+
+			// for each date of mood data for a student, 
+			// calculate the consecutive low mood days
+			for (const [dateKey, moodData] of studentEntry) {
+				const currentDate = dayjs(dateKey);
+
+				// if the current date is the next day of the previous date, 
+				// then increment the consecutive days
+				if (previousDate === null || currentDate.diff(previousDate, 'day') === 1) {
+					consecutiveDays++;
+				} else {
+					// else, reset the consecutive days to 1
+					consecutiveDays = 1;
+				}
+				
+				// if the consecutive days is >= to 4, 
+				// then check if the previous date is the day before the current date
+				if (consecutiveDays >= 4) {
+					// get the last record of the student's streaks 
+					// which is the last element of the array
+					const lastRecord = (consecutiveDaysMap?.get(studentId) || []).slice(-1)[0]; 
+		
+					// if the last record's end date is the day before the current date, 
+					// then update the last record
+					if (
+						lastRecord &&
+						lastRecord.endDate === currentDate.subtract(1, 'day').format('MM/DD/YYYY')
+					) {
+						
+						lastRecord.endDate = currentDate.format('MM/DD/YYYY'); // update the end date
+						lastRecord.moodScores.push(...moodData.moodScores); // add the mood scores
+						lastRecord.reasonLabels.push(...moodData.reasonLabels); // and reason labels
+					} else { // else, create a new record
+
+						// update the maximum consecutive days
+						maxConsecutiveDays = Math.max(maxConsecutiveDays, consecutiveDays); 
+
+						// create a new record with the start date, end date, mood scores, and reason labels
+						currentStreakData = {
+							startDate: currentDate.subtract(consecutiveDays - 1, 'day').format('MM/DD/YYYY'),
+							endDate: currentDate.format('MM/DD/YYYY'),
+							moodScores: [],
+							reasonLabels: []
+						};
+
+						// loop through the consecutive days and get the mood scores and reason labels
+						for (let i = 0; i < consecutiveDays; i++) {
+							// get the date of the streak
+							const streakDate = currentDate
+								.subtract(consecutiveDays - 1 - i, 'day')
+								.format('MM/DD/YYYY');
+
+							// get the mood scores and reason labels of the streak date
+							const streakMoodData = studentEntry.get(streakDate);
+
+							// if there is mood data for the streak date, 
+							// then add the mood scores and reason labels to the current streak data
+							if (streakMoodData) {
+								currentStreakData.moodScores.push(...streakMoodData.moodScores); 
+								currentStreakData.reasonLabels.push(...streakMoodData.reasonLabels);
+							}
+						}
+
+						// add the current streak data to the consecutive days map
+						consecutiveDaysMap?.set(
+							studentId,
+							(consecutiveDaysMap?.get(studentId) || []).concat(currentStreakData)
+						);
+					}
+				}
+				previousDate = currentDate; // update the previous date
+			}
+		}
+
+		//update the consistent low moods store when the consecutive days map is updated
+		consecutiveDaysMap?.forEach((streakData, studentId) => {
+			const studentStreaks = streakData?.map((streak) => ({
+				startDate: streak.startDate,
+				endDate: streak.endDate,
+				moodScores: streak.moodScores,
+				reasonLabels: streak.reasonLabels
+			}));
+			
+			newLowMoodData = true;
+			// `moods` is the current value of the store
+			// add a new entry for a student’s streaks to the consistentLowMoods store.
+			consistentLowMoods?.update((moods) => [...moods, { studentId, streaks: studentStreaks }]);
+		}); 
+	}
+
+	$: if(consistentLowMoods){
+		consistentLowMoods.subscribe((updatedMoods) => {
 			updatedMoods.forEach((moodEntry) => {
 				const studentId = moodEntry.studentId;
 				currStudentIDNotif = studentId;
@@ -129,13 +303,7 @@
 				}
 			});
 		});
-
-		return () => {
-			subscription.unsubscribe();
-			reqChann.unsubscribe();
-			unsubscribe();
-		};
-	});
+	}
 </script>
 
 <Navbar class="bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border-gray-100 dark:border-gray-700 divide-gray-100 dark:divide-gray-700 px-2 sm:px-4 drop-shadow-sm w-full relative z-20 print:hidden flex justify-center py-2.5" {navDivClass}>
@@ -252,7 +420,7 @@
 			<Alert class="bg-blue-100 text-blue-900 flex justify-between items-center content-center mx-4 mt-4">
 				<BellRingSolid tabindex="-1" class="text-blue-700" />
 				<div>
-					<span class="font-bold text-blue-700">(NEW)</span> Help request received! Total of {requestsData.length} help requests.
+					<span class="font-bold text-blue-700">(NEW)</span> Help request received! Total of <span class="font-bold">{requestsData.length}</span> help requests.
 				</div>
 				<CloseSolid
 					tabindex="-1"
@@ -261,9 +429,9 @@
 				/>
 			</Alert>
 		{:else if newLowMoodData}
-			{#if activeUrl == '/dashboard'}
-				<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900 mx-4 mt-4">
-					<BellRingSolid tabindex="-1" class="text-red-700" />
+			<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900 mx-4 mt-4">
+				<BellRingSolid tabindex="-1" class="text-red-700" />
+				{#if activeUrl == '/dashboard'}
 					<div class="text-center">
 						<span class="font-semibold">[{currStudentIDNotif}]</span>{notifText} click
 						<button
@@ -271,29 +439,17 @@
 							class="font-semibold hover:underline hover:text-blue-700">here</button
 						> to view.
 					</div>
-					<CloseSolid
-						tabindex="-1"
-						class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700 focus:outline-none"
-						on:click={() => (newLowMoodData = false)}
-					/>
-				</Alert>
-			{:else}
-				<Alert class="bg-red-200 flex justify-between items-center content-center text-red-900 mx-4 mt-4">
-					<BellRingSolid tabindex="-1" class="text-red-700" />
+				{:else}
 					<div class="text-center">
-						To view the list of students experiencing low moods for atleast 4 consecutive days,
-						please navigate to <a
-							href="/dashboard"
-							class="font-semibold hover:underline hover:text-blue-700">dashboard</a
-						>.
+						Changes has been made to the consistent low moods table, please navigate to <a href="/dashboard" class="font-semibold hover:underline hover:text-blue-700">dashboard</a>.
 					</div>
-					<CloseSolid
-						tabindex="-1"
-						class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700 focus:outline-none"
-						on:click={() => (newLowMoodData = false)}
-					/>
-				</Alert>
-			{/if}
+				{/if}
+				<CloseSolid
+					tabindex="-1"
+					class="cursor-pointer w-4 h-4 text-red-500 hover:text-red-700 focus:outline-none"
+					on:click={() => (newLowMoodData = false)}
+				/>
+			</Alert>
 		{/if}
 	</div>
 	<slot />
