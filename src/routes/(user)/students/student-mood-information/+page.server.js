@@ -57,7 +57,7 @@ export const actions = {
 				.select()
 
 			if(insertMoodEntryError) {
-				//console.log(insertMoodEntryError)
+				// console.log(insertMoodEntryError)
 				throw insertMoodEntryError;
 			}
 			if(error) throw error;

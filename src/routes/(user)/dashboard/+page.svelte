@@ -1502,11 +1502,11 @@
 						{heatmapData}
 						title="Mood Frequency"
 						elementID="dashboardHM"
-						style="width: 500px; min-width: 100%; height:300px;"
+						style="width: 500px; min-width: 100%; height:325px;"
 					/>
 				</div>
 			{:else}
-				<div class="flex flex-col justify-center items-center space-y-5" style="width: 500px; min-width: 100%; height:300px;">
+				<div class="flex flex-col justify-center items-center space-y-5" style="width: 500px; min-width: 100%; height:325px;">
 					<RocketOutline class="h-20 w-20" />
 					<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
 				</div>
@@ -1520,10 +1520,10 @@
 					bind:data={moodRadarData}
 					bind:indicator={reasonRadarIndicator}
 					elementID="moodReasonRadar"
-					style="width: 650px; min-width: 100%; height:300px;"
+					style="width: 650px; min-width: 100%; height:360px;"
 				/>
 			{:else}
-				<div class="flex flex-col justify-center items-center space-y-5" style="width: 650px; min-width: 100%; height:300px;">
+				<div class="flex flex-col justify-center items-center space-y-5" style="width: 650px; min-width: 100%; height:360px;">
 					<RocketOutline class="h-20 w-20" />
 					<p class="text-sm text-slate-500">Data currently <strong>unavailable</strong>.</p>
 				</div>
